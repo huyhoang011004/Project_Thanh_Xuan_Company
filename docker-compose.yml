@@ -1,0 +1,132 @@
+# Adhering to SOLID & Design Patterns
+services:
+  # ==========================================
+  # Database: MongoDB Server
+  # ==========================================
+  mongodb:
+    image: mongo:7.0
+    container_name: laundry_mongodb
+    restart: always
+    command: mongod --wiredTigerCacheSizeGB 0.5
+    mem_limit: 512m
+    ports:
+      - "${PORT_MONGODB:-27018}:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE:-laundry_express_thanh_xuan}
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - laundry_network
+
+  # ==========================================
+  # Backend API Server: NestJS (Thanh Xuan Multi-Database)
+  # ==========================================
+  backend:
+    image: ghcr.io/${GITHUB_REPOSITORY_OWNER:-huyhoang011004}/laundry-express-backend:latest
+    # build:
+    #   context: ./be-nestjs-thanhxuan
+    #   dockerfile: Dockerfile
+    container_name: laundry_backend
+    restart: always
+    mem_limit: 512m
+    ports:
+      - "${PORT_BACKEND:-5001}:5001"
+    environment:
+      - PORT=5001
+      - MONGODB_URI=${MONGODB_URI:-mongodb://mongodb:27017/laundry_express_thanh_xuan}
+      - MONGODB_MOVING_URI=${MONGODB_MOVING_URI:-mongodb://mongodb:27017/moving_express}
+      - MONGODB_INTERNAL_URI=${MONGODB_INTERNAL_URI:-mongodb://mongodb:27017/internal_express}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
+      - JWT_SECRET=${JWT_SECRET:-thanh_xuan_laundry_super_secure_jwt_secret_2026}
+      - JWT_ACCESS_EXPIRES_IN=${JWT_ACCESS_EXPIRES_IN:-15m}
+      - JWT_REFRESH_EXPIRES_IN=${JWT_REFRESH_EXPIRES_IN:-7d}
+      # Cấu hình Mail SMTP
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
+      - COMPANY_EMAIL=${COMPANY_EMAIL}
+      # Cấu hình AI Provider
+      - AI_PROVIDER=${AI_PROVIDER:-gemini}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      # Cấu hình Zalo OA
+      - ZALO_APP_ID=${ZALO_APP_ID}
+      - ZALO_SECRET_KEY=${ZALO_SECRET_KEY}
+      - ZALO_ACCESS_TOKEN=${ZALO_ACCESS_TOKEN}
+      - ZALO_REFRESH_TOKEN=${ZALO_REFRESH_TOKEN}
+      # Cấu hình Cloudinary Upload Ảnh
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+    volumes:
+      - backend_uploads:/app/uploads
+    depends_on:
+      - mongodb
+    networks:
+      - laundry_network
+
+  # ==========================================
+  # Frontend Website & CMS: Next.js (thanhxuanlaundry.com)
+  # ==========================================
+  frontend:
+    image: ghcr.io/${GITHUB_REPOSITORY_OWNER:-huyhoang011004}/laundry-express-frontend:latest
+    # build:
+    #   context: ./fe-nextjs-thanhxuan-laundry
+    #   dockerfile: Dockerfile
+    #   args:
+    #     NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:5001}
+    #     NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+    container_name: laundry_frontend
+    restart: always
+    mem_limit: 768m
+    ports:
+      - "${PORT_FRONTEND:-3000}:3000"
+    environment:
+      - PORT=3000
+      - INTERNAL_API_URL=http://backend:5001
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:5001}
+      - NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+      - JWT_SECRET=${JWT_SECRET:-thanh_xuan_laundry_super_secure_jwt_secret_2026}
+      - JWT_ACCESS_COOKIE_MAX_AGE=${JWT_ACCESS_COOKIE_MAX_AGE:-900}
+      - JWT_REFRESH_COOKIE_MAX_AGE=${JWT_REFRESH_COOKIE_MAX_AGE:-604800}
+    depends_on:
+      - backend
+    networks:
+      - laundry_network
+
+  # ==========================================
+  # Frontend Nội Bộ Xưởng: React (noibo.thanhxuanlaundry.com)
+  # ==========================================
+  internal_frontend:
+    image: ghcr.io/${GITHUB_REPOSITORY_OWNER:-huyhoang011004}/thanhxuan-internal-frontend:latest
+    # build:
+    #   context: ./fe-react-thanhxuan-internal
+    #   dockerfile: Dockerfile
+    container_name: internal_frontend
+    restart: always
+    mem_limit: 512m
+    ports:
+      - "${PORT_FE_INTERNAL:-3001}:3001"
+    environment:
+      - PORT=3001
+      - VITE_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:5001}
+    depends_on:
+      - backend
+    networks:
+      - laundry_network
+
+# ==========================================
+# Volumes & Networks
+# ==========================================
+volumes:
+  mongodb_data:
+    driver: local
+  backend_uploads:
+    driver: local
+
+networks:
+  laundry_network:
+    driver: bridge
+

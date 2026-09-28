@@ -1,0 +1,27 @@
+{
+  "project": {
+    "name": "Laundry Express Thanh Xuan",
+    "techStack": ["Next.js (App Router)", "NestJS", "MongoDB", "TailwindCSS", "Docker", "GitHub Actions CI/CD"],
+    "architecture": ["SOLID", "Repository Pattern", "Feature-based Colocation", "Docker Containerization"]
+  },
+  "modules": [
+    "auth",
+    "users",
+    "categories",
+    "articles",
+    "contacts",
+    "dashboard",
+    "settings",
+    "ai"
+  ],
+  "rules": {
+    "systemContextFile": "./.agents/AGENTS.md",
+    "strictMode": true,
+    "disallowedFeatures": ["client-auth"]
+  },
+  "generation": {
+    "outputFormat": "TypeScript",
+    "useStrictTypes": true,
+    "fileHeaderComment": "/*Adhering to SOLID & Design Patterns */"
+  }
+}
