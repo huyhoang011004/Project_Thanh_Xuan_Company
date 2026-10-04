@@ -1,0 +1,25 @@
+{
+  "thanhxuan-guard": {
+    "PreToolUse": [
+      {
+        "matcher": "run_command|write_to_file|replace_file_content|multi_replace_file_content|view_file",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .agents/hooks/guard.js",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  },
+  "thanhxuan-verify": {
+    "Stop": [
+      {
+        "type": "command",
+        "command": "node .agents/hooks/verify-on-stop.js",
+        "timeout": 300
+      }
+    ]
+  }
+}
