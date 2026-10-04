@@ -1,6 +1,6 @@
 # Plan 7: Đổi route sang /quan-ly/doi-tac, Quản lý Thương hiệu động, Danh mục đồ giặt theo Thương hiệu & Seed dữ liệu Pizza 4P's
 
-> Status: Draft | Created: 2026-10-04
+> Status: Done | Created: 2026-10-04
 
 ## 1. Overview & Affected Files
 
@@ -153,36 +153,36 @@ export class Brand {
 ## 3. Implementation Tasks (Checklist)
 
 ### Giai đoạn 1: Backend - Schema, Repository, DTO & Controller cho Brand và nới lỏng validation
-- [ ] T1: Tạo Schema `brand.schema.ts` trong `be-nestjs-thanhxuan/src/modules/internal/partners/schemas/` và `BrandRepository` trong `repositories/brand.repository.ts`.
-- [ ] T2: Tạo `CreateBrandDto` và `UpdateBrandDto` trong `be-nestjs-thanhxuan/src/modules/internal/partners/dto/`.
-- [ ] T3: Cập nhật `Partner` schema, `ItemCatalog` schema, `CreatePartnerDto`, `CreateItemCatalogDto` để trường `brand` nhận `string` (hỗ trợ mã brand động), giữ index.
-- [ ] T4: Thêm phương thức CRUD cho Brand trong `PartnersService` (`getAllBrands`, `createBrand`, `updateBrand`, `deleteBrand`) và Controller endpoints tương ứng tại `PartnersController` (`/partners/brands`).
-- [ ] T5: Đăng ký `Brand` schema và `BrandRepository` vào `PartnersModule`.
-- [ ] T6: Tạo script seed `seed-pizza-4ps-catalogs.ts` khởi tạo Brand `PIZZA_4PS` và 14 mặt hàng từ phiếu xuất nhập kho thực tế ngày 03/10/2026.
+- [x] T1: Tạo Schema `brand.schema.ts` trong `be-nestjs-thanhxuan/src/modules/internal/partners/schemas/` và `BrandRepository` trong `repositories/brand.repository.ts`.
+- [x] T2: Tạo `CreateBrandDto` và `UpdateBrandDto` trong `be-nestjs-thanhxuan/src/modules/internal/partners/dto/`.
+- [x] T3: Cập nhật `Partner` schema, `ItemCatalog` schema, `CreatePartnerDto`, `CreateItemCatalogDto` để trường `brand` nhận `string` (hỗ trợ mã brand động), giữ index.
+- [x] T4: Thêm phương thức CRUD cho Brand trong `PartnersService` (`getAllBrands`, `createBrand`, `updateBrand`, `deleteBrand`) và Controller endpoints tương ứng tại `PartnersController` (`/partners/brands`).
+- [x] T5: Đăng ký `Brand` schema và `BrandRepository` vào `PartnersModule`.
+- [x] T6: Tạo script seed `seed-pizza-4ps-catalogs.ts` khởi tạo Brand `PIZZA_4PS` và 14 mặt hàng từ phiếu xuất nhập kho thực tế ngày 03/10/2026.
 
 ### Giai đoạn 2: Frontend - Đổi Route, Phân quyền & Quản lý Đối tác
-- [ ] T7: Cập nhật types trong `fe-react-thanhxuan-internal/src/types/index.ts`: Thêm interface `Brand`, cập nhật `ItemCatalog` và `Partner`.
-- [ ] T8: Tạo trang mới `fe-react-thanhxuan-internal/src/app/(internal)/quan-ly/doi-tac/page.tsx` bọc bởi `ProtectedRoute` với `allowedRoles={[StaffRole.ADMIN, StaffRole.MANAGER]}`.
-- [ ] T9: Xóa/chuyển tiếp trang cũ `fe-react-thanhxuan-internal/src/app/(internal)/doi-tac/page.tsx` và cập nhật router `src/app/router.tsx`.
-- [ ] T10: Cập nhật `PartnersPage.tsx` tab Đối Tác:
+- [x] T7: Cập nhật types trong `fe-react-thanhxuan-internal/src/types/index.ts`: Thêm interface `Brand`, cập nhật `ItemCatalog` và `Partner`.
+- [x] T8: Tạo trang mới `fe-react-thanhxuan-internal/src/app/(internal)/quan-ly/doi-tac/page.tsx` bọc bởi `ProtectedRoute` với `allowedRoles={[StaffRole.ADMIN, StaffRole.MANAGER]}`.
+- [x] T9: Xóa/chuyển tiếp trang cũ `fe-react-thanhxuan-internal/src/app/(internal)/doi-tac/page.tsx` và cập nhật router `src/app/router.tsx`.
+- [x] T10: Cập nhật `PartnersPage.tsx` tab Đối Tác:
   - Bỏ toàn bộ các hậu tố `()` trong form thêm đối tác (`Hàng ngày`, `Cách ngày`, `Theo yêu cầu`, `Theo chiếc / cái`, `Theo Kg`, `Thương hiệu`).
   - Biến select Thương hiệu thành dropdown động lấy từ API `/partners/brands`.
   - Bổ sung sự kiện click vào Card đối tác để mở Modal Sửa / Xóa đối tác (với dialog xác nhận trước khi xóa mềm).
 
 ### Giai đoạn 3: Frontend - Quản lý Thương hiệu & Danh mục đồ giặt theo Thương hiệu
-- [ ] T11: Cập nhật `PartnersPage.tsx` bổ sung Tab "Thương Hiệu":
+- [x] T11: Cập nhật `PartnersPage.tsx` bổ sung Tab "Thương Hiệu":
   - Hiển thị danh sách các thương hiệu hiện có (Mã, Tên, Mô tả, Trạng thái).
   - Modal Thêm mới Thương hiệu (`code`, `name`, `description`).
   - Modal Chỉnh sửa Thương hiệu & Nút Xóa thương hiệu.
-- [ ] T12: Cập nhật `PartnersPage.tsx` tab "Danh Mục Đồ":
+- [x] T12: Cập nhật `PartnersPage.tsx` tab "Danh Mục Đồ":
   - Dropdown lọc danh mục theo Thương hiệu (chọn thương hiệu để xem đồ của thương hiệu đó).
   - Modal Thêm mới Đồ giặt (gắn theo thương hiệu, mã đồ, tên đồ, đơn vị: Chiếc / Kg, đơn giá thu khách, công thợ gập).
   - Modal Chỉnh sửa Đồ giặt và nút Xóa đồ giặt.
-- [ ] T13: Chạy script seed dữ liệu Pizza 4P's vào database và kiểm tra hiển thị trên giao diện.
+- [x] T13: Chạy script seed dữ liệu Pizza 4P's vào database và kiểm tra hiển thị trên giao diện.
 
 ### Giai đoạn 4: Kiểm thử và Hoàn thiện
-- [ ] T14: Chạy kiểm tra TypeScript (`pnpm exec tsc --noEmit`) và Build (`pnpm build`) trên cả Backend và Frontend Internal.
-- [ ] T15: Xác minh bằng Browser: Đăng nhập tài khoản Admin/Manager, truy cập `/quan-ly/doi-tac`, kiểm tra các chức năng Thêm/Sửa/Xóa Đối tác, Thương hiệu, Danh mục đồ giặt.
+- [x] T14: Chạy kiểm tra TypeScript (`pnpm exec tsc --noEmit`) và Build (`pnpm build`) trên cả Backend và Frontend Internal.
+- [x] T15: Xác minh bằng Browser: Đăng nhập tài khoản Admin/Manager, truy cập `/quan-ly/doi-tac`, kiểm tra các chức năng Thêm/Sửa/Xóa Đối tác, Thương hiệu, Danh mục đồ giặt.
 
 ---
 
@@ -242,3 +242,13 @@ export class Brand {
 
 ## Changelog
 - 2026-10-04: Khởi tạo Plan 7 theo yêu cầu tái cấu trúc trang Đối tác, quản lý thương hiệu và danh mục đồ giặt Pizza 4P's.
+
+## Execution Log
+- **2026-10-04**:
+  - Hoàn tất toàn bộ 15/15 task (T1 - T15).
+  - Backend: Đã tạo `Brand` schema, `BrandRepository`, DTOs, Controllers/Services CRUD `/partners/brands`. Nới lỏng kiểm tra brand sang string uppercase có index.
+  - Script seed: Đã khởi tạo 3 thương hiệu (`PIZZA_4PS`, `HAIDILAO`, `SMALL_RESTAURANT`) và 14 mặt hàng chuẩn theo phiếu kho thực tế cho thương hiệu `pizza_4ps`.
+  - Frontend: Di chuyển route sang `/quan-ly/doi-tac` với `allowedRoles={[StaffRole.ADMIN, StaffRole.MANAGER]}`. Nâng cấp `PartnersPage.tsx` với 3 Tab hoàn chỉnh, bỏ sạch dấu `()`, modal Sửa/Xóa đối tác, modal Thêm/Sửa/Xóa thương hiệu và danh mục đồ giặt.
+  - Verification: Cả backend và frontend đều build và typecheck pass 100%. Xác minh browser giao diện hoạt động chính xác.
+  - Docs: Cập nhật tài liệu SRS/SDD tại `.agents/docs/SRS_SDD.md`.
+
