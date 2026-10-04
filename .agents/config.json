@@ -1,27 +1,124 @@
 {
   "project": {
     "name": "Laundry Express Thanh Xuan",
-    "techStack": ["Next.js (App Router)", "NestJS", "MongoDB", "TailwindCSS", "Docker", "GitHub Actions CI/CD"],
-    "architecture": ["SOLID", "Repository Pattern", "Feature-based Colocation", "Docker Containerization"]
+    "techStack": [
+      "Next.js (App Router)",
+      "React",
+      "Vite",
+      "NestJS",
+      "MongoDB",
+      "Mongoose",
+      "TailwindCSS",
+      "shadcn/ui",
+      "Docker",
+      "GitHub Actions CI/CD"
+    ],
+    "architecture": [
+      "SOLID",
+      "Layered Architecture (Controller -> Service -> Repository -> Model)",
+      "Repository Pattern (BaseRepository)",
+      "Multi-Database (3 Mongoose Connections)",
+      "Feature-based Colocation",
+      "Docker Containerization"
+    ]
   },
-  "modules": [
-    "auth",
-    "users",
-    "categories",
-    "articles",
-    "contacts",
-    "dashboard",
-    "settings",
-    "ai"
-  ],
+  "apps": {
+    "backend": {
+      "path": "./be-nestjs-thanhxuan",
+      "port": 5001,
+      "container": "backend",
+      "entryFile": "src/main.ts",
+      "rootModuleFile": "src/app.module.ts",
+      "commonDir": "src/common",
+      "configDir": "src/config",
+      "databaseConfigFile": "src/config/database.config.ts",
+      "scriptsDir": "src/scripts"
+    },
+    "web": {
+      "path": "./fe-nextjs-thanhxuan-laundry",
+      "port": 3000,
+      "container": "frontend",
+      "domain": "thanhxuanlaundry.com"
+    },
+    "internal": {
+      "path": "./fe-react-thanhxuan-internal",
+      "port": 3001,
+      "container": "internal_frontend",
+      "domain": "noibo.thanhxuanlaundry.com"
+    },
+    "moving": {
+      "path": "./fe-nextjs-moving-express",
+      "port": 3002,
+      "container": "moving_frontend",
+      "domain": "chuyennhatietkiem.com"
+    }
+  },
+  "databases": {
+    "laundry": "laundry_express",
+    "moving": "moving_express",
+    "internal": "internal_express"
+  },
+  "modules": {
+    "root": "./be-nestjs-thanhxuan/src/modules",
+    "core": {
+      "path": "core",
+      "database": null,
+      "items": ["ai", "upload"]
+    },
+    "laundry": {
+      "path": "laundry",
+      "database": "laundry_express",
+      "items": [
+        "articles",
+        "auth",
+        "categories",
+        "contacts",
+        "crm",
+        "dashboard",
+        "email-marketing",
+        "orders",
+        "settings",
+        "users",
+        "zalo",
+        "zalo-marketing"
+      ]
+    },
+    "moving": {
+      "path": "moving",
+      "database": "moving_express",
+      "moduleFile": "moving.module.ts",
+      "constantsFile": "moving.constants.ts",
+      "shared": ["common"],
+      "items": ["articles", "quotes", "services"]
+    },
+    "internal": {
+      "path": "internal",
+      "database": "internal_express",
+      "moduleFile": "internal.module.ts",
+      "constantsFile": "internal.constants.ts",
+      "shared": ["common"],
+      "items": ["attendance", "handover", "partners", "piecework", "staff-auth"]
+    }
+  },
+  "infrastructure": {
+    "dockerCompose": "./docker-compose.yml",
+    "containers": ["mongodb", "backend", "frontend", "internal_frontend"]
+  },
   "rules": {
-    "systemContextFile": "./.agents/AGENTS.md",
+    "systemContextFile": ".agents/rules/AGENTS.md",
+    "additionalContextFiles": [".agents/rules/GEMINI.md"],
     "strictMode": true,
-    "disallowedFeatures": ["client-auth"]
+    "disallowedFeatures": [
+      "client-auth",
+      "any-type",
+      "model-access-outside-repository",
+      "docker-build-on-vps"
+    ]
   },
   "generation": {
     "outputFormat": "TypeScript",
     "useStrictTypes": true,
-    "fileHeaderComment": "/*Adhering to SOLID & Design Patterns */"
+    "communicationLanguage": "vi-VN",
+    "timezone": "Asia/Ho_Chi_Minh"
   }
 }
