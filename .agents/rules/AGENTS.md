@@ -5,7 +5,7 @@ Tài liệu này là nguồn quy ước chung cho mọi agent và workflow trong
 ## 1. Nguyên tắc cốt lõi & An toàn
 
 - **Dẫn chứng:** Mọi nhận định về code hiện có phải kèm `path:line`. Chưa xác minh được thì nêu rõ trong câu hỏi.
-- **Nguồn sự thật:** Code là hiện trạng; Plan là ý định thay đổi; `.agents/docs/SRS_SDD.md` phản ánh hệ thống sau mỗi thay đổi hoàn tất.
+- **Nguồn sự thật:** Code là hiện trạng; Plan là ý định thay đổi; `.agents/docs/SRS_SDD.md` phản ánh kiến trúc tổng thể và thư mục `.agents/docs/srs_sdd/` (`srs_sdd_backend.md`, `srs_sdd_fe_nextjs.md`, `srs_sdd_fe_internal.md`) phản ánh chi tiết từng phân hệ sau mỗi thay đổi hoàn tất.
 - **An toàn:**
   - Không commit/push trừ khi người dùng yêu cầu rõ.
   - Không chạy lệnh phá hủy (`git reset --hard`, `rm -rf`, drop DB, force push).
@@ -30,12 +30,15 @@ Monorepo gồm 3 app, mỗi app chạy lệnh ở đúng thư mục của nó:
 ## 3. Quy trình làm việc & Tài liệu
 
 - **`/plan`:** Tính năng mới hoặc đổi thiết kế/API -> Tạo kế hoạch tại `.agents/docs/plans/plan<N>.md`.
-- **`/act`:** Thực thi plan đã duyệt -> Sửa code, verify test/build, tick checkbox trong plan, cập nhật kiến trúc hiện tại vào `.agents/docs/SRS_SDD.md`, ghi nhật ký chi tiết vào `.agents/docs/CHANGELOG.md`.
+- **`/act`:** Thực thi plan đã duyệt -> Sửa code, verify test/build, tick checkbox trong plan, cập nhật phân hệ tương ứng tại `.agents/docs/srs_sdd/srs_sdd_<app>.md` (và `.agents/docs/SRS_SDD.md` nếu đổi kiến trúc tổng thể), ghi nhật ký chi tiết vào `.agents/docs/CHANGELOG.md`.
 - **`/review`:** Đánh giá chất lượng sau `/act` hoặc `/fix` -> Ghi nhận tại `.agents/docs/reviews/review<N>.md`.
 - **`/fix`:** Lỗi nhỏ, rõ ràng, tối đa 3 file code, không đổi schema/API contract.
-- **`/docs-sync`:** Quét đồng bộ khi nghi ngờ tài liệu lệch code -> Cập nhật `.agents/docs/SRS_SDD.md` & `CHANGELOG.md`.
+- **`/docs-sync`:** Quét đồng bộ khi nghi ngờ tài liệu lệch code -> Cập nhật `.agents/docs/srs_sdd/srs_sdd_<app>.md` & `.agents/docs/SRS_SDD.md` & `CHANGELOG.md`.
 
-*Quy tắc cập nhật tài liệu:* `SRS_SDD.md` là Living Architecture Specification (chỉ giữ kiến trúc, schema, API hiện hành; Document History chỉ giữ 3-5 dòng mới nhất). Toàn bộ bài luận nhật ký chi tiết theo từng Plan/Fix được lưu trữ tại `CHANGELOG.md`.
+*Quy tắc cập nhật tài liệu Modular SRS/SDD:*
+- `SRS_SDD.md`: Là Living Architecture Specification TỔNG QUAN (System Context, Topology, Master Index liên kết sang 3 file phân hệ, Document History giữ 3-5 dòng mới nhất của toàn hệ sinh thái).
+- `.agents/docs/srs_sdd/srs_sdd_<app>.md`: Đặc tả chi tiết từng phân hệ (`srs_sdd_backend.md`, `srs_sdd_fe_nextjs.md`, `srs_sdd_fe_internal.md`). Sửa app nào thì cập nhật file app đó.
+- `CHANGELOG.md`: Lưu trữ toàn bộ bài luận nhật ký chi tiết theo từng Plan/Fix.
 
 ## 4. Định nghĩa hoàn thành (Definition of Done)
 
@@ -44,7 +47,7 @@ Một thay đổi coi là xong khi:
 2. Lint, typecheck và test pass cho **từng app bị ảnh hưởng**.
 3. Build pass cho từng app bị ảnh hưởng (`pnpm build`).
 4. Thay đổi API contract (DTO, response) ở Backend thì phía gọi (Web, Internal) đã được cập nhật đồng bộ.
-5. `.agents/docs/SRS_SDD.md` phản ánh đúng thay đổi và có dòng Document History.
+5. Tài liệu phân hệ tương ứng (`.agents/docs/srs_sdd/srs_sdd_<app>.md`) và `SRS_SDD.md` (nếu có đổi tổng thể) phản ánh đúng thay đổi, kèm 1 dòng Document History ở `SRS_SDD.md`.
 6. Code sạch sẽ, không còn log debug, mock data thừa hay TODO chưa giải quyết.
 
 ## 5. Quy tắc code bắt buộc

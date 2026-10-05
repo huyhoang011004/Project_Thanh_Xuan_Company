@@ -16,3 +16,12 @@ Website và hệ thống quản trị của Công ty Giặt Sấy Thanh Xuân g�
 2. **Khoán Việc & Năng Suất (`piecework`)**: Chấm công theo sản lượng giặt/ủi từng thợ.
 3. **Điểm Danh Chấm Công (`attendance`)**: Theo dõi ca làm và công thợ theo ngày.
 4. **Quản Lý Đối Tác (`partners`)**: Thông tin, thương hiệu, danh mục đồ giặt (`item_catalogs`) và công nợ đối tác.
+
+## 2. Bản đồ tài liệu kỹ thuật (Modular SRS & SDD)
+
+- Tài liệu tổng thể: `.agents/docs/SRS_SDD.md` (System Context, Topology, Master Index, Conventions).
+- Phân hệ Backend: `.agents/docs/srs_sdd/srs_sdd_backend.md` (3 DB, Repository Pattern, API Contracts, Guards).
+- Phân hệ Web & CMS: `.agents/docs/srs_sdd/srs_sdd_fe_nextjs.md` (RSC SEO, Leads CRM, CMS Articles/Orders).
+- Phân hệ Vận hành: `.agents/docs/srs_sdd/srs_sdd_fe_internal.md` (Vận hành & Quản lý, Mobile PWA, Canvas, Offline Queue).
+- Nhật ký thay đổi: `.agents/docs/CHANGELOG.md` (Lưu vết chi tiết theo từng Plan/Fix).
+
