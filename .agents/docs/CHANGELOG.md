@@ -2,6 +2,73 @@
 
 Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâng cấp, bugfix và triển khai tính năng của Hệ sinh thái Công ty Thanh Xuân qua từng Plan.
 
+## 2026-10-08
+
+### Plan 17 - Chuẩn Hóa Vai Trò Đối Tác (PARTNER_MANAGER, PARTNER_STAFF), Đăng Ký Cascade Brand-Partner & Cô Lập Dữ Liệu Theo Chi Nhánh (`be-nestjs-thanhxuan`, `fe-react-thanhxuan-internal`)
+- **Đồng nhất 100% vai trò Đối tác B2B (Partner Role Standardization):**
+  - Backend:
+    - Khai báo role `PARTNER_MANAGER = 'PARTNER_MANAGER'` và `PARTNER_STAFF = 'PARTNER_STAFF'` trong `StaffRole` enum (`internal.enums.ts`) kèm alias backward compatibility `RESTAURANT_MANAGER = 'PARTNER_MANAGER'`, `RESTAURANT_STAFF = 'PARTNER_STAFF'`.
+    - Bổ sung trường `brand` (string, uppercase, trim, indexed) vào `StaffAccount` schema (`staff-account.schema.ts`).
+    - Cập nhật `InternalJwtStrategy`, `accounts.service.ts` (`login`, `refreshToken`, `getMe`) đưa `brand` vào JWT payload và thông tin người dùng.
+    - Cập nhật RBAC permission map: `ACCOUNT_APPROVE_PARTNER`, `HANDOVER_PARTNER_COUNT` (kèm alias `ACCOUNT_APPROVE_RESTAURANT`, `HANDOVER_RESTAURANT_COUNT`).
+    - Cập nhật `PartnerScopeGuard` và Handover State Machine nhận diện đầy đủ role `PARTNER_STAFF` và `PARTNER_MANAGER`.
+  - Frontend:
+    - Cập nhật `StaffRole` (`PARTNER_MANAGER`, `PARTNER_STAFF`) kèm alias `RESTAURANT_*` trong `src/types/index.ts`.
+    - Mở rộng interface `StaffUser` và `RegisterPayload` chứa trường `brand`.
+    - Cập nhật `permissions.ts`, `nav-config.ts`, `AppHeader.tsx`, `MobileNavDrawer.tsx`, `AuthContext.tsx` và các trang app `allowedRoles`.
+- **Đăng ký Cascade 2 Cấp (Brand ➔ Partner Cascade Registration):**
+  - Bổ sung public API ở Backend: `GET /partners/brands/public` (danh sách thương hiệu active) và `GET /partners/public` (danh sách chi nhánh).
+  - Cập nhật DTO Backend: `RegisterDto`, `CreateManagementAccountDto`, `UpdateAccountDto` hỗ trợ `brand` và validate cascade: tài khoản đối tác bắt buộc chọn Chi nhánh (`partnerId`), tự động đối soát `brand` từ chi nhánh đối tác.
+  - Cập nhật màn hình đăng ký Frontend (`RegisterPage.tsx` và `RegisterModal.tsx`):
+    - Mở rộng lựa chọn 4 vai trò: Thợ Xưởng (`WORKER`), Giao Hàng (`SHIPPER`), NV Đối Tác (`PARTNER_STAFF`), QL Đối Tác (`PARTNER_MANAGER`).
+    - Khi chọn vai trò đối tác, tự động kích hoạt cụm 2 dropdown cascade:
+      1. Dropdown 1: **Thương Hiệu Đối Tác (Brand)** (Pizza 4P's, Haidilao, Golden Gate...).
+      2. Dropdown 2: **Chi Nhánh Cơ Sở (Partner)** tự động lọc danh sách theo đúng thương hiệu đã chọn (`partner.brand === selectedBrand`).
+    - Bắt buộc chọn cả Brand và Chi nhánh để gửi kèm payload đăng ký.
+- **Phân vùng dữ liệu nghiêm ngặt (Scope Isolation) trên Cổng Đối Tác (`PartnerPortalPage.tsx`):**
+  - Backend: Bổ sung endpoint `@Post(['partner-count', 'restaurant-count'])` và `@Put(':id/partner-count')` tạo/cập nhật phiếu đếm đồ bẩn an toàn idempotency.
+  - Frontend `PartnerPortalPage.tsx`:
+    - Hiển thị nhãn Thương hiệu (Brand) và Chi nhánh đối tác ngay trên Header từ `user.brand` và `partner`.
+    - Tải danh mục đồ vải (`item_catalogs`) lọc chuẩn xác theo thương hiệu của chi nhánh.
+    - Tab Đếm Đồ Bẩn: Gửi dữ liệu về `/handover/partner-count` (hỗ trợ cả Offline Queue qua IndexedDB).
+    - Tab Lịch Sử & Kiểm Nhận Đồ Sạch: Tải đúng phiếu giao nhận của chi nhánh người dùng (`/handover?partnerId=${userPartnerId}`).
+    - Tab Duyệt Nhân Viên (dành cho `PARTNER_MANAGER`): Chỉ tải và phê duyệt các yêu cầu đăng ký nhân viên của chính chi nhánh mình.
+- **Kiểm thử & Xác minh chất lượng (Verification):**
+  - Backend: `pnpm build` (`nest build`) trong `be-nestjs-thanhxuan` pass 100%.
+  - Frontend: `pnpm build` (`tsc -b && vite build`) trong `fe-react-thanhxuan-internal` pass 100%.
+
+### Plan 16 - Chuẩn Hóa Ngữ Pháp Module, Phân Chia Features Management/Operations, Đổi Tên Đối Tác & URL Số Ít (`be-nestjs-thanhxuan`, `fe-react-thanhxuan-internal`)
+- **Chuẩn hóa ngữ pháp tiếng Anh danh mục Module (Grammar-Accurate Pluralization):**
+  - Giữ đuôi số nhiều `s` cho các danh từ đếm được: `handovers/`, `partners/`, `reports/`.
+  - Bỏ đuôi `s` (về số ít) cho danh từ không đếm được và từ viết tắt:
+    - Backend: `auths/` ➔ `auth/`, `attendances/` ➔ `attendance/`, `fuels/` ➔ `fuel/`, `payrolls/` ➔ `payroll/`, `pieceworks/` ➔ `piecework/`.
+    - Cập nhật các module class: `AuthModule`, `AttendanceModule`, `FuelModule`, `PayrollModule`, `PieceworkModule` (kèm alias tương thích ngược).
+    - Cập nhật quy tắc ngữ pháp danh mục module trong skill `.agents/skills/create-nestjs-module/SKILL.md`.
+- **Tái cấu trúc thư mục Frontend Features (`src/features/`):**
+  - Học tập cấu trúc phân tầng rõ ràng từ Web Next.js, chia `features/` thành 2 miền nghiệp vụ độc lập:
+    - `features/management/`: `attendance`, `auth`, `fuel`, `handovers`, `partners`, `payroll`, `piecework`, `reports`.
+    - `features/operations/`: `attendance`, `fuel`, `handovers`, `partners`, `payroll`, `piecework`, `reports`.
+  - Duy trì `features/auth/` và `features/dashboard/` làm Shared Features cấp root, re-export linh hoạt sang `features/management/auth`.
+  - Tách các views từ thư mục `components/` cũ và dọn dẹp sạch toàn bộ các thư mục features phẳng cấp root.
+- **Chuẩn hóa thuật ngữ Đối tác B2B (Partner Terminology):**
+  - Đổi toàn bộ các khái niệm "nhà hàng" / "restaurant" trong ngữ cảnh B2B sang "đối tác" / "partner":
+    - URL & Folder: `operations/restaurant-manager` ➔ `operations/partner-manager/partner`, `operations/restaurant-staff` ➔ `operations/partner-staff/partner`.
+    - UI Text: "Quản lý Đối tác", "Nhân viên Đối tác", "Cổng Đối Tác B2B", "Cổng Giao Nhận Đối Tác", "Cổng Quản Lý Đối Tác".
+    - Page Components: Đổi `RestaurantPage.tsx` thành `PartnerPortalPage.tsx` đặt tại `features/operations/partners/`.
+    - Đổi tên `RestaurantMonthlyTable` thành `PartnerMonthlyTable` và rà soát toàn bộ UI forms (`RegisterModal.tsx`, `RegisterPage.tsx`, `LoginPage.tsx`).
+- **Tước bỏ quyền phê duyệt tài khoản của vai trò Kế toán (`ACCOUNTANT`):**
+  - Chuyển `management/approvals` vào `management/manager/approval` (số ít).
+  - Cấu hình `allowedRoles={[StaffRole.ADMIN, StaffRole.MANAGER, StaffRole.RESTAURANT_MANAGER]}` — tước bỏ hoàn toàn quyền của Kế toán.
+  - Cập nhật `nav-config.ts` và `ManagementPage.tsx` ẩn tab tài khoản với vai trò `ACCOUNTANT`.
+  - `RESTAURANT_MANAGER` chỉ xem và duyệt nhân viên đối tác thuộc cơ sở mình.
+- **Chuẩn hóa 100% Tuyến đường Số Ít (Singular RESTful Routes):**
+  - Canonical routes: `/operations/report`, `/management/manager/partner`, `/management/manager/approval`, `/operations/partner-manager/partner`, `/operations/partner-staff/partner`.
+  - Thiết lập mạng lưới Backward Compatibility Redirects hoàn chỉnh trong `router.tsx` đảm bảo không bị lỗi 404 cho bất kỳ link cũ nào (kể cả link tiếng Việt lẫn tiếng Anh dạng số nhiều).
+- **Kiểm thử & Xác minh chất lượng (Verification):**
+  - Typecheck Frontend: `pnpm exec tsc -b` trong `fe-react-thanhxuan-internal` pass 100%.
+  - Build Frontend: `pnpm build` (`vite build`) thành công rực rỡ, PWA service worker generate hoàn tất.
+  - Build Backend: `pnpm build` (`nest build`) trong `be-nestjs-thanhxuan` pass 100%.
+
 ## 2026-10-07
 
 ### Plan 15 - Chuẩn Hóa Cấu Trúc Thư Mục Phân Hệ Internal (Số Nhiều Toàn Diện) & Cập Nhật Skill create-nestjs-module (`be-nestjs-thanhxuan`)

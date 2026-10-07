@@ -103,9 +103,9 @@ Website_Thanh_Xuan_Company/
 │
 ├── fe-react-thanhxuan-internal/          # Cổng Vận Hành Xưởng & Quản Vận noibo.thanhxuanlaundry.com (Port 3001)
 │   ├── src/app/(auth)/                  # Đăng nhập, đăng ký OTP, quên mật khẩu
-│   ├── src/app/(internal)/van-hanh/     # Phân hệ vận hành cho Kho, Thợ, Shipper, Nhà hàng
-│   ├── src/app/(internal)/quan-ly/      # Phân hệ điều hành cho Quản lý, Kế toán, Admin
-│   ├── src/features/                    # 13 Feature modules độc lập (handover, recount, fuel, payroll...)
+│   ├── src/app/(internal)/operations/   # Phân hệ vận hành cho Kho, Thợ, Shipper, Đối tác (100% số ít)
+│   ├── src/app/(internal)/management/   # Phân hệ điều hành cho Quản lý, Kế toán, Admin (100% số ít)
+│   ├── src/features/                    # Colocation phân định rõ ràng management/ và operations/ chuẩn backend
 │   └── src/lib/                         # offline-queue (IndexedDB), api-client, permissions
 │
 ├── docker-compose.yml                    # Điều phối 4 container (mongodb, backend, frontend, internal)
@@ -147,7 +147,7 @@ Website_Thanh_Xuan_Company/
 
 > 📌 **Chi tiết toàn bộ nhật ký các Plan và Bugfix:** Xem đầy đủ tại [CHANGELOG.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/CHANGELOG.md).
 
+- **2026-10-08 - Plan 17 - Chuẩn Hóa Vai Trò Đối Tác (PARTNER_MANAGER, PARTNER_STAFF), Đăng Ký Cascade Brand & Cô Lập Dữ Liệu Theo Chi Nhánh:** Đồng nhất 100% role đối tác giữa backend và frontend (kèm alias RESTAURANT_*); bổ sung trường brand vào StaffAccount; triển khai đăng ký cascade chọn Brand trước rồi lọc Chi nhánh; cô lập dữ liệu (Scope Isolation) phiếu đếm/kiểm đồ sạch và duyệt nhân viên theo đúng chi nhánh người dùng.
+- **2026-10-08 - Plan 16 - Chuẩn Hóa Ngữ Pháp Module, Phân Chia Features Management/Operations, Đổi Tên Đối Tác & URL Số Ít:** Chuẩn hóa ngữ pháp tiếng Anh các module backend & frontend (danh từ không đếm được auth, attendance, fuel, payroll, piecework bỏ "s"; handovers, partners, reports giữ "s"); tái cấu trúc frontend `features/` thành `management/` và `operations/`; đổi tên restaurant thành partner trên giao diện và thư mục; chuyển approvals vào manager/approval (tước quyền accountant); chuẩn hóa 100% routes số ít kèm redirects tương thích ngược.
 - **2026-10-07 - Plan 15 - Chuẩn Hóa Cấu Trúc Thư Mục Phân Hệ Internal & Cập Nhật Skill create-nestjs-module:** Tái cấu trúc toàn bộ module `internal/` sang dạng số nhiều (`auths`, `attendances`, `fuels`, `handovers`, `partners`, `payrolls`, `pieceworks`, `reports`), chuẩn hóa thư mục con `dto/` (giữ nguyên từ viết tắt), `schemas/`, `repositories/`, `specs/`, tách `controllers/` và cập nhật quy chuẩn vào `create-nestjs-module` skill.
 - **2026-10-07 - Plan 14 - Chuẩn Hóa Toàn Bộ Routes Sang Tiếng Anh Cho Phân Hệ Vận Hành Nội Bộ:** Chuyển đổi toàn bộ tuyến đường thư mục `src/app/(auth)` và `src/app/(internal)` sang 100% tiếng Anh (`/login`, `/register`, `/forgot-password`, `/dashboard`, `/operations/*`, `/management/*`), đồng bộ `router.tsx`, `nav-config.ts`, `api-client.ts`, `AuthContext.tsx`, bổ sung toàn bộ mạng lưới backward compatibility redirects.
-- **2026-10-05 - Tái Cấu Trúc Modular SRS & SDD (Master + 3 Phân Hệ Chi Tiết):** Tinh gọn `SRS_SDD.md` thành kiến trúc tổng quan hệ sinh thái Monorepo; tách riêng 3 tài liệu đặc tả chuyên sâu cho Backend API (`srs_sdd_backend.md`), Web & CMS Next.js (`srs_sdd_fe_nextjs.md`) và Cổng Vận Hành Xưởng React (`srs_sdd_fe_internal.md`).
-- **2026-10-05 - Plan 13 - Tinh gọn Phân quyền Menu & Cơ chế Tự động Chấm công cho Shipper:** Giới hạn chấm công camera chỉ dành cho thợ xưởng (WORKER), ẩn chấm công/phiếu lương với đối tác nhà hàng và quản lý; tự động kích hoạt check-in ca làm việc cho Shipper khi ký phiếu giao nhận đầu tiên trong ngày.

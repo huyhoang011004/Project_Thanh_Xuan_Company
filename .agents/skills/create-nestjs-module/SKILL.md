@@ -36,16 +36,17 @@ Module phải được đặt đúng phân hệ tương ứng:
 - Vận hành nội bộ: `be-nestjs-thanhxuan/src/modules/internal/<module-name>/`
 - Tiện ích dùng chung: `be-nestjs-thanhxuan/src/modules/core/<module-name>/`
 
-**Quy ước danh xưng số nhiều (Plural Module Naming):**
-- **Tên module:** Ưu tiên số nhiều (ví dụ: `auths/`, `attendances/`, `fuels/`, `handovers/`, `partners/`, `payrolls/`, `pieceworks/`, `reports/`, `articles/`, `categories/`, `contacts/`, `quotes/`).
+**Quy ước danh xưng module chuẩn ngữ pháp tiếng Anh:**
+- **Danh từ đếm được (Countable Nouns):** Dùng số nhiều (ví dụ: `handovers/`, `partners/`, `reports/`, `articles/`, `categories/`, `contacts/`, `quotes/`...).
+- **Danh từ không đếm được (Uncountable Nouns) & Từ viết tắt:** Giữ số ít chuẩn chính tả (ví dụ: `auth/` [Authentication], `attendance/` [Chấm công], `fuel/` [Xăng xe], `piecework/` [Khoán việc - không đếm được], `payroll/` [Hệ thống tính lương], `settings/`, `crm/`...).
 - **Cấu trúc thư mục con bên trong module:**
   - `dto/` (Bắt buộc): Chứa Data Transfer Objects (`create-*.dto.ts`, `update-*.dto.ts`, `query-*.dto.ts`...). Giữ nguyên `dto/` (từ viết tắt Data Transfer Object, không thêm số nhiều).
   - `schemas/` (Bắt buộc nếu có model DB): Chứa Mongoose Schemas (Số nhiều).
   - `repositories/` (Bắt buộc nếu có schema DB): Chứa Repositories kế thừa `BaseRepository` (Số nhiều).
   - `specs/` (Bắt buộc): Gom 100% các file unit test `*.spec.ts` (cả controller, service, state machine, dto tests) (Số nhiều).
-  - `controllers/` (Tùy chọn): Khi module có $\ge 2$ controllers (ví dụ: `handovers/controllers/`, `auths/controllers/`). Nếu chỉ có 1 controller, có thể để ở root module: `<module-name>.controller.ts`.
+  - `controllers/` (Tùy chọn): Khi module có $\ge 2$ controllers (ví dụ: `handovers/controllers/`, `auth/controllers/`). Nếu chỉ có 1 controller, có thể để ở root module: `<module-name>.controller.ts`.
   - `services/` (Tùy chọn): Khi module có nhiều export/worker services chuyên trách (ví dụ: `reports/services/excel-export.service.ts`).
-  - `strategies/` (Tùy chọn): Khi module xác thực có Passport Strategies (ví dụ: `auths/strategies/internal-jwt.strategy.ts`).
+  - `strategies/` (Tùy chọn): Khi module xác thực có Passport Strategies (ví dụ: `auth/strategies/internal-jwt.strategy.ts`).
 
 ```
 <plural-module-name>/

@@ -13,34 +13,34 @@
 ### 1.1. Mục Tiêu & Đối Tượng Sử Dụng
 Phân hệ `fe-react-thanhxuan-internal` là cổng điều hành số hóa toàn diện xưởng giặt là công nghiệp và chuỗi cung ứng B2B của Công ty Thanh Xuân:
 1. **Đối tượng người dùng đa dạng (8 vai trò RBAC):**
-   - **Tài xế giao nhận (`SHIPPER`)**: Thao tác trên thiết bị di động (Mobile PWA) tại nhà hàng đối tác để giao nhận đồ sạch/đồ bẩn, lấy chữ ký điện tử, nộp hóa đơn xăng xe.
+   - **Tài xế giao nhận (`SHIPPER`)**: Thao tác trên thiết bị di động (Mobile PWA) tại đối tác để giao nhận đồ sạch/đồ bẩn, lấy chữ ký điện tử, nộp hóa đơn xăng xe.
    - **Thợ xưởng (`WORKER`)**: Chấm công vào/ra ca bằng camera selfie di động, chấm sản lượng khoán từng công đoạn (gấp, ủi, đóng gói), rạch bao đếm lại đồ gom.
    - **Thủ kho (`WAREHOUSE_MANAGER`)**: Soạn đồ sạch theo kế hoạch xuất xưởng, tiếp nhận đồ bẩn, kiểm đếm đối soát tại trạm đếm.
-   - **Quản lý xưởng (`MANAGER`)**: Giám sát vận hành xưởng, phê duyệt tài khoản, chốt sản lượng khoán cuối ngày, rà soát các ca công bất thường. *(Ràng buộc: Bị ẩn 100% thông tin tiền bạc/lương)*.
-   - **Đại diện nhà hàng đối tác (`RESTAURANT_MANAGER`, `RESTAURANT_STAFF`)**: Kiểm nhận đồ sạch tại chỗ, ký xác nhận giao nhận, tra cứu bảng kê đối soát tháng.
-   - **Kế toán (`ACCOUNTANT`)**: Phê duyệt đề xuất hoàn tiền xăng xe, cấu hình tham số lương, chạy tính bảng lương chu kỳ và xuất các báo cáo tài chính.
+   - **Quản lý xưởng (`MANAGER`)**: Giám sát vận hành xưởng, phê duyệt tài khoản thợ/tài xế, chốt sản lượng khoán cuối ngày, rà soát các ca công bất thường. *(Ràng buộc: Bị ẩn 100% thông tin tiền bạc/lương)*.
+   - **Đại diện đối tác (`PARTNER_MANAGER`, `PARTNER_STAFF`)**: Quản lý đối tác và Nhân viên đối tác (hỗ trợ alias tương thích ngược `RESTAURANT_MANAGER`, `RESTAURANT_STAFF`). Kiểm nhận đồ sạch tại chỗ, đếm đồ bẩn, ký xác nhận giao nhận, tra cứu bảng kê đối soát tháng, duyệt tài khoản nhân viên đối tác thuộc cơ sở mình.
+   - **Kế toán (`ACCOUNTANT`)**: Phê duyệt đề xuất hoàn tiền xăng xe, cấu hình tham số lương, chạy tính bảng lương chu kỳ và xuất các báo cáo tài chính. *(Ràng buộc: Không tham gia phê duyệt tài khoản nhân sự)*.
    - **Quản trị viên hệ thống (`ADMIN`, `SYSTEM_ADMIN`)**: Toàn quyền quản trị nhân sự, đối tác, danh mục đồ giặt, khóa/mở khóa kỳ lương và giám sát toàn hệ thống.
 
 ---
 
 ### 1.2. Danh Sách Tính Năng Theo Nhóm Nghiệp Vụ (Functional Requirements)
 
-#### FE-INT-FR-01: Xác Thực & Phân Quyền Vai Trò (`features/auth`)
-- **Đăng nhập & Quản lý phiên:** Xác thực bằng Email/Mật khẩu với Backend NestJS. Cấp Access Token (JWT 12h, `aud: 'internal'`) và Refresh Token lưu trữ an toàn trong `localStorage`. Tự động gia hạn phiên ngầm định (Silent Refresh).
-- **Đăng ký tài khoản:** Dành cho thợ xưởng, tài xế và nhân viên nhà hàng (bắt buộc chọn chi nhánh đối tác). Nhập mã OTP 6 số gửi qua email.
-- **Phê duyệt tài khoản:** Danh sách chờ duyệt tài khoản. Quản lý nhà hàng duyệt nhân viên nhà hàng; Quản lý/Admin xưởng duyệt nhân sự nội bộ.
+#### FE-INT-FR-01: Xác Thực & Phân Quyền Vai Trò (`features/auth`, `features/management/auth`)
+- **Đăng nhập & Quản lý phiên:** Xác thực bằng Email/Mật khẩu với Backend NestJS. Cấp Access Token (JWT 15 phút, `aud: 'internal'`, chứa `partnerId` và `brand`) và Refresh Token lưu trữ an toàn trong `localStorage`. Tự động gia hạn phiên ngầm định (Silent Refresh).
+- **Đăng ký tài khoản (Cascade Registration):** Dành cho thợ xưởng, tài xế, nhân viên đối tác và quản lý đối tác. Khi chọn vai trò đối tác (`PARTNER_STAFF`, `PARTNER_MANAGER`), giao diện hiển thị 2 dropdown cascading: chọn **Thương hiệu đối tác** trước (Brand), sau đó danh sách **Chi nhánh cơ sở** (Partner) tự động lọc theo đúng thương hiệu đã chọn. Bắt buộc chọn cả Brand và Chi nhánh để gửi kèm payload đăng ký. Nhập mã OTP 6 số gửi qua email.
+- **Phê duyệt tài khoản:** Danh sách chờ duyệt tài khoản. Quản lý đối tác (`PARTNER_MANAGER` / `RESTAURANT_MANAGER`) chỉ xem và duyệt nhân viên đối tác thuộc chi nhánh mình (`partnerId`); Quản lý (`MANAGER`, `WAREHOUSE_MANAGER`) và Admin xưởng duyệt nhân sự nội bộ (`WORKER`, `SHIPPER`). Vai trò Kế toán (`ACCOUNTANT`) bị tước bỏ hoàn toàn quyền truy cập chức năng này.
 - **Quên mật khẩu & Đặt lại mật khẩu:** Quy trình khôi phục mật khẩu 2 bước thông qua OTP email.
 
-#### FE-INT-FR-02: Phân Hệ Phiếu Giao Nhận Kép (`features/handover`)
+#### FE-INT-FR-02: Phân Hệ Phiếu Giao Nhận Kép (`features/operations/handovers`)
 - **Tạo phiếu giao nhận:** Shipper hoặc Quản lý tạo phiếu theo chi nhánh đối tác. Tự động tải danh mục đồ vải theo đúng thương hiệu (`brand`).
-- **Soạn đồ sạch xuất kho (`features/warehouse` - `WarehousePage`):** Thủ kho chuẩn bị số lượng đồ sạch dự kiến giao theo lịch đối tác.
+- **Soạn đồ sạch xuất kho (`features/operations/handovers` - `WarehousePage`):** Thủ kho chuẩn bị số lượng đồ sạch dự kiến giao theo lịch đối tác.
 - **Giao nhận 2 chiều trên Mobile:**
   - Cập nhật số lượng đồ sạch bàn giao thực tế (`cleanDelivery`).
   - Ghi nhận đồ bẩn thu gom (`dirtyPickup`): Chọn chế độ `ON_SITE` (đếm chi tiết từng món tại quán) hoặc `AT_FACTORY` (gom bao niêm phong đếm tại xưởng).
-- **Chữ ký điện tử Canvas (`SignatureCanvas`):** Đại diện nhà hàng ký nhận trực tiếp trên màn hình cảm ứng điện thoại/tablet (Base64 PNG < 280KB).
+- **Chữ ký điện tử Canvas (`SignatureCanvas`):** Đại diện đối tác ký nhận trực tiếp trên màn hình cảm ứng điện thoại/tablet (Base64 PNG < 280KB).
 - **Cơ chế Tự động Check-in cho Shipper (Plan 13):** Khi Shipper ký xác nhận phiếu giao nhận đầu tiên trong ngày, hệ thống tự động kích hoạt check-in ca làm việc nếu chưa check-in.
 - **Sửa đổi ô phiếu sau ký (`EditFieldModal`):** Cho phép sửa ô phiếu khi có sai lệch phát hiện sau ký, ghi nhận `edit_marks`, lý do sửa, phát sinh thông báo tới Quản lý và audit log.
-- **Bảng kê tháng nhà hàng (`features/restaurant` - `RestaurantMonthlyPage`):** Cổng tra cứu riêng cho nhà hàng đối soát tổng sản lượng giao nhận theo tháng, ẩn hoàn toàn đơn giá tài chính.
+- **Cổng giao nhận & đối soát đối tác (`features/operations/partners` - `PartnerPortalPage`):** Cổng tra cứu riêng cho đối tác đối soát tổng sản lượng giao nhận theo tháng, đếm đồ bẩn gửi về xưởng (`/handover/partner-count`), xem lịch sử phiếu của đúng chi nhánh mình (Scope Isolation), ẩn hoàn toàn đơn giá tài chính. Quản lý đối tác có thêm tab duyệt nhân viên chi nhánh mình.
 
 #### FE-INT-FR-03: Trạm Đếm Đồ Bẩn Tại Xưởng (`features/recount` - `RecountStationPage`)
 - Phân quyền chuyên biệt cho Thợ xưởng (`WORKER`) và Thủ kho (`WAREHOUSE_MANAGER`).
@@ -57,11 +57,11 @@ Phân hệ `fe-react-thanhxuan-internal` là cổng điều hành số hóa toà
   - Hỗ trợ nhập số âm để trừ bù khi kiểm đếm nhầm.
 - **Chốt duyệt sản lượng (`ManagerPieceworkConfirmModal`):** Quản lý xưởng rà soát tổng sản lượng toàn xưởng vào cuối ngày và chốt duyệt trạng thái `CONFIRMED`.
 
-#### FE-INT-FR-05: Quản Lý Hoàn Tiền Xăng Xe (`features/fuel`)
+#### FE-INT-FR-05: Quản Lý Hoàn Tiền Xăng Xe (`features/operations/fuel`, `features/management/fuel`)
 - **Tài xế nộp đề xuất xăng (`FuelProposalPage`):** Chỉ hiển thị cho vai trò `SHIPPER`. Bắt buộc chụp ảnh hóa đơn cây xăng và ảnh đồng hồ công-tơ-mét / vạch xăng xe.
 - **Kế toán duyệt xăng xe (`FuelApprovalPage`):** Kế toán và Admin duyệt hoặc từ chối đề xuất hoàn tiền. Quản lý xưởng bị ẩn chức năng này để bảo vệ thông tin tài chính.
 
-#### FE-INT-FR-06: Quản Trị Bảng Lương & Tra Cứu Phiếu Lương (`features/payroll`)
+#### FE-INT-FR-06: Quản Trị Bảng Lương & Tra Cứu Phiếu Lương (`features/operations/payroll`, `features/management/payroll`)
 - **Quản lý kỳ lương (`PayrollPeriodPage`):** Kế toán và Admin khởi tạo kỳ lương tháng, tính toán tổng hợp tự động từ giờ công, sản lượng khoán và tiền hoàn xăng.
 - **Đóng băng kỳ lương:** Khóa kỳ lương chuyển sang `LOCKED` (đóng băng dữ liệu nguồn). Chỉ Admin có quyền mở khóa kèm ghi nhận audit log.
 - **Tra cứu phiếu lương cá nhân (`PayslipViewPage`):**
@@ -69,7 +69,7 @@ Phân hệ `fe-react-thanhxuan-internal` là cổng điều hành số hóa toà
   - Chỉ hiển thị khi kỳ lương đã ở trạng thái `LOCKED` hoặc `PAID`. Tuyệt đối không cho phép xem chéo phiếu lương.
   - Ẩn hoàn toàn với vai trò `ADMIN` (Admin không có phiếu lương nhân viên).
 
-#### FE-INT-FR-07: Trung Tâm Báo Cáo Phân Tích & Xuất File (`features/reports` - `ReportsPage`)
+#### FE-INT-FR-07: Trung Tâm Báo Cáo Phân Tích & Xuất File (`features/operations/reports`, `features/management/reports`)
 - Giao diện trực quan hóa 6 báo cáo aggregation: Báo cáo kho, Đối soát đối tác, Chấm công thợ, Lịch trình shipper, Sự cố chênh lệch và Báo cáo xăng xe.
 - Bộ lọc khoảng ngày linh hoạt (tối đa 31 ngày).
 - Xuất file tải về trực tiếp: Xuất file Excel XLSX và PDF streaming.
@@ -93,10 +93,10 @@ fe-react-thanhxuan-internal/src/
 │   │   ├── layout.tsx                   # Layout khung: Topbar, Sidebar, Navigation
 │   │   ├── dashboard/page.tsx           # /dashboard - Thống kê KPI tổng quan
 │   │   │
-│   │   ├── operations/                  # Phân hệ Vận Hành theo đối tượng (/operations/*)
+│   │   ├── operations/                  # Phân hệ Vận Hành theo đối tượng (/operations/* - 100% số ít)
 │   │   │   ├── attendance/page.tsx      # /operations/attendance - Thợ chấm công selfie
 │   │   │   ├── payslip/page.tsx         # /operations/payslip - Tra cứu phiếu lương cá nhân
-│   │   │   ├── reports/page.tsx         # /operations/reports - Trung tâm 6 báo cáo & xuất Excel/PDF
+│   │   │   ├── report/page.tsx          # /operations/report - Trung tâm báo cáo & xuất Excel/PDF (số ít)
 │   │   │   ├── warehouse-manager/
 │   │   │   │   └── warehouse/page.tsx   # /operations/warehouse-manager/warehouse - Thủ kho soạn đồ sạch
 │   │   │   ├── shipper/
@@ -106,65 +106,68 @@ fe-react-thanhxuan-internal/src/
 │   │   │   ├── worker/
 │   │   │   │   ├── recount/page.tsx     # /operations/worker/recount - Trạm đếm gom bao xưởng
 │   │   │   │   └── piecework/page.tsx   # /operations/worker/piecework - Chấm sản lượng khoán
-│   │   │   └── restaurant-manager/
-│   │   │       └── restaurant/page.tsx  # /operations/restaurant-manager/restaurant - Cổng đối soát nhà hàng
-│   │   │   └── restaurant-staff/
-│   │   │       └── restaurant/page.tsx  # /operations/restaurant-staff/restaurant - Cổng đối soát nhà hàng
+│   │   │   ├── partner-manager/
+│   │   │   │   └── partner/page.tsx     # /operations/partner-manager/partner - Cổng đối tác (Quản lý)
+│   │   │   └── partner-staff/
+│   │   │       └── partner/page.tsx     # /operations/partner-staff/partner - Cổng đối tác (Nhân viên)
 │   │   │
-│   │   └── management/                  # Phân hệ Quản Trị theo vai trò (/management/*)
+│   │   └── management/                  # Phân hệ Quản Trị theo vai trò (/management/* - 100% số ít)
 │   │       ├── page.tsx                 # /management - Hub điều hành chung (thích ứng theo role)
-│   │       ├── approvals/page.tsx       # /management/approvals - Phê duyệt tài khoản nhân viên
 │   │       ├── manager/
+│   │       │   ├── approval/page.tsx    # /management/manager/approval - Phê duyệt tài khoản (số ít)
 │   │       │   ├── personnel/page.tsx   # /management/manager/personnel - Quản trị nhân sự & RBAC
-│   │       │   ├── partners/page.tsx    # /management/manager/partners - Quản trị chuỗi đối tác & bảng giá
+│   │       │   ├── partner/page.tsx     # /management/manager/partner - Quản trị chuỗi đối tác (số ít)
 │   │       │   ├── attendance/page.tsx  # /management/manager/attendance - Bảng công toàn xưởng
-│   │       │   └── piecework/page.tsx   # /management/manager/piecework - Chốt sản lượng khoán toàn xưởng
+│   │       │   └── piecework/page.tsx   # /management/manager/piecework - Chốt sản lượng khoán
 │   │       └── accountant/
 │   │           ├── fuel/page.tsx        # /management/accountant/fuel - Duyệt đề xuất xăng xe
 │   │           └── payroll/page.tsx     # /management/accountant/payroll - Bảng lương chu kỳ & chốt sổ
 │   │
 │   ├── layout.tsx                       # Root Layout: AuthProvider, QueryClientProvider
-│   └── router.tsx                       # Centralized Router cấu hình Route Guards & Redirects
+│   └── router.tsx                       # Centralized Router cấu hình Route Guards & Backward Redirects
 │
-├── components/                          # Layout, Shell, Notifications, shadcn/ui
-├── features/                            # 13 Feature Modules độc lập (Colocation)
-│   ├── auth/                            # AuthContext, LoginForm, RegisterForm, ApprovalList
-│   ├── attendance/                      # CameraCheckIn, AttendanceList, ReviewModal
-│   ├── piecework/                       # WorkerPieceworkForm, PieceworkConfirmModal
-│   ├── handover/                        # HandoverList, HandoverDetail, CanvasSign, EditModal
-│   ├── recount/                         # RecountStationPage, RecountTaskModal
-│   ├── warehouse/                       # WarehousePage, CleanPlannedModal
-│   ├── fuel/                            # FuelProposalForm, FuelApprovalList
-│   ├── payroll/                         # PayrollPeriodList, PayslipDetailModal
-│   ├── partners/                        # PartnerList, ItemCatalogManagement
-│   ├── restaurant/                      # RestaurantMonthlyTable
-│   ├── reports/                         # ReportsDashboard, ExportModal
-│   └── management/                      # ManagementPage, AdaptiveActionCards
+├── components/                          # Layout (nav-config, AppHeader, Sidebar), Shell, shadcn/ui
+├── features/                            # Phân định rõ ràng Management vs Operations (đồng nhất backend)
+│   ├── auth/                            # Shared Auth: AuthContext, LoginForm, RegisterForm, useAuth
+│   ├── dashboard/                       # DashboardPage, KPICards, QuickActions
+│   ├── management/                      # Module Quản trị cấp quản lý & văn phòng
+│   │   ├── attendance/                  # ManagerAttendanceView
+│   │   ├── auth/                        # ApprovalList, ApprovalActionModal (re-export từ auth)
+│   │   ├── fuel/                        # FuelApprovalView, FuelApprovalModal
+│   │   ├── handovers/                   # HandoverReviewView (kiểm soát giao nhận)
+│   │   ├── partners/                    # PartnerListView, ItemCatalogModal
+│   │   ├── payroll/                     # PayrollPeriodManagementView, PayslipModal
+│   │   ├── piecework/                   # ManagerPieceworkConfirmView
+│   │   └── reports/                     # ReportsManagementDashboard, ExportModal
+│   │
+│   └── operations/                      # Module Vận hành hiện trường xưởng & di động
+│       ├── attendance/                  # CameraCheckIn, WorkerAttendancePage
+│       ├── fuel/                        # FuelProposalForm, FuelProposalPage
+│       ├── handovers/                   # HandoverListPage, HandoverDetailPage, CanvasSign, WarehousePage, RecountStation
+│       ├── partners/                    # PartnerPortalPage (đối soát đối tác)
+│       ├── payroll/                     # PayslipPersonalPage
+│       ├── piecework/                   # WorkerPieceworkForm, WorkerPieceworkPage
+│       └── reports/                     # OperationsReportPage
 │
-├── lib/                                 # Tiện ích hạ tầng
-│   ├── api-client.ts                    # Axios client gắn Interceptors và Refresh Token
-│   ├── offline-queue.ts                 # Hàng đợi ngoại tuyến IndexedDB (PWA Offline)
-│   ├── permissions.ts                   # Ma trận kiểm tra quyền vai trò & canViewFinancials
-│   └── utils.ts                         # Định dạng ngày giờ VN, formatCurrencyVND
-│
-└── types/                               # TypeScript Interfaces chuẩn hóa
+├── lib/                                 # Tiện ích hạ tầng (api-client, permissions, offline-queue, utils)
+└── types/                               # TypeScript Interfaces & Enums chuẩn hóa
 ```
 
 ---
 
 ### 2.2. Ma Trận Điều Hướng & Phân Quyền Menu (Navigation & RBAC)
 
-Dựa trên cấu hình chuẩn hóa từ Plan 13 và Plan 14:
+Dựa trên cấu hình chuẩn hóa từ Plan 13, Plan 14 và Plan 16:
 
 | Nhóm Tài Khoản | Tuyến Đường Mặc Định | Quyền Truy Cập Vận Hành (`/operations`) | Quyền Truy Cập Quản Lý (`/management`) |
 | :--- | :--- | :--- | :--- |
 | **`SHIPPER`** | `/operations/shipper/handover` | `/operations/shipper/handover`, `/operations/shipper/fuel`, `/operations/payslip` | ❌ Không có quyền |
 | **`WORKER`** | `/operations/worker/piecework` | `/operations/worker/piecework`, `/operations/attendance`, `/operations/worker/recount`, `/operations/payslip` | ❌ Không có quyền |
 | **`WAREHOUSE_MANAGER`**| `/operations/warehouse-manager/warehouse` | `/operations/warehouse-manager/warehouse`, `/operations/worker/recount`, `/operations/shipper/handover` (chế độ xem), `/operations/payslip` | ❌ Không có quyền *(Bị ẩn trường tiền)* |
-| **`RESTAURANT_MANAGER`**| `/operations/restaurant-manager/restaurant`| `/operations/restaurant-manager/restaurant`, `/operations/shipper/handover` (chỉ chi nhánh mình) | `/management/approvals` (Chỉ xem và duyệt nhân viên chi nhánh mình) |
-| **`RESTAURANT_STAFF`** | `/operations/restaurant-staff/restaurant` | `/operations/restaurant-staff/restaurant`, `/operations/shipper/handover` (chỉ chi nhánh mình) | ❌ Không có quyền |
-| **`ACCOUNTANT`** | `/dashboard` | `/operations/payslip`, `/operations/reports` | Toàn quyền Quản lý: `/management/accountant/payroll`, `/management/accountant/fuel`, `/management/manager/partners`, `/management/manager/personnel` |
-| **`MANAGER`** | `/dashboard` | `/operations/shipper/handover` (chế độ xem), `/operations/reports` | Quản lý vận hành xưởng: `/management/manager/personnel`, `/management/manager/partners`, `/management/manager/attendance`, `/management/manager/piecework` *(Ẩn hoàn toàn bảng lương & tiền)* |
+| **`RESTAURANT_MANAGER`**| `/operations/partner-manager/partner`| `/operations/partner-manager/partner`, `/operations/shipper/handover` (chỉ chi nhánh mình) | `/management/manager/approval` (Chỉ xem và duyệt nhân viên chi nhánh mình) |
+| **`RESTAURANT_STAFF`** | `/operations/partner-staff/partner` | `/operations/partner-staff/partner`, `/operations/shipper/handover` (chỉ chi nhánh mình) | ❌ Không có quyền |
+| **`ACCOUNTANT`** | `/dashboard` | `/operations/payslip`, `/operations/report` | Quản lý kế toán & đối tác: `/management/accountant/payroll`, `/management/accountant/fuel`, `/management/manager/partner`, `/management/manager/personnel` *(Không có quyền duyệt tài khoản)* |
+| **`MANAGER`** | `/dashboard` | `/operations/shipper/handover` (chế độ xem), `/operations/report` | Quản lý vận hành xưởng: `/management/manager/personnel`, `/management/manager/partner`, `/management/manager/attendance`, `/management/manager/piecework`, `/management/manager/approval` *(Ẩn hoàn toàn bảng lương & tiền)* |
 | **`ADMIN`** | `/dashboard` | Toàn bộ các trang vận hành | Toàn quyền tuyệt đối 100% các chức năng quản lý |
 
 ---

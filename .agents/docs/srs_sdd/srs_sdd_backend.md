@@ -21,15 +21,16 @@ Backend API tập trung phục vụ toàn bộ các kênh tương tác của Cô
 ### 1.2. Danh Sách Tính Năng Theo Sub-Modules (Functional Requirements)
 
 #### BE-FR-01: Quản Trị Tài Khoản, Xác Thực & RBAC v2 (`/api/v1/internal/auth`)
-- **Đăng ký tài khoản:** Nhân viên xưởng (`WORKER`, `SHIPPER`) và nhân viên nhà hàng (`RESTAURANT_STAFF`, bắt buộc gửi `partnerId`). Sinh mã OTP 6 chữ số gửi qua email SMTP/Resend, cooldown 60s, giới hạn 5 lần/giờ (`OtpCodeRepository`).
+- **Đăng ký tài khoản:** Nhân viên xưởng (`WORKER`, `SHIPPER`), nhân viên đối tác (`PARTNER_STAFF`) và quản lý đối tác (`PARTNER_MANAGER`). Hỗ trợ alias tương thích ngược `RESTAURANT_STAFF`, `RESTAURANT_MANAGER`. Với vai trò đối tác, bắt buộc gửi cả `brand` và `partnerId`. Sinh mã OTP 6 chữ số gửi qua email SMTP/Resend, cooldown 60s, giới hạn 5 lần/giờ (`OtpCodeRepository`).
 - **Xác thực OTP & Trạng thái tài khoản:** Sau khi xác thực OTP, tài khoản chuyển sang `PENDING_APPROVAL`.
 - **Phê duyệt tài khoản (`approval_requests`):**
-  - Quản lý nhà hàng (`RESTAURANT_MANAGER`): Phê duyệt nhân viên thuộc đúng chi nhánh nhà hàng của mình.
-  - Quản trị viên/Quản lý (`ADMIN`, `MANAGER`): Phê duyệt nhân sự xưởng nội bộ.
+  - Quản lý đối tác (`PARTNER_MANAGER` / `RESTAURANT_MANAGER`): Phê duyệt nhân viên thuộc đúng chi nhánh đối tác của mình (`partnerId`).
+  - Quản trị viên/Quản lý (`ADMIN`, `MANAGER`, `WAREHOUSE_MANAGER`): Phê duyệt nhân sự xưởng nội bộ.
 - **Đăng nhập & Quản lý phiên:**
-  - Cấp cặp Access Token (JWT 12h, bắt buộc `aud: 'internal'`) và Refresh Token (7 ngày).
+  - Cấp cặp Access Token (JWT 15 phút, bắt buộc `aud: 'internal'`, chứa `partnerId` và `brand`) và Refresh Token (7 ngày).
   - Tự động khóa tài khoản tạm thời 15 phút sau 5 lần nhập sai mật khẩu liên tiếp.
   - Xoay vòng Refresh Token Rotation: Mỗi lần refresh sẽ thu hồi token cũ và sinh cặp token mới; phát hiện dùng lại token đã thu hồi sẽ khóa toàn bộ phiên.
+  - Phân vùng dữ liệu (Scope Isolation): `PartnerScopeGuard` tự động cô lập truy vấn của tài khoản đối tác theo đúng `partnerId`.
 - **Bảo mật tài chính đa tầng (`PayFieldFilterInterceptor`):**
   - Đệ quy duyệt và bóc tách toàn bộ trường tiền/lương (`rate`, `totalEarnings`, `estimatedPrice`, `amount`, `salary`...) khỏi JSON response khi user không có quyền `pay.view` (đặc biệt là Quản lý xưởng `MANAGER` và Quản lý kho `WAREHOUSE_MANAGER`).
 
@@ -115,13 +116,13 @@ be-nestjs-thanhxuan/src/
     ├── laundry/                         # 12 modules Giặt Là Website & CMS (DB: laundry_express)
     ├── moving/                          # Quotes, Services, Articles (DB: moving_express)
     └── internal/                        # Vận Hành Nội Bộ & Quản Trị Đối Tác (DB: internal_express)
-        ├── auths/                       # dto/, schemas/, repositories/, specs/, controllers/, strategies/
+        ├── auth/                        # dto/, schemas/, repositories/, specs/, controllers/, strategies/
         ├── partners/                    # dto/, schemas/, repositories/, specs/
         ├── handovers/                   # dto/, schemas/, repositories/, specs/, controllers/
-        ├── pieceworks/                  # dto/, schemas/, repositories/, specs/
-        ├── attendances/                 # dto/, schemas/, repositories/, specs/
-        ├── fuels/                       # dto/, schemas/, repositories/, specs/
-        ├── payrolls/                    # dto/, schemas/, repositories/, specs/
+        ├── piecework/                   # dto/, schemas/, repositories/, specs/
+        ├── attendance/                  # dto/, schemas/, repositories/, specs/
+        ├── fuel/                        # dto/, schemas/, repositories/, specs/
+        ├── payroll/                     # dto/, schemas/, repositories/, specs/
         └── reports/                     # dto/, services/, specs/
 ```
 
@@ -139,7 +140,7 @@ graph TD
     
     DB_Laundry --> Mod_Laundry[src/modules/laundry/*<br/>Articles, Categories, Orders, Contacts, CRM]
     DB_Moving --> Mod_Moving[src/modules/moving/*<br/>Quotes, Services, Articles]
-    DB_Internal --> Mod_Internal[src/modules/internal/*<br/>Auths, Partners, Handovers, Attendances, Pieceworks, Fuels, Payrolls, Reports]
+    DB_Internal --> Mod_Internal[src/modules/internal/*<br/>Auth, Partners, Handovers, Attendance, Piecework, Fuel, Payroll, Reports]
 ```
 
 - **Mongoose Multi-Database Isolation:**
