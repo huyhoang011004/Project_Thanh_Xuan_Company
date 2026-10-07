@@ -2,6 +2,65 @@
 
 Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâng cấp, bugfix và triển khai tính năng của Hệ sinh thái Công ty Thanh Xuân qua từng Plan.
 
+## 2026-10-07
+
+### Plan 15 - Chuẩn Hóa Cấu Trúc Thư Mục Phân Hệ Internal (Số Nhiều Toàn Diện) & Cập Nhật Skill create-nestjs-module (`be-nestjs-thanhxuan`)
+- **Chuẩn hóa danh xưng số nhiều toàn diện (Comprehensive Plural Naming):**
+  - Chuyển đổi tên 100% các module nghiệp vụ trong `src/modules/internal/` sang dạng số nhiều:
+    - `accounts/` ➔ `auths/` (kèm đổi tên module thành `auths.module.ts` và export `AuthsModule` cùng alias `AccountsModule`).
+    - `attendance/` ➔ `attendances/` (kèm `attendances.module.ts`, export `AttendancesModule` cùng alias `AttendanceModule`).
+    - `fuel/` ➔ `fuels/` (kèm `fuels.module.ts`, export `FuelsModule` cùng alias `FuelModule`).
+    - `handover/` ➔ `handovers/` (kèm `handovers.module.ts`, export `HandoversModule` cùng alias `HandoverModule`).
+    - `payroll/` ➔ `payrolls/` (kèm `payrolls.module.ts`, export `PayrollsModule` cùng alias `PayrollModule`).
+    - `piecework/` ➔ `pieceworks/` (kèm `pieceworks.module.ts`, export `PieceworksModule` cùng alias `PieceworkModule`).
+    - `partners/` & `reports/`: Đã là số nhiều, duy trì chuẩn hóa.
+  - Chuẩn hóa thư mục con `dto/` (giữ nguyên quy chuẩn từ viết tắt Data Transfer Object, không thêm số nhiều, đồng bộ 100% với các phân hệ `laundry/`, `moving/` và `core/audit/`).
+- **Tổ chức cấu trúc thư mục con học theo phân hệ mẫu `laundry/`:**
+  - Tạo thư mục `specs/` cho tất cả các module và gom 100% các file unit test `*.spec.ts` vào `specs/` (`auths/specs/`, `attendances/specs/`, `fuels/specs/`, `handovers/specs/`, `partners/specs/`, `payrolls/specs/`, `pieceworks/specs/`, `reports/specs/`).
+  - Tách thư mục `controllers/` cho các module có $\ge 2$ controllers:
+    - `auths/controllers/`: `accounts.controller.ts`, `auth.controller.ts`, `approvals.controller.ts`.
+    - `handovers/controllers/`: `handover.controller.ts`, `recount-tasks.controller.ts`.
+  - Cập nhật chuẩn `MockRepository<T>` cho unit test mocks loại bỏ hoàn toàn các lỗi typecheck của Jest mock methods.
+- **Duy trì an toàn API Contracts & Backward Compatibility:**
+  - Giữ nguyên 100% các decorator `@Controller('internal/...')` (`accounts`, `approvals`, `attendance`, `fuel`, `handover`, `partners`, `payroll`, `piecework`, `reports`) để không gây breaking change với Frontend API client.
+  - Export song song class module mới và alias tên class cũ (`export { AuthsModule as AccountsModule }`, `export { HandoversModule as HandoverModule }`...) đảm bảo mọi module phụ trợ và test suites đều hoạt động trơn tru.
+  - Cập nhật đồng bộ các file import toàn dự án: `src/app.module.ts`, `src/modules/internal/internal.module.ts`, `src/modules/core/schedule/*`.
+- **Cập nhật Skill & Tài liệu Kiến trúc:**
+  - `.agents/skills/create-nestjs-module/SKILL.md`: Cập nhật cấu trúc thư mục chuẩn (`dto/`, `schemas/`, `repositories/`, `specs/`, `controllers/`, `services/`, `strategies/`) và checklist kiểm định.
+  - `.agents/docs/srs_sdd/srs_sdd_backend.md`: Cập nhật cây thư mục và sơ đồ kiến trúc module phân hệ Internal.
+  - `.agents/docs/SRS_SDD.md`: Thêm 1 dòng Document History cho Plan 15.
+- **Kiểm thử & Xác minh chất lượng (Verification):**
+  - Typecheck: `pnpm exec tsc --noEmit` pass 100% cho toàn bộ phân hệ `internal/` và `core/schedule/`.
+  - Unit Tests: `pnpm test` pass toàn bộ **43 test suites, 194 tests (100% passed)**.
+  - Build: `pnpm build` (`nest build`) biên dịch thành công hoàn hảo với exit code 0.
+
+
+### Plan 14 - Chuẩn Hóa Toàn Bộ Routes Sang Tiếng Anh Cho Phân Hệ Vận Hành Nội Bộ (`fe-react-thanhxuan-internal`)
+- **Tái cấu trúc thư mục định tuyến (Directory Restructuring):**
+  - Chuyển đổi toàn bộ các thư mục route trong `src/app/(auth)` và `src/app/(internal)` từ tiếng Việt sang 100% tiếng Anh chuẩn mực RESTful:
+    - `(auth)`: `dang-nhap` ➔ `login`, `dang-ky` ➔ `register`, `quen-mat-khau` ➔ `forgot-password`.
+    - `(internal)`: `tong-quan` ➔ `dashboard`, `van-hanh` ➔ `operations`, `quan-ly` ➔ `management`.
+    - `operations/`: `attendance`, `payslip`, `reports`, `warehouse-manager/warehouse`, `shipper/handover`, `shipper/handover/[recordCode]`, `shipper/fuel`, `worker/recount`, `worker/piecework`, `restaurant-manager/restaurant`, `restaurant-staff/restaurant`.
+    - `management/`: `page.tsx` (hub), `approvals`, `manager/personnel`, `manager/partners`, `manager/attendance`, `manager/piecework`, `accountant/fuel`, `accountant/payroll`.
+- **Cập nhật đồng bộ các thành phần định tuyến & điều hướng:**
+  - `src/app/router.tsx`: Định nghĩa toàn bộ cây route tiếng Anh mới; thiết lập mạng lưới chuyển hướng tương thích ngược (Backward Compatibility Redirects) cho 100% các URL và alias cũ để người dùng truy cập bookmark hoặc URL cũ không bị 404.
+  - `src/components/layout/nav-config.ts`: Cập nhật `path` trong `NAV_GROUPS` và `getMobileQuickNavItems` trỏ chính xác về các tuyến đường tiếng Anh mới.
+  - `src/app/page.tsx`: Cập nhật chuyển hướng unauthenticated sang `/login`.
+  - `src/features/auth/AuthContext.tsx`: Cập nhật `getDefaultRouteForRole` trả về các route tiếng Anh mới cho 8 vai trò người dùng và `logout()` chuyển hướng về `/login`.
+  - `src/features/auth/ProtectedRoute.tsx`: Cập nhật chuyển hướng đăng nhập và tài khoản tạm khóa về `/login`.
+  - `src/lib/api-client.ts`: Cập nhật hàm `isPublicAuthPage` và chuyển hướng khi phiên hết hạn 401 về `/login`.
+  - `src/features/auth/LoginPage.tsx`: Cập nhật link đăng ký sang `/register`.
+  - `src/features/auth/RegisterPage.tsx`: Cập nhật navigate và link đăng nhập sang `/login`.
+  - `src/features/auth/ForgotPasswordPage.tsx`: Cập nhật navigate và link sang `/login`.
+  - `src/features/dashboard/DashboardPage.tsx`: Cập nhật các nút quick action sang `/operations/shipper/handover`, `/operations/attendance`, `/operations/worker/recount`.
+  - `src/features/management/ManagementPage.tsx`: Cập nhật các action cards và nút xuất báo cáo sang `/management/*` và `/operations/reports`.
+  - `src/features/handover/HandoverListPage.tsx` & `HandoverDetailPage.tsx`: Cập nhật các link và nút chuyển hướng sang `/operations/shipper/handover` và `/operations/shipper/handover/:recordCode`.
+- **Kiểm thử & Xác minh chất lượng (Verification):**
+  - Typecheck: `pnpm exec tsc --noEmit` pass 100% không phát sinh bất kỳ lỗi TypeScript nào.
+  - Tests: `pnpm test` pass toàn bộ.
+  - Production Build: `pnpm build` biên dịch thành công Vite bundle và Service Worker PWA hoàn tất trong 5.83s.
+- **Tài liệu & Đồng bộ:** Cập nhật sơ đồ thư mục và ma trận route tại `srs_sdd_fe_internal.md`, ghi nhận `SRS_SDD.md` và hoàn tất `plan14.md`.
+
 ---
 
 ## 2026-10-05

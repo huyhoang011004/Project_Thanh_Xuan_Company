@@ -85,36 +85,46 @@ Phân hệ `fe-react-thanhxuan-internal` là cổng điều hành số hóa toà
 fe-react-thanhxuan-internal/src/
 ├── app/
 │   ├── (auth)/                          # Đăng nhập, Đăng ký OTP, Quên mật khẩu
-│   │   ├── dang-nhap/page.tsx
-│   │   ├── dang-ky/page.tsx
-│   │   └── quen-mat-khau/page.tsx
+│   │   ├── login/page.tsx               # /login
+│   │   ├── register/page.tsx            # /register
+│   │   └── forgot-password/page.tsx     # /forgot-password
 │   │
 │   ├── (internal)/                      # Vùng vận hành yêu cầu JWT xác thực
 │   │   ├── layout.tsx                   # Layout khung: Topbar, Sidebar, Navigation
-│   │   ├── van-hanh/                    # Nhóm nghiệp vụ Vận Hành theo đối tượng
-│   │   │   ├── warehouse-manager/kho/page.tsx      # Thủ kho soạn đồ sạch
-│   │   │   ├── worker/tram-dem/page.tsx            # Trạm rạch bao đếm lại xưởng
-│   │   │   ├── worker/khoan-viec/page.tsx          # Thợ chấm sản lượng khoán
-│   │   │   ├── worker/cham-cong/page.tsx           # Thợ chấm công selfie
-│   │   │   ├── shipper/giao-nhan/page.tsx          # Shipper nhận hàng & giao đồ
-│   │   │   ├── shipper/xang/page.tsx               # Shipper nộp đề xuất xăng
-│   │   │   ├── restaurant-manager/nha-hang/page.tsx # Cổng đối soát tháng nhà hàng
-│   │   │   └── phieu-luong/page.tsx                # Tra cứu phiếu lương cá nhân
+│   │   ├── dashboard/page.tsx           # /dashboard - Thống kê KPI tổng quan
 │   │   │
-│   │   ├── quan-ly/                     # Nhóm nghiệp vụ Quản Lý theo vai trò
-│   │   │   ├── page.tsx                 # Hub điều hành chung (thích ứng theo role)
-│   │   │   ├── nhan-su/page.tsx         # Quản trị nhân viên & phê duyệt OTP
-│   │   │   ├── doi-tac/page.tsx         # Quản trị chuỗi đối tác & bảng giá đồ vải
-│   │   │   ├── cham-cong/page.tsx       # Bảng chấm công toàn xưởng
-│   │   │   ├── khoan-viec/page.tsx      # Bảng sản lượng khoán toàn xưởng
-│   │   │   ├── xang-xe/page.tsx         # Duyệt đề xuất xăng xe
-│   │   │   ├── bang-luong/page.tsx      # Quản trị chu kỳ lương & tính lương
-│   │   │   └── bao-cao/page.tsx         # Trung tâm 6 báo cáo & xuất Excel/PDF
+│   │   ├── operations/                  # Phân hệ Vận Hành theo đối tượng (/operations/*)
+│   │   │   ├── attendance/page.tsx      # /operations/attendance - Thợ chấm công selfie
+│   │   │   ├── payslip/page.tsx         # /operations/payslip - Tra cứu phiếu lương cá nhân
+│   │   │   ├── reports/page.tsx         # /operations/reports - Trung tâm 6 báo cáo & xuất Excel/PDF
+│   │   │   ├── warehouse-manager/
+│   │   │   │   └── warehouse/page.tsx   # /operations/warehouse-manager/warehouse - Thủ kho soạn đồ sạch
+│   │   │   ├── shipper/
+│   │   │   │   ├── handover/page.tsx    # /operations/shipper/handover - Giao nhận 2 chiều
+│   │   │   │   ├── handover/[recordCode]/page.tsx # Chi tiết phiếu & chữ ký Canvas
+│   │   │   │   └── fuel/page.tsx        # /operations/shipper/fuel - Nộp hóa đơn xăng xe
+│   │   │   ├── worker/
+│   │   │   │   ├── recount/page.tsx     # /operations/worker/recount - Trạm đếm gom bao xưởng
+│   │   │   │   └── piecework/page.tsx   # /operations/worker/piecework - Chấm sản lượng khoán
+│   │   │   └── restaurant-manager/
+│   │   │       └── restaurant/page.tsx  # /operations/restaurant-manager/restaurant - Cổng đối soát nhà hàng
+│   │   │   └── restaurant-staff/
+│   │   │       └── restaurant/page.tsx  # /operations/restaurant-staff/restaurant - Cổng đối soát nhà hàng
 │   │   │
-│   │   └── tong-quan/page.tsx           # Dashboard thống kê
+│   │   └── management/                  # Phân hệ Quản Trị theo vai trò (/management/*)
+│   │       ├── page.tsx                 # /management - Hub điều hành chung (thích ứng theo role)
+│   │       ├── approvals/page.tsx       # /management/approvals - Phê duyệt tài khoản nhân viên
+│   │       ├── manager/
+│   │       │   ├── personnel/page.tsx   # /management/manager/personnel - Quản trị nhân sự & RBAC
+│   │       │   ├── partners/page.tsx    # /management/manager/partners - Quản trị chuỗi đối tác & bảng giá
+│   │       │   ├── attendance/page.tsx  # /management/manager/attendance - Bảng công toàn xưởng
+│   │       │   └── piecework/page.tsx   # /management/manager/piecework - Chốt sản lượng khoán toàn xưởng
+│   │       └── accountant/
+│   │           ├── fuel/page.tsx        # /management/accountant/fuel - Duyệt đề xuất xăng xe
+│   │           └── payroll/page.tsx     # /management/accountant/payroll - Bảng lương chu kỳ & chốt sổ
 │   │
 │   ├── layout.tsx                       # Root Layout: AuthProvider, QueryClientProvider
-│   └── router.tsx                       # Centralized Router cấu hình Route Guards
+│   └── router.tsx                       # Centralized Router cấu hình Route Guards & Redirects
 │
 ├── components/                          # Layout, Shell, Notifications, shadcn/ui
 ├── features/                            # 13 Feature Modules độc lập (Colocation)
@@ -144,18 +154,18 @@ fe-react-thanhxuan-internal/src/
 
 ### 2.2. Ma Trận Điều Hướng & Phân Quyền Menu (Navigation & RBAC)
 
-Dựa trên cấu hình chuẩn hóa từ Plan 12 và Plan 13:
+Dựa trên cấu hình chuẩn hóa từ Plan 13 và Plan 14:
 
-| Nhóm Tài Khoản | Tuyến Đường Mặc Định | Quyền Truy Cập Vận Hành (`/van-hanh`) | Quyền Truy Cập Quản Lý (`/quan-ly`) |
+| Nhóm Tài Khoản | Tuyến Đường Mặc Định | Quyền Truy Cập Vận Hành (`/operations`) | Quyền Truy Cập Quản Lý (`/management`) |
 | :--- | :--- | :--- | :--- |
-| **`SHIPPER`** | `/van-hanh/shipper/giao-nhan` | `/shipper/giao-nhan`, `/shipper/xang`, `/phieu-luong` | ❌ Không có quyền |
-| **`WORKER`** | `/van-hanh/worker/khoan-viec` | `/worker/khoan-viec`, `/worker/cham-cong`, `/worker/tram-dem`, `/phieu-luong` | ❌ Không có quyền |
-| **`WAREHOUSE_MANAGER`**| `/van-hanh/warehouse-manager/kho` | `/warehouse-manager/kho`, `/worker/tram-dem`, `/shipper/giao-nhan` (chế độ xem), `/phieu-luong` | ❌ Không có quyền *(Bị ẩn trường tiền)* |
-| **`RESTAURANT_MANAGER`**| `/van-hanh/restaurant-manager/nha-hang`| `/restaurant-manager/nha-hang`, `/shipper/giao-nhan` (chỉ chi nhánh mình) | `/quan-ly` (Chỉ xem và duyệt nhân viên chi nhánh mình) |
-| **`RESTAURANT_STAFF`** | `/van-hanh/shipper/giao-nhan` | `/shipper/giao-nhan` (chỉ chi nhánh mình) | ❌ Không có quyền |
-| **`ACCOUNTANT`** | `/quan-ly` | `/phieu-luong` | Toàn quyền Quản lý: `/bang-luong`, `/xang-xe`, `/doi-tac`, `/bao-cao`, `/nhan-su` |
-| **`MANAGER`** | `/quan-ly` | `/shipper/giao-nhan` (chế độ xem) | Quản lý vận hành xưởng: `/nhan-su`, `/doi-tac`, `/cham-cong`, `/khoan-viec`, `/bao-cao` *(Ẩn hoàn toàn bảng lương & tiền)* |
-| **`ADMIN`** | `/quan-ly` | Toàn bộ các trang vận hành | Toàn quyền tuyệt đối 100% các chức năng quản lý |
+| **`SHIPPER`** | `/operations/shipper/handover` | `/operations/shipper/handover`, `/operations/shipper/fuel`, `/operations/payslip` | ❌ Không có quyền |
+| **`WORKER`** | `/operations/worker/piecework` | `/operations/worker/piecework`, `/operations/attendance`, `/operations/worker/recount`, `/operations/payslip` | ❌ Không có quyền |
+| **`WAREHOUSE_MANAGER`**| `/operations/warehouse-manager/warehouse` | `/operations/warehouse-manager/warehouse`, `/operations/worker/recount`, `/operations/shipper/handover` (chế độ xem), `/operations/payslip` | ❌ Không có quyền *(Bị ẩn trường tiền)* |
+| **`RESTAURANT_MANAGER`**| `/operations/restaurant-manager/restaurant`| `/operations/restaurant-manager/restaurant`, `/operations/shipper/handover` (chỉ chi nhánh mình) | `/management/approvals` (Chỉ xem và duyệt nhân viên chi nhánh mình) |
+| **`RESTAURANT_STAFF`** | `/operations/restaurant-staff/restaurant` | `/operations/restaurant-staff/restaurant`, `/operations/shipper/handover` (chỉ chi nhánh mình) | ❌ Không có quyền |
+| **`ACCOUNTANT`** | `/dashboard` | `/operations/payslip`, `/operations/reports` | Toàn quyền Quản lý: `/management/accountant/payroll`, `/management/accountant/fuel`, `/management/manager/partners`, `/management/manager/personnel` |
+| **`MANAGER`** | `/dashboard` | `/operations/shipper/handover` (chế độ xem), `/operations/reports` | Quản lý vận hành xưởng: `/management/manager/personnel`, `/management/manager/partners`, `/management/manager/attendance`, `/management/manager/piecework` *(Ẩn hoàn toàn bảng lương & tiền)* |
+| **`ADMIN`** | `/dashboard` | Toàn bộ các trang vận hành | Toàn quyền tuyệt đối 100% các chức năng quản lý |
 
 ---
 

@@ -115,15 +115,14 @@ be-nestjs-thanhxuan/src/
     ├── laundry/                         # 12 modules Giặt Là Website & CMS (DB: laundry_express)
     ├── moving/                          # Quotes, Services, Articles (DB: moving_express)
     └── internal/                        # Vận Hành Nội Bộ & Quản Trị Đối Tác (DB: internal_express)
-        ├── accounts/                    # Accounts, OTP, RefreshTokens, ApprovalRequests
-        ├── partners/                    # Partners, ItemCatalogs
-        ├── handover/                    # HandoverRecords, RecountTasks, Counters, State-Machine
-        ├── piecework/                   # PieceworkLogs
-        ├── attendance/                  # AttendanceRecords
-        ├── fuel/                        # FuelLogs
-        ├── payroll/                     # PaySettings, PayrollPeriods, Payslips
-        ├── reports/                     # 6 Aggregations, ExcelJS Streaming, PDFMake, ExportQueue
-        └── notifications/               # In-app Notifications
+        ├── auths/                       # dto/, schemas/, repositories/, specs/, controllers/, strategies/
+        ├── partners/                    # dto/, schemas/, repositories/, specs/
+        ├── handovers/                   # dto/, schemas/, repositories/, specs/, controllers/
+        ├── pieceworks/                  # dto/, schemas/, repositories/, specs/
+        ├── attendances/                 # dto/, schemas/, repositories/, specs/
+        ├── fuels/                       # dto/, schemas/, repositories/, specs/
+        ├── payrolls/                    # dto/, schemas/, repositories/, specs/
+        └── reports/                     # dto/, services/, specs/
 ```
 
 ---
@@ -140,7 +139,7 @@ graph TD
     
     DB_Laundry --> Mod_Laundry[src/modules/laundry/*<br/>Articles, Categories, Orders, Contacts, CRM]
     DB_Moving --> Mod_Moving[src/modules/moving/*<br/>Quotes, Services, Articles]
-    DB_Internal --> Mod_Internal[src/modules/internal/*<br/>Accounts, Partners, Handover, Attendance, Piecework, Fuel, Payroll, Reports]
+    DB_Internal --> Mod_Internal[src/modules/internal/*<br/>Auths, Partners, Handovers, Attendances, Pieceworks, Fuels, Payrolls, Reports]
 ```
 
 - **Mongoose Multi-Database Isolation:**

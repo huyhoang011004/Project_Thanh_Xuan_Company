@@ -28,7 +28,7 @@ Skill này hướng dẫn quy chuẩn kỹ thuật và các bước thực thi �
 
 ---
 
-## 2. Cấu trúc thư mục chuẩn của một Module
+## 2. Cấu trúc thư mục chuẩn của một Module (Chuẩn Số Nhiều Toàn Diện)
 
 Module phải được đặt đúng phân hệ tương ứng:
 - Giặt là: `be-nestjs-thanhxuan/src/modules/laundry/<module-name>/`
@@ -36,23 +36,41 @@ Module phải được đặt đúng phân hệ tương ứng:
 - Vận hành nội bộ: `be-nestjs-thanhxuan/src/modules/internal/<module-name>/`
 - Tiện ích dùng chung: `be-nestjs-thanhxuan/src/modules/core/<module-name>/`
 
+**Quy ước danh xưng số nhiều (Plural Module Naming):**
+- **Tên module:** Ưu tiên số nhiều (ví dụ: `auths/`, `attendances/`, `fuels/`, `handovers/`, `partners/`, `payrolls/`, `pieceworks/`, `reports/`, `articles/`, `categories/`, `contacts/`, `quotes/`).
+- **Cấu trúc thư mục con bên trong module:**
+  - `dto/` (Bắt buộc): Chứa Data Transfer Objects (`create-*.dto.ts`, `update-*.dto.ts`, `query-*.dto.ts`...). Giữ nguyên `dto/` (từ viết tắt Data Transfer Object, không thêm số nhiều).
+  - `schemas/` (Bắt buộc nếu có model DB): Chứa Mongoose Schemas (Số nhiều).
+  - `repositories/` (Bắt buộc nếu có schema DB): Chứa Repositories kế thừa `BaseRepository` (Số nhiều).
+  - `specs/` (Bắt buộc): Gom 100% các file unit test `*.spec.ts` (cả controller, service, state machine, dto tests) (Số nhiều).
+  - `controllers/` (Tùy chọn): Khi module có $\ge 2$ controllers (ví dụ: `handovers/controllers/`, `auths/controllers/`). Nếu chỉ có 1 controller, có thể để ở root module: `<module-name>.controller.ts`.
+  - `services/` (Tùy chọn): Khi module có nhiều export/worker services chuyên trách (ví dụ: `reports/services/excel-export.service.ts`).
+  - `strategies/` (Tùy chọn): Khi module xác thực có Passport Strategies (ví dụ: `auths/strategies/internal-jwt.strategy.ts`).
+
 ```
-<module-name>/
-├── dto/
-│   ├── create-<module-name>.dto.ts
-│   ├── update-<module-name>.dto.ts
-│   ├── query-<module-name>.dto.ts
-│   └── <module-name>-response.dto.ts
+<plural-module-name>/
+├── dto/                                  # Giữ nguyên dto (từ viết tắt)
+│   ├── create-<entity>.dto.ts
+│   ├── update-<entity>.dto.ts
+│   ├── query-<entity>.dto.ts
+│   └── <entity>-response.dto.ts
 ├── schemas/
-│   └── <module-name>.schema.ts
+│   └── <entity>.schema.ts
 ├── repositories/
-│   └── <module-name>.repository.ts
-├── <module-name>.controller.ts
+│   └── <entity>.repository.ts
+├── specs/                                # 100% unit tests đặt tại đây
+│   ├── <entity>.controller.spec.ts
+│   └── <entity>.service.spec.ts
+├── controllers/                          # Tùy chọn (khi có >= 2 controllers)
+│   ├── <entity>.controller.ts
+│   └── <sub-entity>.controller.ts
+├── services/                             # Tùy chọn (khi có helper services)
+│   └── <helper-task>.service.ts
+├── strategies/                           # Tùy chọn (khi có auth strategies)
+│   └── internal-jwt.strategy.ts
+├── <module-name>.controller.ts           # Dùng khi chỉ có 1 controller duy nhất
 ├── <module-name>.service.ts
-├── <module-name>.module.ts
-└── specs/
-    ├── <module-name>.controller.spec.ts
-    └── <module-name>.service.spec.ts
+└── <plural-module-name>.module.ts
 ```
 
 ---
@@ -177,7 +195,7 @@ export class PartnerRepository extends BaseRepository<PartnerDocument> {
 - Đăng ký module này vào Module cha của phân hệ (`InternalModule`, `MovingModule`, `LaundryModule` hoặc `AppModule`).
 
 ### Bước 7: Viết Unit Test Hồi Quy
-- Tạo file `.spec.ts` cho Service và Controller với mock repository/service đầy đủ, đảm bảo `pnpm test` vượt qua.
+- Tạo file `.spec.ts` cho Service và Controller đặt trong thư mục `specs/` của module (`specs/<name>.service.spec.ts`, `specs/<name>.controller.spec.ts`), với mock repository/service đầy đủ, đảm bảo `pnpm test` vượt qua 100%.
 
 ---
 
