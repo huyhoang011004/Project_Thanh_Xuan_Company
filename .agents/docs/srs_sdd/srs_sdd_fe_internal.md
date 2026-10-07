@@ -25,10 +25,22 @@ Phân hệ `fe-react-thanhxuan-internal` là cổng điều hành số hóa toà
 
 ### 1.2. Danh Sách Tính Năng Theo Nhóm Nghiệp Vụ (Functional Requirements)
 
-#### FE-INT-FR-01: Xác Thực & Phân Quyền Vai Trò (`features/auth`, `features/management/auth`)
-- **Đăng nhập & Quản lý phiên:** Xác thực bằng Email/Mật khẩu với Backend NestJS. Cấp Access Token (JWT 15 phút, `aud: 'internal'`, chứa `partnerId` và `brand`) và Refresh Token lưu trữ an toàn trong `localStorage`. Tự động gia hạn phiên ngầm định (Silent Refresh).
-- **Đăng ký tài khoản (Cascade Registration):** Dành cho thợ xưởng, tài xế, nhân viên đối tác và quản lý đối tác. Khi chọn vai trò đối tác (`PARTNER_STAFF`, `PARTNER_MANAGER`), giao diện hiển thị 2 dropdown cascading: chọn **Thương hiệu đối tác** trước (Brand), sau đó danh sách **Chi nhánh cơ sở** (Partner) tự động lọc theo đúng thương hiệu đã chọn. Bắt buộc chọn cả Brand và Chi nhánh để gửi kèm payload đăng ký. Nhập mã OTP 6 số gửi qua email.
-- **Phê duyệt tài khoản:** Danh sách chờ duyệt tài khoản. Quản lý đối tác (`PARTNER_MANAGER` / `RESTAURANT_MANAGER`) chỉ xem và duyệt nhân viên đối tác thuộc chi nhánh mình (`partnerId`); Quản lý (`MANAGER`, `WAREHOUSE_MANAGER`) và Admin xưởng duyệt nhân sự nội bộ (`WORKER`, `SHIPPER`). Vai trò Kế toán (`ACCOUNTANT`) bị tước bỏ hoàn toàn quyền truy cập chức năng này.
+#### FE-INT-FR-01: Xác Thực, Quản Trị Nhân Sự & Profile Header (`features/auth`, `features/management/auth`, `components/layout/AppHeader`)
+- **Đăng nhập & Tài khoản mẫu:** Xác thực Email/Mật khẩu với Backend NestJS. Lưới tài khoản mẫu gồm 8 nút (Admin, Quản lý xưởng, Quản lý kho, Kế toán trưởng, Tài xế, Thợ xưởng, QL Đối Tác, NV Đối Tác) với mật khẩu mặc định `ThanhXuan@2026`, hỗ trợ đăng nhập tức thì.
+- **Đăng ký tài khoản công khai (`/register`, `RegisterModal`):** Chỉ cho phép đăng ký 3 vai trò thực thi: **NV Xưởng** (`WORKER`), **NV Giao Hàng** (`SHIPPER`) và **Nhân Viên Đối Tác** (`PARTNER_STAFF`). Bỏ hoàn toàn vai trò Quản lý đối tác khỏi trang đăng ký công khai. Khi chọn Nhân viên đối tác, cascade chọn Thương hiệu (Brand) trước rồi lọc Chi nhánh (Partner).
+- **Header Profile, Avatar & Dropdown Menu:**
+  - Góc phải Header hiển thị Avatar tròn (ảnh Cloudinary hoặc ký tự viết tắt), Họ tên và Huy hiệu vai trò.
+  - Dropdown Popover gồm 3 chức năng:
+    * 👤 **Thông tin cá nhân:** Mở `ProfileEditModal` cho phép sửa họ tên, SĐT và chọn ảnh trực tiếp từ máy tính để upload lên Cloudinary. Cập nhật tức thì avatar trên Header.
+    * 🔑 **Đổi mật khẩu:** Mở `ChangePasswordModal` nhập mật khẩu cũ, mật khẩu mới, xác nhận mật khẩu mới.
+    * 🚪 **Đăng xuất:** Gọi `logout()` và xóa toàn bộ session storage.
+- **Quản lý nhân sự toàn diện (`StaffManagementView`):**
+  - **Tabs phân loại tài khoản:** 6 nhóm: *Tất Cả*, *Ban Quản Trị & Kế Toán*, *Vận Hành Xưởng & Kho*, *Giao Nhận*, *Khối Đối Tác B2B*, *Tài Khoản Tạm Khóa*.
+  - **Thêm nhân sự:** Modal tạo mới tài khoản cho `ADMIN` và `MANAGER`, hỗ trợ tạo cả tài khoản Quản lý đối tác (`PARTNER_MANAGER`) kèm chọn Brand và Chi nhánh. Mật khẩu khởi tạo: `ThanhXuan@2026`.
+  - **Chỉnh sửa nhân sự:** Cập nhật họ tên, SĐT, vai trò, thương hiệu và chi nhánh.
+  - **Tạm khóa tài khoản & Cơ chế 60 ngày:** Chuyển trạng thái sang `LOCKED`, ghi nhận thời điểm `lockedAt`, hiển thị số ngày còn lại (ví dụ: *Còn 59 ngày trước khi xóa vĩnh viễn*). Backend tự động xóa các tài khoản đã khóa quá 60 ngày. Hỗ trợ Mở khóa (`ACTIVE`).
+  - **Xóa tài khoản vĩnh viễn:** **Chỉ hiển thị và cho phép thực hiện đối với vai trò `ADMIN`**. Quản lý xưởng (`MANAGER`) không có nút xóa.
+- **Phê duyệt tài khoản (`approval_requests`):** Quản lý đối tác (`PARTNER_MANAGER`) duyệt nhân viên đối tác thuộc cơ sở mình; Quản lý xưởng và Admin duyệt nhân sự nội bộ (`WORKER`, `SHIPPER`). Kế toán bị tước bỏ hoàn toàn quyền duyệt nhân sự.
 - **Quên mật khẩu & Đặt lại mật khẩu:** Quy trình khôi phục mật khẩu 2 bước thông qua OTP email.
 
 #### FE-INT-FR-02: Phân Hệ Phiếu Giao Nhận Kép (`features/operations/handovers`)

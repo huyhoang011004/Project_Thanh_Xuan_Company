@@ -4,6 +4,37 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
 
 ## 2026-10-08
 
+### Plan 18 - Quản Lý Nhân Sự Toàn Diện (Khóa 60 Ngày Tự Xóa, Xóa Vĩnh Viễn Admin, Phân Tab), Tinh Gọn Đăng Ký, Seed Tài Khoản Test & Header Profile Popover (`be-nestjs-thanhxuan`, `fe-react-thanhxuan-internal`)
+- **Tinh gọn Trang Đăng Ký (`/register` & `RegisterModal`):**
+  - Loại bỏ hoàn toàn tùy chọn vai trò "Quản Lý Đối Tác" (`PARTNER_MANAGER`) khỏi form đăng ký công khai.
+  - Trang đăng ký công khai chỉ cho phép 3 vai trò thực thi: "NV Xưởng" (`WORKER`), "NV Giao Hàng" (`SHIPPER`), "Nhân Viên Đối Tác" (`PARTNER_STAFF` - chọn cascade Brand ➔ Chi nhánh cơ sở).
+  - Backend bảo vệ: Chặn đăng ký vai trò `PARTNER_MANAGER` / `RESTAURANT_MANAGER` tại `register()` endpoint công khai; vai trò Quản lý đối tác bắt buộc do Admin/Manager khởi tạo trong Cổng Quản lý nhân sự.
+- **Tự động Seed 8 Tài Khoản Mẫu & Đồng Bộ Mật Khẩu Test (`LoginPage.tsx` & Backend):**
+  - Backend tự động seed/khôi phục khi khởi động (`OnModuleInit`) 8 tài khoản mẫu chuẩn: `admin`, `manager`, `warehouse_manager`, `accountant`, `shipper`, `worker`, `partner_manager`, `partner_staff` với mật khẩu chung `ThanhXuan@2026`.
+  - Frontend `LoginPage.tsx`: Cập nhật lưới tài khoản mẫu 8 vai trò phân loại trực quan, hỗ trợ đăng nhập 1-click phục vụ kiểm thử nhanh.
+- **Màn Hình Quản Lý Nhân Sự (`StaffManagementView.tsx` - `/management/manager/personnel`):**
+  - **Phân loại Tab vai trò:** 6 tab danh mục (Tất cả, Quản trị, Vận hành, Giao hàng, Đối tác, Tạm khóa) kèm huy hiệu đếm số lượng tài khoản theo thời gian thực.
+  - **Modal Thêm Tài Khoản:** Hỗ trợ Admin/Manager khởi tạo mọi vai trò (bao gồm `PARTNER_MANAGER` và `PARTNER_STAFF` kèm cụm cascade Brand ➔ Chi nhánh).
+  - **Modal Chỉnh Sửa Tài Khoản:** Cập nhật thông tin họ tên, số điện thoại, vai trò, thương hiệu và chi nhánh đối tác.
+  - **Cơ chế Tạm Khóa & Tự Động Xóa Sau 60 Ngày:**
+    - Schema lưu `lockedAt: Date` khi tài khoản bị khóa.
+    - Giao diện hiển thị cảnh báo thời hạn và số ngày đếm ngược còn lại trước khi bị xóa vĩnh viễn (quy tắc: khóa đủ 60 ngày tự xóa).
+    - Backend: Scheduler/Cleanup logic tự động xóa vĩnh viễn tài khoản bị khóa quá 60 ngày (`deleteExpiredLockedAccounts`).
+  - **Xóa Vĩnh Viễn Tài Khoản (Đặc Quyền Riêng Admin):**
+    - Backend: Endpoint `DELETE /accounts/:id` yêu cầu quyền `ACCOUNT_ADMIN`, cấm tự xóa chính mình và cấm non-admin xóa.
+    - Frontend: Nút "Xóa vĩnh viễn" (kèm hộp thoại xác nhận) chỉ hiển thị cho tài khoản có vai trò `ADMIN`.
+- **Header Profile Popover & Quản Lý Hồ Sơ Cá Nhân (`AppHeader.tsx` & Backend):**
+  - Góc trên bên phải Header hiển thị Avatar tròn, Tên người dùng và Huy hiệu phân quyền; click mở Popover Dropdown menu chuyên nghiệp.
+  - **Popup Xem/Sửa Thông Tin Cá Nhân (`ProfileEditModal.tsx`):**
+    - Cho phép cập nhật Họ và tên, Số điện thoại (`PATCH /accounts/me/profile`).
+    - Hỗ trợ tải ảnh Avatar trực tiếp từ máy tính lên Cloudinary qua Backend endpoint `POST /accounts/me/avatar` (lưu trữ tại thư mục `internal/avatars`, tự động dọn dẹp ảnh cũ).
+  - **Popup Đổi Mật Khẩu (`ChangePasswordModal.tsx`):**
+    - Form 3 trường chuẩn xác: Mật khẩu hiện tại, Mật khẩu mới, Xác nhận mật khẩu mới (`POST /auth/change-password`).
+  - Nút **Đăng xuất** an toàn với 1 chạm.
+- **Kiểm thử & Xác minh chất lượng (Verification):**
+  - Backend: `pnpm build` (`nest build`) trong `be-nestjs-thanhxuan` pass 100%.
+  - Frontend: `pnpm exec tsc -b` & `pnpm build` (`vite build`) trong `fe-react-thanhxuan-internal` pass 100%.
+
 ### Plan 17 - Chuẩn Hóa Vai Trò Đối Tác (PARTNER_MANAGER, PARTNER_STAFF), Đăng Ký Cascade Brand-Partner & Cô Lập Dữ Liệu Theo Chi Nhánh (`be-nestjs-thanhxuan`, `fe-react-thanhxuan-internal`)
 - **Đồng nhất 100% vai trò Đối tác B2B (Partner Role Standardization):**
   - Backend:

@@ -20,11 +20,22 @@ Backend API tập trung phục vụ toàn bộ các kênh tương tác của Cô
 
 ### 1.2. Danh Sách Tính Năng Theo Sub-Modules (Functional Requirements)
 
-#### BE-FR-01: Quản Trị Tài Khoản, Xác Thực & RBAC v2 (`/api/v1/internal/auth`)
-- **Đăng ký tài khoản:** Nhân viên xưởng (`WORKER`, `SHIPPER`), nhân viên đối tác (`PARTNER_STAFF`) và quản lý đối tác (`PARTNER_MANAGER`). Hỗ trợ alias tương thích ngược `RESTAURANT_STAFF`, `RESTAURANT_MANAGER`. Với vai trò đối tác, bắt buộc gửi cả `brand` và `partnerId`. Sinh mã OTP 6 chữ số gửi qua email SMTP/Resend, cooldown 60s, giới hạn 5 lần/giờ (`OtpCodeRepository`).
-- **Xác thực OTP & Trạng thái tài khoản:** Sau khi xác thực OTP, tài khoản chuyển sang `PENDING_APPROVAL`.
+#### BE-FR-01: Quản Trị Tài Khoản, Xác Thực & RBAC v2 (`/api/v1/internal/auth`, `/api/v1/internal/accounts`)
+- **Đăng ký tài khoản công khai:** Chỉ cho phép đăng ký 3 vai trò thực thi: Nhân viên xưởng (`WORKER`), Tài xế giao nhận (`SHIPPER`) và Nhân viên đối tác (`PARTNER_STAFF`). Bắt buộc chặn tự đăng ký Quản lý đối tác (`PARTNER_MANAGER` / `RESTAURANT_MANAGER`) và các vai trò quản lý khác từ cổng công khai.
+- **Khởi tạo Quản lý Đối tác:** Tài khoản `PARTNER_MANAGER` chỉ được khởi tạo bởi `ADMIN` hoặc `MANAGER` trong phân hệ Quản lý nhân sự kèm ràng buộc chọn `brand` và `partnerId`.
+- **Quản lý nhân sự & Tạm khóa 60 ngày:**
+  - Hỗ trợ thêm/sửa nhân sự, tạm khóa (`LOCKED`) và mở khóa (`ACTIVE`).
+  - Ghi nhận `lockedAt` khi tạm khóa. Cơ chế dọn dẹp tự động (`cleanupExpiredLockedAccounts`): Tự động xóa vĩnh viễn các tài khoản có `status === 'LOCKED'` đã quá 60 ngày.
+  - Xóa tài khoản vĩnh viễn (`DELETE /accounts/:id`): Chỉ dành riêng cho vai trò `ADMIN` (MANAGER không có quyền xóa).
+- **Hồ sơ cá nhân & Upload Avatar Cloudinary:**
+  - Cập nhật thông tin cá nhân (`PATCH /accounts/me/profile`).
+  - Upload avatar (`POST /accounts/me/avatar`) lưu trữ Cloudinary thư mục `internal/avatars`, tự động xóa avatar cũ khi thay mới.
+  - Endpoint `GET /auth/me` trả về `avatarUrl` và `lockedAt`.
+- **Tự động Seed 8 tài khoản mẫu (`onModuleInit`):**
+  - Khởi tạo sẵn các tài khoản: `admin`, `manager`, `warehouse_manager`, `accountant`, `shipper`, `worker`, `partner_manager`, `partner_staff` với mật khẩu chung `ThanhXuan@2026`.
+- **Xác thực OTP & Trạng thái tài khoản:** Sinh mã OTP 6 chữ số gửi qua email SMTP/Resend, cooldown 60s, giới hạn 5 lần/giờ (`OtpCodeRepository`). Sau khi xác thực OTP, tài khoản chuyển sang `PENDING_APPROVAL`.
 - **Phê duyệt tài khoản (`approval_requests`):**
-  - Quản lý đối tác (`PARTNER_MANAGER` / `RESTAURANT_MANAGER`): Phê duyệt nhân viên thuộc đúng chi nhánh đối tác của mình (`partnerId`).
+  - Quản lý đối tác (`PARTNER_MANAGER`): Phê duyệt nhân viên thuộc đúng chi nhánh đối tác của mình (`partnerId`).
   - Quản trị viên/Quản lý (`ADMIN`, `MANAGER`, `WAREHOUSE_MANAGER`): Phê duyệt nhân sự xưởng nội bộ.
 - **Đăng nhập & Quản lý phiên:**
   - Cấp cặp Access Token (JWT 15 phút, bắt buộc `aud: 'internal'`, chứa `partnerId` và `brand`) và Refresh Token (7 ngày).
