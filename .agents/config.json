@@ -17,6 +17,7 @@
       "SOLID",
       "Layered Architecture (Controller -> Service -> Repository -> Model)",
       "Repository Pattern (BaseRepository)",
+      "Strategy Pattern",
       "Multi-Database (3 Mongoose Connections)",
       "Feature-based Colocation",
       "Docker Containerization"

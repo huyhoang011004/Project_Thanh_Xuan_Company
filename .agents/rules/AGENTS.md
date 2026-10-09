@@ -96,3 +96,40 @@ Một thay đổi coi là xong khi:
 - **Build Docker Image chỉ thực hiện trên GitHub Actions.** Tuyệt đối không chạy `docker-compose build` trực tiếp trên VPS để tránh tràn tài nguyên.
 - **Quy trình deploy:** GitHub Actions build image -> Push GHCR -> SSH vào VPS pull image và `docker compose up -d`.
 - **Biến môi trường:** Biến client (`NEXT_PUBLIC_*`, `VITE_*`) truyền qua GitHub Secrets dạng Build Arguments khi build image; biến bí mật Backend nằm trong file `.env` trên VPS.
+
+## 7. Bảng Nhận Diện Ý Định Tiếng Việt Tự Nhiên (Intent Classifier)
+
+Agent chủ động thấu hiểu khẩu ngữ và cách diễn đạt tự nhiên của lập trình viên bằng tiếng Việt để kích hoạt đúng bộ kỹ năng chuyên biệt:
+
+| Khẩu ngữ / Yêu cầu tiếng Việt | Bộ kỹ năng (Skill) kích hoạt | Trọng tâm thực thi |
+| :--- | :--- | :--- |
+| *"trau chuốt UI / audit UI / làm lại giao diện đỉnh cao / cân chỉnh lề-chữ"* | `impeccable` | Audit spacing, typography hierarchy, micro-interactions, accessibility. |
+| *"chống phèn / nâng tầm thẩm mỹ / landing page có gu / bỏ kiểu AI generic"* | `design-taste-frontend` | Bỏ gradient tím/xanh nhạt nhẽo, áp dụng ngôn ngữ thiết kế độc bản, sang trọng. |
+| *"chọn bảng màu / phối màu / phong cách UI / theme chuẩn"* | `ui-ux-pro-max` | Gợi ý bảng màu HSL, typography tokens, hơn 50+ phong cách UI chuẩn chỉ. |
+| *"viết code đầy đủ / không viết tắt / cấm TODO / code chạy luôn"* | `full-output-enforcement` | Xuất code trọn vẹn 100%, không bỏ lửng, không placeholder. |
+| *"tìm nguyên nhân gốc / tại sao bị lỗi này / truy vết bug"* | `systematic-debugging` | Điều tra nguyên nhân gốc rễ (root cause) bằng chứng cớ, không đoán mò. |
+| *"tạo module backend / thêm bảng DB / viết API NestJS"* | `create-nestjs-module` | Chuẩn Repository Pattern, Multi-Database, Class DTO, strict validation. |
+| *"làm trang web mới / thêm tính năng CMS / form liên hệ"* | `create-nextjs-feature` | Server Components SEO, Feature-based colocation, shadcn + Zod. |
+| *"làm màn hình vận hành / phiếu giao nhận / chấm công xưởng"* | `create-react-feature` | Mobile-first, Vite SPA, TanStack Query, offline queue, ký số Canvas. |
+
+## 8. Kỷ luật hoàn thiện mã nguồn (Senior Engineering & Anti-AI Slop)
+
+1. **Anti-AI Slop & Full Output (Tuyệt đối không bỏ dở code):**
+   - Nghiêm cấm các đoạn mã viết tắt: `// TODO: tự code tiếp`, `// ... rest of code`, `/* các hàm khác giữ nguyên */`, `// implement later`.
+   - Mọi đoạn code xuất ra phải hoàn chỉnh, có thể chạy và tích hợp vào hệ thống ngay lập tức.
+2. **Root-Cause First:**
+   - Trước khi sửa bất kỳ bug nào: tìm chính xác nguyên nhân gốc (đọc log, kiểm tra trace, phân tích điều kiện biên), tuyệt đối không che giấu lỗi bằng `try/catch` rỗng hay ép kiểu `any`.
+3. **KISS & YAGNI:**
+   - Không tạo abstraction thừa thãi. Giải pháp tốt nhất là giải pháp ít dòng code nhất mà vẫn thỏa mãn 100% ràng buộc nghiệp vụ và kiến trúc của dự án.
+
+## 9. Giám Sát Ngữ Cảnh & Chống Ảo Giác (Context Health & /compact)
+
+- **Nguyên tắc:** Khi một phiên trao đổi kéo dài nhiều lượt hoặc chứa quá nhiều file log, ngữ cảnh tích lũy lớn sẽ làm tăng nguy cơ mô hình bị phân tán chú ý hoặc ảo giác.
+- **Dòng thông báo trạng thái ngữ cảnh (Context Monitor):** Ở cuối mỗi câu trả lời kỹ thuật hoặc kết thúc mỗi task/turn, Agent chủ động đính kèm 1 dòng thông tin ước lượng:
+  > 🧭 *[Context Health: ~Xk tokens | Trạng thái: An toàn / Cần lưu ý / Quá tải | Gõ `/compact` khi cần cô đọng]*
+- **Mức cảnh báo:**
+  - *Dưới 50k tokens:* **An toàn (Xanh)** — Làm việc bình thường.
+  - *50k - 100k tokens:* **Cần lưu ý (Vàng)** — Nên hoàn thành nốt công việc hiện tại rồi gõ `/compact` trước khi chuyển sang tính năng mới.
+  - *Trên 100k tokens:* **Quá tải (Đỏ)** — Khuyến nghị gõ ngay `/compact` hoặc bắt đầu phiên mới để đảm bảo độ chính xác 100%.
+
+
