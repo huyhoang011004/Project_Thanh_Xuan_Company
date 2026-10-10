@@ -2,9 +2,9 @@
 
 ## HỆ SINH THÁI CÔNG NGHỆ CÔNG TY THANH XUÂN (THANH XUAN COMPANY)
 
-> **Phiên bản:** 3.0  
-> **Kiến trúc:** Modular Living Architecture Specification (Tài liệu tổng quan + 3 phân hệ chi tiết)  
-> **Synced:** 2026-10-05 | **Môi trường:** Monorepo đa ứng dụng (NestJS, Next.js, React Vite)  
+> **Phiên bản:** 3.0
+> **Kiến trúc:** Modular Living Architecture Specification (Tài liệu tổng quan + 3 phân hệ chi tiết)
+> **Synced:** 2026-10-05 | **Môi trường:** Monorepo đa ứng dụng (NestJS, Next.js, React Vite)
 > **Quy chuẩn kỹ thuật:** SOLID, Repository Pattern, Multi-Database Isolation, Clean Architecture, PWA Standards, Mobile-First
 
 ---
@@ -12,6 +12,7 @@
 ## 1. BỐI CẢNH & TỔNG QUAN HỆ THỐNG (SYSTEM CONTEXT)
 
 ### 1.1. Bối Cảnh Hệ Sinh Thái Doanh Nghiệp
+
 Công ty Thanh Xuân vận hành một hệ sinh thái dịch vụ đa ngành, kết hợp chặt chẽ giữa dịch vụ tiếp thị khách hàng và điều hành chuỗi cung ứng sản xuất thực tế:
 
 1. **Dịch vụ Giặt Sấy Chuyên Nghiệp & Tiếp Thị B2B (`thanhxuanlaundry.com`)**:
@@ -31,11 +32,13 @@ Công ty Thanh Xuân vận hành một hệ sinh thái dịch vụ đa ngành, k
 
 Hệ thống tài liệu kỹ thuật được module hóa thành 3 phân hệ chuyên sâu, tương ứng với 3 ứng dụng trong Monorepo:
 
-| STT | Phân Hệ | Ứng Dụng | Đường Dẫn Tài Liệu Chi Tiết | Trọng Tâm Đặc Tả |
-| :---: | :--- | :--- | :--- | :--- |
-| **01** | **Backend API Tập Trung** | `be-nestjs-thanhxuan/` | [srs_sdd_backend.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_backend.md) | Kiến trúc 3 MongoDB độc lập, Repository Pattern, toàn bộ bảng API Contracts, DTO Validation, State Machine, RBAC Guards, Cron Jobs, Streaming Reports. |
-| **02** | **Web Khách Hàng & CMS** | `fe-nextjs-thanhxuan-laundry/` | [srs_sdd_fe_nextjs.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_nextjs.md) | Next.js App Router, Server Components SEO (RSC), Metadata động, Lead Capture CTA, CMS Quản trị bài viết, chiến dịch Zalo OA/Email. |
-| **03** | **Cổng Vận Hành Xưởng & Đối Tác** | `fe-react-thanhxuan-internal/` | [srs_sdd_fe_internal.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_internal.md) | React Router v7, Centralized Routes (`van-hanh/` & `quan-ly/`), Mobile-First PWA, Canvas Signature, Offline Queue IndexedDB, phân quyền giao diện 8 vai trò RBAC. |
+|  STT   | Phân Hệ                               | Ứng Dụng                       | Đường Dẫn Tài Liệu Chi Tiết                                                                                         | Trọng Tâm Đặc Tả                                                                                                                                                  |
+| :----: | :------------------------------------ | :----------------------------- | :------------------------------------------------------------------------------------------------------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **01** | **Backend API Tập Trung**             | `be-nestjs-thanhxuan/`         | [srs_sdd_backend.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_backend.md)         | Kiến trúc 3 MongoDB độc lập, Repository Pattern, toàn bộ bảng API Contracts, DTO Validation, State Machine, RBAC Guards, Cron Jobs, Streaming Reports.            |
+| **02** | **Web Khách Hàng & CMS**              | `fe-nextjs-thanhxuan-laundry/` | [srs_sdd_fe_nextjs.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_nextjs.md)     | Next.js App Router, Server Components SEO (RSC), Metadata động, Lead Capture CTA, CMS Quản trị bài viết, chiến dịch Zalo OA/Email.                                |
+| **03** | **Cổng Vận Hành Xưởng & Đối Tác**     | `fe-react-thanhxuan-internal/` | [srs_sdd_fe_internal.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_internal.md) | React Router v7, Centralized Routes (`van-hanh/` & `quan-ly/`), Mobile-First PWA, Canvas Signature, Offline Queue IndexedDB, phân quyền giao diện 8 vai trò RBAC. |
+| **04** | **Từ Điển Dữ Liệu (Data Dictionary)** | `be-nestjs-thanhxuan/`         | [DATABASE_DICTIONARY.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/DATABASE_DICTIONARY.md)         | Từ điển 34+ collections thuộc 3 MongoDB độc lập, chi tiết từng thuộc tính, kiểu dữ liệu, index, quan hệ và ý nghĩa nghiệp vụ.                                     |
+| **05** | **Bản Đồ Mã Nguồn (Codebase Atlas)**  | Monorepo (3 apps)              | [CODEBASE_ATLAS.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/CODEBASE_ATLAS.md)                   | Chỉ mục truy xuất tức thì: Endpoint ↔ Controller ↔ Service ↔ Repository ↔ Schema và Route ↔ Page ↔ Modal ↔ Hooks ↔ Service.                                       |
 
 ---
 
@@ -53,30 +56,34 @@ graph TD
 
     subgraph API_Gateway ["Lớp Backend API (NestJS - Port 5001)"]
         RouterModule["RouterModule Register (/api/v1)"]
-        
+
         Mod_Laundry["Module Giặt Là (Default)<br/>/articles, /orders, /contacts"]
         Mod_Moving["Module Chuyển Nhà (/moving)<br/>/quotes, /services, /articles"]
         Mod_Internal["Module Vận Hành Nội Bộ (/internal)<br/>/auth, /partners, /handover, /piecework,<br/>/attendance, /fuel, /payroll, /reports"]
-        
+        Mod_Core["Module Core Hạ Tầng Chia Sẻ<br/>/audit, /media, /notifications, idempotency"]
+
         RouterModule --> Mod_Laundry
         RouterModule --> Mod_Moving
         RouterModule --> Mod_Internal
+        RouterModule --> Mod_Core
     end
 
     subgraph Data_Layer ["Lớp Dữ Liệu Độc Lập (Multi-Database Isolation)"]
-        DB_Laundry[("MongoDB: laundry_express<br/>(Articles, Orders, Contacts, CRM)")]
-        DB_Moving[("MongoDB: moving_express<br/>(Moving Quotes, Moving Services)")]
-        DB_Internal[("MongoDB: internal_express<br/>(Accounts, Handover, Attendance, Payroll...)")]
+        DB_Laundry[("MongoDB: laundry_express<br/>Articles, Orders, Contacts, CRM")]
+        DB_Moving[("MongoDB: moving_express<br/>Moving Quotes, Moving Services")]
+        DB_Internal[("MongoDB: internal_express<br/>Accounts, Handover, Attendance, Payroll...")]
+        DB_Core[("MongoDB: core_express<br/>AuditLog, MediaFile, Idempotency, Notifications")]
     end
 
     WebPublic -->|Public API| Mod_Laundry
     CMSAdmin -->|Admin JWT| Mod_Laundry
     WebPublic -->|Public Quotes| Mod_Moving
-    InternalPWA -->|Internal JWT (aud: internal)| Mod_Internal
+    InternalPWA -->|"Internal JWT (aud: internal)"| Mod_Internal
 
     Mod_Laundry --> DB_Laundry
     Mod_Moving --> DB_Moving
     Mod_Internal --> DB_Internal
+    Mod_Core --> DB_Core
 ```
 
 ---
@@ -147,8 +154,10 @@ Website_Thanh_Xuan_Company/
 
 > 📌 **Chi tiết toàn bộ nhật ký các Plan và Bugfix:** Xem đầy đủ tại [CHANGELOG.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/CHANGELOG.md).
 
+- **2026-10-10 - Plan 22 - Tách Database core_express (CORE_CONNECTION) & Migration Dữ Liệu An Toàn:** Tách 4 bảng dùng chung (`audit_logs`, `media_files`, `idempotency_keys`, `notifications`) từ `internal_express` sang cơ sở dữ liệu độc lập `core_express`; cấu hình Mongoose connection thứ 4 `CORE_CONNECTION`; di chuyển toàn bộ dữ liệu kèm indexes sang `core_express` và drop sạch 4 bảng cũ bên `internal_express`; cập nhật tài liệu [DATABASE_DICTIONARY.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/DATABASE_DICTIONARY.md) và topology 4 DBs.
+- **2026-10-10 - Harness Engineering Baseline & Data Dictionary:** Sửa lỗi render Mermaid diagram; khởi tạo hoàn chỉnh Từ điển dữ liệu toàn hệ thống [DATABASE_DICTIONARY.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/DATABASE_DICTIONARY.md) cho 34 Mongoose collections; khởi tạo Bản đồ định vị mã nguồn [CODEBASE_ATLAS.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/CODEBASE_ATLAS.md) cho 3 apps; bổ sung quy định bắt buộc cập nhật Dictionary & Atlas vào Definition of Done trong [AGENTS.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/rules/AGENTS.md).
 - **2026-10-10 - Plan 21 - Cải Tiến Giao Diện Đối Tác B2B, Form Đếm Đồ Bẩn Thông Minh, Kiểm Nhận Canvas 2 Chiều, Lịch Sử Phân Trang & Khắc Phục Lỗi 403 / Loop Re-render:** Tái cấu trúc cổng đối tác chuẩn `@/components/common`, chuyển menu điều hướng 4 tab xuống Mobile BottomBar; nâng cấp form Đếm đồ bẩn thông minh (Smart Math Parser, auto-save on blur, khóa chi nhánh/ngày theo phiếu soạn); tích hợp phiếu giao nhận 2 chiều Canvas lùi/tiến ngày và ký kiểm nhận đồ sạch; lịch sử phân trang 12 phiếu/trang; sửa lỗi 403 Permissions và loop re-render ở PrepOrderModal ([srs_sdd_fe_internal.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_internal.md), [srs_sdd_backend.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_backend.md)).
-- **2026-10-10 - Refactor - Chuẩn Hóa Kiến Trúc File Features & Giới Hạn Dung Lượng (*Page.tsx, modals/*Modal.tsx, components/*Component.tsx):** Rà soát và bóc tách các file vượt kích thước (> 350-400 dòng), chia nhỏ thành các component con và modal độc lập; chuẩn hóa toàn diện quy tắc đặt tên file trong `src/features/` ([srs_sdd_fe_internal.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_internal.md)); cập nhật rules và skills đồng bộ.
+- **2026-10-10 - Refactor - Chuẩn Hóa Kiến Trúc File Features & Giới Hạn Dung Lượng (*Page.tsx, modals/*Modal.tsx, components/\*Component.tsx):** Rà soát và bóc tách các file vượt kích thước (> 350-400 dòng), chia nhỏ thành các component con và modal độc lập; chuẩn hóa toàn diện quy tắc đặt tên file trong `src/features/` ([srs_sdd_fe_internal.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_internal.md)); cập nhật rules và skills đồng bộ.
 - **2026-10-10 - Docs-sync:** Đồng bộ chi tiết phân hệ vận hành & quản lý đối tác ([srs_sdd_fe_internal.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_internal.md)): chuẩn hóa Canvas Phiếu in A4 (lề trên 50px, 4 dòng công ty căn trái cỡ to, tiêu đề bảng rõ nét), Clean Print tắt header/footer trình duyệt, sửa lỗi cuộn flexbox, tích hợp nút QR Zalo phân quyền Admin/Manager và thu nhỏ Action Bar.
-- **2026-10-10 - Plan 20 - Soạn Đồ Giao Hàng, Xuất Phiếu Giấy Zalo Chuẩn Khổ A4, Tự Động Định Kỳ & Sửa Lỗi Popup Đối Tác:** Bổ sung tính năng Soạn đồ tại kho với cơ chế tự động điền sẵn (prefill) đồ bẩn hôm trước, nhập 3 loại số lượng sạch (*Đã giao*, *Chưa giao*, *Giao trả*) + ghi chú từng dòng và Canvas ký điện tử; hoàn thiện modal & helper xuất ảnh Phiếu Xuất Nhập Kho Vận Chuyển A4 chuẩn mẫu thực tế Pizza 4P's gửi nhóm Zalo; thiết lập tự động lên đơn theo lịch định kỳ; sửa triệt để lỗi popup sửa đối tác.
+- **2026-10-10 - Plan 20 - Soạn Đồ Giao Hàng, Xuất Phiếu Giấy Zalo Chuẩn Khổ A4, Tự Động Định Kỳ & Sửa Lỗi Popup Đối Tác:** Bổ sung tính năng Soạn đồ tại kho với cơ chế tự động điền sẵn (prefill) đồ bẩn hôm trước, nhập 3 loại số lượng sạch (_Đã giao_, _Chưa giao_, _Giao trả_) + ghi chú từng dòng và Canvas ký điện tử; hoàn thiện modal & helper xuất ảnh Phiếu Xuất Nhập Kho Vận Chuyển A4 chuẩn mẫu thực tế Pizza 4P's gửi nhóm Zalo; thiết lập tự động lên đơn theo lịch định kỳ; sửa triệt để lỗi popup sửa đối tác.
 - **2026-10-10 - Plan 19 - Nâng Tầm Toàn Diện UI/UX Phân Hệ Nội Bộ (`fe-react-thanhxuan-internal`):** Chuẩn hóa typography Plus Jakarta Sans & JetBrains Mono tabular-nums; nâng cấp hệ thống CSS Tokens & shadows; bổ sung bộ UI components cốt lõi (StatCard KPI có trend, EmptyState sinh động, SkeletonLoader shimmer, Badge status dot logistics); tái cấu trúc Header kính mờ, Desktop Sidebar active indicator, Mobile Bottom Bar tactile pill và thiết kế lại Dashboard trung tâm điều hành xưởng.

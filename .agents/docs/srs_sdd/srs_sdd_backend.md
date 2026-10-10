@@ -139,7 +139,7 @@ be-nestjs-thanhxuan/src/
 
 ---
 
-### 2.2. Kiến Trúc Cô Lập 3 Cơ Sở Dữ Liệu MongoDB (Multi-Database)
+### 2.2. Kiến Trúc Cô Lập 4 Cơ Sở Dữ Liệu MongoDB (Multi-Database)
 
 ```mermaid
 graph TD
@@ -148,16 +148,19 @@ graph TD
     AppModule -->|Default Connection| DB_Laundry[(MongoDB: laundry_express)]
     AppModule -->|MOVING_CONNECTION| DB_Moving[(MongoDB: moving_express)]
     AppModule -->|INTERNAL_CONNECTION| DB_Internal[(MongoDB: internal_express)]
+    AppModule -->|CORE_CONNECTION| DB_Core[(MongoDB: core_express)]
     
     DB_Laundry --> Mod_Laundry[src/modules/laundry/*<br/>Articles, Categories, Orders, Contacts, CRM]
     DB_Moving --> Mod_Moving[src/modules/moving/*<br/>Quotes, Services, Articles]
     DB_Internal --> Mod_Internal[src/modules/internal/*<br/>Auth, Partners, Handovers, Attendance, Piecework, Fuel, Payroll, Reports]
+    DB_Core --> Mod_Core[src/modules/core/*<br/>Audit, Media, Idempotency, Notifications]
 ```
 
 - **Mongoose Multi-Database Isolation:**
   - `laundry_express` (Default Connection): Phục vụ các API truyền thống của web giặt sấy (`/articles`, `/orders`, `/contacts`...).
   - `moving_express` (`MOVING_CONNECTION`): Cô lập hoàn toàn dữ liệu dịch vụ chuyển nhà (`moving_quotes`, `moving_services`, `moving_articles`).
-  - `internal_express` (`INTERNAL_CONNECTION`): Toàn bộ dữ liệu nhạy cảm vận hành xưởng, đối tác nhà hàng, nhân sự và bảng lương.
+  - `internal_express` (`INTERNAL_CONNECTION`): Toàn bộ dữ liệu vận hành xưởng, đối tác nhà hàng, nhân sự và bảng lương.
+  - `core_express` (`CORE_CONNECTION`): Toàn bộ dữ liệu hạ tầng dùng chung toàn hệ thống (`audit_logs`, `media_files`, `idempotency_keys`, `notifications`).
 
 ---
 

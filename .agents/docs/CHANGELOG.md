@@ -4,6 +4,32 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
 
 ## 2026-10-10
 
+### Plan 22 - Tách Database `core_express` (CORE_CONNECTION), Migration Dữ Liệu An Toàn & Chuẩn Hóa Kiến Trúc 4 CSDL Độc Lập (`be-nestjs-thanhxuan`)
+- **Tách Lớp Hạ Tầng Core Khỏi Phân Hệ Vận Hành Xưởng:**
+  - Chuyển 4 collections chia sẻ toàn hệ thống gồm: `audit_logs` (Nhật ký kiểm toán bảo mật), `media_files` (Quản lý file ảnh Cloudinary), `idempotency_keys` (Khóa chống request trùng lặp) và `notifications` (Thông báo in-app) từ cơ sở dữ liệu `internal_express` sang một database riêng biệt hoàn toàn mang tên `core_express`.
+  - Khởi tạo hằng số kết nối chuẩn: [core.constants.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/core/core.constants.ts) định nghĩa `export const CORE_CONNECTION = 'CORE_CONNECTION'`.
+- **Nâng Cấp Cấu Hình & Đăng Ký Mongoose 4 Connections (`database.config.ts`, `app.module.ts`):**
+  - Cập nhật [database.config.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/config/database.config.ts): Bổ sung `coreUri` hỗ trợ biến môi trường `MONGODB_CORE_URI` kèm fallback tự động trỏ sang `.../core_express`.
+  - Cập nhật [app.module.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/app.module.ts): Đăng ký kết nối thứ 4 bằng `MongooseModule.forRootAsync` với `connectionName: CORE_CONNECTION`.
+- **Tái Cấu Trúc 4 Modules & Repositories Tương Ứng:**
+  - `AuditModule` & `AuditLogRepository`: Đổi connection từ `INTERNAL_CONNECTION` sang `CORE_CONNECTION`.
+  - `MediaModule` & `MediaFileRepository`: Đổi connection từ `INTERNAL_CONNECTION` sang `CORE_CONNECTION`.
+  - `IdempotencyModule` & `IdempotencyInterceptor`: Đổi connection từ `INTERNAL_CONNECTION` sang `CORE_CONNECTION`.
+  - `NotificationsModule` & `NotificationRepository`: Đổi connection từ `INTERNAL_CONNECTION` sang `CORE_CONNECTION`.
+- **Kịch Bản Di Chuyển Dữ Liệu An Toàn & Tự Động Hóa (`migrate-core-db.ts`):**
+  - Xây dựng script di chuyển dữ liệu độc lập [migrate-core-db.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/scripts/migrate-core-db.ts) tích hợp lệnh `pnpm run migrate:core-db`.
+  - Thực hiện copy toàn bộ bản ghi có sẵn từ `internal_express` sang `core_express` bằng cơ chế `bulkWrite` có `upsert: true` bảo toàn 100% `_id`, timestamps và kiểu dữ liệu.
+  - Đồng bộ toàn bộ indexes (bao gồm cả index TTL `expiresAt` của `idempotency_keys` và compound index của `audit_logs`).
+  - Kiểm chứng số lượng bản ghi giữa 2 database (Verified 100%).
+  - Chạy với cờ `--drop-source` để xóa sạch 4 collections cũ trên `internal_express` sau khi đã kiểm chứng an toàn.
+- **Đồng Bộ Hệ Thống Tài Liệu Kỹ Thuật (SRS/SDD & Data Dictionary):**
+  - Sửa lỗi cú pháp render sơ đồ Mermaid trong [DATABASE_DICTIONARY.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/DATABASE_DICTIONARY.md).
+  - Cập nhật [DATABASE_DICTIONARY.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/DATABASE_DICTIONARY.md): Chuyển Phân Vùng 4 sang `core_express` với `CORE_CONNECTION`.
+  - Cập nhật [SRS_SDD.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/SRS_SDD.md) & [srs_sdd_backend.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_backend.md): Đồng bộ topology hệ sinh thái từ 3 databases lên 4 databases độc lập.
+  - Cập nhật [CODEBASE_ATLAS.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/CODEBASE_ATLAS.md) và hoàn tất checklist [plan22.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/plans/plan22.md).
+- **Kiểm Thử & Biên Dịch:**
+  - `nest build` thành công rực rỡ, không phát sinh bất kỳ lỗi biên dịch nào.
+
 ### Plan 21 - Cải Tiến Giao Diện Đối Tác B2B, Form Đếm Đồ Bẩn Thông Minh, Kiểm Nhận Canvas 2 Chiều, Lịch Sử Phân Trang & Khắc Phục Lỗi 403 / Loop Re-render (`be-nestjs-thanhxuan`, `fe-react-thanhxuan-internal`)
 - **Quy Chuẩn Giao Diện Cổng Đối Tác Bằng `@/components/common` (`PartnerPortalPage.tsx`):**
   - Tầng 1: Sử dụng [PageBanner.tsx](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/components/common/PageBanner.tsx) hiển thị tiêu đề cổng đối tác, tên thương hiệu/chi nhánh và thông tin tài khoản đăng nhập.

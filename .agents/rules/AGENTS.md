@@ -35,9 +35,11 @@ Monorepo gồm 3 app, mỗi app chạy lệnh ở đúng thư mục của nó:
 - **`/fix`:** Lỗi nhỏ, rõ ràng, tối đa 3 file code, không đổi schema/API contract.
 - **`/docs-sync`:** Quét đồng bộ khi nghi ngờ tài liệu lệch code -> Cập nhật `.agents/docs/srs_sdd/srs_sdd_<app>.md` & `.agents/docs/SRS_SDD.md` & `CHANGELOG.md`.
 
-*Quy tắc cập nhật tài liệu Modular SRS/SDD:*
+*Quy tắc cập nhật tài liệu Modular SRS/SDD & Harness Data:*
 - `SRS_SDD.md`: Là Living Architecture Specification TỔNG QUAN (System Context, Topology, Master Index liên kết sang 3 file phân hệ, Document History giữ 3-5 dòng mới nhất của toàn hệ sinh thái).
 - `.agents/docs/srs_sdd/srs_sdd_<app>.md`: Đặc tả chi tiết từng phân hệ (`srs_sdd_backend.md`, `srs_sdd_fe_nextjs.md`, `srs_sdd_fe_internal.md`). Sửa app nào thì cập nhật file app đó.
+- `.agents/docs/DATABASE_DICTIONARY.md`: Từ điển dữ liệu toàn diện (3 databases, 34+ collections, chi tiết từng trường, kiểu dữ liệu, index, quan hệ và tác dụng nghiệp vụ).
+- `.agents/docs/CODEBASE_ATLAS.md`: Bản đồ định vị nhanh toàn bộ mã nguồn (Endpoint ↔ Controller ↔ Service ↔ Repository ↔ Schema và Route ↔ Page ↔ Component ↔ Hook) giúp Agent định vị file lập tức không cần grep dò tìm.
 - `CHANGELOG.md`: Lưu trữ toàn bộ bài luận nhật ký chi tiết theo từng Plan/Fix.
 
 ## 4. Định nghĩa hoàn thành (Definition of Done)
@@ -47,8 +49,10 @@ Một thay đổi coi là xong khi:
 2. Lint, typecheck và test pass cho **từng app bị ảnh hưởng**.
 3. Build pass cho từng app bị ảnh hưởng (`pnpm build`).
 4. Thay đổi API contract (DTO, response) ở Backend thì phía gọi (Web, Internal) đã được cập nhật đồng bộ.
-5. Tài liệu phân hệ tương ứng (`.agents/docs/srs_sdd/srs_sdd_<app>.md`) và `SRS_SDD.md` (nếu có đổi tổng thể) phản ánh đúng thay đổi, kèm 1 dòng Document History ở `SRS_SDD.md`.
-6. Code sạch sẽ, không còn log debug, mock data thừa hay TODO chưa giải quyết.
+5. **Cập nhật Database Dictionary:** Bất kỳ thay đổi nào liên quan đến Schema/Field/Index MongoDB Mongoose bắt buộc cập nhật đồng bộ tại `.agents/docs/DATABASE_DICTIONARY.md`.
+6. **Cập nhật Codebase Atlas:** Tạo mới module, endpoint, service, hoặc cấu trúc component chính phải cập nhật tại `.agents/docs/CODEBASE_ATLAS.md`.
+7. Tài liệu phân hệ tương ứng (`.agents/docs/srs_sdd/srs_sdd_<app>.md`) và `SRS_SDD.md` (nếu có đổi tổng thể) phản ánh đúng thay đổi, kèm 1 dòng Document History ở `SRS_SDD.md`.
+8. Code sạch sẽ, không còn log debug, mock data thừa hay TODO chưa giải quyết.
 
 ## 5. Quy tắc code bắt buộc
 

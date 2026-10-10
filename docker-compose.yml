@@ -33,7 +33,7 @@ services:
       - "${PORT_BACKEND:-5001}:5001"
     environment:
       - PORT=5001
-      - MONGODB_URI=${MONGODB_URI:-mongodb://mongodb:27017/laundry_express_thanh_xuan}
+      - MONGODB_LAUNDRY_URI=${MONGODB_LAUNDRY_URI:-mongodb://mongodb:27017/laundry_express_thanh_xuan}
       - MONGODB_MOVING_URI=${MONGODB_MOVING_URI:-mongodb://mongodb:27017/moving_express}
       - MONGODB_INTERNAL_URI=${MONGODB_INTERNAL_URI:-mongodb://mongodb:27017/internal_express}
       - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
@@ -129,4 +129,3 @@ volumes:
 networks:
   laundry_network:
     driver: bridge
-

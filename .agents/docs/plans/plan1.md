@@ -3,6 +3,7 @@
 ## 1. Overview & Affected Files
 
 ### Mục tiêu tổng quan
+
 1. **Nâng cấp Hệ thống thành Thanh Xuân Multi-Service Architecture**:
    - Đổi tên thư mục gốc workspace: `Website_Laundry_Express_Thanh_Xuan` -> `Website_Thanh_Xuan_Company`.
    - Chuẩn hóa tên thư mục Backend: `backend-nestjs` -> `be-nestjs-thanhxuan`.
@@ -26,24 +27,28 @@
 ### Danh sách Files & Thư Mục Bị Ảnh Hưởng
 
 #### A. Cấu Trúc Thư Mục Cấp Root & Hệ Thống
+
 - [RENAME] `Website_Laundry_Express_Thanh_Xuan` -> `Website_Thanh_Xuan_Company` (Thư mục gốc)
 - [RENAME] `backend-nestjs/` -> `be-nestjs-thanhxuan/`
 - [RENAME] `frontend-nextjs/` -> `fe-nextjs-thanhxuan-laundry/`
 - [NEW DIR] `fe-react-thanhxuan-internal/` (Khởi tạo dự án React/Vite + Tailwind CSS + Shadcn UI cho web nội bộ)
 - [MODIFY] `docker-compose.yml`: Cập nhật build context hoặc volume mapping trỏ theo tên thư mục mới, bổ sung service container cho `internal_frontend`.
-- [MODIFY] `.env.example` & `.env`: Cập nhật cổng port và URI cho 3 Database (`MONGODB_URI`, `MONGODB_MOVING_URI`, `MONGODB_INTERNAL_URI`) cùng port cho Frontend Nội bộ (`PORT_FE_INTERNAL=3001`).
+- [MODIFY] `.env.example` & `.env`: Cập nhật cổng port và URI cho 3 Database (`MONGODB_LAUNDRY_URI`, `MONGODB_MOVING_URI`, `MONGODB_INTERNAL_URI`) cùng port cho Frontend Nội bộ (`PORT_FE_INTERNAL=3001`).
 
 #### B. Backend Configuration & Connection (`be-nestjs-thanhxuan`)
+
 - [MODIFY] `src/config/database.config.ts`: Thêm `movingUri` và `internalUri`.
 - [MODIFY] `src/app.module.ts`: Cấu hình 3 Mongoose connections và liên kết các module `core`, `laundry`, `moving`, `internal`.
 
 #### C. Backend Modules Restructure (`be-nestjs-thanhxuan/src/modules`)
+
 - [MOVE] `src/modules/upload` -> `src/modules/core/upload`
 - [MOVE] `src/modules/ai` -> `src/modules/core/ai`
 - [MOVE] 12 folders giặt là -> `src/modules/laundry/`
 - [MODIFY] Cập nhật đường dẫn import tương đối giữa Core, Laundry và Common.
 
 #### D. Moving Module Tạo Mới (`be-nestjs-thanhxuan/src/modules/moving` - DB: `moving_express`)
+
 - [NEW] `src/modules/moving/moving.constants.ts` (`MOVING_CONNECTION`)
 - [NEW] `src/modules/moving/schemas/moving-quote.schema.ts`
 - [NEW] `src/modules/moving/schemas/moving-service.schema.ts`
@@ -53,6 +58,7 @@
 - [NEW] `src/modules/moving/moving.module.ts`
 
 #### E. Internal Module Tạo Mới (`be-nestjs-thanhxuan/src/modules/internal` - DB: `internal_express`)
+
 - [NEW] `src/modules/internal/internal.constants.ts` (`INTERNAL_CONNECTION`)
 - [NEW] `src/modules/internal/schemas/handover-record.schema.ts` (Biên bản giao nhận 2 chiều Pizza 4P's, Haidilao)
 - [NEW] `src/modules/internal/schemas/piecework-log.schema.ts` (Ghi nhận sản lượng thợ gấp khăn xám, tạp dề)
@@ -65,6 +71,7 @@
 - [NEW] `src/modules/internal/internal.module.ts`
 
 #### F. Frontend Nội Bộ Khởi Tạo (`fe-react-thanhxuan-internal`)
+
 - [NEW] Setup ứng dụng Frontend chuyên biệt cho vận hành xưởng:
   - Công nghệ: React 18+ (Vite) / Next.js, Tailwind CSS, Lucide Icons, Shadcn UI.
   - Mục tiêu màn hình:
@@ -115,58 +122,59 @@
 ### Đặc tả Interface & Cấu Hình
 
 #### 1. Config Database Contract (`database.config.ts`)
+
 ```typescript
 export interface DatabaseConfig {
-  uri: string;           // Default connection (laundry_express)
-  movingUri: string;     // Named connection: MOVING_CONNECTION (moving_express)
-  internalUri: string;   // Named connection: INTERNAL_CONNECTION (internal_express)
+  uri: string; // Default connection (laundry_express)
+  movingUri: string; // Named connection: MOVING_CONNECTION (moving_express)
+  internalUri: string; // Named connection: INTERNAL_CONNECTION (internal_express)
 }
 ```
 
 #### 2. Cấu Hình 3 Mongoose Connection Trong `AppModule`
+
 ```typescript
 // 1. KẾT NỐI MẶC ĐỊNH: laundry_express (Giữ nguyên không gán tên)
-MongooseModule.forRootAsync({
+(MongooseModule.forRootAsync({
   imports: [ConfigModule],
   useFactory: (configService: ConfigService) => ({
-    uri: configService.get<string>('database.uri'),
+    uri: configService.get<string>("database.uri"),
     maxPoolSize: 50,
     serverSelectionTimeoutMS: 5000,
   }),
   inject: [ConfigService],
 }),
-
-// 2. KẾT NỐI 2: moving_express
-MongooseModule.forRootAsync({
-  connectionName: 'MOVING_CONNECTION',
-  imports: [ConfigModule],
-  useFactory: (configService: ConfigService) => ({
-    uri: configService.get<string>('database.movingUri'),
-    maxPoolSize: 30,
-    serverSelectionTimeoutMS: 5000,
+  // 2. KẾT NỐI 2: moving_express
+  MongooseModule.forRootAsync({
+    connectionName: "MOVING_CONNECTION",
+    imports: [ConfigModule],
+    useFactory: (configService: ConfigService) => ({
+      uri: configService.get<string>("database.movingUri"),
+      maxPoolSize: 30,
+      serverSelectionTimeoutMS: 5000,
+    }),
+    inject: [ConfigService],
   }),
-  inject: [ConfigService],
-}),
-
-// 3. KẾT NỐI 3: internal_express
-MongooseModule.forRootAsync({
-  connectionName: 'INTERNAL_CONNECTION',
-  imports: [ConfigModule],
-  useFactory: (configService: ConfigService) => ({
-    uri: configService.get<string>('database.internalUri'),
-    maxPoolSize: 30,
-    serverSelectionTimeoutMS: 5000,
-  }),
-  inject: [ConfigService],
-})
+  // 3. KẾT NỐI 3: internal_express
+  MongooseModule.forRootAsync({
+    connectionName: "INTERNAL_CONNECTION",
+    imports: [ConfigModule],
+    useFactory: (configService: ConfigService) => ({
+      uri: configService.get<string>("database.internalUri"),
+      maxPoolSize: 30,
+      serverSelectionTimeoutMS: 5000,
+    }),
+    inject: [ConfigService],
+  }));
 ```
 
 #### 3. Repository Pattern Với Named Connection (Tuân thủ Rule 4.2)
+
 ```typescript
 @Injectable()
 export class HandoverRecordRepository extends BaseRepository<HandoverRecordDocument> {
   constructor(
-    @InjectModel(HandoverRecord.name, 'INTERNAL_CONNECTION')
+    @InjectModel(HandoverRecord.name, "INTERNAL_CONNECTION")
     recordModel: Model<HandoverRecordDocument>,
   ) {
     super(recordModel);
@@ -179,6 +187,7 @@ export class HandoverRecordRepository extends BaseRepository<HandoverRecordDocum
 ## 3. Implementation Tasks (Checklist)
 
 ### Giai Đoạn 1: Chuẩn Bị & Rename Thư Mục Hệ Thống
+
 - [x] Task 1.1: Tạm dừng các tiến trình `pnpm dev` đang chạy ở background terminal để giải phóng file locks trên Windows.
 - [x] Task 1.2: Đổi tên `backend-nestjs` -> `be-nestjs-thanhxuan`.
 - [x] Task 1.3: Đổi tên `frontend-nextjs` -> `fe-nextjs-thanhxuan-laundry`.
@@ -187,10 +196,12 @@ export class HandoverRecordRepository extends BaseRepository<HandoverRecordDocum
 - [x] Task 1.6: Chuẩn bị lệnh đổi tên thư mục gốc workspace `Website_Laundry_Express_Thanh_Xuan` -> `Website_Thanh_Xuan_Company`.
 
 ### Giai Đoạn 2: Cập Nhật Cấu Hình Biến Môi Trường
+
 - [x] Task 2.1: [`.env.example` & `.env`] - Bổ sung `MONGODB_MOVING_URI` và `MONGODB_INTERNAL_URI`, cấu hình `PORT_FE_INTERNAL=3001`.
 - [x] Task 2.2: [`be-nestjs-thanhxuan/src/config/database.config.ts`] - Đăng ký thêm `movingUri` và `internalUri` với fallback an toàn.
 
 ### Giai Đoạn 3: Tái Cấu Trúc Thư Mục `be-nestjs-thanhxuan/src/modules`
+
 - [x] Task 3.1: Tạo các thư mục cha: `src/modules/core`, `src/modules/laundry`, `src/modules/moving`, `src/modules/internal`.
 - [x] Task 3.2: Di chuyển `upload` và `ai` vào `src/modules/core/`.
 - [x] Task 3.3: Di chuyển 12 module cũ vào `src/modules/laundry/`.
@@ -198,11 +209,13 @@ export class HandoverRecordRepository extends BaseRepository<HandoverRecordDocum
 - [x] Task 3.5: Cập nhật các import trong `be-nestjs-thanhxuan/src/app.module.ts`.
 
 ### Giai Đoạn 4: Cấu Hình 3 Mongoose Connections Trong `app.module.ts`
+
 - [x] Task 4.1: Giữ nguyên Default Connection (không có `connectionName`) trỏ tới database giặt là.
 - [x] Task 4.2: Thêm `MongooseModule.forRootAsync` với `connectionName: 'MOVING_CONNECTION'`.
 - [x] Task 4.3: Thêm `MongooseModule.forRootAsync` với `connectionName: 'INTERNAL_CONNECTION'`.
 
 ### Giai Đoạn 5: Khởi Tạo Moving Module (`moving_express`)
+
 - [x] Task 5.1: Tạo `src/modules/moving/moving.constants.ts`.
 - [x] Task 5.2: Tạo Schemas: `moving-quote.schema.ts`, `moving-service.schema.ts`.
 - [x] Task 5.3: Đăng ký Schemas vào `MongooseModule.forFeature(..., MOVING_CONNECTION)`.
@@ -211,6 +224,7 @@ export class HandoverRecordRepository extends BaseRepository<HandoverRecordDocum
 - [x] Task 5.6: Đăng ký `MovingModule` vào `AppModule`.
 
 ### Giai Đoạn 6: Khởi Tạo Internal Module (`internal_express`)
+
 - [x] Task 6.1: Tạo `src/modules/internal/internal.constants.ts`.
 - [x] Task 6.2: Tạo Schemas: `handover-record.schema.ts`, `piecework-log.schema.ts`, `partner.schema.ts`.
 - [x] Task 6.3: Đăng ký Schemas vào `MongooseModule.forFeature(..., INTERNAL_CONNECTION)`.
@@ -219,20 +233,22 @@ export class HandoverRecordRepository extends BaseRepository<HandoverRecordDocum
 - [x] Task 6.6: Đăng ký `InternalModule` vào `AppModule`.
 
 ### Giai Đoạn 7: Khởi Tạo Frontend Nội Bộ (`fe-react-thanhxuan-internal`)
+
 - [x] Task 7.1: Cấu hình `package.json`, `vite.config.ts`, `tsconfig.json`, Tailwind CSS.
 - [x] Task 7.2: Thiết lập cấu trúc giao diện vận hành xưởng: Phiếu giao nhận kép, Sản lượng thợ, Chấm công, Đối tác.
 - [x] Task 7.3: Tạo cấu hình API Client kết nối tới backend port 5001.
 
 ### Giai Đoạn 8: Đổi Tên Thư Mục Gốc & Hoàn Tất Verification
+
 - [x] Task 8.1: Chạy build thành công toàn bộ Backend và cả 2 Frontend.
 - [x] Task 8.2: Đồng bộ tài liệu kỹ thuật SRS & SDD tại `docs/SRS_SDD.md`.
-
 
 ---
 
 ## 4. Verification & Testing
 
 ### Lệnh Kiểm Tra Hệ Thống
+
 ```bash
 # 1. Kiểm tra build Backend NestJS mới (be-nestjs-thanhxuan)
 cd be-nestjs-thanhxuan
@@ -249,6 +265,7 @@ pnpm run build
 ```
 
 ### Kịch Bản Kiểm Thử (Test Scenarios)
+
 1. **Kiểm tra Production Giặt Là (Default Connection)**:
    - Chạy `be-nestjs-thanhxuan` và gọi API `GET /api/articles`, `POST /api/contacts`.
    - Kết quả: Dữ liệu đọc/ghi chính xác vào database `laundry_express`, 100% không đổi.
@@ -264,11 +281,12 @@ pnpm run build
 ## 5. Risks & Rollback
 
 ### Rủi ro tiềm ẩn & Biện pháp phòng ngừa
+
 1. **File Locks trên Windows khi Rename Thư Mục**:
    - Hai tiến trình terminal `pnpm dev` đang chạy sẽ khóa thư mục `backend-nestjs` và `frontend-nextjs`.
-   - *Phòng ngừa*: Phải dừng (kill) cả 2 background task terminal trước khi thực hiện lệnh đổi tên.
+   - _Phòng ngừa_: Phải dừng (kill) cả 2 background task terminal trước khi thực hiện lệnh đổi tên.
 2. **Đổi tên Thư Mục Gốc Workspace**:
    - Đổi `Website_Laundry_Express_Thanh_Xuan` thành `Website_Thanh_Xuan_Company` sẽ làm thay đổi đường dẫn tuyệt đối của toàn bộ IDE và Antigravity workspace URI.
-   - *Phòng ngừa*: Ưu tiên rename các thư mục con bên trong trước (`be-nestjs-thanhxuan`, `fe-nextjs-thanhxuan-laundry`, `fe-react-thanhxuan-internal`). Khi đổi tên thư mục gốc, người dùng sẽ mở lại IDE tại thư mục mới.
+   - _Phòng ngừa_: Ưu tiên rename các thư mục con bên trong trước (`be-nestjs-thanhxuan`, `fe-nextjs-thanhxuan-laundry`, `fe-react-thanhxuan-internal`). Khi đổi tên thư mục gốc, người dùng sẽ mở lại IDE tại thư mục mới.
 3. **Quá tải tài nguyên khi chạy đồng thời 2 Frontend + 1 Backend + MongoDB**:
-   - *Phòng ngừa*: Cấu hình memory limits hợp lý trong `docker-compose.yml`.
+   - _Phòng ngừa_: Cấu hình memory limits hợp lý trong `docker-compose.yml`.
