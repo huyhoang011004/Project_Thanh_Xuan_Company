@@ -13,6 +13,11 @@ description:
 - Gọi API NestJS qua một API client tập trung (một file), không rải `fetch` khắp nơi.
 - Dùng `next/image`, `next/link`, `next/font`; dùng loading.tsx / error.tsx cho trạng thái loading và lỗi.
 - Logic dùng lại thì tách thành custom Hook; component nhỏ, một trách nhiệm.
+- **Quy chuẩn chia nhỏ file & đặt tên:**
+  - File lớn nhất / màn hình chính cấp cao nhất: `[Tên]Page.tsx`.
+  - Thư mục `modals/`: chứa các file `[Tên liên quan đến page]Modal.tsx`.
+  - Thư mục `components/`: chứa các file `[Tên]Component.tsx`.
+  - Giới hạn kích thước file: Chủ động chia nhỏ file khi phình to (> 250 - 300 dòng), không để file dồn đống hàng trăm nghìn dòng; tách các modal sang `modals/` và các sub-component sang `components/`.
 
 # shadcn/ui
 

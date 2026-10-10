@@ -100,10 +100,15 @@ Toàn bộ các nghiệp vụ tương ứng được đóng gói theo mô hình 
 
 ```
 src/features/<feature-name>/
-├── components/                       # Chứa toàn bộ UI components, modals, cards của feature
-│   ├── <FeatureName>Card.tsx
-│   ├── <FeatureName>Table.tsx
+├── <FeatureName>Page.tsx             # File lớn nhất / Màn hình view chính cấp cao nhất
+├── modals/                           # Thư mục chứa toàn bộ modals/dialogs liên quan đến feature/page
 │   ├── <FeatureName>Modal.tsx
+│   ├── <Action>Modal.tsx
+│   └── index.ts                      # Re-export modals
+├── components/                       # Chứa các sub-components (bảng, thẻ, bộ lọc, action bar, v.v...)
+│   ├── <FeatureName>CardComponent.tsx
+│   ├── <FeatureName>TableComponent.tsx
+│   ├── <FeatureName>FilterComponent.tsx
 │   └── index.ts                      # Re-export components
 ├── <feature-name>.service.ts         # API fetcher gọi Backend (Axios instance)
 ├── <feature-name>.types.ts           # Interfaces, types, filters
@@ -111,6 +116,12 @@ src/features/<feature-name>/
 ├── use<FeatureName>.ts               # Custom Hook TanStack Query v5 (state, query, mutation)
 └── index.ts                          # Barrel export duy nhất của Feature
 ```
+
+> ⚠️ **Quy chuẩn kích thước file & phân tách bắt buộc:**
+> - Tuyệt đối không để file gộp cồng kềnh quá 250 - 300 dòng.
+> - Bóc tách ngay các dialog/modal sang thư mục `modals/` với tên `[Tên]Modal.tsx`.
+> - Bóc tách các thành phần hiển thị con (card, table, form con, tabs, filter...) sang thư mục `components/` với tên `[Tên]Component.tsx`.
+> - File gốc lớn nhất luôn là `[Tên]Page.tsx` đóng vai trò điều phối layout, state và kết nối components.
 
 ### Danh sách các Features tương ứng trong `src/features/`:
 

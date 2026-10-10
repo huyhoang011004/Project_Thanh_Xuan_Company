@@ -90,6 +90,11 @@ Một thay đổi coi là xong khi:
 - Style bằng **TailwindCSS** và `cn()`; dùng CSS variables tokens, không hardcode màu. Icon dùng **Lucide**.
 - Form dùng **react-hook-form** + **zod** kết hợp `Form` của shadcn.
 - Text hiển thị tiếng Việt tự nhiên, chú trọng accessibility (label, focus, keyboard).
+- **Quy chuẩn cấu trúc & đặt tên file Frontend (Áp dụng cả Next.js và React Internal):**
+  - File lớn nhất / màn hình chính cấp cao nhất: `[Tên]Page.tsx`.
+  - Thư mục `modals/`: chứa các file `[Tên liên quan đến page]Modal.tsx`.
+  - Thư mục `components/`: chứa các file `[Tên]Component.tsx`.
+  - Kiểm tra và chia nhỏ file kịp thời khi kích thước vượt quá 250 - 300 dòng; bóc tách modal sang `modals/` và các thành phần con sang `components/`. Không dồn nhiều nghìn dòng trong một file.
 
 ## 6. Deployment & CI/CD
 

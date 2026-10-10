@@ -35,11 +35,14 @@ Skill này hướng dẫn quy chuẩn kỹ thuật và các bước thực thi �
 
 ```
 fe-nextjs-thanhxuan-laundry/src/features/<feature-name>/
-├── components/
-│   ├── <feature-name>-view.tsx          # Server Component hiển thị layout chính
-│   ├── <feature-name>-card.tsx          # Component thẻ hiển thị
-│   ├── <feature-name>-form.tsx          # Client Component ("use client") nếu có form nhập liệu
-│   └── <feature-name>-skeleton.tsx      # Skeleton loading state
+├── <FeatureName>Page.tsx                # Server/Client Component hiển thị view chính cấp cao nhất
+├── modals/                              # Thư mục chứa các modals/dialogs liên quan đến page/feature
+│   ├── <FeatureName>Modal.tsx           # Client Component modal ("use client")
+│   └── <Action>Modal.tsx
+├── components/                          # Thư mục chứa các sub-components hiển thị con
+│   ├── <FeatureName>CardComponent.tsx   # Component thẻ hiển thị
+│   ├── <FeatureName>FormComponent.tsx   # Form nhập liệu
+│   └── <FeatureName>SkeletonComponent.tsx # Skeleton loading state
 ├── actions/
 │   └── <feature-name>.actions.ts        # Server Actions ("use server") xử lý mutation, cache
 ├── hooks/
@@ -51,6 +54,12 @@ fe-nextjs-thanhxuan-laundry/src/features/<feature-name>/
 └── services/
     └── <feature-name>.service.ts        # Fetcher gọi API Backend NestJS qua fetch cache
 ```
+
+> ⚠️ **Quy chuẩn kích thước file & phân tách bắt buộc:**
+> - Tuyệt đối không để file gộp cồng kềnh quá 250 - 300 dòng.
+> - Bóc tách ngay các dialog/modal sang thư mục `modals/` với tên `[Tên]Modal.tsx`.
+> - Bóc tách các thành phần hiển thị con (card, table, form con, tabs, filter...) sang thư mục `components/` với tên `[Tên]Component.tsx`.
+> - File gốc lớn nhất luôn là `[Tên]Page.tsx` đóng vai trò điều phối layout, state và kết nối components.
 
 ---
 

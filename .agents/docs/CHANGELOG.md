@@ -2,6 +2,171 @@
 
 Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâng cấp, bugfix và triển khai tính năng của Hệ sinh thái Công ty Thanh Xuân qua từng Plan.
 
+## 2026-10-10
+
+### Plan 21 - Cải Tiến Giao Diện Đối Tác B2B, Form Đếm Đồ Bẩn Thông Minh, Kiểm Nhận Canvas 2 Chiều, Lịch Sử Phân Trang & Khắc Phục Lỗi 403 / Loop Re-render (`be-nestjs-thanhxuan`, `fe-react-thanhxuan-internal`)
+- **Quy Chuẩn Giao Diện Cổng Đối Tác Bằng `@/components/common` (`PartnerPortalPage.tsx`):**
+  - Tầng 1: Sử dụng [PageBanner.tsx](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/components/common/PageBanner.tsx) hiển thị tiêu đề cổng đối tác, tên thương hiệu/chi nhánh và thông tin tài khoản đăng nhập.
+  - Tầng 2: Sử dụng [PageActionBar.tsx](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/components/common/PageActionBar.tsx) chứa thanh tab chức năng trên Desktop (`lg:flex`) và các nút hành động nhanh.
+  - Tầng 3: Sử dụng [ResponsiveCardGrid.tsx](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/components/common/ResponsiveCardGrid.tsx) hiển thị danh sách phiếu lịch sử tự co dãn từ 1 đến 4 cột chuẩn công thái học.
+  - Đồng bộ trạng thái tab qua URL query param `?tab=COUNT | RECEIPT | HISTORY | STAFF`, đảm bảo khi tải lại trang hoặc chia sẻ link luôn giữ đúng màn hình làm việc.
+- **Menu Phân Hệ Đối Tác Mobile-First (Mobile Bottom Bar - `MobileBottomBar.tsx`, `nav-config.ts`):**
+  - Cập nhật cấu hình điều hướng cho 2 vai trò `PARTNER_STAFF` và `PARTNER_MANAGER`:
+    * 4 tính năng cốt lõi: **Đếm đồ bẩn** (`COUNT`), **Kiểm nhận đồ sạch** (`RECEIPT`), **Lịch sử** (`HISTORY`), **Phê duyệt NV** (`STAFF`, chỉ hiển thị nếu role là `PARTNER_MANAGER`).
+  - Trên màn hình di động (`lg:hidden`), toàn bộ điều hướng chuyển xuống thanh **Bottom Navbar** cố định đáy màn hình với các icon to bản và nhãn tiếng Việt trực quan; ẩn nút 'Thêm' và nút Hamburger menu.
+  - Bổ sung nhận diện active state theo `location.search` (`?tab=...`), giúp thanh Bottom Bar phát sáng chính xác nút đang được chọn.
+  - **Bỏ Hoàn Toàn Sidebar Trên Cả Desktop & Drawer Mobile:** Khi người dùng là `PARTNER_MANAGER` hoặc `PARTNER_STAFF`, hệ thống loại bỏ hoàn toàn [DesktopSidebar.tsx](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/components/layout/DesktopSidebar.tsx) và [MobileNavDrawer.tsx](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/components/layout/MobileNavDrawer.tsx), xóa bỏ khoảng lùi lề `lg:pl-64` để giao diện bung 100% chiều rộng màn hình, tinh gọn tối đa giao diện làm việc của quán.
+- **Form Đếm Đồ Bẩn Thông Minh Chuẩn Hóa Theo PrepOrderModal (`PartnerCountTabComponent.tsx`):**
+  - Tái cấu trúc theo ngôn ngữ giao diện của [PrepOrderModal.tsx](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/operations/handovers/modals/PrepOrderModal.tsx), hỗ trợ chuyển đổi linh hoạt Dual View Mode giữa **Dạng Thẻ (`Card View`)** và **Dạng Bảng (`Table View`)**.
+  - Tự động nhận diện chi nhánh & thương hiệu của tài khoản (`user.brand`, `user.partnerId`), **khóa cứng (disabled / read-only)** Thương hiệu, Chi nhánh và Ngày (mặc định lấy theo ngày của phiếu soạn đồ do quản lý kho tạo).
+  - Thay thế các cột soạn đồ thành duy nhất **1 cột số lượng: "Đồ chưa giặt"**. Bỏ trường ghi chú chung, giữ ghi chú từng món nếu có sự cố rách/hỏng.
+  - **Cơ chế Smart Math Input & Auto-Save on Blur (`lib/utils.ts`):**
+    * Viết hàm `parseSmartQtyExpression(input)` an toàn (không dùng `eval`), hỗ trợ tính toán cộng trừ và gom dồn: gõ `12 34` hoặc `12 + 34` => tính ra `46`, gõ `50-10` => tính ra `40`.
+    * Tự động tính kết quả và lưu ngay khi rời ô (`onBlur`), mang lại trải nghiệm nhập liệu siêu tốc cho nhân viên kiểm đồ.
+  - **Lưu & Xuất Phiếu Giao Nhận Kép:**
+    * Bấm *"Lưu và xem phiếu giao nhận"*: Lưu dữ liệu đếm đồ bẩn vào phiếu giao nhận (cột *Số lượng đã nhận* `dirtyReceivedQty` và chữ ký đối tác), đồng thời truy vấn dữ liệu đồ sạch đã soạn từ phía `warehouse-manager` trong ngày để hiển thị đồng thời cả 2 chiều trên phiếu xuất nhập kho Canvas [HandoverDeliverySlipModal.tsx](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/operations/handovers/modals/HandoverDeliverySlipModal.tsx).
+- **Kiểm Nhận Đồ Sạch Trực Quan Bằng Canvas 2 Chiều (Tab RECEIPT - `PartnerReceiptTabComponent.tsx`):**
+  - Hiển thị trực tiếp phiếu giao nhận 2 chiều xuất nhập kho vẽ bằng HTML5 Canvas sắc nét để đối tác kiểm đếm đồ sạch đối soát với đồ bẩn.
+  - Nút điều hướng ngày: **Sang trái (`ChevronLeft`)** lùi 1 ngày, **Sang phải (`ChevronRight`)** tiến 1 ngày để dễ dàng lật xem các phiếu giao nhận theo ngày mà không cần mở nhiều màn hình.
+  - Ô **họ tên người nhận** (mặc định nạp tự động từ tài khoản đăng nhập `user.fullName || user.name`) và ô **ký tên** (`SignatureCanvas`) ngay dưới phiếu, bấm xác nhận gửi API `/handover/:id/receipt-check`.
+- **Lịch Sử Giao Nhận Phân Trang & Tra Cứu Theo Ngày (Tab HISTORY - `PartnerHistoryTabComponent.tsx`):**
+  - Danh sách phiếu giao nhận hiển thị theo thứ tự **từ mới đến cũ** (mới nhất lên đầu) trong `ResponsiveCardGrid`.
+  - **Phân trang (Pagination):** Tối đa **12 phiếu / trang** kèm thanh chuyển trang tiện lợi.
+  - **Bộ lọc ngày cụ thể:** Bộ chọn ngày (Date Picker) lọc và xem ngay phiếu giao nhận của 1 ngày bất kỳ, bấm nút *"Xem Phiếu"* mở modal Canvas hiển thị đầy đủ phiếu để tải ảnh hoặc copy Zalo.
+- **Khắc Phục Toàn Diện Lỗi Console & Quyền Hạn (403 Forbidden & Loop Re-render):**
+  - **Sửa lỗi 403 Forbidden trên các API Partner:** Cập nhật [permissions.map.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/config/permissions.map.ts) cấp quyền `PARTNER_VIEW` (`partner.view`) và `CATALOG_PRICE_CUSTOMER_VIEW` (`catalog.price_customer.view`) cho `PARTNER_MANAGER` và `PARTNER_STAFF`. Cập nhật Jest snapshot test [permissions.map.spec.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/config/permissions.map.spec.ts) pass 9/9.
+  - **Sửa lỗi Maximum update depth exceeded (`PrepOrderModal.tsx`):** Thêm điều kiện chặn vòng lặp `useEffect` khi danh sách chi nhánh rỗng hoặc khi `defaultPartnerId` đã được thiết lập, giải quyết triệt để lỗi crash giao diện khi mở form Soạn đồ bên phía kho vận.
+  - **Chuẩn hóa TypeScript Types:** Bổ sung các trường `clean`, `dirty`, `cleanPlanned`, `restaurant_count` và `note?: string` vào `HandoverDirtyItem` trong [types/index.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/types/index.ts).
+
+### Refactor - Chuẩn Hóa Kiến Trúc File Features & Giới Hạn Dung Lượng (*Page.tsx, modals/*Modal.tsx, components/*Component.tsx)
+- **Chuẩn Hóa Quy Ước Đặt Tên & Cấu Trúc Thư Mục Feature:**
+  - Quy định thống nhất toàn diện:
+    * Màn hình chính / view cấp cao nhất: `[Tên]Page.tsx` (ví dụ `StaffManagementPage.tsx`, `HandoverDetailPage.tsx`, `WarehousePage.tsx`, `PartnersPage.tsx`, `RegisterPage.tsx`).
+    * Thư mục `modals/`: Chứa toàn bộ các dialog/modal theo dạng `[Tên]Modal.tsx` (ví dụ `PartnerModal.tsx`, `PrepOrderModal.tsx`, `StaffFormModal.tsx`).
+    * Thư mục `components/`: Chứa các component con phụ trách render phần giao diện riêng lẻ theo dạng `[Tên]Component.tsx` (ví dụ `StaffTableComponent.tsx`, `HandoverCleanDeliveryComponent.tsx`, `WarehouseCleanPlanTabComponent.tsx`).
+  - Ghi nhận bắt buộc vào bộ tài liệu dự án:
+    * `.agents/rules/frontend.md`: Bổ sung nguyên tắc đặt tên file và giới hạn kích thước tối đa 300 dòng (ngoại lệ không quá 450 dòng đối với form nghiệp vụ phức tạp).
+    * `.agents/rules/AGENTS.md` (Mục 5.5): Quy định cấu trúc thư mục con chuẩn hóa và quy ước tiền tố / hậu tố file.
+    * `.agents/skills/create-react-feature/SKILL.md`: Cập nhật cấu trúc Feature-Based Flat Colocation.
+    * `.agents/skills/create-nextjs-feature/SKILL.md`: Cập nhật cấu trúc component & modal.
+- **Rà Soát & Bóc Tách Các File Vượt Kích Thước Trong `fe-react-thanhxuan-internal/src/features`:**
+  - **`features/management/auth`:**
+    * Bóc tách `StaffManagementView.tsx` (1,154 dòng) thành `StaffManagementPage.tsx`, `modals/StaffFormModal.tsx`, `modals/StaffDeleteModal.tsx`, `components/StaffFilterComponent.tsx`, `components/StaffTableComponent.tsx`.
+    * Chuẩn hóa `ApprovalManagementPage.tsx` và `AuditLogPage.tsx`.
+  - **`features/management/partners`:**
+    * Bóc tách toàn bộ modals vào `modals/`: `PartnerModal.tsx`, `BrandModal.tsx`, `CatalogModal.tsx`, `DeleteConfirmModal.tsx`.
+    * Chuẩn hóa các components: `PartnersTopBannerComponent.tsx`, `PartnersActionBarComponent.tsx`, `PartnersPartnerFilterComponent.tsx`, `PartnersCatalogFilterComponent.tsx`, `PartnerListComponent.tsx`, `PartnerCardComponent.tsx`, `CatalogListComponent.tsx`.
+  - **`features/auth`:**
+    * Thu gọn `RegisterPage.tsx` từ 566 dòng xuống 189 dòng; chuyển các modals sang `auth/modals/`: `ChangePasswordModal.tsx`, `ForgotPasswordModal.tsx`, `OtpVerificationModal.tsx`, `ProfileEditModal.tsx`, `RegisterModal.tsx`; tạo `components/RegisterFormComponent.tsx`.
+  - **`features/operations/handovers`:**
+    * Bóc tách `HandoverDetailPage.tsx` (933 dòng) thành `components/HandoverHeaderComponent.tsx`, `components/HandoverCleanDeliveryComponent.tsx`, `components/HandoverDirtyPickupComponent.tsx`, `components/HandoverSignaturesComponent.tsx`, `modals/DisputeModal.tsx` và `HandoverDetailPage.tsx` (~350 dòng).
+    * Bóc tách `WarehousePage.tsx` (750 dòng) thành `components/WarehouseCleanPlanTabComponent.tsx`, `components/WarehouseRecountQueueTabComponent.tsx`, `components/WarehouseSummaryTabComponent.tsx` và `WarehousePage.tsx` (~180 dòng).
+    * Bóc tách `PrepOrderModal.tsx` (873 dòng) thành `components/PrepOrderItemCardComponent.tsx`, `components/PrepOrderItemTableComponent.tsx` và `modals/PrepOrderModal.tsx` (~420 dòng).
+    * Nâng cấp `PrepOrderModal.tsx`: Tự động nhận diện thiết bị khi mở modal (Mobile: hiện Dạng Thẻ trước, Desktop: hiện Dạng Bảng trước).
+    * Bổ sung hiển thị ảnh đồ giặt (`cat.imageUrl`) có fallback icon `Package` ngay trước tên món đồ ở cả Dạng Thẻ (`PrepOrderItemCardComponent.tsx`) và Dạng Bảng (`PrepOrderItemTableComponent.tsx`).
+    * Ẩn hoàn toàn mã đồ giặt `itemCode` ở Dạng Thẻ để tinh gọn và tập trung cho thợ thao tác cảm ứng.
+    * Chuẩn hóa toàn bộ modal vào `modals/`: `CreateHandoverModal.tsx`, `HandoverDeliverySlipModal.tsx`, `RecountRequestModal.tsx`, `SignatureModal.tsx`, `ZaloQrSettingsModal.tsx`, `WarehouseScheduleSettingsModal.tsx`.
+  - **`features/operations/partners`:**
+    * Bóc tách `PartnerPortalPage.tsx` (690 dòng) thành `components/PartnerCountTabComponent.tsx`, `components/PartnerReceiptTabComponent.tsx`, `components/PartnerHistoryTabComponent.tsx`, `components/PartnerStaffTabComponent.tsx` và `PartnerPortalPage.tsx` (~200 dòng).
+  - **`features/operations/reports` & `features/operations/piecework`:**
+    * Chuẩn hóa `ReportsPage.tsx`, `components/ReportsViewComponent.tsx`, `components/ItemCounterCardComponent.tsx`.
+- **Tái Thiết Kế & Nâng Tầm Thẩm Mỹ Top Banner (`PageBanner.tsx`):**
+  - Chuyển đổi toàn diện bố cục sang phương ngang: Icon container nổi bật đặt bên trái (`w-12 h-12 sm:w-14 sm:h-14`), toàn bộ Title, Tagline và Description đặt bên phải Icon với tỷ lệ công thái học cân xứng.
+  - Phối màu cao cấp HSL: Icon container sử dụng gradient đa tầng `sky-500` & `indigo-500` viền sắc nét kèm hiệu ứng hover scale; Card container phủ dải chuyển sắc nhẹ `from-white via-white to-sky-50/40` (Dark: `from-slate-900 to-sky-950/20`) cùng viền tinh xảo; Description hỗ trợ ReactNode dạng thẻ linh hoạt.
+- **Dọn Dẹp Triệt Để Các File Shim & Tối Ưu Import:**
+  - Cập nhật toàn bộ các import trực tiếp trong toàn bộ mã nguồn trỏ chuẩn xác vào thư mục `modals/` hoặc `components/`.
+  - Xóa bỏ triệt để 35 file shim trung gian (các file chỉ chứa 1 dòng `export * from './modals/...'` hoặc `export * from './components/...'`) giúp cây thư mục gọn gàng, trong sáng và dễ bảo trì.
+  - Tinh giản các file barrel `index.ts` chỉ xuất các component và modal chính danh.
+- **Kiểm Thử Toàn Diện:**
+  - Kiểm thử TypeScript (`pnpm exec tsc --noEmit`): Pass 100% không có lỗi.
+  - Kiểm thử Vite Production Build (`pnpm build`): Pass 100% với bundle và PWA Service Worker tạo thành công trong 4.58s.
+
+### Plan 20 - Tính Năng Soạn Đồ Giao Hàng, Xuất Phiếu Giấy Zalo Chuẩn Khổ A4, Tự Động Định Kỳ & Sửa Lỗi Popup Đối Tác (`be-nestjs-thanhxuan`, `fe-react-thanhxuan-internal`)
+- **Khắc Phục Lỗi Cuộn Khuất Đỉnh Phiếu Trên Màn Hình PC (`HandoverDeliverySlipModal.tsx`):**
+  - Nguyên nhân: Container cuộn trước đây dùng `flex justify-center items-center`, thuộc tính `items-center` căn giữa theo chiều dọc khiến một nửa trên của tấm ảnh khổ A4 dài >1000px bị đẩy lên vùng âm tọa độ cuộn (scroll top < 0), khiến người dùng dù có kéo kịch thanh cuộn lên trên cùng cũng không nhìn thấy được khung thông tin công ty.
+  - Khắc phục: Chuyển cấu trúc container sang `flex flex-col items-center justify-start py-6`. Ảnh phiếu được đặt ngay ngắn bắt đầu từ đỉnh đầu có khoảng đệm 24px, căn giữa theo chiều ngang và cuộn trơn tru từ đầu trang đến chân trang mà không bao giờ bị cắt mất mép trên.
+- **Tinh Chỉnh Thẩm Mỹ & Cân Đối Thanh Thao Tác Quản Lý Đối Tác (`PartnersActionBar.tsx`):**
+  - Thu nhỏ toàn bộ các nút hành động bên phải: *Thêm Đối Tác*, *Thêm Đồ Giặt*, *Thêm Thương Hiệu*, và *Cài QR Zalo Phiếu*.
+  - Chuyển đổi từ `size="touch"` (chiều cao lớn 56px vốn chỉ dành cho màn hình xưởng) sang `size="sm"` (`h-8`, bo góc `rounded-lg`, font chữ `text-xs font-semibold`, icon `w-3.5 h-3.5`).
+  - Hỗ trợ text co giãn linh hoạt trên mobile cho nút QR Zalo (`hidden sm:inline` "Cài QR Zalo Phiếu" và `sm:hidden` "QR Zalo").
+  - Đảm bảo thanh Action Bar hiển thị thẳng hàng, tỷ lệ cân đối hoàn hảo với khối tab bộ lọc bên trái.
+- **Tối Ưu Bố Cục Khổ Giấy In A4 & Phân Quyền Cài Đặt QR Zalo (`HandoverExportHelper.ts`, `PartnersPage.tsx`, `HandoverDeliverySlipModal.tsx`):**
+  - Tăng khoảng cách lề trên khung thông tin công ty từ 35px lên chuẩn **50px** (`box1Y = 50;`) và dịch chuyển phần cam kết dịch vụ chân trang (`footerY = 1095;`) để giữ tỷ lệ lề trên - lề dưới cân đối.
+  - Tách hoàn toàn nút cài QR Zalo ra khỏi modal xem phiếu kho vận, đưa về trang Quản lý Đối tác (`/management/manager/partner`) dành riêng cho quyền `ADMIN` và `MANAGER`.
+  - Phiếu giao nhận tự động nhận diện và hiển thị mã QR Zalo đã lưu khi bất kỳ ai bấm xem phiếu.
+- **Sửa Triệt Để Lỗi Popup Form Đối Tác (Ảnh 2 - `PartnerDialog.tsx` & `dialog.tsx`):**
+  - Khắc phục tình trạng Header dính sát mép trên và Footer đè cắt ngang input *"Người liên hệ trực tiếp tại quán"*.
+  - Cải tiến `dialog.tsx`: thiết lập container `max-h-[90vh] flex flex-col`, cấu trúc padding `px-6` cân đối, màu border tinh chỉnh theo token theme light/dark mode.
+  - Tái cấu trúc `PartnerDialog.tsx`: cố định `DialogHeader` và `DialogFooter`, toàn bộ 7 input form fields được bọc vào vùng cuộn `max-h-[60vh] overflow-y-auto px-6 py-4 space-y-4` mượt mà, đạt 100% chuẩn thẩm mỹ ergonomics.
+- **Nâng Cấp Backend Handovers (Schemas, DTOs & Nghiệp Vụ Soạn Đồ):**
+  - Mở rộng Mongoose sub-schema `HandoverItem` và `CleanPlanned`: hỗ trợ `undeliveredQty` (số lượng chưa giao), `returnedDebtQty` (số lượng giao trả nợ), `note` (ghi chú từng món), `preparedByName` (họ tên người lập) và `preparedBySignature` (chữ ký số Base64).
+  - Bổ sung các Class DTO validation: `CleanItemDetailDto`, `CleanPlannedDto`, `PrepOrderDto` với đầy đủ validator Decorator (`@IsOptional()`, `@IsString()`, `@IsNumber()`).
+  - Thêm endpoint `POST /handover/prep-order`: tạo mới hoặc cập nhật phiếu soạn đồ sạch cho ngày mai với đầy đủ 3 loại số lượng, ghi chú từng dòng và chữ ký điện tử.
+  - Thêm endpoint `GET /handover/previous-dirty`: truy vấn phiếu giao nhận gần nhất trước ngày chỉ định để lấy chính xác số lượng đồ bẩn đã nhận (`dirty.final.items` ➔ `dirty.shipperItems` ➔ `restaurant_count.items`), dùng để prefill tự động sang đồ sạch.
+  - Thêm endpoint `POST /handover/auto-schedule`: duyệt danh sách đối tác có lịch giao định kỳ (`DAILY`, `ALTERNATE_DAYS`), tự động sinh phiếu giao nhận ngày mai kèm prefill số lượng đồ bẩn hôm trước vào `clean.planned`.
+- **Giao Diện Soạn Đồ Thông Minh & Chữ Ký Điện Tử (`PrepOrderModal.tsx`):**
+  - Tích hợp bộ chọn 2 cấp: Thương hiệu (Brand) ➔ Chi nhánh đối tác (Partner), tự động tải danh mục đồ giặt tương ứng (`item_catalogs`).
+  - Tự động gọi API `/handover/previous-dirty` điền sẵn số lượng vào cột *Số lượng sẽ giao* giúp thủ kho không phải gõ lại từ đầu.
+  - Hỗ trợ nhập và chỉnh sửa linh hoạt: Cột *Số lượng sẽ giao*, *Chưa giao*, *Giao trả nợ*, kèm cột *Ghi chú* từng dòng (ví dụ: *"đã giao trước trong ngày 20 chiếc"*).
+  - Khung Canvas ký tên điện tử (`react-signature-canvas`) có nút xóa chữ ký, ô họ tên người lập phiếu tự động điền họ tên tài khoản đang đăng nhập.
+  - Bấm "Lưu & Xem Phiếu Giao Nhận" tự động lưu vào hệ thống và kích hoạt mở modal xem trước phiếu thực tế.
+  - **Tối ưu hóa hiển thị di động & Chống lỗi cuộn ngang trên Mobile (Dual View Mode):**
+    * Khắc phục triệt để lỗi thẻ cha `overflow-hidden` chặn vuốt cảm ứng ngang trên điện thoại di động.
+    * Bổ sung chế độ **Dạng Thẻ (`Card View`)**: Mặc định kích hoạt trên màn hình điện thoại (< 768px), hiển thị từng món đồ giặt thành thẻ dọc với nút bấm stepper [-] / [+] to bản 32-40px tiện lợi, nhập Chưa giao / Trả nợ / Ghi chú trực tiếp mà không cần cuộn ngang màn hình.
+    * Cung cấp chế độ **Dạng Bảng (`Table View`)**: Hỗ trợ vuốt ngang mượt mà (`overflow-x-auto min-w-[580px]`), tinh gọn tối đa các cột cố định bên trái (STT thu hẹp còn `w-8` 32px, Tên đồ thu gọn `min-w-[120px]` và **ẩn hoàn toàn mã đồ bên dưới**, ĐVT thu hẹp `w-11`), ghim cố định (*STT* `sticky left-0` và *Tên đồ giặt* `sticky left-8 sm:left-10`), giúp màn hình điện thoại hiển thị ngay cột *Sẽ giao* và vuốt nhẹ là thấy toàn bộ *Chưa giao*, *Giao trả nợ*.
+    * Nút chuyển đổi View Mode nhanh chóng giữa Dạng Thẻ và Dạng Bảng ngay trên thanh tiêu đề danh mục.
+- **Render Canvas Phiếu Xuất Nhập Kho Vận Chuyển Giống Ảnh 1 Mẫu Thực Tế Pizza 4P's (`HandoverExportHelper.ts`):**
+  - Xây dựng hàm `renderHandoverDeliverySlipToCanvas(slipData)` vẽ đồ họa Canvas HTML5 chuẩn khổ giấy A4 (800x1130px) nền trắng sắc nét.
+  - Header: Khung thông tin công ty Thanh Xuân (MST `0108942736`, Hotline `0769 270 676`, Địa chỉ Kiến Hưng, Hà Nội).
+  - Mã QR CSKH Zalo góc trái, Tiêu đề *PHIẾU XUẤT NHẬP KHO VẬN CHUYỂN* và ngày tháng năm lập phiếu.
+  - Thông tin bên nhận (Nơi nhận, Bộ phận, Địa chỉ, SĐT).
+  - Bảng dịch vụ chuẩn 16 dòng kẻ ô: gồm STT, Danh mục dịch vụ, Đơn vị, Đồ chưa giặt (Đã nhận, Thực nhận), Đồ sạch đã giặt (Đã giao, Chưa giao, Giao trả), Ghi chú từng dòng, và dòng TỔNG CỘNG ở chân bảng.
+  - Khu vực 4 chữ ký: *Thủ kho*, *Người giao hàng*, *Người nhận hàng*, *Người lập phiếu (Người đếm đồ bẩn)* hiển thị ảnh chữ ký Canvas và họ tên bên dưới.
+  - Footer: Thông tin thương hiệu TX Laundry Service và toàn bộ đoạn văn bản cam kết chất lượng dịch vụ theo đúng mẫu giấy in thực tế.
+- **Modal Xem Trước, In Phiếu Chuẩn Khổ A4 & Xuất Ảnh Zalo (`HandoverDeliverySlipModal.tsx`):**
+  - Hiển thị trực quan toàn bộ phiếu in tỷ lệ chuẩn A4.
+  - **Khắc phục lỗi in ấn trình duyệt (Clean Print):** Áp dụng CSS `@page { size: A4 portrait; margin: 0mm !important; }` và `.print-box { padding: 6mm 10mm; }`, triệt tiêu 100% các dòng thông tin thừa do trình duyệt tự chèn (ngày giờ in, tiêu đề trang, `about:blank`, và số trang `1/1`), phiếu in ra sạch sẽ như bản in thương mại.
+  - Tích hợp nút **"Cài QR Zalo"** mở hộp thoại tùy chỉnh mã QR trực tiếp ngay khi đang xem phiếu.
+  - Tích hợp nút **"Tải Xuống Thành Ảnh (.PNG)"** tải file ảnh chất lượng cao gửi ngay vào nhóm Zalo.
+  - Nút **"Sao chép ảnh"** ghi trực tiếp dữ liệu hình ảnh vào Clipboard để dán nhanh (Ctrl+V) vào Zalo máy tính mà không cần lưu file.
+- **Tính Năng Cài Đặt Mã QR Zalo CSKH Cho Phiếu Giao Nhận (`ZaloQrSettingsModal.tsx`):**
+  - Hỗ trợ tải file ảnh mã QR Zalo (PNG, JPG, WEBP) từ thiết bị hoặc dán URL ảnh trực tiếp.
+  - Lưu cấu hình mã QR vào bộ nhớ hệ thống (`TX_ZALO_QR_CODE`), hỗ trợ quay lại mã QR mặc định bất cứ lúc nào.
+  - Tích hợp điểm truy cập cài đặt tại cả 2 nơi: Modal xem phiếu `HandoverDeliverySlipModal` và Hộp thoại cấu hình kho `WarehouseScheduleSettingsDialog`.
+  - Phiếu giao nhận tự động nạp ảnh thật của mã QR Zalo và vẽ sắc nét vào góc trái phiếu in.
+- **Setting Tự Động Lên Đơn Theo Lịch Định Kỳ (`WarehouseScheduleSettingsDialog.tsx` & `WarehousePage.tsx`):**
+  - Hộp thoại cấu hình lịch giao: thống kê chi nhánh giao hàng ngày / cách ngày vs chi nhánh theo yêu cầu (`ON_DEMAND`).
+  - Nút kích hoạt nhanh "Tự Động Lên Đơn Theo Lịch" ngay trên thanh công cụ trang Kho (`WarehousePage.tsx`).
+  - Thêm nút "Soạn Đồ" nổi bật và nút "Cài Đặt Lịch Giao" trên thanh tác vụ.
+- **Kiểm thử & Xác minh chất lượng (Verification):**
+  - `pnpm exec tsc --noEmit` trên `fe-react-thanhxuan-internal` pass 100% (0 lỗi).
+  - `pnpm build` (`vite build`) trên `fe-react-thanhxuan-internal` pass 100% trong 7.09 giây.
+  - `pnpm build` (`nest build`) trên `be-nestjs-thanhxuan` pass 100% không cảnh báo lỗi biên dịch.
+
+### Plan 19 - Nâng Tầm Toàn Diện Giao Diện UI/UX Phân Hệ Vận Hành Nội Bộ (`fe-react-thanhxuan-internal`)
+- **Chuẩn hóa Nền tảng Thiết kế & Typography (Design Foundation & Font Stack):**
+  - Tích hợp bộ font Google Fonts `Plus Jakarta Sans` (400, 500, 600, 700, 800) và `JetBrains Mono` tại `index.html`.
+  - Mở rộng cấu hình `tailwind.config.js`: Khai báo font stack `font-sans`, `font-mono`, các bóng đổ cao cấp (`soft`, `card`, `card-hover`, `glow-sky`, `glow-emerald`) và chuẩn hóa bo góc `rounded-2xl`, `rounded-3xl`.
+  - Cập nhật `src/index.css`: Bổ sung lớp số học chuẩn xác `.tabular-nums` (cho tiền tệ và kiểm đếm đồ giặt), lớp vùng an toàn di động `.safe-bottom`, `.safe-bottom-nav`, và thanh cuộn tinh gọn `.scrollbar-thin`.
+- **Hệ Thống Component UI Cốt Lõi Tinh Gọn (Core UI Components):**
+  - `Button.tsx`: Loại bỏ triệt để gradient 3 màu tím/xanh nhạt nhẽo kiểu "AI slop". Nâng cấp các variant solid brand sắc sảo, bổ sung variant `success`, `touch` (chiều cao >= 52-56px cho thợ đeo găng tay và tài xế xe tải thao tác một tay).
+  - `Badge.tsx`: Nâng cấp badge bo tròn hỗ trợ tùy chọn `dot` status indicator nhấp nháy, viền mờ cao cấp, phân biệt trực quan 5 trạng thái vận hành logistics (`SCHEDULED`, `IN_TRANSIT`, `PROCESSING`, `COMPLETED`, `DISPUTED`).
+  - `Card.tsx`: Bổ sung các biến thể `default`, `interactive` (hiệu ứng hover lift nổi bật khi rê chuột), `outline`, `flat`, padding phân cấp logic.
+  - `StatCard.tsx` (Mới): Thẻ số liệu KPI cao cấp với container icon bo góc mềm mại, hiển thị số liệu lớn `tabular-nums`, badge phần trăm tăng trưởng và hiệu ứng micro-elevation.
+  - `EmptyState.tsx` (Mới): Component trạng thái rỗng sinh động cho các danh sách phiếu/chấm công chưa có dữ liệu, kèm icon bao quanh viền mờ và nút hành động nhanh.
+  - `SkeletonLoader.tsx` (Mới): Component skeleton hiệu ứng shimmer mượt mà cho card và danh sách khi đang tải dữ liệu.
+- **Tái Cấu Trúc Khung Shell Điều Hướng (Layout & Navigation Shell):**
+  - `AppHeader.tsx`: Nền kính mờ `backdrop-blur-md bg-white/85 dark:bg-slate-900/85`, huy hiệu vai trò nhân viên sử dụng `Badge` kèm dot status rực rỡ, dropdown menu tài khoản mềm mại.
+  - `DesktopSidebar.tsx`: Nâng cấp menu thanh thoát, vạch sáng active indicator chạy dọc lề trái, container logo TX có chiều sâu, chữ in hoa danh mục tinh tế.
+  - `MobileBottomBar.tsx`: Hỗ trợ vùng đệm an toàn `env(safe-area-inset-bottom)` cho iPhone, các tab điều hướng dạng pill nổi bật khi được chọn, phản hồi chạm nhạy bén.
+- **Tái Thiết Kế Toàn Diện Màn Hình Trung Tâm Điều Hành (`DashboardPage.tsx`):**
+  - Hero Banner thời gian thực với nhãn "BẢNG VẬN HÀNH THỜI GIAN THỰC", ngày giờ chuẩn Việt Nam và các nút Quick Action điều xe / trạm đếm.
+  - Lưới 4 thẻ KPI `StatCard`: Xe đang giao nhận, Giao nhận hoàn tất, Lương khoán/Sản lượng thợ hôm nay, Lệch đồ/Khiếu nại cần xử lý ngay.
+  - Hai cột danh sách vận hành trực quan: Bảng phiếu cần theo dõi và Bảng năng suất thợ xưởng tích hợp `EmptyState` khi không có dữ liệu, loại bỏ hoàn toàn các khoảng trắng vô hồn.
+- **Kiểm thử & Xác minh chất lượng (Verification):**
+  - `pnpm exec tsc --noEmit` pass 100% không cảnh báo lỗi type.
+  - `pnpm build` (`vite build`) pass 100%, bundle sinh mã PWA Service Worker thành công trong 7.6 giây.
+
 ## 2026-10-08
 
 ### Plan 18 - Quản Lý Nhân Sự Toàn Diện (Khóa 60 Ngày Tự Xóa, Xóa Vĩnh Viễn Admin, Phân Tab), Tinh Gọn Đăng Ký, Seed Tài Khoản Test & Header Profile Popover (`be-nestjs-thanhxuan`, `fe-react-thanhxuan-internal`)

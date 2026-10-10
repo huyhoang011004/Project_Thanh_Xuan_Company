@@ -2,7 +2,7 @@
 ## PHÂN HỆ BACKEND API TẬP TRUNG (be-nestjs-thanhxuan)
 
 > **Tài liệu tham chiếu cấp cao:** [SRS_SDD.md (Kiến Trúc Tổng Quan)](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/SRS_SDD.md)  
-> **Phiên bản:** 2.1 | **Môi trường:** NestJS 10, Node.js v20+, MongoDB Multi-Database  
+> **Phiên bản:** 2.2 | **Synced:** 2026-10-10 | **Môi trường:** NestJS 10, Node.js v20+, MongoDB Multi-Database  
 > **Phạm vi mã nguồn:** `be-nestjs-thanhxuan/src/**`  
 > **Quy chuẩn kỹ thuật:** Clean Architecture, Repository Pattern, Multi-Database Isolation, SOLID, Defensive Programming
 
@@ -232,7 +232,7 @@ export class HandoverRecordRepository extends BaseRepository<HandoverRecordDocum
 | `GET` | `/api/v1/internal/partners` | `InternalJwtGuard` | Mọi người dùng | Danh sách nhà hàng đối tác đang hoạt động. |
 | `GET` | `/api/v1/internal/partners/schedule` | `InternalJwtGuard` | Mọi người dùng | Lịch giao nhận trong ngày (DAILY / ALTERNATE_DAYS theo ngày VN). |
 | `POST`, `PATCH`, `DELETE` | `/api/v1/internal/partners` | `InternalJwtGuard` + `InternalRolesGuard` | ADMIN, MANAGER | Quản lý thông tin đối tác và chi nhánh. |
-| `GET` | `/api/v1/internal/partners/catalogs` | `InternalJwtGuard` | Mọi người dùng | Danh mục đồ giặt, hỗ trợ lọc theo `brand`. |
+| `GET` | `/api/v1/internal/partners/catalogs` | `InternalJwtGuard` | Mọi người dùng (Bao gồm PARTNER_MANAGER, PARTNER_STAFF với quyền `CATALOG_PRICE_CUSTOMER_VIEW`) | Danh mục đồ giặt, hỗ trợ lọc theo `brand`. |
 | `POST`, `PATCH`, `DELETE` | `/api/v1/internal/partners/catalogs` | `InternalJwtGuard` + `InternalRolesGuard` | ADMIN | Quản trị mã đồ giặt, đơn giá khoán thợ và ảnh Cloudinary. |
 
 #### C. Nhóm API Phiếu Giao Nhận Kép (`/api/v1/internal/handover`)
@@ -243,6 +243,10 @@ export class HandoverRecordRepository extends BaseRepository<HandoverRecordDocum
 | `GET` | `/api/v1/internal/handover` | `InternalJwtGuard` | Phân quyền theo vai trò | SHIPPER chỉ xem của mình; RM/RS chỉ xem chi nhánh mình; ADMIN/MG xem toàn bộ. |
 | `GET` | `/api/v1/internal/handover/:recordCode` | `InternalJwtGuard` | Phân quyền theo vai trò | Xem chi tiết phiếu giao nhận theo mã. |
 | `GET` | `/api/v1/internal/handover/monthly` | `InternalJwtGuard` + `InternalRolesGuard` | RESTAURANT_MANAGER, RESTAURANT_STAFF, ADMIN | Bảng kê giao nhận theo tháng cho nhà hàng (bảo mật ẩn hoàn toàn đơn giá). |
+| `POST` | `/api/v1/internal/handover/prep-order` | `InternalJwtGuard` + `InternalRolesGuard` | WAREHOUSE_MANAGER, ADMIN, MANAGER | Soạn đồ sạch cho ngày mai: lưu 3 loại số lượng (*Đã giao*, *Chưa giao*, *Giao trả*), ghi chú từng dòng và chữ ký điện tử. |
+| `POST` | `/api/v1/internal/handover/partner-count` | `InternalJwtGuard` + `InternalRolesGuard` | RESTAURANT_MANAGER, RESTAURANT_STAFF, PARTNER_MANAGER, PARTNER_STAFF | Đếm đồ bẩn đối tác gửi về xưởng: lưu số lượng chưa giặt, chữ ký và họ tên người đếm. |
+| `POST` | `/api/v1/internal/handover/auto-schedule` | `InternalJwtGuard` + `InternalRolesGuard` | WAREHOUSE_MANAGER, ADMIN, MANAGER | Tự động sinh phiếu giao nhận theo lịch định kỳ (`DAILY`, `ALTERNATE_DAYS`), prefill số lượng đồ bẩn hôm trước. |
+| `GET` | `/api/v1/internal/handover/previous-dirty` | `InternalJwtGuard` | Mọi vai trò nội bộ | Lấy số lượng đồ bẩn đã nhận hôm trước của đối tác để điền sẵn vào phiếu soạn đồ. |
 | `POST` | `/api/v1/internal/handover/clean-planned` | `InternalJwtGuard` + `InternalRolesGuard` | WAREHOUSE_MANAGER, ADMIN, MANAGER | Thủ kho lên kế hoạch soạn đồ sạch tại kho. |
 | `PATCH` | `/api/v1/internal/handover/:id/clean-delivery` | `InternalJwtGuard` + `InternalRolesGuard` | SHIPPER, ADMIN, MANAGER | Cập nhật số lượng đồ sạch bàn giao. |
 | `PATCH` | `/api/v1/internal/handover/:id/dirty-pickup` | `InternalJwtGuard` + `InternalRolesGuard` | SHIPPER, ADMIN, MANAGER, RESTAURANT_STAFF | Cập nhật số lượng đồ bẩn thu gom (`ON_SITE` hoặc `AT_FACTORY`). |
