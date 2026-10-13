@@ -4,7 +4,34 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
 
 ## 2026-10-13
 
-### Plan 25: Hợp Nhất Thư Viện Ảnh Phiếu Dùng Chung, Sửa Lỗi Load Ảnh Kho, Đồng Bộ URL Search Params & Nâng Cấp Luồng Shipper Đếm Thay (`be-nestjs-thanhxuan`, `fe-react-thanhxuan-internal`)
+### Plan 27: Tinh Gọn Triệt Để Bản Ghi HandoverRecord - Loại Bỏ Lặp Base64 Chữ Ký & Mảng Mặc Định Rỗng (`be-nestjs-thanhxuan`, `fe-react-thanhxuan-internal`)
+- **Động lực & Vấn đề giải quyết:**
+  - Sau khi loại bỏ trường `status` ở Plan 26, dữ liệu bản ghi `HandoverRecord` trong MongoDB Atlas vẫn còn bị phình to do nhân đôi chuỗi Base64 chữ ký (~30KB-50KB/bản ghi) tại cả `cleanClothes.preparedBySignature` và `signatures.warehouseManager.signature`.
+  - Đồng thời, thông tin thủ kho bị lặp 3 nơi (`cleanClothes.preparedByName/warehouseManagerId`, `signatures.warehouseManager`, và root `warehouseManagerId/warehouseManagerName`).
+  - Mongoose Schema có các giá trị khởi tạo rỗng mặc định khiến mọi document mới tạo tự động sinh `dirtyClothes: { items: [] }`, `notes: []`, `isRecount: false`, và `recount: { isRecount: false, status: 'NONE' }`.
+- **Backend API & CSDL MongoDB (`be-nestjs-thanhxuan`):**
+  - **Schema (`handover-record.schema.ts`):**
+    * Tinh gọn sub-schema `CleanClothes`: chỉ còn duy nhất `items: CleanItemLine[]`. Loại bỏ hoàn toàn `preparedByName`, `preparedBySignature`, `warehouseManagerId`, `at`.
+    * Chuẩn hóa `CleanItemLine`: bỏ `default: 0` của `undeliveredQuantity` và `quantityReturned` để không ép sinh giá trị 0 khi mới soạn đồ sạch.
+    * Loại bỏ các giá trị `default` rỗng ở root document: `dirtyClothes` (bỏ `{ items: [] }`), `notes` (bỏ `[]`), `recount` (bỏ `{ isRecount: false, status: 'NONE' }`).
+    * Loại bỏ cờ thừa `isRecount: boolean` ở root document (quản lý tập trung trong khối `recount`). Đánh index `sparse: true` cho `recount.isRecount` và `recount.status`.
+  - **Services (`handover-record.service.ts` & `handover-flow.service.ts`):**
+    * `createOrUpdatePrepOrder`, `createHandover`, `planScheduledHandovers`, `createPartnerCountRecord`: chỉ lưu danh sách đồ sạch vào `cleanClothes.items`. Chữ ký thủ kho được lưu duy nhất tại `signatures.warehouseManager = { name, signature, at }`.
+    * Loại bỏ việc khởi tạo object/mảng rỗng khi tạo mới phiếu. Khi chưa phát sinh đồ bẩn, document hoàn toàn không có `dirtyClothes`. Khi chưa có ghi chú, document hoàn toàn không có `notes`. Khi chưa yêu cầu đếm lại, document hoàn toàn không có `recount`.
+    * Hàm `updateShipperConfirm`: chỉ sinh khối `recount: { isRecount: true, status: 'PENDING' }` khi shipper thực sự tích chọn đếm lại.
+  - **Script Dọn Dẹp CSDL Thực Tế (`drop-legacy-collections.ts`):**
+    * Bổ sung `$unset` cho các trường thừa: `cleanClothes.preparedByName`, `cleanClothes.preparedBySignature`, `cleanClothes.warehouseManagerId`, `cleanClothes.at`, và `isRecount`.
+    * Thêm logic quét và `$unset` cho các mảng rỗng `notes: []`, `dirtyClothes: { items: [] }` (khi không có partnerCount), và `recount: { isRecount: false }` hoặc `status: 'NONE'`.
+    * Chạy script `pnpm run db:drop-legacy` thành công 100% trên cơ sở dữ liệu MongoDB Atlas thực tế.
+- **Frontend Vận Hành (`fe-react-thanhxuan-internal`):**
+  - Tinh gọn interface `CleanClothes` trong `src/types/index.ts` chỉ còn `items: CleanItemLine[]`.
+  - Cập nhật `PartnerPortalPage.tsx`, `PartnerReceiptTabComponent.tsx`, `ShipperHandoverItemCardComponent.tsx`, và `HandoverExportHelper.ts` đọc chữ ký thủ kho trực tiếp từ `signatures.warehouseManager.signature` và `signatures.warehouseManager.name`.
+- **Kiểm thử & Nghiệm thu:**
+  - `pnpm exec tsc --noEmit` pass 100% trên cả Backend và Frontend.
+  - `pnpm build` pass 100% trên `be-nestjs-thanhxuan` và `fe-react-thanhxuan-internal` (Vite build 12.65s).
+  - Kiểm tra document thực tế trong MongoDB Atlas: bản ghi siêu tinh gọn, chỉ chứa đúng thông tin cốt lõi, tiết kiệm hơn 50% dung lượng byte.
+
+
 - **Khắc phục triệt để lỗi không tải được ảnh phiếu ở Kho (`/operations/warehouse-manager/warehouse`):**
   - **Backend (`handover-record.service.ts`):** 
     * Cải tiến hàm `getSlipGallery`: Khi truy vấn theo `brand`, hệ thống tự động tra cứu danh sách các cơ sở `partnerIds` thuộc thương hiệu đó để lọc `$or: [{ brand }, { partnerId: { $in: partnerIds } }]`. 

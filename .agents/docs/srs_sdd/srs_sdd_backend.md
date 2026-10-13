@@ -57,11 +57,11 @@ Backend API tập trung phục vụ toàn bộ các kênh tương tác của Cô
 - **Tự sinh mã phiếu chuẩn hóa:** Sinh mã định dạng `GN-XXX-DDMMYYYY` (với `XXX` là `shortCode` của partner viết hoa, `DDMMYYYY` theo ngày giao nhận giờ Việt Nam UTC+7). Nếu trùng phiếu trong ngày, cơ chế retry loop tự động thêm hậu tố phân biệt `-1`, `-2`.
 - **Chuẩn hóa ngày giao nhận & múi giờ:** Lưu `recordDate` (chuỗi ngày `YYYY-MM-DD` theo múi giờ `Asia/Ho_Chi_Minh`), mặc định ngày mai khi thủ kho soạn đồ buổi tối (17h-21h) hoặc tự động tính ngày mai khi đối tác đếm đồ bẩn trong khung giờ 21h-23h59 (`getTargetRecordDateVN`). Chặn chọn ngày đã qua.
 - **Quy trình vận hành 5 bước & Cập nhật nguyên tử chống xung đột:**
-  1. *Bước 1 (Thủ kho soạn hàng 17h-21h):* Nhập `cleanClothes`, `notes`, ký tên thủ kho `warehouseManager`, sinh ảnh phiếu WebP lưu trữ Cloudinary (`slipImageUrl`). Cron Job tự động chạy lúc 12:00 trưa mỗi ngày sinh phiếu tự động theo `deliveryFrequency`.
+  1. *Bước 1 (Thủ kho soạn hàng 17h-21h):* Nhập `cleanClothes.items`, ký tên thủ kho `signatures.warehouseManager` (lưu chữ ký duy nhất 1 nơi, triệt tiêu lặp Base64), sinh ảnh phiếu WebP lưu trữ Cloudinary (`slipImageUrl`). Cron Job tự động chạy lúc 12:00 trưa mỗi ngày sinh phiếu tự động theo `deliveryFrequency`. Bản ghi siêu tinh gọn không sinh các object/mảng rỗng mặc định.
   2. *Bước 2 (Đối tác đếm đồ bẩn 21h-23h59):* Auto-save onblur từng dòng đồ bẩn qua endpoint nguyên tử `PATCH /handover/:id/dirty-item-onblur` dùng toán tử `$set` của MongoDB (ngăn chặn Race Condition), ký nhận qua `PATCH /handover/:id/partner-count-signature`.
-  3. *Bước 3 (Shipper nhận & bàn giao):* Shipper kiểm đếm, xác nhận qua `PATCH /handover/:id/shipper-confirm`. Hỗ trợ checkbox `isRecount` nếu đối tác chưa đếm hoặc nghi ngờ sai lệch.
-  4. *Bước 4 (Trạm rạch bao đếm lại xưởng):* Lọc các phiếu có `isRecount === true` hoặc đồ bẩn trống số, thợ xưởng cập nhật số thực tế qua `PATCH /handover/:id/recount-actual`.
-  5. *Bước 5 (Đối tác kiểm nhận đồ sạch):* Đối tác kiểm nhận số lượng đồ sạch đã nhận, ký xác nhận qua `PATCH /handover/:id/partner-check-signature`, chuyển trạng thái phiếu sang `COMPLETED`.
+  3. *Bước 3 (Shipper nhận & bàn giao):* Shipper kiểm đếm, xác nhận qua `PATCH /handover/:id/shipper-confirm`. Hỗ trợ kích hoạt đếm lại `recount: { isRecount: true, status: 'PENDING' }` nếu đối tác chưa đếm hoặc nghi ngờ sai lệch.
+  4. *Bước 4 (Trạm rạch bao đếm lại xưởng):* Lọc các phiếu có `recount.isRecount === true` hoặc đồ bẩn trống số, thợ xưởng cập nhật số thực tế qua `PATCH /handover/:id/recount-actual`.
+  5. *Bước 5 (Đối tác kiểm nhận đồ sạch):* Đối tác kiểm nhận số lượng đồ sạch đã nhận, ký xác nhận qua `PATCH /handover/:id/partner-check-signature`, chuyển trạng thái phiếu sang hoàn thành dựa trên chữ ký thực tế.
 - **Thư viện ảnh phiếu (`GET /handover/slip-gallery`):** Cho phép xem ảnh phiếu giao nhận theo ngày, thương hiệu, chi nhánh và khoảng thời gian.
 
 #### BE-FR-04: Chấm Công Camera Selfie & Công Thợ Theo Thời Gian x Hệ Số (`/api/v1/internal/attendance`, `/piecework`)

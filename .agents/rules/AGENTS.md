@@ -7,11 +7,12 @@ Tài liệu này là nguồn quy ước chung cho mọi agent và workflow trong
 - **Dẫn chứng:** Mọi nhận định về code hiện có phải kèm `path:line`. Chưa xác minh được thì nêu rõ trong câu hỏi.
 - **Nguồn sự thật:** Code là hiện trạng; Plan là ý định thay đổi; `.agents/docs/SRS_SDD.md` phản ánh kiến trúc tổng thể và thư mục `.agents/docs/srs_sdd/` (`srs_sdd_backend.md`, `srs_sdd_fe_nextjs.md`, `srs_sdd_fe_internal.md`) phản ánh chi tiết từng phân hệ sau mỗi thay đổi hoàn tất.
 - **An toàn:**
-  - Không commit/push trừ khi người dùng yêu cầu rõ.
+  - **Tự động commit và push lên nhánh `dev`:** Khi hoàn thành mỗi task/tính năng (sau khi đã chạy lint/typecheck/test/build pass), Agent tự động commit và push code lên nhánh `dev` của ứng dụng hoặc repository tương ứng.
+  - **Quy chuẩn thông điệp commit:** Viết bằng tiếng Việt tự nhiên, giữ nguyên thuật ngữ kỹ thuật/chuyên ngành bằng tiếng Anh (ví dụ: `feat(handovers): thêm Service xử lý kiểm kê và đồng bộ DTO`, `fix(auth): sửa lỗi Guard kiểm tra audience JWT`).
+  - **Bảo vệ môi trường Production (`master`):** Không bao giờ push trực tiếp lên nhánh `master`. Nhánh `master` chỉ dùng khi người dùng yêu cầu merge/trigger phát hành lên Production VPS.
   - Không chạy lệnh phá hủy (`git reset --hard`, `rm -rf`, drop DB, force push).
   - Không đọc/in giá trị trong `.env`, secrets, token; chỉ nhắc tên biến.
   - Không tự ý cài dependency mới ngoài plan đã duyệt.
-  - Không đụng vào thay đổi chưa commit không thuộc phạm vi công việc.
   - Không chạy lệnh ghi/xóa trực tiếp trên database thật.
 - **Dừng và hỏi:** Hỏi thay vì tự đoán khi yêu cầu mơ hồ ảnh hưởng lớn đến kiến trúc hoặc cần vượt phạm vi đã định.
 
@@ -58,6 +59,7 @@ Một thay đổi coi là xong khi:
 7. Tài liệu phân hệ tương ứng (`.agents/docs/srs_sdd/srs_sdd_<app>.md`) và `SRS_SDD.md` (nếu có đổi tổng thể) phản ánh đúng thay đổi, kèm 1 dòng Document History ở `SRS_SDD.md`.
 8. Code sạch sẽ, không còn log debug, mock data thừa hay TODO chưa giải quyết.
 9. **Xóa bỏ triệt để file/alias tương thích ngược tạm thời:** Các file re-export hoặc alias tạo ra trong quá trình refactor/đổi tên (DTO, Schema, Type...) chỉ là giải pháp tạm thời để chống lỗi compile tức thời giữa các bước trung gian. Khi hoàn tất code, BẮT BUỘC xóa bỏ các file re-export này, cập nhật mọi nơi gọi trỏ trực tiếp vào file mới, rồi mới được chạy test/build để verify.
+10. **Tự động Commit & Push lên nhánh `dev`:** Sau khi hoàn thành và verify toàn bộ các tiêu chí trên, Agent tự động tạo commit với thông điệp tiếng Việt tự nhiên (giữ nguyên thuật ngữ kỹ thuật tiếng Anh) và push lên nhánh `dev` của ứng dụng/repo liên quan. Không tự ý merge hay push vào nhánh `master`.
 
 ## 5. Quy tắc code bắt buộc
 
@@ -107,8 +109,12 @@ Một thay đổi coi là xong khi:
 
 ## 6. Deployment & CI/CD
 
+- **Phân định vai trò các nhánh (Branch Strategy & CI/CD):**
+  - **Nhánh `dev`:** Nhánh phát triển hàng ngày của lập trình viên và Agent. Push code lên `dev` **không kích hoạt GitHub Actions workflow** (không build/push Docker image hay bundle) để tiết kiệm tối đa phút chạy của GitHub Actions. Việc verify test/build đã được Agent tự kiểm tra ở local trước khi commit.
+  - **Nhánh `build`:** Nhánh kiểm thử CI. Khi merge code vào `build`, GitHub Actions sẽ tự động kích hoạt build và push image lên GHCR / build bundle tĩnh để kiểm thử toàn diện.
+  - **Nhánh `master`/`main`:** Nhánh phát hành Production (CD). Khi merge code vào nhánh `master`/`main`, GitHub Actions tự động build image/static bundle -> Push GHCR/SCP -> SSH vào VPS pull image và `docker compose up -d` để triển khai Production.
 - **Build Docker Image chỉ thực hiện trên GitHub Actions.** Tuyệt đối không chạy `docker-compose build` trực tiếp trên VPS để tránh tràn tài nguyên.
-- **Quy trình deploy:** GitHub Actions build image -> Push GHCR -> SSH vào VPS pull image và `docker compose up -d`.
+- **Quy trình deploy:** Code được merge vào nhánh `master` -> GitHub Actions build image/static bundle -> Push GHCR/SCP -> SSH vào VPS pull image và `docker compose up -d`.
 - **Biến môi trường:** Biến client (`NEXT_PUBLIC_*`, `VITE_*`) truyền qua GitHub Secrets dạng Build Arguments khi build image; biến bí mật Backend nằm trong file `.env` trên VPS.
 
 ## 7. Bảng Nhận Diện Ý Định Tiếng Việt Tự Nhiên (Intent Classifier)
