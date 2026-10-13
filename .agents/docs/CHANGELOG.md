@@ -4,6 +4,40 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
 
 ## 2026-10-13
 
+### Plan 28: Chuẩn Hóa Toàn Diện Schema & Dọn Rác Dữ Liệu Các Bảng (Accounts, ItemCatalogs, HandoverRecords) (`be-nestjs-thanhxuan`, `fe-react-thanhxuan-internal`)
+- **Động lực & Vấn đề giải quyết:**
+  - Sau quá trình rà soát CSDL và các Mongoose Schemas, phát hiện một số bảng vẫn tồn tại trường dữ liệu thừa, không đúng chuẩn hoặc lệch tên so với nghiệp vụ thực tế:
+    1. Bảng `accounts`: Tồn tại cả 2 trường `role` và `roles: string[]` gây dư thừa dữ liệu (trong khi RBAC và Guard chỉ sử dụng `role: StaffRole`). Trường `pay_profile` bị gán mặc định `default: () => ({})` với 3 số 0 cho mọi tài khoản Quản lý/Đối tác, sinh rác dữ liệu không cần thiết.
+    2. Bảng `item_catalogs`: Tồn đọng các trường khoán thợ cũ (`foldingRateWorker`, `ironingRateWorker`) trong MongoDB Atlas mặc dù công ty đã chuyển sang tính công thợ theo thời gian $\times$ hệ số loại việc (`hourly_work`). Schema cũ viết nhầm `customerPrice` trong khi báo cáo và interceptor sử dụng `priceToCustomer`. Bảng thiếu vị trí rõ ràng cho 2 trường cốt lõi `priceToCustomer` và `sortOrder`.
+    3. Bảng `handover_records`: Mongoose tự động khởi tạo mảng `notes: []` rỗng cho mọi phiếu mới tạo nếu không khai báo `default: undefined`.
+- **Backend API & CSDL MongoDB (`be-nestjs-thanhxuan`):**
+  - **Chuẩn hóa Bảng `accounts` (`staff-account.schema.ts`):**
+    * Xóa bỏ hoàn toàn trường `roles: string[]`, thống nhất sử dụng `role: StaffRole` làm Single Source of Truth duy nhất.
+    * Bỏ giá trị khởi tạo rỗng `default: () => ({})` của `pay_profile`, chỉ lưu khi tài khoản thợ hoặc shipper có cấu hình lương thực tế.
+    * Cập nhật `account-management.service.ts`, `account-auth.service.ts`, `account-seed.service.ts`: Bỏ gán `roles = [dto.role]`, map response `roles: [account.role]` để đảm bảo tương thích ngược.
+    * Cập nhật `InternalJwtStrategy` và `PermissionsGuard` fallback tự động `user.roles || (user.role ? [user.role] : [])`.
+  - **Chuẩn hóa Bảng `item_catalogs` (`item-catalog.schema.ts`):**
+    * Chuẩn hóa hoàn chỉnh đúng **8 trường cốt lõi**: `itemCode`, `brand`, `name`, `unit`, `priceToCustomer`, `sortOrder`, `imageUrl`, `isActive`.
+    * Đổi tên trường từ `customerPrice` sang `priceToCustomer` (đơn giá dịch vụ thu đối tác, VND, bảo mật qua `PayFieldFilterInterceptor` chỉ Admin/Kế toán thấy).
+    * Bổ sung `priceToCustomer` vào `CreateItemCatalogDto` và `UpdateItemCatalogDto` cùng logic lưu/cập nhật tại `PartnersService`.
+    * Đồng bộ hóa trực tiếp với `partner-report.service.ts`.
+  - **Triệt tiêu mảng rỗng mặc định trong `handover_records` (`handover-record.schema.ts`):**
+    * Khai báo `@Prop({ type: [HandoverItemNoteSchema], default: undefined }) notes?: HandoverItemNote[];` ngăn chặn Mongoose tự động sinh `notes: []`.
+  - **Thực thi Dọn dẹp CSDL Thực tế (`drop-legacy-collections.ts`):**
+    * Bổ sung script migration `$unset` cho các trường thừa: gỡ bỏ `roles` khỏi 8 tài khoản, gỡ bỏ `pay_profile` rỗng khỏi 6 tài khoản quản lý, gỡ bỏ `foldingRateWorker`, `ironingRateWorker`, `customerPrice` khỏi 14 món đồ giặt, và gỡ bỏ `notes: []` rỗng khỏi phiếu giao nhận.
+    * Chạy lệnh `pnpm run db:drop-legacy` thành công 100% trên MongoDB Atlas.
+- **Frontend Vận Hành (`fe-react-thanhxuan-internal`):**
+  - Đồng bộ `AuthContext.tsx`: Fallback `roles: rawUser.roles || (rawUser.role ? [rawUser.role] : [])` trong cả hàm `fetchMe` và `login`.
+  - Chuẩn hóa interface `ItemCatalog` trong `src/types/index.ts` ưu tiên `priceToCustomer` và `sortOrder`.
+- **Tài liệu Kỹ thuật & Đồng bộ Hóa:**
+  - Cập nhật mục 1.1 `accounts`, mục 1.7 `item_catalogs` (đúng 8 trường cốt lõi) và mục 1.8 `handover_records` trong [DATABASE_DICTIONARY.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/DATABASE_DICTIONARY.md).
+  - Cập nhật phân hệ [srs_sdd_backend.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_backend.md) và [SRS_SDD.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/SRS_SDD.md).
+  - Hoàn tất toàn bộ checklist trong [plan28.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/plans/plan28.md).
+- **Kiểm thử & Nghiệm thu:**
+  - `pnpm exec tsc --noEmit` pass 100% trên cả Backend và Frontend.
+  - `pnpm build` pass 100% trên cả 2 ứng dụng (`be-nestjs-thanhxuan` và `fe-react-thanhxuan-internal`).
+  - Dữ liệu MongoDB Atlas thực tế qua verification script hoàn toàn sạch sẽ, không còn trường thừa.
+
 ### Plan 27: Tinh Gọn Triệt Để Bản Ghi HandoverRecord - Loại Bỏ Lặp Base64 Chữ Ký & Mảng Mặc Định Rỗng (`be-nestjs-thanhxuan`, `fe-react-thanhxuan-internal`)
 - **Động lực & Vấn đề giải quyết:**
   - Sau khi loại bỏ trường `status` ở Plan 26, dữ liệu bản ghi `HandoverRecord` trong MongoDB Atlas vẫn còn bị phình to do nhân đôi chuỗi Base64 chữ ký (~30KB-50KB/bản ghi) tại cả `cleanClothes.preparedBySignature` và `signatures.warehouseManager.signature`.

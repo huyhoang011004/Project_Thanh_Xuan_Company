@@ -24,6 +24,8 @@ Backend API tập trung phục vụ toàn bộ các kênh tương tác của Cô
 - **Khởi tạo Quản lý Đối tác:** Tài khoản `PARTNER_MANAGER` chỉ được khởi tạo bởi `ADMIN` hoặc `MANAGER` trong phân hệ Quản lý nhân sự kèm ràng buộc chọn `brand` và `partnerId`.
 - **Quản lý nhân sự & Tạm khóa 60 ngày:**
   - Hỗ trợ thêm/sửa nhân sự, tạm khóa (`LOCKED`) và mở khóa (`ACTIVE`).
+  - Single Source of Truth cho phân quyền vai trò là duy nhất trường `role: StaffRole` (đã loại bỏ hoàn toàn mảng `roles: string[]` trùng lặp).
+  - Cấu hình lương `pay_profile` chỉ khởi tạo khi tài khoản thợ xưởng hoặc tài xế được thiết lập lương thực tế, không sinh object rỗng mặc định cho các tài khoản quản lý hay đối tác.
   - Ghi nhận `lockedAt` khi tạm khóa. Cơ chế dọn dẹp tự động (`cleanupExpiredLockedAccounts`): Tự động xóa vĩnh viễn các tài khoản có `status === 'LOCKED'` đã quá 60 ngày.
   - Xóa tài khoản vĩnh viễn (`DELETE /accounts/:id`): Chỉ dành riêng cho vai trò `ADMIN` (MANAGER không có quyền xóa).
 - **Hồ sơ cá nhân & Upload Avatar Cloudinary:**
@@ -42,16 +44,18 @@ Backend API tập trung phục vụ toàn bộ các kênh tương tác của Cô
   - Xoay vòng Refresh Token Rotation: Mỗi lần refresh sẽ thu hồi token cũ và sinh cặp token mới; phát hiện dùng lại token đã thu hồi sẽ khóa toàn bộ phiên.
   - Phân vùng dữ liệu (Scope Isolation): `PartnerScopeGuard` tự động cô lập truy vấn của tài khoản đối tác theo đúng `partnerId`.
 - **Bảo mật tài chính đa tầng (`PayFieldFilterInterceptor`):**
-  - Đệ quy duyệt và bóc tách toàn bộ trường tiền/lương (`rate`, `totalEarnings`, `estimatedPrice`, `amount`, `salary`...) khỏi JSON response khi user không có quyền `pay.view` (đặc biệt là Quản lý xưởng `MANAGER` và Quản lý kho `WAREHOUSE_MANAGER`).
+  - Đệ quy duyệt và bóc tách toàn bộ trường tiền/lương (`rate`, `totalEarnings`, `estimatedPrice`, `amount`, `salary`, `priceToCustomer`...) khỏi JSON response khi user không có quyền `pay.view` (đặc biệt là Quản lý xưởng `MANAGER` và Quản lý kho `WAREHOUSE_MANAGER`).
 
 #### BE-FR-02: Quản Lý Đối Tác & Danh Mục Bảng Giá (`/api/v1/internal/partners`)
 - **Thông tin đối tác:** Quản lý danh sách các chuỗi đối tác (Pizza 4P's, Haidilao Hotpot, Golden Gate...), địa chỉ chi nhánh, người liên hệ, tần suất giao nhận (`DAILY`, `ALTERNATE_DAYS`), ca giao nhận mặc định (`deliveryShift`: `MORNING` / `EVENING`).
 - **Mã viết tắt đối tác (`shortCode`):** Bắt buộc thiết lập khi tạo và sửa chi nhánh đối tác (ví dụ: `TT` cho Tràng Tiền, `TDH` cho Trần Duy Hưng). Lưu trữ uppercase, index unique để làm tiền tố sinh mã phiếu giao nhận.
 - **Lịch giao nhận trong ngày (`/schedule`):** Tự động tính toán các chi nhánh cần giao trong ngày theo múi giờ `Asia/Ho_Chi_Minh` (đối với lịch cách ngày, tính theo chẵn/lẻ số ngày trong năm).
-- **Danh mục đồ giặt & Đơn giá khoán (`item_catalogs`):**
-  - Quản lý mã đồ giặt theo thương hiệu đối tác (ví dụ `4PS_GRAY_TOWEL`, `4PS_APRON`...).
-  - Thiết lập đơn giá khoán thợ (`foldingRateWorker`, `ironingRateWorker`, `packingRateWorker`).
+- **Danh mục đồ giặt & Đơn giá dịch vụ (`item_catalogs`):**
+  - Quản lý chuẩn hóa đúng **8 trường cốt lõi** (`itemCode`, `brand`, `name`, `unit`, `priceToCustomer`, `sortOrder`, `imageUrl`, `isActive`).
+  - `priceToCustomer`: Đơn giá dịch vụ thu đối tác phục vụ báo cáo doanh thu & đối soát công nợ (bảo mật qua interceptor chỉ Admin/Kế toán thấy).
+  - `sortOrder`: Thứ tự sắp xếp hiển thị cố định trên bảng đếm đồ và phiếu in A4.
   - Hỗ trợ ảnh chụp mẫu đồ giặt lưu trữ Cloudinary kèm cơ chế xóa ảnh cũ khi cập nhật.
+  - Loại bỏ hoàn toàn mô hình khoán thợ đơn chiếc cũ do công ty đã chuyển sang tính công thợ theo thời gian $\times$ hệ số loại việc (`hourly_work`).
 
 #### BE-FR-03: Phiếu Giao Nhận Kép & Quy Trình 5 Bước Vận Hành (`/api/v1/internal/handover`)
 - **Tự sinh mã phiếu chuẩn hóa:** Sinh mã định dạng `GN-XXX-DDMMYYYY` (với `XXX` là `shortCode` của partner viết hoa, `DDMMYYYY` theo ngày giao nhận giờ Việt Nam UTC+7). Nếu trùng phiếu trong ngày, cơ chế retry loop tự động thêm hậu tố phân biệt `-1`, `-2`.
