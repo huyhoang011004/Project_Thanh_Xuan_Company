@@ -1,8 +1,9 @@
 # Plan 23: Tái Cấu Trúc Module Biên Bản Giao Nhận (Handover Record) & Trải Nghiệm Vận Hành
 
-> Status: In progress | Created: 2026-10-11 | Updated: 2026-10-11
+> Status: Done | Created: 2026-10-11 | Updated: 2026-10-11
 
 ## 1. Overview & Affected Files
+
 
 ### 1.1. Mục tiêu
 Chuẩn hóa và tái cấu trúc toàn diện phân hệ Biên bản giao nhận (`HandoverRecord`) trên cả Backend NestJS (`be-nestjs-thanhxuan`) và Frontend React Internal (`fe-react-thanhxuan-internal`), bao gồm:
@@ -189,41 +190,41 @@ async generateRecordCode(recordDate: string, maxRetries = 3): Promise<{ recordCo
 ## 3. Implementation Tasks (Checklist)
 
 ### Giai đoạn 1: Backend Schemas, DTOs & Xóa bỏ RecountTask
-- [ ] T1: Xóa bỏ collection `recount_tasks`: Xóa `recount-task.schema.ts`, `recount-task.repository.ts`, `recount-tasks.controller.ts`, gỡ bỏ khỏi `handovers.module.ts`. - Depends on: none
-- [ ] T2: Tái cấu trúc `handover-record.schema.ts`: Định nghĩa `recordDate`, `warehouseManagerId`, `cleanClothes`, `dirtyClothes` (có `countedByRole`), `recount`, `signatures`, `slipImageUrl`; cập nhật Unique Indexes `{ partnerId: 1, recordDate: 1, seq: 1 }`. - Depends on: T1
-- [ ] T3: Cập nhật các DTO trong `be-nestjs-thanhxuan/src/modules/internal/handovers/dto/`: Tạo/sửa `create-handover.dto.ts`, `clean-clothes.dto.ts`, `dirty-clothes.dto.ts`, `recount.dto.ts`, `handover-sign.dto.ts`. - Depends on: T2
-- [ ] T4: Cập nhật `handover-record.repository.ts`: Thêm method `findLatestByPrefix(prefix: string)` và `existsByRecordCode(code: string)` để hỗ trợ tự sinh số thứ tự `seq` mà không cần Counter collection. - Depends on: T2
+- [x] T1: Xóa bỏ collection `recount_tasks`: Xóa `recount-task.schema.ts`, `recount-task.repository.ts`, `recount-tasks.controller.ts`, gỡ bỏ khỏi `handovers.module.ts`. - Depends on: none
+- [x] T2: Tái cấu trúc `handover-record.schema.ts`: Định nghĩa `recordDate`, `warehouseManagerId`, `cleanClothes`, `dirtyClothes` (có `countedByRole`), `recount`, `signatures`, `slipImageUrl`; cập nhật Unique Indexes `{ partnerId: 1, recordDate: 1, seq: 1 }`. - Depends on: T1
+- [x] T3: Cập nhật các DTO trong `be-nestjs-thanhxuan/src/modules/internal/handovers/dto/`: Tạo/sửa `create-handover.dto.ts`, `clean-clothes.dto.ts`, `dirty-clothes.dto.ts`, `recount.dto.ts`, `handover-sign.dto.ts`. - Depends on: T2
+- [x] T4: Cập nhật `handover-record.repository.ts`: Thêm method `findLatestByPrefix(prefix: string)` và `existsByRecordCode(code: string)` để hỗ trợ tự sinh số thứ tự `seq` mà không cần Counter collection. - Depends on: T2
 
 ### Giai đoạn 2: Backend Services, Cloudinary Upload & Controllers
-- [ ] T5: Sửa `handover-record.service.ts`: Cập nhật logic tự sinh `recordCode` kèm retry loop; lưu `recordDate`, `warehouseManagerId`; bổ sung helper upload Base64 WebP lên Cloudinary và xóa ảnh cũ bất đồng bộ. - Depends on: T3, T4
-- [ ] T6: Sửa `handover-flow.service.ts`: Cập nhật các luồng `recordPartnerCount`, `recordCleanClothes`, `deliver`, `receiptCheck` theo schema mới; xử lý `countedByRole: 'SHIPPER'`; tự động cập nhật `signatures` và `slipImageUrl`. - Depends on: T5
-- [ ] T7: Tái cấu trúc `handover-recount.service.ts`: Chuyển logic yêu cầu đếm lại và hoàn tất đếm lại vào trường `dirtyClothes.actualQuantity` và `recount` của `HandoverRecord`, cập nhật ảnh phiếu. - Depends on: T5, T6
-- [ ] T8: Cập nhật `handover.controller.ts`: Cập nhật route endpoints, permissions và param tương ứng. - Depends on: T6, T7
-- [ ] T9: Cập nhật tương thích ngược trong các service báo cáo (`warehouse-report.service.ts`, `partner-report.service.ts`, `report-export.service.ts`, `pdf-export.service.ts`). - Depends on: T6
+- [x] T5: Sửa `handover-record.service.ts`: Cập nhật logic tự sinh `recordCode` kèm retry loop; lưu `recordDate`, `warehouseManagerId`; bổ sung helper upload Base64 WebP lên Cloudinary và xóa ảnh cũ bất đồng bộ. - Depends on: T3, T4
+- [x] T6: Sửa `handover-flow.service.ts`: Cập nhật các luồng `recordPartnerCount`, `recordCleanClothes`, `deliver`, `receiptCheck` theo schema mới; xử lý `countedByRole: 'SHIPPER'`; tự động cập nhật `signatures` và `slipImageUrl`. - Depends on: T5
+- [x] T7: Tái cấu trúc `handover-recount.service.ts`: Chuyển logic yêu cầu đếm lại và hoàn tất đếm lại vào trường `dirtyClothes.actualQuantity` và `recount` của `HandoverRecord`, cập nhật ảnh phiếu. - Depends on: T5, T6
+- [x] T8: Cập nhật `handover.controller.ts`: Cập nhật route endpoints, permissions và param tương ứng. - Depends on: T6, T7
+- [x] T9: Cập nhật tương thích ngược trong các service báo cáo (`warehouse-report.service.ts`, `partner-report.service.ts`, `report-export.service.ts`, `pdf-export.service.ts`). - Depends on: T6
 
 ### Giai đoạn 3: Frontend TypeScript Types & Canvas Helper
-- [ ] T10: Cập nhật `fe-react-thanhxuan-internal/src/types/index.ts`: Cập nhật interface `HandoverRecord`, `CleanClothes`, `DirtyClothes`, `RecountInfo`, `HandoverSignatures`. - Depends on: T2
-- [ ] T11: Cập nhật `fe-react-thanhxuan-internal/src/features/operations/handovers/HandoverExportHelper.ts`: Cập nhật hàm `renderHandoverDeliverySlipToCanvas` để vẽ đầy đủ thông tin từ `cleanClothes`, `dirtyClothes` (phân biệt người đếm nếu là shipper), và 4 chữ ký từ `signatures`. - Depends on: T10
+- [x] T10: Cập nhật `fe-react-thanhxuan-internal/src/types/index.ts`: Cập nhật interface `HandoverRecord`, `CleanClothes`, `DirtyClothes`, `RecountInfo`, `HandoverSignatures`. - Depends on: T2
+- [x] T11: Cập nhật `fe-react-thanhxuan-internal/src/features/operations/handovers/HandoverExportHelper.ts`: Cập nhật hàm `renderHandoverDeliverySlipToCanvas` để vẽ đầy đủ thông tin từ `cleanClothes`, `dirtyClothes` (phân biệt người đếm nếu là shipper), và 4 chữ ký từ `signatures`. - Depends on: T10
 
 ### Giai đoạn 4: Frontend UI Vận Hành (Warehouse, Shipper, Partner, Recount)
-- [ ] T12: Cập nhật `PrepOrderModal.tsx`:
+- [x] T12: Cập nhật `PrepOrderModal.tsx`:
   - Lưu đúng `cleanClothes`, `recordDate`, `warehouseManagerId`.
   - **Tích hợp khung Canvas Preview trực tiếp ngay phía trên nút Lưu** để Thủ kho xem trước phiếu hoàn chỉnh trước khi lưu.
   - Khi bấm Lưu: Nén canvas sang WebP Base64 gửi lên Backend để lưu link ảnh Cloudinary. - Depends on: T11
-- [ ] T13: Cải tiến giao diện Shipper `HandoverListPage.tsx` & bóc tách `ShipperHandoverItemCardComponent.tsx`:
+- [x] T13: Cải tiến giao diện Shipper `HandoverListPage.tsx` & bóc tách `ShipperHandoverItemCardComponent.tsx`:
   - Hiển thị danh sách chi nhánh đối tác được phân công trong ngày.
   - Mỗi chi nhánh có nút chuyển sang chế độ đếm đồ thay đối tác khi quán vắng người (lưu `countedByRole: 'SHIPPER'`).
   - Khung xem ảnh `slipImageUrl`, nút phóng to / tải ảnh.
   - Tùy chọn checkbox: "Chưa đếm đồ bẩn" / "Yêu cầu xưởng đếm lại".
   - Ô ký tên kèm ô nhập họ tên (mặc định lấy tên tài khoản shipper đang đăng nhập), bấm Lưu -> gửi chữ ký và cập nhật lại ảnh có chữ ký. - Depends on: T11
-- [ ] T14: Cập nhật `PartnerCountTabComponent.tsx`: Hiển thị Canvas phiếu xem trước trực tiếp ngay phía trên nút Lưu (không cần mở Modal sau khi lưu). - Depends on: T11
-- [ ] T15: Cập nhật `PartnerReceiptTabComponent.tsx`: Đổi từ cơ chế vẽ lại Canvas sang hiển thị trực tiếp thẻ `<img>` load link ảnh `slipImageUrl` từ Cloudinary; cho phép ký tên kiểm nhận và lưu ảnh cập nhật. - Depends on: T11
-- [ ] T16: Cập nhật `RecountStationPage.tsx`: Cập nhật giao diện đếm lại tại xưởng: lấy danh sách phiếu có `recount.isRecount = true`, form đếm tương tự đối tác nhưng không cần ký tên; lưu vào `dirtyClothes.actualQuantity` và cập nhật ảnh mới. - Depends on: T11
+- [x] T14: Cập nhật `PartnerCountTabComponent.tsx`: Hiển thị Canvas phiếu xem trước trực tiếp ngay phía trên nút Lưu (không cần mở Modal sau khi lưu). - Depends on: T11
+- [x] T15: Cập nhật `PartnerReceiptTabComponent.tsx`: Đổi từ cơ chế vẽ lại Canvas sang hiển thị trực tiếp thẻ `<img>` load link ảnh `slipImageUrl` từ Cloudinary; cho phép ký tên kiểm nhận và lưu ảnh cập nhật. - Depends on: T11
+- [x] T16: Cập nhật `RecountStationPage.tsx`: Cập nhật giao diện đếm lại tại xưởng: lấy danh sách phiếu có `recount.isRecount = true`, form đếm tương tự đối tác nhưng không cần ký tên; lưu vào `dirtyClothes.actualQuantity` và cập nhật ảnh mới. - Depends on: T11
 
 ### Giai đoạn 5: Kiểm Thử, Đồng Bộ Tài Liệu & Baseline Verification
-- [ ] T17: Chạy kiểm tra lint & build trên cả 2 phân hệ `be-nestjs-thanhxuan` và `fe-react-thanhxuan-internal`. - Depends on: T12, T13, T14, T15, T16
-- [ ] T18: Chạy unit tests cho các luồng nghiệp vụ Backend Handover. - Depends on: T17
-- [ ] T19: Cập nhật tài liệu kỹ thuật: `.agents/docs/DATABASE_DICTIONARY.md`, `.agents/docs/srs_sdd/srs_sdd_backend.md`, `.agents/docs/srs_sdd/srs_sdd_fe_internal.md`, `.agents/docs/SRS_SDD.md`, và ghi nhật ký vào `CHANGELOG.md`. - Depends on: T18
+- [x] T17: Chạy kiểm tra lint & build trên cả 2 phân hệ `be-nestjs-thanhxuan` và `fe-react-thanhxuan-internal`. - Depends on: T12, T13, T14, T15, T16
+- [x] T18: Chạy unit tests cho các luồng nghiệp vụ Backend Handover. - Depends on: T17
+- [x] T19: Cập nhật tài liệu kỹ thuật: `.agents/docs/DATABASE_DICTIONARY.md`, `.agents/docs/srs_sdd/srs_sdd_backend.md`, `.agents/docs/srs_sdd/srs_sdd_fe_internal.md`, `.agents/docs/SRS_SDD.md`, và ghi nhật ký vào `CHANGELOG.md`. - Depends on: T18
 
 ---
 
@@ -277,6 +278,18 @@ async generateRecordCode(recordDate: string, maxRetries = 3): Promise<{ recordCo
 
 ---
 
+## 6. Execution Log
+
+- **2026-10-11 - Hoàn tất thực thi 19/19 Tasks**:
+  - Backend: Tái cấu trúc hoàn tất `HandoverRecord`, xóa bỏ `recount_tasks`, sinh mã nguyên tử bằng regex `findLatestByPrefix`, chuẩn hóa múi giờ VN `recordDate`, thêm `warehouseManagerId`, 4 chữ ký độc lập, nén WebP tải Cloudinary `slipImageUrl` và dọn ảnh cũ bất đồng bộ. Dual-read backward compatibility cho báo cáo. Chạy kiểm thử tự động `pnpm test src/modules/internal/handovers` **PASS 35/35 tests**, `pnpm build` **PASS 100%**.
+  - Frontend: Cập nhật types, Canvas export helper, thêm `PrepOrderSlipPreviewComponent`, `ShipperHandoverItemCardComponent`, `ShipperCountPartnerModal`. Thủ kho & Đối tác xem trước Canvas trước khi lưu; Shipper đếm thay đối tác; Tab kiểm nhận hiển thị trực tiếp ảnh Cloudinary; Trạm đếm xưởng không cần ký tên. Typecheck `tsc --noEmit` **PASS 100%**, `vite build` **PASS 100%**.
+  - Tài liệu: Đồng bộ [DATABASE_DICTIONARY.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/DATABASE_DICTIONARY.md), [srs_sdd_backend.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_backend.md), [srs_sdd_fe_internal.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_internal.md), [CODEBASE_ATLAS.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/CODEBASE_ATLAS.md), [SRS_SDD.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/SRS_SDD.md), và ghi nhật ký vào [CHANGELOG.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/CHANGELOG.md).
+- Status: **Done**.
+
+---
+
 ## Changelog
 - 2026-10-11: Khởi tạo Plan 23 tái cấu trúc module Handover Record, tích hợp Cloudinary lifecycle và trải nghiệm vận hành cho Warehouse, Shipper, Partner, Recount.
 - 2026-10-11: Cập nhật Plan 23: Tích hợp Canvas Preview trước khi lưu cho Thủ kho trong `PrepOrderModal`; áp dụng toàn diện 6 giải pháp kiến trúc tối ưu (Atomic Retry loop sinh mã, Cloudinary async deletion, WebP client compression, cờ `countedByRole` minh bạch cho Shipper, tab Kiểm nhận hiển thị trực tiếp ảnh từ Cloudinary, và fallback đọc kép báo cáo thống kê).
+- 2026-10-11: Thực thi hoàn tất 100% toàn bộ 19 tasks kỹ thuật và cập nhật tài liệu đồng bộ toàn hệ sinh thái.
+

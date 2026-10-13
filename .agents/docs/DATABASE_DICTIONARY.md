@@ -1,10 +1,10 @@
 # TỪ ĐIỂN CƠ SỞ DỮ LIỆU TOÀN HỆ THỐNG (DATABASE DATA DICTIONARY)
 
 > **Hệ sinh thái:** Công ty Giặt Sấy Thanh Xuân (Thanh Xuan Laundry & Moving Company)
-> **Phiên bản:** 2.0 | **Ngày cập nhật:** 2026-10-10
+> **Phiên bản:** 2.2 | **Ngày cập nhật:** 2026-10-13
 > **Kiến trúc dữ liệu:** Multi-Database Isolation trên MongoDB (4 Databases độc lập)
-> **Tổng số bảng (Collections):** 34 Collections
-> **Quy chuẩn duy trì:** Mọi thay đổi Schema trong Backend NestJS bắt buộc cập nhật đồng bộ file này theo Definition of Done trong [AGENTS.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/rules/AGENTS.md).
+> **Tổng số bảng (Collections):** 32 Collections
+> **Quy chuẩn duy trì:** Mọi thay đổi Schema trong Backend NestJS bắt buộc cập nhật đồng bộ file này theo Definition of Done trong [AGENTS.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/rules/AGENTS.md). Xóa bỏ hoàn toàn bảng đã xóa khỏi tài liệu và chạy script dọn dẹp DB thực tế.
 
 ---
 
@@ -13,39 +13,39 @@
 ```mermaid
 graph TD
     subgraph Multi_Database_Topology ["Hạ Tầng 4 MongoDB Độc Lập"]
-        DB_Internal[("1. internal_express<br/>16 Collections - Vận hành, Đối tác, Lương")]
+        DB_Internal[("1. internal_express<br/>14 Collections - Vận hành, Đối tác, Lương")]
         DB_Laundry[("2. laundry_express<br/>11 Collections - Website B2B, SEO, CRM")]
         DB_Moving[("3. moving_express<br/>3 Collections - Khảo sát chuyển nhà")]
         DB_Core[("4. core_express<br/>4 Collections - Audit, Media, Idempotency, Notifications")]
     end
 ```
 
-| Phân Vùng CSDL  | Tên Database MongoDB | Số Collections | Trọng Tâm Nghiệp Vụ                                                                                                                                   |
-| :-------------- | :------------------- | :------------: | :---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Phân Vùng 1** | `internal_express`   |     **16**     | Tài khoản nội bộ, đối tác nhà hàng, phiếu giao nhận kép, trạm rạch bao đếm lại xưởng, chấm công selfie, khoán thợ, hoàn tiền xăng, bảng lương chu kỳ. |
-| **Phân Vùng 2** | `laundry_express`    |     **11**     | Website khách hàng`thanhxuanlaundry.com`, CMS bài viết chuẩn SEO, đơn hàng giặt ủi, CRM khách hàng, chiến dịch Email & Zalo OA Marketing.             |
-| **Phân Vùng 3** | `moving_express`     |     **3**      | Website dịch vụ chuyển nhà`chuyennhatietkiem.vn`, khảo sát báo giá cước vận tải xe tải, danh mục xe tải & cẩm nang chuyển nhà.                        |
-| **Phân Vùng 4** | `core_express`       |     **4**      | Kết nối qua`CORE_CONNECTION`: Nhật ký kiểm toán bảo mật (Audit Log), file media Cloudinary, khóa chống trùng lặp (Idempotency), thông báo in-app.     |
+| Phân Vùng CSDL  | Tên Database MongoDB | Số Collections | Trọng Tâm Nghiệp Vụ                                                                                                                                            |
+| :-------------- | :------------------- | :------------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Phân Vùng 1** | `internal_express`   |     **14**     | Tài khoản nội bộ, thương hiệu & đối tác, danh mục đồ, phiếu giao nhận kép, chấm công selfie, công thợ theo giờ (`hourly_work`), chi phí xe, bảng lương chu kỳ. |
+| **Phân Vùng 2** | `laundry_express`    |     **11**     | Website khách hàng`thanhxuanlaundry.com`, CMS bài viết chuẩn SEO, đơn hàng giặt ủi, CRM khách hàng, chiến dịch Email & Zalo OA Marketing.                      |
+| **Phân Vùng 3** | `moving_express`     |     **3**      | Website dịch vụ chuyển nhà`chuyennhatietkiem.vn`, khảo sát báo giá cước vận tải xe tải, danh mục xe tải & cẩm nang chuyển nhà.                                 |
+| **Phân Vùng 4** | `core_express`       |     **4**      | Kết nối qua`CORE_CONNECTION`: Nhật ký kiểm toán bảo mật (Audit Log), file media Cloudinary, khóa chống trùng lặp (Idempotency), thông báo in-app.              |
 
 ---
 
 # PHẦN 1: CƠ SỞ DỮ LIỆU `internal_express` (VẬN HÀNH NỘI BỘ & ĐỐI TÁC)
 
 Kết nối qua: `INTERNAL_CONNECTION`
-Phạm vi: Cổng vận hành xưởng, điều phối logistics, chấm công, khoán sản lượng và tính lương.
+Phạm vi: Cổng vận hành xưởng, điều phối logistics, chấm công, thời gian công thợ và tính lương.
 
 ```mermaid
 erDiagram
-    accounts ||--o{ handover_records : "shipperId / createdBy"
+    accounts ||--o{ handover_records : "shipperId / warehouseManagerId"
     accounts ||--o{ attendance_records : "staffId"
-    accounts ||--o{ piecework_logs : "workerId"
+    accounts ||--o{ hourly_work : "workerId"
     accounts ||--o{ fuel_logs : "shipperId"
     accounts ||--o{ payslips : "staffId"
+    brands ||--o{ partners : "brand"
     partners ||--o{ accounts : "partnerId"
     partners ||--o{ handover_records : "partnerId"
     brands ||--o{ item_catalogs : "brand"
-    item_catalogs ||--o{ piecework_logs : "itemCode"
-    handover_records ||--o| recount_tasks : "handoverId"
+    pay_settings ||--o{ hourly_work : "jobCoefficients"
     payroll_periods ||--o{ payslips : "periodId"
 ```
 
@@ -131,37 +131,38 @@ erDiagram
 
 ---
 
-### 1.5. Bảng `partners` (Partner)
-
-- **Mã nguồn:** [`partner.schema.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/partners/schemas/partner.schema.ts)
-- **Mục đích nghiệp vụ:** Quản lý danh bạ khách hàng chuỗi B2B (Nhà hàng Pizza 4P's Tràng Tiền, Haidilao Phạm Ngọc Thạch...). Lưu địa chỉ, cấu hình lịch giao định kỳ và thông tin người phụ trách.
-
-| Tên Trường          | Kiểu Dữ Liệu    |     Ràng Buộc / Mặc Định      | Index / Ref | Ý Nghĩa & Tác Dụng Nghiệp Vụ                                              |
-| :------------------ | :-------------- | :---------------------------: | :---------: | :------------------------------------------------------------------------ |
-| `partnerCode`       | `String`        |  Bắt buộc, Unique, uppercase  |   Unique    | Mã đối tác viết tắt (ví dụ:`4PS_HBT`, `HDL_LM81`).                        |
-| `brand`             | `String`        |      Bắt buộc, uppercase      |    Index    | Thương hiệu chuỗi nhà hàng (ví dụ:`PIZZA_4PS`, `HAIDILAO`).               |
-| `name`              | `String`        |        Bắt buộc, trim         |    Index    | Tên đầy đủ của chi nhánh (ví dụ: "Pizza 4P's - Tràng Tiền").              |
-| `address`           | `String`        |           Bắt buộc            |      -      | Địa chỉ chi nhánh nhà hàng shipper sẽ giao/nhận hàng.                     |
-| `deliveryFrequency` | `String (Enum)` | `DAILY` hoặc `ALTERNATE_DAYS` |      -      | Tần suất giao hàng: Mỗi ngày (`DAILY`) hoặc Cách ngày (`ALTERNATE_DAYS`). |
-| `contactPerson`     | `String`        |           Bắt buộc            |      -      | Họ tên người đại diện tiếp nhận giao đồ tại chi nhánh.                    |
-| `contactPhone`      | `String`        |           Bắt buộc            |      -      | Số điện thoại liên hệ đại diện nhà hàng.                                  |
-| `contactEmail`      | `String`        |           Tùy chọn            |      -      | Email nhận biên bản giao nhận và bảng kê đối soát.                        |
-| `isActive`          | `Boolean`       |        Mặc định:`true`        |    Index    | Đánh dấu đối tác còn đang hợp tác giặt ủi hay tạm ngưng.                  |
-| `notes`             | `String`        |           Tùy chọn            |      -      | Ghi chú đặc biệt (ví dụ: "Giao trước 9h sáng, đi cửa sau").               |
-
----
-
-### 1.6. Bảng `brands` (Brand)
+### 1.5. Bảng `brands` (Brand)
 
 - **Mã nguồn:** [`brand.schema.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/partners/schemas/brand.schema.ts)
 - **Mục đích nghiệp vụ:** Danh mục các tập đoàn/thương hiệu đối tác F&B lớn để gom nhóm các chi nhánh và bảng danh mục đồ giặt.
 
-| Tên Trường  | Kiểu Dữ Liệu |    Ràng Buộc / Mặc Định     | Index / Ref | Ý Nghĩa & Tác Dụng Nghiệp Vụ                                 |
-| :---------- | :----------- | :-------------------------: | :---------: | :----------------------------------------------------------- |
-| `brandCode` | `String`     | Bắt buộc, Unique, uppercase |   Unique    | Mã định danh thương hiệu (ví dụ:`PIZZA_4PS`, `GOLDEN_GATE`). |
-| `brandName` | `String`     |          Bắt buộc           |      -      | Tên đầy đủ của thương hiệu chuỗi.                            |
-| `logoUrl`   | `String`     |          Tùy chọn           |      -      | Logo thương hiệu.                                            |
-| `isActive`  | `Boolean`    |       Mặc định:`true`       |    Index    | Trạng thái kích hoạt thương hiệu.                            |
+| Tên Trường | Kiểu Dữ Liệu |    Ràng Buộc / Mặc Định     | Index / Ref | Ý Nghĩa & Tác Dụng Nghiệp Vụ                              |
+| :--------- | :----------- | :-------------------------: | :---------: | :-------------------------------------------------------- |
+| `code`     | `String`     | Bắt buộc, Unique, uppercase |   Unique    | Mã định danh thương hiệu (ví dụ:`PIZZA_4PS`, `HAIDILAO`). |
+| `name`     | `String`     |          Bắt buộc           |      -      | Tên đầy đủ của thương hiệu chuỗi.                         |
+| `isActive` | `Boolean`    |       Mặc định:`true`       |    Index    | Trạng thái kích hoạt thương hiệu.                         |
+
+---
+
+### 1.6. Bảng `partners` (Partner)
+
+- **Mã nguồn:** [`partner.schema.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/partners/schemas/partner.schema.ts)
+- **Mục đích nghiệp vụ:** Quản lý danh bạ khách hàng chuỗi B2B (Nhà hàng Pizza 4P's Tràng Tiền, Haidilao Phạm Ngọc Thạch...). Lưu địa chỉ, cấu hình lịch giao định kỳ và thông tin người phụ trách.
+
+| Tên Trường           | Kiểu Dữ Liệu    |          Ràng Buộc / Mặc Định          |        Index / Ref        | Ý Nghĩa & Tác Dụng Nghiệp Vụ                                                                                             |
+| :------------------- | :-------------- | :------------------------------------: | :-----------------------: | :----------------------------------------------------------------------------------------------------------------------- |
+| `shortCode`          | `String`        |      Bắt buộc, Unique, uppercase       |          Unique           | Tên viết tắt đối tác (ví dụ:`TT` cho Tràng Tiền, `TDH` cho Trần Duy Hưng), dùng làm tiền tố mã phiếu `GN-XXX-DDMMYYYY`.  |
+| `brand`              | `String`        |          Bắt buộc, uppercase           |           Index           | Thương hiệu chuỗi nhà hàng (ví dụ:`PIZZA_4PS`, `HAIDILAO`).                                                              |
+| `name`               | `String`        |             Bắt buộc, trim             |           Index           | Tên đầy đủ của chi nhánh (ví dụ: "Pizza 4P's - Tràng Tiền").                                                             |
+| `address`            | `String`        |                Tùy chọn                |             -             | Địa chỉ chi nhánh nhà hàng shipper sẽ giao/nhận hàng.                                                                    |
+| `deliverySchedule`   | `String (Enum)` | `DAILY`, `ALTERNATE_DAYS`, `ON_DEMAND` |             -             | Tần suất giao hàng: Mỗi ngày (`DAILY`), Cách ngày (`ALTERNATE_DAYS`), Theo yêu cầu (`ON_DEMAND`).                        |
+| `deliveryShift`      | `String (Enum)` |        `MORNING` hoặc `EVENING`        |             -             | Ca giao nhận mặc định của chi nhánh (Sáng hoặc Tối).                                                                     |
+| `scheduleAnchorDate` | `String`        |                Tùy chọn                |             -             | Ngày neo chu kỳ giao cách ngày YYYY-MM-DD (cho trường hợp `ALTERNATE_DAYS`).                                             |
+| `billingType`        | `String (Enum)` |         `PER_UNIT` hoặc `PER_KG`       |             -             | Phương thức tính phí giặt: theo món (`PER_UNIT`) hoặc theo cân (`PER_KG`).                                               |
+| `defaultShipperId`   | `ObjectId`      |                Tùy chọn                | Ref:`StaffAccount`, Index | Tài xế / Shipper mặc định phụ trách tuyến đối tác này.                                                                   |
+| `contactPerson`      | `String`        |                Tùy chọn                |             -             | Họ tên người đại diện tiếp nhận giao đồ tại chi nhánh.                                                                   |
+| `contactPhone`       | `String`        |                Tùy chọn                |             -             | Số điện thoại liên hệ đại diện nhà hàng.                                                                                 |
+| `isActive`           | `Boolean`       |            Mặc định:`true`             |           Index           | Đánh dấu đối tác còn đang hợp tác giặt ủi hay tạm ngưng.                                                                 |
 
 ---
 
@@ -170,101 +171,51 @@ erDiagram
 - **Mã nguồn:** [`item-catalog.schema.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/partners/schemas/item-catalog.schema.ts)
 - **Mục đích nghiệp vụ:** Quản lý mã quy chuẩn từng loại đồ giặt (Khăn lau bàn, Tạp dề, Khăn ăn, Áo bếp...). Lưu đơn giá giặt khách hàng, đơn giá khoán thợ (gấp, ủi, đóng gói) và ảnh chụp mẫu đồ giặt Cloudinary.
 
-| Tên Trường          | Kiểu Dữ Liệu |    Ràng Buộc / Mặc Định     | Index / Ref | Ý Nghĩa & Tác Dụng Nghiệp Vụ                                        |
-| :------------------ | :----------- | :-------------------------: | :---------: | :------------------------------------------------------------------ |
-| `itemCode`          | `String`     | Bắt buộc, Unique, uppercase |   Unique    | Mã chuẩn đồ giặt (ví dụ:`4PS_GRAY_TOWEL`, `4PS_APRON_DENIM`).       |
-| `brand`             | `String`     |     Bắt buộc, uppercase     |    Index    | Thương hiệu sở hữu loại đồ giặt này.                                |
-| `itemName`          | `String`     |          Bắt buộc           |      -      | Tên tiếng Việt của món đồ (ví dụ: "Khăn xám lau bàn lớn").          |
-| `unit`              | `String`     |       Mặc định:`Cái`        |      -      | Đơn vị tính:`Cái`, `Bộ`, `Kg`...                                    |
-| `foldingRateWorker` | `Number`     |        Mặc định:`0`         |      -      | Đơn giá khoán trả cho thợ xưởng khi gấp 1 cái (VND).                |
-| `ironingRateWorker` | `Number`     |        Mặc định:`0`         |      -      | Đơn giá khoán trả cho thợ khi ủi 1 cái (VND).                       |
-| `packingRateWorker` | `Number`     |        Mặc định:`0`         |      -      | Đơn giá khoán trả cho thợ khi đóng gói 1 cái (VND).                 |
-| `customerPrice`     | `Number`     |        Mặc định:`0`         |      -      | Đơn giá dịch vụ thu của nhà hàng (bảo mật, chỉ Admin/Kế toán thấy). |
-| `imageUrl`          | `String`     |          Tùy chọn           |      -      | Ảnh chụp mẫu món đồ giặt thực tế trên Cloudinary.                   |
-| `imagePublicId`     | `String`     |          Tùy chọn           |      -      | Cloudinary ID để dọn ảnh cũ khi cập nhật ảnh mới.                   |
-| `isActive`          | `Boolean`    |       Mặc định:`true`       |    Index    | Đánh dấu loại đồ còn sử dụng hay đã ngưng.                          |
+| Tên Trường          | Kiểu Dữ Liệu |    Ràng Buộc / Mặc Định     | Index / Ref | Ý Nghĩa & Tác Dụng Nghiệp Vụ                                       |
+| :------------------ | :----------- | :-------------------------: | :---------: | :----------------------------------------------------------------- |
+| `itemCode`          | `String`     | Bắt buộc, Unique, uppercase |   Unique    | Mã chuẩn đồ giặt (ví dụ:`4PS_GRAY_TOWEL`, `4PS_APRON_DENIM`).      |
+| `brand`             | `String`     |     Bắt buộc, uppercase     |    Index    | Thương hiệu sở hữu loại đồ giặt này.                               |
+| `name`              | `String`     |          Bắt buộc           |      -      | Tên tiếng Việt của món đồ (ví dụ: "Khăn xám lau bàn lớn").         |
+| `unit`              | `String`     |       Mặc định:`Cái`        |      -      | Đơn vị tính:`Cái`, `Bộ`, `Kg`...                                   |
+| `foldingRateWorker` | `Number`     |        Mặc định:`0`         |      -      | Đơn giá khoán trả cho thợ xưởng khi gấp 1 cái (VND).               |
+| `ironingRateWorker` | `Number`     |        Mặc định:`0`         |      -      | Đơn giá khoán trả cho thợ khi ủi 1 cái (VND).                      |
+| `priceToCustomer`   | `Number`     |        Mặc định:`0`         |      -      | Đơn giá dịch vụ thu của đối tác (bảo mật, chỉ Admin/Kế toán thấy). |
+| `imageUrl`          | `String`     |          Tùy chọn           |      -      | Ảnh chụp mẫu món đồ giặt thực tế trên Cloudinary.                  |
+| `isActive`          | `Boolean`    |       Mặc định:`true`       |    Index    | Đánh dấu loại đồ còn sử dụng hay đã ngưng.                         |
 
 ---
 
 ### 1.8. Bảng `handover_records` (HandoverRecord)
 
 - **Mã nguồn:** [`handover-record.schema.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/handovers/schemas/handover-record.schema.ts)
-- **Mục đích nghiệp vụ:** **Bảng nghiệp vụ quan trọng nhất của xưởng.** Quản lý phiếu giao nhận 2 chiều giữa xưởng và nhà hàng. Lưu trữ quy trình soạn đồ sạch, đếm đồ bẩn (tại bàn giao hoặc đem về xưởng rạch bao), chữ ký điện tử Canvas Base64 và cơ chế khóa lạc quan (Optimistic Locking).
+- **Mục đích nghiệp vụ:** **Bảng nghiệp vụ quan trọng nhất của xưởng.** Quản lý phiếu giao nhận 2 chiều giữa xưởng và chi nhánh đối tác. Lưu trữ toàn bộ quy trình: Thủ kho soạn đồ sạch xuất xưởng (`cleanClothes`), Nhà hàng/Shipper đếm đồ bẩn thu gom (`dirtyClothes`), ghi chú theo từng món (`notes`), chữ ký 4 bên (`signatures`), trạm rạch bao đếm lại tại xưởng (`recount`), link ảnh Cloudinary (`slipImageUrl`) và cơ chế chống xung đột đồng thời qua version Optimistic Lock. Trạng thái phiếu được dẫn xuất tự nhiên từ các mốc chữ ký thực tế, không lưu status enum cứng trong DB.
 
-| Tên Trường        | Kiểu Dữ Liệu    |    Ràng Buộc / Mặc Định     |        Index / Ref        | Ý Nghĩa & Tác Dụng Nghiệp Vụ                                                                                                                                                                                                                  |
-| :---------------- | :-------------- | :-------------------------: | :-----------------------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `recordCode`      | `String`        | Bắt buộc, Unique, uppercase |          Unique           | Mã phiếu nguyên tử`GN-YYYYMMDD-NNN` (sinh tự động qua Counter).                                                                                                                                                                               |
-| `brand`           | `String`        |     Bắt buộc, uppercase     |           Index           | Thương hiệu nhà hàng đối tác.                                                                                                                                                                                                                 |
-| `partnerId`       | `ObjectId`      |          Bắt buộc           |   Ref:`Partner`, Index    | Chi nhánh nhà hàng tiếp nhận giao hàng.                                                                                                                                                                                                       |
-| `status`          | `String (Enum)` |    Mặc định:`SCHEDULED`     |           Index           | Vòng đời phiếu:`SCHEDULED` $\rightarrow$ `IN_TRANSIT` $\rightarrow$ `DELIVERED` $\rightarrow$ `COMPLETED` (hoặc `DISPUTED`).                                                                                                                  |
-| `datePrefix`      | `String`        |    Bắt buộc (`YYYYMMDD`)    |           Index           | Tiền tố ngày theo múi giờ Việt Nam để truy vấn và sinh số thứ tự.                                                                                                                                                                             |
-| `shipperId`       | `ObjectId`      |          Tùy chọn           | Ref:`StaffAccount`, Index | Shipper nhận phụ trách phiếu này.                                                                                                                                                                                                             |
-| `cleanDelivery`   | `Object`        |          Tùy chọn           |             -             | **Nhánh Giao Đồ Sạch:** Gồm `planned` (kế hoạch thủ kho soạn hàng: số lượng giao, chưa giao, giao trả nợ, chữ ký thủ kho) và `delivered` (số lượng thực giao tới nhà hàng).                                                                   |
-| `dirtyPickup`     | `Object`        |          Tùy chọn           |             -             | **Nhánh Nhận Đồ Bẩn:** Gồm `countMode` (`ON_SITE` hoặc `AT_FACTORY`), `shipperItems` (thợ/tài xế đếm), `bagsCount` (số bao gom niêm phong), `bagPhotos` (ảnh chụp bao), `factoryCount` (đếm lại tại xưởng), `variance` (chênh lệch số lượng). |
-| `restaurantCount` | `Object`        |          Tùy chọn           |             -             | Số lượng do đại diện nhà hàng tự đếm và gửi lên kèm chữ ký đối tác.                                                                                                                                                                           |
-| `receiptCheck`    | `Object`        |          Tùy chọn           |             -             | Kết quả nhà hàng kiểm nhận đồ sạch (`ENOUGH`, `SHORT`, `EXCESS`), chữ ký kiểm nhận.                                                                                                                                                           |
-| `defects`         | `Array<Object>` |        Mặc định`[]`         |             -             | Danh sách đồ bị rách hỏng/ố bẩn nghiêm trọng phát hiện kèm ảnh đối chứng.                                                                                                                                                                     |
-| `signatures`      | `Object`        |          Tùy chọn           |             -             | Lưu Base64 ảnh chữ ký của Shippper và Đại diện nhà hàng ký nhận tại chỗ.                                                                                                                                                                      |
-| `editMarks`       | `Array<Object>` |        Mặc định`[]`         |             -             | Lịch sử sửa đổi các trường sau khi đã ký nhận (ghi nhận ai sửa, thời gian, giá trị cũ/mới).                                                                                                                                                   |
-| `adjustments`     | `Array<Object>` |        Mặc định`[]`         |             -             | Số liệu điều chỉnh giải quyết khiếu nại sau khi phiếu đã hoàn tất.                                                                                                                                                                            |
-| `version`         | `Number`        |        Mặc định:`1`         |             -             | Phiên bản khóa lạc quan (Optimistic Locking) chống 2 người sửa đè nhau.                                                                                                                                                                       |
-| `notes`           | `String`        |          Tùy chọn           |             -             | Ghi chú chung của chuyến xe.                                                                                                                                                                                                                  |
+| Tên Trường             | Kiểu Dữ Liệu    |    Ràng Buộc / Mặc Định     |        Index / Ref        | Ý Nghĩa & Tác Dụng Nghiệp Vụ                                                                                                                                                                     |
+| :--------------------- | :-------------- | :-------------------------: | :-----------------------: | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `recordCode`           | `String`        | Bắt buộc, Unique, uppercase |          Unique           | Mã phiếu chuẩn `GN-XXX-DDMMYYYY` (ví dụ: `GN-TT-14102026` với XXX là tên viết tắt đối tác, ngày giờ Việt Nam UTC+7, kiểm tra trùng lặp và retry loop có hậu tố -1, -2 nếu phát sinh nhiều phiếu). |
+| `recordDate`           | `String`        |   Bắt buộc (`YYYY-MM-DD`)   |           Index           | Ngày giao nhận theo chuẩn múi giờ Việt Nam (`Asia/Ho_Chi_Minh`), mặc định ngày mai khi soạn tối hoặc tự động tính ngày mai nếu đếm đồ bẩn lúc 21h-23h59.                                         |
+| `brand`                | `String`        |     Bắt buộc, uppercase     |           Index           | Thương hiệu nhà hàng đối tác (`PIZZA_4PS`, `HAIDILAO`...).                                                                                                                                       |
+| `partnerId`            | `ObjectId`      |          Bắt buộc           |   Ref:`Partner`, Index    | Chi nhánh nhà hàng tiếp nhận giao nhận.                                                                                                                                                          |
+| `partnerName`          | `String`        |          Tùy chọn           |             -             | Snapshot tên chi nhánh đối tác tại thời điểm tạo phiếu (truy vấn nhanh không cần populate).                                                                                                      |
+| `warehouseManagerId`   | `ObjectId`      |          Tùy chọn           | Ref:`StaffAccount`, Index | Thủ kho chịu trách nhiệm soạn đồ và xuất kho.                                                                                                                                                    |
+| `warehouseManagerName` | `String`        |          Tùy chọn           |             -             | Snapshot tên thủ kho xuất kho.                                                                                                                                                                   |
+| `shipperId`            | `ObjectId`      |          Tùy chọn           | Ref:`StaffAccount`, Index | Tài xế / Shipper vận chuyển phụ trách giao nhận.                                                                                                                                                 |
+| `shipperName`          | `String`        |          Tùy chọn           |             -             | Snapshot tên tài xế vận chuyển.                                                                                                                                                                  |
+| `deliveryShift`        | `String (Enum)` |  `MORNING` hoặc `EVENING`   |             -             | Ca giao nhận (Sáng hoặc Tối), tự động kế thừa từ cấu hình chi nhánh đối tác.                                                                                                                     |
+| `cleanClothes`         | `Object`        |          Tùy chọn           |             -             | **Nhánh Đồ Sạch Xuất Xưởng:** `items: CleanItemLine[]` (`itemCode`, `itemName`, `deliveryQuantity`, `undeliveredQuantity`, `quantityReturned`), người soạn và chữ ký thủ kho.                   |
+| `dirtyClothes`         | `Object`        |          Tùy chọn           |             -             | **Nhánh Đồ Bẩn Thu Gom:** `items: DirtyItemLine[]` (`itemCode`, `itemName`, `quantityReceived`, `actualQuantityReceived`), thông tin người đếm và chữ ký đếm đồ bẩn.                          |
+| `notes`                | `Array<Object>` |        Mặc định `[]`        |             -             | **Ghi Chú Theo Món:** `HandoverItemNote[]` (`itemCode`, `itemName`, `note`) ghi nhận lỗi hỏng, rách, bẩn... thay thế hoàn toàn sub-schema defects cũ.                                           |
+| `isRecount`            | `Boolean`       |      Mặc định:`false`       |           Index           | Cờ đánh dấu cần rạch bao đếm lại tại xưởng (do shipper bật hoặc đối tác chưa đếm).                                                                                                               |
+| `recount`              | `Object`        |          Tùy chọn           |             -             | **Trạm Đếm Lại Tại Xưởng:** Gồm `isRecount`, `status` (`NONE`, `PENDING`, `DONE`), `note`, `recountedBy`, `recountedAt`.                                                                         |
+| `signatures`           | `Object`        |          Tùy chọn           |             -             | Lưu thông tin chữ ký 4 bên: `warehouseManager` (thủ kho), `shipper` (tài xế), `partnerCount` (đếm đồ bẩn), `partnerCheck` (kiểm nhận đồ sạch).                                                    |
+| `slipImageUrl`         | `String`        |          Tùy chọn           |             -             | Đường dẫn ảnh phiếu giao nhận WebP xuất từ Canvas lưu trên Cloudinary (`internal/handovers/slips/`).                                                                                             |
+| `version`              | `Number`        |        Mặc định:`1`         |             -             | Phiên bản khóa lạc quan (Optimistic Concurrency Control) chống ghi đè đồng thời.                                                                                                                 |
 
----
-
-### 1.9. Bảng `recount_tasks` (RecountTask)
-
-- **Mã nguồn:** [`recount-task.schema.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/handovers/schemas/recount-task.schema.ts)
-- **Mục đích nghiệp vụ:** Quản lý nhiệm vụ rạch bao niêm phong và đếm lại đồ bẩn tại xưởng khi tài xế gom bao theo chế độ `AT_FACTORY`.
-
-| Tên Trường       | Kiểu Dữ Liệu    | Ràng Buộc / Mặc Định |         Index / Ref          | Ý Nghĩa & Tác Dụng Nghiệp Vụ                                                          |
-| :--------------- | :-------------- | :------------------: | :--------------------------: | :------------------------------------------------------------------------------------ |
-| `handoverId`     | `ObjectId`      |       Bắt buộc       | Ref:`HandoverRecord`, Unique | Phiếu giao nhận tương ứng của nhiệm vụ đếm lại.                                       |
-| `recordCode`     | `String`        |       Bắt buộc       |            Index             | Mã phiếu giao nhận`GN-YYYYMMDD-NNN`.                                                  |
-| `partnerId`      | `ObjectId`      |       Bắt buộc       |        Ref:`Partner`         | Chi nhánh đối tác gửi bao đồ bẩn.                                                     |
-| `status`         | `String (Enum)` |  Mặc định:`PENDING`  |            Index             | Trạng thái:`PENDING` (chờ rạch bao), `IN_PROGRESS` (đang đếm), `COMPLETED` (đã xong). |
-| `bagsReceived`   | `Number`        |       Bắt buộc       |              -               | Số lượng bao xưởng tiếp nhận thực tế từ xe tải.                                       |
-| `assignedTo`     | `ObjectId`      |       Tùy chọn       |      Ref:`StaffAccount`      | Thợ hoặc Quản lý kho được phân công rạch bao.                                         |
-| `countedItems`   | `Array<Object>` |     Mặc định`[]`     |              -               | Danh sách số lượng từng món đồ đếm được tại xưởng.                                    |
-| `evidencePhotos` | `Array<String>` |     Mặc định`[]`     |              -               | Danh sách ảnh chụp hiện trường bao đồ khi mở niêm phong.                              |
-| `discrepancies`  | `Array<Object>` |     Mặc định`[]`     |              -               | Bảng thống kê chênh lệch thừa/thiếu so với số liệu nhà hàng khai báo.                 |
-| `completedAt`    | `Date`          |       Tùy chọn       |              -               | Thời điểm hoàn tất kiểm đếm xưởng.                                                    |
+- **Compound Unique Index:** `{ partnerId: 1, recordDate: 1 }` (Mỗi đối tác tối đa 1 phiếu giao nhận chính thức trong ngày, hoặc kèm tiền tố ca).
 
 ---
 
-### 1.10. Bảng `counters` (Counter)
-
-- **Mã nguồn:** [`counter.schema.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/handovers/schemas/counter.schema.ts)
-- **Mục đích nghiệp vụ:** Sinh số thứ tự tăng dần nguyên tử (Atomic Auto-increment) cho mã phiếu giao nhận hàng ngày, đảm bảo không bao giờ trùng số khi nhiều người tạo phiếu cùng lúc.
-
-| Tên Trường | Kiểu Dữ Liệu | Ràng Buộc / Mặc Định | Index / Ref | Ý Nghĩa & Tác Dụng Nghiệp Vụ                   |
-| :--------- | :----------- | :------------------: | :---------: | :--------------------------------------------- |
-| `_id`      | `String`     |       Bắt buộc       | Primary Key | Khóa định danh bộ đếm dạng`HANDOVER_YYYYMMDD`. |
-| `seq`      | `Number`     |     Mặc định:`0`     |      -      | Số thứ tự hiện tại (tăng bằng`$inc` atomic).   |
-
----
-
-### 1.11. Bảng `piecework_logs` (PieceworkLog)
-
-- **Mã nguồn:** [`piecework-log.schema.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/piecework/schemas/piecework-log.schema.ts)
-- **Mục đích nghiệp vụ:** Ghi nhận sản lượng khoán theo từng món đồ của thợ xưởng (gấp, ủi, đóng gói). Snapshot đơn giá tại thời điểm làm để tính lương khoán chính xác.
-
-| Tên Trường      | Kiểu Dữ Liệu    | Ràng Buộc / Mặc Định |          Index / Ref          | Ý Nghĩa & Tác Dụng Nghiệp Vụ                                                                       |
-| :-------------- | :-------------- | :------------------: | :---------------------------: | :------------------------------------------------------------------------------------------------- |
-| `workerId`      | `ObjectId`      |       Bắt buộc       |   Ref:`StaffAccount`, Index   | Thợ xưởng thực hiện công việc.                                                                     |
-| `attendanceId`  | `ObjectId`      |       Bắt buộc       | Ref:`AttendanceRecord`, Index | Ca làm việc đang mở của thợ (chặn ghi sản lượng khi chưa check-in).                                |
-| `stage`         | `String (Enum)` |       Bắt buộc       |               -               | Công đoạn thực hiện:`FOLDING` (Gấp), `IRONING` (Ủi), `PACKING` (Đóng gói).                         |
-| `itemCode`      | `String`        | Bắt buộc, uppercase  |             Index             | Mã loại đồ giặt thợ vừa làm xong.                                                                  |
-| `quantity`      | `Number`        |       Bắt buộc       |               -               | Số lượng sản phẩm thợ làm (hỗ trợ số âm để sửa sai bù trừ).                                        |
-| `rateSnapshot`  | `Number`        |       Bắt buộc       |               -               | Đơn giá khoán snapshot từ`ItemCatalog` tại thời điểm ghi nhận (chống đổi giá hồi tố).              |
-| `totalEarnings` | `Number`        |       Bắt buộc       |               -               | Tiền công tính được =`quantity * rateSnapshot`.                                                    |
-| `status`        | `String (Enum)` |  Mặc định:`PENDING`  |             Index             | Trạng thái:`PENDING` (chờ chốt), `CONFIRMED` (Quản lý đã duyệt), `LOCKED` (đã đưa vào bảng lương). |
-| `confirmedBy`   | `ObjectId`      |       Tùy chọn       |      Ref:`StaffAccount`       | Quản lý xưởng xác nhận sản lượng cuối ngày.                                                        |
-| `loggedAt`      | `Date`          | Mặc định:`Date.now`  |             Index             | Thời điểm thợ ghi nhận sản lượng.                                                                  |
-
----
-
-### 1.12. Bảng `attendance_records` (AttendanceRecord)
+### 1.9. Bảng `attendance_records` (AttendanceRecord)
 
 - **Mã nguồn:** [`attendance-record.schema.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/attendance/schemas/attendance-record.schema.ts)
 - **Mục đích nghiệp vụ:** Chấm công nhân sự bằng ảnh chụp camera selfie. Quản lý giờ vào/ra, tính số phút làm việc và hỗ trợ tự động check-in ca cho tài xế xe tải khi ký phiếu đầu ngày.
@@ -282,40 +233,69 @@ erDiagram
 
 ---
 
-### 1.13. Bảng `fuel_logs` (FuelLog)
+### 1.10. Bảng `hourly_work` (HourlyWork)
+
+- **Mã nguồn:** [`piecework-log.schema.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/piecework/schemas/piecework-log.schema.ts)
+- **Mục đích nghiệp vụ:** Ghi nhận công việc và thời gian làm việc của thợ xưởng theo giờ nhân hệ số công việc (`WorkshopJobType`), thay thế mô hình khoán sản lượng đơn chiếc cũ. Tự động tính toán thu nhập dựa trên số phút làm việc, đơn giá giờ cơ bản snapshot từ tài khoản thợ và hệ số công việc lấy từ cấu hình công ty.
+
+| Tên Trường       | Kiểu Dữ Liệu    | Ràng Buộc / Mặc Định |          Index / Ref          | Ý Nghĩa & Tác Dụng Nghiệp Vụ                                                                                                  |
+| :--------------- | :-------------- | :------------------: | :---------------------------: | :---------------------------------------------------------------------------------------------------------------------------- |
+| `workerId`       | `ObjectId`      |       Bắt buộc       |   Ref:`StaffAccount`, Index   | Thợ xưởng thực hiện công việc.                                                                                                |
+| `attendanceId`   | `ObjectId`      |       Tùy chọn       | Ref:`AttendanceRecord`, Index | Ca làm việc đang mở của thợ tại thời điểm ghi nhận công.                                                                      |
+| `jobType`        | `String (Enum)` |       Bắt buộc       |             Index             | Loại công việc:`IRONING` (Ủi đồ), `FOLDING` (Gấp đồ), `PACKING` (Đóng gói), `WASHING` (Giặt), `DRYING` (Sấy), `OTHER` (Khác). |
+| `minutesWorked`  | `Number`        |   Bắt buộc, min: 1   |               -               | Số phút thợ thực tế thực hiện công việc này.                                                                                  |
+| `coefficient`    | `Number`        |    Mặc định:`1.0`    |               -               | Hệ số tính lương của loại công việc (snapshot từ`PaySettings.jobCoefficients` tại thời điểm ghi nhận).                        |
+| `hourlyBaseRate` | `Number`        |     Mặc định:`0`     |               -               | Đơn giá giờ cơ bản của thợ (snapshot từ`StaffAccount.hourlyRate`).                                                            |
+| `totalEarnings`  | `Number`        |       Bắt buộc       |               -               | Tiền công tính được =`(minutesWorked / 60) * hourlyBaseRate * coefficient`.                                                   |
+| `notes`          | `String`        |       Tùy chọn       |               -               | Ghi chú bổ sung về mẻ đồ hoặc tình huống xưởng phát sinh.                                                                     |
+| `status`         | `String (Enum)` |  Mặc định:`PENDING`  |             Index             | Trạng thái:`PENDING` (chờ chốt), `CONFIRMED` (Quản lý đã duyệt), `LOCKED` (đã đưa vào bảng lương).                            |
+| `confirmedBy`    | `ObjectId`      |       Tùy chọn       |      Ref:`StaffAccount`       | Quản lý xưởng xác nhận công việc cuối ca.                                                                                     |
+| `loggedAt`       | `Date`          | Mặc định:`Date.now`  |             Index             | Thời điểm thợ ghi nhận công việc.                                                                                             |
+
+---
+
+### 1.11. Bảng `fuel_logs` (FuelLog - Quản Lý Chi Phí Xe Shipper)
 
 - **Mã nguồn:** [`fuel-log.schema.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/fuel/schemas/fuel-log.schema.ts)
-- **Mục đích nghiệp vụ:** Quản lý đề xuất hoàn tiền xăng của đội shipper. Bắt buộc ảnh chụp hóa đơn và ảnh đồng hồ công-tơ-mét/vạch xăng xe. Phân quyền bảo mật: Kế toán duyệt, Quản lý xưởng bị ẩn tiền.
+- **Mục đích nghiệp vụ:** Quản lý toàn diện các khoản chi phí phương tiện của đội tài xế shipper bao gồm: Đổ Xăng (`FUEL`) và Sửa Chữa Xe (`REPAIR`). Yêu cầu đầy đủ ảnh chụp hóa đơn/biên lai và ảnh đồng hồ công-tơ-mét hoặc ảnh xe máy sửa chữa. Kế toán duyệt để cộng tự động vào phiếu lương shipper.
 
-| Tên Trường         | Kiểu Dữ Liệu    | Ràng Buộc / Mặc Định |        Index / Ref        | Ý Nghĩa & Tác Dụng Nghiệp Vụ                                                   |
-| :----------------- | :-------------- | :------------------: | :-----------------------: | :----------------------------------------------------------------------------- |
-| `shipperId`        | `ObjectId`      |       Bắt buộc       | Ref:`StaffAccount`, Index | Tài xế nộp đề xuất hoàn tiền xăng.                                             |
-| `amount`           | `Number`        |  Bắt buộc, min 1000  |             -             | Số tiền xăng đề xuất thanh toán (VND).                                         |
-| `liters`           | `Number`        |       Tùy chọn       |             -             | Số lít xăng đổ thực tế.                                                        |
-| `odometer`         | `Number`        |       Tùy chọn       |             -             | Số Km hiển thị trên đồng hồ xe tại thời điểm đổ xăng.                          |
-| `receiptPhotoUrl`  | `String`        |       Bắt buộc       |             -             | Ảnh chụp hóa đơn VAT hoặc biên nhận tại cây xăng.                              |
-| `odometerPhotoUrl` | `String`        |       Bắt buộc       |             -             | Ảnh chụp đồng hồ công-tơ-mét hoặc kim xăng đối chứng.                          |
-| `status`           | `String (Enum)` |  Mặc định:`PENDING`  |           Index           | Trạng thái:`PENDING` (chờ duyệt), `APPROVED` (đã duyệt), `REJECTED` (từ chối). |
-| `approvedBy`       | `ObjectId`      |       Tùy chọn       |    Ref:`StaffAccount`     | Kế toán hoặc Admin phê duyệt khoản tiền.                                       |
-| `rejectedReason`   | `String`        |       Tùy chọn       |             -             | Lý do từ chối thanh toán nếu có sai lệch.                                      |
+| Tên Trường                     | Kiểu Dữ Liệu    | Ràng Buộc / Mặc Định |        Index / Ref        | Ý Nghĩa & Tác Dụng Nghiệp Vụ                                                                |
+| :----------------------------- | :-------------- | :------------------: | :-----------------------: | :------------------------------------------------------------------------------------------ |
+| `shipperId`                    | `ObjectId`      |       Bắt buộc       | Ref:`StaffAccount`, Index | Tài xế nộp đề xuất hoàn tiền xăng / sửa xe.                                                 |
+| `expenseType`                  | `String (Enum)` | `FUEL` hoặc `REPAIR` |           Index           | Phân loại chi phí:`FUEL` (Đổ xăng đi giao nhận) hoặc `REPAIR` (Sửa chữa, bảo dưỡng xe máy). |
+| `amountMoney`                  | `Number`        | Bắt buộc, min: 1000  |             -             | Số tiền chi phí thực tế đề xuất hoàn (VND). Đồng bộ trường`amount`.                         |
+| `liters`                       | `Number`        |       Tùy chọn       |             -             | Số lít xăng đổ thực tế (áp dụng khi`expenseType === 'FUEL'`).                               |
+| `odometer`                     | `Number`        |       Tùy chọn       |             -             | Số Km hiển thị trên đồng hồ xe máy.                                                         |
+| `receiptPhotoUrl`              | `String`        |       Bắt buộc       |             -             | Ảnh chụp hóa đơn VAT, biên lai cây xăng hoặc phiếu thu tiệm sửa xe.                         |
+| `odometerOrMotorcyclePhotoUrl` | `String`        |       Bắt buộc       |             -             | Ảnh chụp đồng hồ công-tơ-mét xe hoặc ảnh chụp xe máy tại tiệm sửa xe đối chứng.             |
+| `description`                  | `String`        |       Tùy chọn       |             -             | Mô tả chi tiết phụ tùng thay thế hoặc lý do sửa chữa xe.                                    |
+| `status`                       | `String (Enum)` |  Mặc định:`PENDING`  |           Index           | Trạng thái:`PENDING` (chờ duyệt), `APPROVED` (đã duyệt), `REJECTED` (từ chối).              |
+| `approvedBy`                   | `ObjectId`      |       Tùy chọn       |    Ref:`StaffAccount`     | Kế toán hoặc Admin phê duyệt khoản chi.                                                     |
+| `rejectedReason`               | `String`        |       Tùy chọn       |             -             | Lý do từ chối nếu hóa đơn không hợp lệ hoặc số tiền bất thường.                             |
 
 ---
 
-### 1.14. Bảng `pay_settings` (PaySettings)
+### 1.12. Bảng `pay_settings` (PaySettings)
 
 - **Mã nguồn:** [`pay-settings.schema.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/payroll/schemas/pay-settings.schema.ts)
-- **Mục đích nghiệp vụ:** Thiết lập quy tắc tính lương toàn công ty: hệ số làm đêm, hệ số tăng ca (OT), hệ số làm ngày chủ nhật và lễ tết.
+- **Mục đích nghiệp vụ:** Cấu hình chính sách tính lương toàn diện cho công ty: Bảng hệ số công việc của thợ xưởng (`jobCoefficients`) và bộ tham số định mức của tài xế shipper (chuẩn 28 ngày công, bonus ca cuối tuần, chuyên cần ngày, phụ cấp điện thoại, khấu trừ BHXH).
 
-| Tên Trường            | Kiểu Dữ Liệu | Ràng Buộc / Mặc Định | Index / Ref | Ý Nghĩa & Tác Dụng Nghiệp Vụ                     |
-| :-------------------- | :----------- | :------------------: | :---------: | :----------------------------------------------- |
-| `overtimeRate`        | `Number`     |    Mặc định:`1.5`    |      -      | Hệ số lương làm thêm giờ ngày thường (150%).     |
-| `sundayRate`          | `Number`     |    Mặc định:`2.0`    |      -      | Hệ số lương làm ngày Chủ Nhật (200%).            |
-| `holidayRate`         | `Number`     |    Mặc định:`3.0`    |      -      | Hệ số lương làm ngày Lễ, Tết (300%).             |
-| `standardHoursPerDay` | `Number`     |     Mặc định:`8`     |      -      | Số giờ tiêu chuẩn của một ca làm việc hàng ngày. |
+| Tên Trường                    | Kiểu Dữ Liệu    | Ràng Buộc / Mặc Định | Index / Ref | Ý Nghĩa & Tác Dụng Nghiệp Vụ                                                                             |
+| :---------------------------- | :-------------- | :------------------: | :---------: | :------------------------------------------------------------------------------------------------------- |
+| `jobCoefficients`             | `Array<Object>` |   Mặc định: xem mã   |      -      | Danh mục hệ số công việc thợ:`jobType`, `coefficient`, `description` (Gấp, Ủi, Đóng gói, Giặt, Sấy...).  |
+| `shipperStandardDays`         | `Number`        |    Mặc định:`28`     |      -      | Số ngày công chuẩn của Shipper trong 1 tháng (công thức:`Lương cơ bản / 28 * ngày thực tế`).             |
+| `shipperWeekendShiftBonus`    | `Number`        |   Mặc định:`60000`   |      -      | Tiền thưởng ca cuối tuần cho Shipper (60.000 VNĐ / ca: ca tối Thứ 7/Chủ Nhật và ca sáng Chủ Nhật/Thứ 2). |
+| `shipperAttendanceBonusDaily` | `Number`        |   Mặc định:`7000`    |      -      | Tiền thưởng chuyên cần mỗi ngày cho Shipper (7.000 VNĐ / ngày có chấm công thực tế).                     |
+| `shipperPhoneAllowance`       | `Number`        |  Mặc định:`200000`   |      -      | Phụ cấp cước điện thoại hàng tháng cho Shipper (200.000 VNĐ).                                            |
+| `shipperInsuranceDeduction`   | `Number`        |  Mặc định:`400000`   |      -      | Khoản trích đóng Bảo hiểm xã hội trừ vào lương Shipper (400.000 VNĐ).                                    |
+| `overtimeRate`                | `Number`        |    Mặc định:`1.5`    |      -      | Hệ số lương làm thêm giờ ngày thường (150%).                                                             |
+| `sundayRate`                  | `Number`        |    Mặc định:`2.0`    |      -      | Hệ số lương làm ngày Chủ Nhật (200%).                                                                    |
+| `holidayRate`                 | `Number`        |    Mặc định:`3.0`    |      -      | Hệ số lương làm ngày Lễ, Tết (300%).                                                                     |
+| `standardHoursPerDay`         | `Number`        |     Mặc định:`8`     |      -      | Số giờ tiêu chuẩn của một ca làm việc hàng ngày.                                                         |
 
 ---
 
-### 1.15. Bảng `payroll_periods` (PayrollPeriod)
+### 1.13. Bảng `payroll_periods` (PayrollPeriod)
 
 - **Mã nguồn:** [`payroll-period.schema.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/payroll/schemas/payroll-period.schema.ts)
 - **Mục đích nghiệp vụ:** Quản lý vòng đời chu kỳ tính lương (tháng hoặc nửa tháng). Trạng thái `LOCKED` đóng băng toàn bộ dữ liệu nguồn để chống sửa đổi số liệu đã phát lương.
@@ -332,22 +312,25 @@ erDiagram
 
 ---
 
-### 1.16. Bảng `payslips` (Payslip)
+### 1.14. Bảng `payslips` (Payslip)
 
 - **Mã nguồn:** [`payslip.schema.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/payroll/schemas/payslip.schema.ts)
-- **Mục đích nghiệp vụ:** Phiếu lương chi tiết của từng cá nhân. Bảo mật nghiêm ngặt: Nhân sự chỉ xem được phiếu lương của chính mình khi kỳ lương đã `LOCKED` hoặc `PAID`.
+- **Mục đích nghiệp vụ:** Phiếu lương chi tiết minh bạch của từng nhân sự. Tách bạch mô hình tính toán giữa Shipper (chuẩn 28 ngày công, ca cuối tuần, hoàn chi phí xăng xe/sửa xe, phụ cấp) và Thợ xưởng (tổng giờ làm việc nhân hệ số công việc).
 
-| Tên Trường      | Kiểu Dữ Liệu    | Ràng Buộc / Mặc Định |        Index / Ref         | Ý Nghĩa & Tác Dụng Nghiệp Vụ                                                  |
-| :-------------- | :-------------- | :------------------: | :------------------------: | :---------------------------------------------------------------------------- |
-| `periodId`      | `ObjectId`      |       Bắt buộc       | Ref:`PayrollPeriod`, Index | Kỳ lương của phiếu lương này.                                                 |
-| `staffId`       | `ObjectId`      |       Bắt buộc       | Ref:`StaffAccount`, Index  | Nhân sự nhận lương.                                                           |
-| `baseSalary`    | `Number`        |     Mặc định:`0`     |             -              | Lương cơ bản hoặc lương giờ công tính được (VND).                             |
-| `pieceworkPay`  | `Number`        |     Mặc định:`0`     |             -              | Tổng tiền thu nhập từ sản lượng khoán giặt/ủi (VND).                          |
-| `fuelAllowance` | `Number`        |     Mặc định:`0`     |             -              | Tổng tiền hoàn xăng xe được duyệt trong kỳ (VND).                             |
-| `bonus`         | `Number`        |     Mặc định:`0`     |             -              | Tiền thưởng chuyên cần, năng suất thêm.                                       |
-| `deductions`    | `Number`        |     Mặc định:`0`     |             -              | Các khoản khấu trừ (đi trễ, làm hỏng đồ, tạm ứng).                            |
-| `netPay`        | `Number`        |       Bắt buộc       |             -              | Thực lĩnh nhận về =`(baseSalary + piecework + fuel + bonus) - deductions`.    |
-| `status`        | `String (Enum)` |   Mặc định:`DRAFT`   |             -              | Trạng thái:`DRAFT` (nháp), `FINALIZED` (chốt), `PAID` (đã trả qua ngân hàng). |
+| Tên Trường       | Kiểu Dữ Liệu    | Ràng Buộc / Mặc Định |        Index / Ref         | Ý Nghĩa & Tác Dụng Nghiệp Vụ                                                                                            |
+| :--------------- | :-------------- | :------------------: | :------------------------: | :---------------------------------------------------------------------------------------------------------------------- |
+| `periodId`       | `ObjectId`      |       Bắt buộc       | Ref:`PayrollPeriod`, Index | Kỳ lương của phiếu lương này.                                                                                           |
+| `staffId`        | `ObjectId`      |       Bắt buộc       | Ref:`StaffAccount`, Index  | Nhân sự nhận lương.                                                                                                     |
+| `roleSnapshot`   | `String`        |       Tùy chọn       |             -              | Snapshot vai trò nhân sự tại thời điểm tính lương (`SHIPPER`, `WORKER`, `WAREHOUSE_MANAGER`...).                        |
+| `baseSalary`     | `Number`        |     Mặc định:`0`     |             -              | Lương cơ bản tính được theo công thức chức danh (VND).                                                                  |
+| `pieceworkPay`   | `Number`        |     Mặc định:`0`     |             -              | Thu nhập công việc thợ xưởng theo giờ nhân hệ số (VND).                                                                 |
+| `fuelAllowance`  | `Number`        |     Mặc định:`0`     |             -              | Tổng tiền hoàn chi phí xe (xăng + sửa xe) đã được duyệt trong kỳ (VND).                                                 |
+| `bonus`          | `Number`        |     Mặc định:`0`     |             -              | Tổng các khoản thưởng (thưởng ca cuối tuần, thưởng chuyên cần...).                                                      |
+| `deductions`     | `Number`        |     Mặc định:`0`     |             -              | Tổng các khoản khấu trừ (bảo hiểm xã hội 400k, tạm ứng...).                                                             |
+| `netPay`         | `Number`        |       Bắt buộc       |             -              | Thực lĩnh nhận về =`(baseSalary + pieceworkPay + fuelAllowance + bonus) - deductions`.                                  |
+| `shipperDetails` | `Object`        |       Tùy chọn       |             -              | Minh bạch chi tiết lương Shipper: ngày chuẩn, ngày thực tế, bonus ca cuối tuần, chuyên cần, phụ cấp, xăng/sửa xe, BHXH. |
+| `workerDetails`  | `Object`        |       Tùy chọn       |             -              | Minh bạch chi tiết lương Thợ xưởng: tổng phút làm việc, bảng tổng hợp thời gian và tiền công theo từng nhóm việc.       |
+| `status`         | `String (Enum)` |   Mặc định:`DRAFT`   |             -              | Trạng thái:`DRAFT` (nháp), `FINALIZED` (chốt), `PAID` (đã trả qua ngân hàng).                                           |
 
 ---
 
@@ -573,33 +556,31 @@ Phạm vi: Hạ tầng kiểm toán an toàn thông tin, đa phương tiện Clo
 |  2  | `otp_codes`           | `internal_express` | `OtpCode`          | [otp-code.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/auth/schemas/otp-code.schema.ts)                         |
 |  3  | `refresh_tokens`      | `internal_express` | `RefreshToken`     | [refresh-token.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/auth/schemas/refresh-token.schema.ts)               |
 |  4  | `approval_requests`   | `internal_express` | `ApprovalRequest`  | [approval-request.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/auth/schemas/approval-request.schema.ts)         |
-|  5  | `partners`            | `internal_express` | `Partner`          | [partner.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/partners/schemas/partner.schema.ts)                       |
-|  6  | `brands`              | `internal_express` | `Brand`            | [brand.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/partners/schemas/brand.schema.ts)                           |
+|  5  | `brands`              | `internal_express` | `Brand`            | [brand.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/partners/schemas/brand.schema.ts)                           |
+|  6  | `partners`            | `internal_express` | `Partner`          | [partner.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/partners/schemas/partner.schema.ts)                       |
 |  7  | `item_catalogs`       | `internal_express` | `ItemCatalog`      | [item-catalog.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/partners/schemas/item-catalog.schema.ts)             |
 |  8  | `handover_records`    | `internal_express` | `HandoverRecord`   | [handover-record.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/handovers/schemas/handover-record.schema.ts)      |
-|  9  | `recount_tasks`       | `internal_express` | `RecountTask`      | [recount-task.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/handovers/schemas/recount-task.schema.ts)            |
-| 10  | `counters`            | `internal_express` | `Counter`          | [counter.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/handovers/schemas/counter.schema.ts)                      |
-| 11  | `piecework_logs`      | `internal_express` | `PieceworkLog`     | [piecework-log.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/piecework/schemas/piecework-log.schema.ts)          |
-| 12  | `attendance_records`  | `internal_express` | `AttendanceRecord` | [attendance-record.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/attendance/schemas/attendance-record.schema.ts) |
-| 13  | `fuel_logs`           | `internal_express` | `FuelLog`          | [fuel-log.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/fuel/schemas/fuel-log.schema.ts)                         |
-| 14  | `pay_settings`        | `internal_express` | `PaySettings`      | [pay-settings.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/payroll/schemas/pay-settings.schema.ts)              |
-| 15  | `payroll_periods`     | `internal_express` | `PayrollPeriod`    | [payroll-period.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/payroll/schemas/payroll-period.schema.ts)          |
-| 16  | `payslips`            | `internal_express` | `Payslip`          | [payslip.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/payroll/schemas/payslip.schema.ts)                        |
-| 17  | `articles`            | `laundry_express`  | `Article`          | [articles.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/laundry/articles/schemas/articles.schema.ts)                      |
-| 18  | `categories`          | `laundry_express`  | `Category`         | [categories.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/laundry/categories/schemas/categories.schema.ts)                |
-| 19  | `orders`              | `laundry_express`  | `Order`            | [orders.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/laundry/orders/schemas/orders.schema.ts)                            |
-| 20  | `contacts`            | `laundry_express`  | `Contact`          | [contacts.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/laundry/contacts/schemas/contacts.schema.ts)                      |
-| 21  | `customers`           | `laundry_express`  | `Customer`         | [customer.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/laundry/crm/schemas/customer.schema.ts)                           |
-| 22  | `campaigns`           | `laundry_express`  | `Campaign`         | [campaigns.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/laundry/zalo-marketing/schemas/campaigns.schema.ts)              |
-| 23  | `sequences`           | `laundry_express`  | `Sequence`         | [sequences.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/laundry/zalo-marketing/schemas/sequences.schema.ts)              |
-| 24  | `email_campaigns`     | `laundry_express`  | `EmailCampaign`    | [email-campaign.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/laundry/email-marketing/schemas/email-campaign.schema.ts)   |
-| 25  | `email_sequences`     | `laundry_express`  | `EmailSequence`    | [email-sequence.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/laundry/email-marketing/schemas/email-sequence.schema.ts)   |
-| 26  | `settings`            | `laundry_express`  | `Setting`          | [setting.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/laundry/settings/schemas/setting.schema.ts)                        |
-| 27  | `users`               | `laundry_express`  | `User`             | [user.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/laundry/users/schemas/user.schema.ts)                                 |
-| 28  | `moving_quotes`       | `moving_express`   | `MovingQuote`      | [moving-quote.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/moving/quotes/schemas/moving-quote.schema.ts)                 |
-| 29  | `moving_services`     | `moving_express`   | `MovingService`    | [moving-service.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/moving/services/schemas/moving-service.schema.ts)           |
-| 30  | `moving_articles`     | `moving_express`   | `MovingArticle`    | [moving-article.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/moving/articles/schemas/moving-article.schema.ts)           |
-| 31  | `audit_logs`          | `core_express`     | `AuditLog`         | [audit-log.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/core/audit/schemas/audit-log.schema.ts)                          |
-| 32  | `media_files`         | `core_express`     | `MediaFile`        | [media-file.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/core/media/schemas/media-file.schema.ts)                        |
-| 33  | `idempotency_keys`    | `core_express`     | `IdempotencyKey`   | [idempotency-key.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/core/idempotency/schemas/idempotency-key.schema.ts)        |
-| 34  | `notifications`       | `core_express`     | `Notification`     | [notification.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/core/notifications/schemas/notification.schema.ts)            |
+|  9  | `attendance_records`  | `internal_express` | `AttendanceRecord` | [attendance-record.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/attendance/schemas/attendance-record.schema.ts) |
+| 10  | `hourly_work`         | `internal_express` | `HourlyWork`       | [piecework-log.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/piecework/schemas/piecework-log.schema.ts)          |
+| 11  | `fuel_logs`           | `internal_express` | `FuelLog`          | [fuel-log.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/fuel/schemas/fuel-log.schema.ts)                         |
+| 12  | `pay_settings`        | `internal_express` | `PaySettings`      | [pay-settings.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/payroll/schemas/pay-settings.schema.ts)              |
+| 13  | `payroll_periods`     | `internal_express` | `PayrollPeriod`    | [payroll-period.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/payroll/schemas/payroll-period.schema.ts)          |
+| 14  | `payslips`            | `internal_express` | `Payslip`          | [payslip.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/payroll/schemas/payslip.schema.ts)                        |
+| 15  | `articles`            | `laundry_express`  | `Article`          | [articles.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/laundry/articles/schemas/articles.schema.ts)                      |
+| 16  | `categories`          | `laundry_express`  | `Category`         | [categories.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/laundry/categories/schemas/categories.schema.ts)                |
+| 17  | `orders`              | `laundry_express`  | `Order`            | [orders.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/laundry/orders/schemas/orders.schema.ts)                            |
+| 18  | `contacts`            | `laundry_express`  | `Contact`          | [contacts.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/laundry/contacts/schemas/contacts.schema.ts)                      |
+| 19  | `customers`           | `laundry_express`  | `Customer`         | [customer.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/laundry/crm/schemas/customer.schema.ts)                           |
+| 20  | `campaigns`           | `laundry_express`  | `Campaign`         | [campaigns.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/laundry/zalo-marketing/schemas/campaigns.schema.ts)              |
+| 21  | `sequences`           | `laundry_express`  | `Sequence`         | [sequences.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/laundry/zalo-marketing/schemas/sequences.schema.ts)              |
+| 22  | `email_campaigns`     | `laundry_express`  | `EmailCampaign`    | [email-campaign.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/laundry/email-marketing/schemas/email-campaign.schema.ts)   |
+| 23  | `email_sequences`     | `laundry_express`  | `EmailSequence`    | [email-sequence.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/laundry/email-marketing/schemas/email-sequence.schema.ts)   |
+| 24  | `settings`            | `laundry_express`  | `Setting`          | [setting.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/laundry/settings/schemas/setting.schema.ts)                        |
+| 25  | `users`               | `laundry_express`  | `User`             | [user.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/laundry/users/schemas/user.schema.ts)                                 |
+| 26  | `moving_quotes`       | `moving_express`   | `MovingQuote`      | [moving-quote.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/moving/quotes/schemas/moving-quote.schema.ts)                 |
+| 27  | `moving_services`     | `moving_express`   | `MovingService`    | [moving-service.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/moving/services/schemas/moving-service.schema.ts)           |
+| 28  | `moving_articles`     | `moving_express`   | `MovingArticle`    | [moving-article.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/moving/articles/schemas/moving-article.schema.ts)           |
+| 29  | `audit_logs`          | `core_express`     | `AuditLog`         | [audit-log.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/core/audit/schemas/audit-log.schema.ts)                          |
+| 30  | `idempotency_keys`    | `core_express`     | `IdempotencyKey`   | [idempotency-key.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/core/idempotency/schemas/idempotency-key.schema.ts)        |
+| 31  | `media_files`         | `core_express`     | `MediaFile`        | [media-file.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/core/media/schemas/media-file.schema.ts)                        |
+| 32  | `notifications`       | `core_express`     | `Notification`     | [notification.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/core/notifications/schemas/notification.schema.ts)            |

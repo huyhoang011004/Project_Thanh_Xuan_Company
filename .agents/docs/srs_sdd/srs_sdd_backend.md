@@ -1,8 +1,7 @@
 # ĐẶC TẢ YÊU CẦU & THIẾT KẾ HỆ THỐNG BACKEND (SRS & SDD)
 ## PHÂN HỆ BACKEND API TẬP TRUNG (be-nestjs-thanhxuan)
 
-> **Tài liệu tham chiếu cấp cao:** [SRS_SDD.md (Kiến Trúc Tổng Quan)](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/SRS_SDD.md)  
-> **Phiên bản:** 2.2 | **Synced:** 2026-10-10 | **Môi trường:** NestJS 10, Node.js v20+, MongoDB Multi-Database  
+> **Tài liệu tham chiếu cấp cao:** [SRS_SDD.md (Kiến Trúc Tổng Quan)](file:///d:/PROJECT/Website_Thanh_Xuan_Co> **Phiên bản:** 2.3 | **Synced:** 2026-10-13 | **Môi trường:** NestJS 10, Node.js v20+, MongoDB Multi-Database  
 > **Phạm vi mã nguồn:** `be-nestjs-thanhxuan/src/**`  
 > **Quy chuẩn kỹ thuật:** Clean Architecture, Repository Pattern, Multi-Database Isolation, SOLID, Defensive Programming
 
@@ -14,7 +13,7 @@
 Backend API tập trung phục vụ toàn bộ các kênh tương tác của Công ty Thanh Xuân:
 1. **Dịch vụ Giặt Là Công Nghiệp & B2C (`laundry_express`)**: Phục vụ Web Next.js khách hàng, đặt lịch, bài viết SEO, CRM liên hệ và chiến dịch tiếp thị Zalo/Email.
 2. **Dịch vụ Chuyển Nhà Trọn Gói (`moving_express`)**: Tiếp nhận khảo sát, tính cước vận tải xe tải theo cự ly Km, quản lý bài viết tư vấn chuyển nhà.
-3. **Cổng Vận Hành Xưởng Nội Bộ & Quản Trị Đối Tác B2B (`internal_express`)**: Hệ thống ERP/WMS vận hành xưởng giặt là, điều phối phiếu giao nhận 2 chiều, trạm đếm đồ gom bao, chấm công camera selfie, khoán sản lượng thợ, quản lý đề xuất xăng xe, tính bảng lương chu kỳ và trung tâm báo cáo streaming.
+3. **Cổng Vận Hành Xưởng Nội Bộ & Quản Trị Đối Tác B2B (`internal_express`)**: Hệ thống ERP/WMS vận hành xưởng giặt là, điều phối phiếu giao nhận 2 chiều theo quy trình 5 bước, trạm rạch bao đếm lại xưởng, chấm công camera selfie, ghi nhận công thợ theo giờ nhân hệ số, quản lý chi phí xe shipper (xăng & sửa xe), tính bảng lương chu kỳ và trung tâm báo cáo streaming.
 
 ---
 
@@ -46,49 +45,50 @@ Backend API tập trung phục vụ toàn bộ các kênh tương tác của Cô
   - Đệ quy duyệt và bóc tách toàn bộ trường tiền/lương (`rate`, `totalEarnings`, `estimatedPrice`, `amount`, `salary`...) khỏi JSON response khi user không có quyền `pay.view` (đặc biệt là Quản lý xưởng `MANAGER` và Quản lý kho `WAREHOUSE_MANAGER`).
 
 #### BE-FR-02: Quản Lý Đối Tác & Danh Mục Bảng Giá (`/api/v1/internal/partners`)
-- **Thông tin đối tác:** Quản lý danh sách các chuỗi nhà hàng (Pizza 4P's, Haidilao Hotpot, Golden Gate...), địa chỉ chi nhánh, người liên hệ, tần suất giao nhận (`DAILY`, `ALTERNATE_DAYS`).
+- **Thông tin đối tác:** Quản lý danh sách các chuỗi đối tác (Pizza 4P's, Haidilao Hotpot, Golden Gate...), địa chỉ chi nhánh, người liên hệ, tần suất giao nhận (`DAILY`, `ALTERNATE_DAYS`), ca giao nhận mặc định (`deliveryShift`: `MORNING` / `EVENING`).
+- **Mã viết tắt đối tác (`shortCode`):** Bắt buộc thiết lập khi tạo và sửa chi nhánh đối tác (ví dụ: `TT` cho Tràng Tiền, `TDH` cho Trần Duy Hưng). Lưu trữ uppercase, index unique để làm tiền tố sinh mã phiếu giao nhận.
 - **Lịch giao nhận trong ngày (`/schedule`):** Tự động tính toán các chi nhánh cần giao trong ngày theo múi giờ `Asia/Ho_Chi_Minh` (đối với lịch cách ngày, tính theo chẵn/lẻ số ngày trong năm).
 - **Danh mục đồ giặt & Đơn giá khoán (`item_catalogs`):**
   - Quản lý mã đồ giặt theo thương hiệu đối tác (ví dụ `4PS_GRAY_TOWEL`, `4PS_APRON`...).
   - Thiết lập đơn giá khoán thợ (`foldingRateWorker`, `ironingRateWorker`, `packingRateWorker`).
   - Hỗ trợ ảnh chụp mẫu đồ giặt lưu trữ Cloudinary kèm cơ chế xóa ảnh cũ khi cập nhật.
 
-#### BE-FR-03: Phiếu Giao Nhận Kép & Đếm Lại Tại Xưởng (`/api/v1/internal/handover`)
-- **Tạo phiếu giao nhận:** Hỗ trợ tạo thủ công từ Shipper hoặc tạo tự động qua Cron lúc 15:05 mỗi ngày theo lịch giao nhận đã cấu hình. Định dạng mã phiếu atomic `GN-YYYYMMDD-NNN`.
-- **Cơ chế Khóa lạc quan (Optimistic Locking):** Toàn bộ thao tác cập nhật phiếu yêu cầu truyền trường `version`. Nếu `version` trong DB khác `version` client gửi lên, trả về HTTP `409 Conflict`.
-- **2 Chế độ kiểm đếm đồ bẩn:**
-  - `ON_SITE`: Tài xế và nhân viên nhà hàng đếm chi tiết từng món tại chỗ.
-  - `AT_FACTORY`: Gom bao niêm phong, ghi nhận số lượng bao (`bagsCount`), chuyển về trạm rạch bao tại xưởng đếm lại.
-- **Trạm rạch bao đếm lại xưởng (`recount_tasks`):**
-  - Thợ kho/quản lý rạch bao, đếm chi tiết số lượng thực tế, chụp ảnh đối chứng hiện trường, tự động tính chênh lệch thừa/thiếu (`variance`).
-- **Ký nhận điện tử & Rà soát sửa đổi:**
-  - Ký nhận Canvas Base64 PNG (< 280KB) giữa tài xế và đại diện nhà hàng $\rightarrow$ chuyển trạng thái sang `IN_TRANSIT`.
-  - Tự động kích hoạt check-in ca làm việc cho Shipper khi ký phiếu giao nhận đầu tiên trong ngày nếu chưa check-in.
-  - Sửa đổi trường phiếu sau khi đã ký (`/fields`): Bắt buộc lưu vết `edit_marks`, phát sinh audit log và thông báo rà soát tới Quản lý (`MANAGER`, `ADMIN`).
-- **State Machine phiếu giao nhận:** `SCHEDULED` $\rightarrow$ `IN_TRANSIT` $\rightarrow$ `DELIVERED` $\rightarrow$ `COMPLETED` (hoặc `DISPUTED` khi có khiếu nại).
+#### BE-FR-03: Phiếu Giao Nhận Kép & Quy Trình 5 Bước Vận Hành (`/api/v1/internal/handover`)
+- **Tự sinh mã phiếu chuẩn hóa:** Sinh mã định dạng `GN-XXX-DDMMYYYY` (với `XXX` là `shortCode` của partner viết hoa, `DDMMYYYY` theo ngày giao nhận giờ Việt Nam UTC+7). Nếu trùng phiếu trong ngày, cơ chế retry loop tự động thêm hậu tố phân biệt `-1`, `-2`.
+- **Chuẩn hóa ngày giao nhận & múi giờ:** Lưu `recordDate` (chuỗi ngày `YYYY-MM-DD` theo múi giờ `Asia/Ho_Chi_Minh`), mặc định ngày mai khi thủ kho soạn đồ buổi tối (17h-21h) hoặc tự động tính ngày mai khi đối tác đếm đồ bẩn trong khung giờ 21h-23h59 (`getTargetRecordDateVN`). Chặn chọn ngày đã qua.
+- **Quy trình vận hành 5 bước & Cập nhật nguyên tử chống xung đột:**
+  1. *Bước 1 (Thủ kho soạn hàng 17h-21h):* Nhập `cleanClothes`, `notes`, ký tên thủ kho `warehouseManager`, sinh ảnh phiếu WebP lưu trữ Cloudinary (`slipImageUrl`). Cron Job tự động chạy lúc 12:00 trưa mỗi ngày sinh phiếu tự động theo `deliveryFrequency`.
+  2. *Bước 2 (Đối tác đếm đồ bẩn 21h-23h59):* Auto-save onblur từng dòng đồ bẩn qua endpoint nguyên tử `PATCH /handover/:id/dirty-item-onblur` dùng toán tử `$set` của MongoDB (ngăn chặn Race Condition), ký nhận qua `PATCH /handover/:id/partner-count-signature`.
+  3. *Bước 3 (Shipper nhận & bàn giao):* Shipper kiểm đếm, xác nhận qua `PATCH /handover/:id/shipper-confirm`. Hỗ trợ checkbox `isRecount` nếu đối tác chưa đếm hoặc nghi ngờ sai lệch.
+  4. *Bước 4 (Trạm rạch bao đếm lại xưởng):* Lọc các phiếu có `isRecount === true` hoặc đồ bẩn trống số, thợ xưởng cập nhật số thực tế qua `PATCH /handover/:id/recount-actual`.
+  5. *Bước 5 (Đối tác kiểm nhận đồ sạch):* Đối tác kiểm nhận số lượng đồ sạch đã nhận, ký xác nhận qua `PATCH /handover/:id/partner-check-signature`, chuyển trạng thái phiếu sang `COMPLETED`.
+- **Thư viện ảnh phiếu (`GET /handover/slip-gallery`):** Cho phép xem ảnh phiếu giao nhận theo ngày, thương hiệu, chi nhánh và khoảng thời gian.
 
-#### BE-FR-04: Chấm Công Camera Selfie & Khoán Sản Lượng (`/api/v1/internal/attendance`, `/piecework`)
+#### BE-FR-04: Chấm Công Camera Selfie & Công Thợ Theo Thời Gian x Hệ Số (`/api/v1/internal/attendance`, `/piecework`)
 - **Chấm công camera selfie:**
   - Bắt buộc tải ảnh chụp trực tiếp từ camera của thợ/nhân viên, lưu trữ trên Cloudinary.
   - Mỗi nhân sự chỉ có duy nhất 1 ca làm việc `OPEN` tại một thời điểm (trùng trả về HTTP `409 Conflict`).
   - Ghi nhận giờ vào/ra chuẩn server theo múi giờ `Asia/Ho_Chi_Minh`, tự động tính số phút làm việc `workedMinutes`.
   - Cron lúc 00:30 mỗi ngày quét các ca làm việc quá 16 giờ chưa check-out để chuyển sang trạng thái cảnh báo `NEEDS_REVIEW`.
-- **Ghi nhận sản lượng khoán thợ xưởng:**
-  - Chỉ cho phép thợ đang có ca làm việc `OPEN` ghi nhận sản lượng khoán.
-  - Mỗi request gửi đúng 1 dòng `{ itemCode, quantity }`. Hỗ trợ số âm để bù trừ/sửa sai.
-  - Đơn giá được snapshot tự động (`rateSnapshot`) từ `ItemCatalog` tại thời điểm thợ ghi nhận (chống gian lận đơn giá client).
-  - Quản lý xưởng xác nhận chốt sản lượng cuối ngày (`CONFIRMED`).
+- **Ghi nhận công việc thợ xưởng theo giờ nhân hệ số:**
+  - Ghi nhận thời gian làm việc theo phút (`minutesWorked`) và phân loại công việc `jobType` (`IRONING`, `FOLDING`, `PACKING`, `WASHING`, `DRYING`, `OTHER`).
+  - Tự động snapshot đơn giá giờ `hourlyBaseRate` từ hồ sơ thợ và `coefficient` từ `PaySettings.jobCoefficients`.
+  - Tiền công tính toán tự động = `(minutesWorked / 60) * hourlyBaseRate * coefficient`.
+  - Quản lý xưởng xác nhận chốt công cuối ca (`CONFIRMED`).
 
-#### BE-FR-05: Quản Lý Hoàn Tiền Xăng Xe (`/api/v1/internal/fuel`)
-- Shipper nộp đề xuất hoàn tiền xăng: Bắt buộc đính kèm ảnh hóa đơn cây xăng và ảnh đồng hồ công-tơ-mét / vạch xăng xe.
+#### BE-FR-05: Quản Lý Chi Phí Phương Tiện Của Shipper (`/api/v1/internal/fuel`)
+- Shipper nộp đề xuất chi phí xe gồm 2 loại (`expenseType`): Đổ Xăng (`FUEL`) và Sửa Chữa Xe (`REPAIR`).
+- Bắt buộc đính kèm ảnh hóa đơn/biên lai và ảnh đồng hồ công-tơ-mét / ảnh xe máy sửa chữa.
 - Trạng thái đề xuất: `PENDING` $\rightarrow$ `APPROVED` hoặc `REJECTED` (kèm lý do).
-- Phân quyền nghiêm ngặt: Chỉ Kế toán (`ACCOUNTANT`) và Quản trị viên (`ADMIN`) có quyền duyệt và xem số tiền xăng. Quản lý xưởng (`MANAGER`) bị chặn xem số tiền.
+- Phân quyền nghiêm ngặt: Chỉ Kế toán (`ACCOUNTANT`) và Quản trị viên (`ADMIN`) có quyền duyệt và xem số tiền. Khoản duyệt được cộng tự động vào phiếu lương shipper.
 
 #### BE-FR-06: Quản Lý Bảng Lương & Bảo Mật Phiếu Lương (`/api/v1/internal/payroll`)
-- **Cấu hình lương (`pay_settings`):** 4 cơ chế tính (`HOURLY`, `PIECEWORK`, `HYBRID`, `MONTHLY_FIXED`), thiết lập hệ số tăng ca, chủ nhật, ngày lễ.
-- **Tính toán bảng lương chu kỳ:** Tổng hợp tự động từ giờ công chấm công đã duyệt, tổng thu nhập khoán sản lượng, các khoản hoàn tiền xăng đã duyệt, thưởng/phụ cấp/khấu trừ. Làm tròn số nguyên tiền Việt Nam Đồng (`roundVnd`).
-- **Vòng đời kỳ lương:** `OPEN` $\rightarrow$ `CALCULATING` $\rightarrow$ `LOCKED` (đóng băng dữ liệu nguồn chấm công, khoán, xăng) $\rightarrow$ `PAID`. Chỉ `ADMIN` mới có quyền mở khóa kỳ lương kèm lý do audit log.
-- **Bảo mật phiếu lương cá nhân (`payslips`):** Nhân viên chỉ được xem phiếu lương của chính mình và chỉ khi kỳ lương đã ở trạng thái `LOCKED` hoặc `PAID`. Tuyệt đối chặn truy cập chéo giữa các nhân sự.
+- **Cấu hình lương (`pay_settings`):** Thiết lập bảng hệ số công việc thợ (`jobCoefficients`) và định mức Shipper (chuẩn 28 ngày công, bonus ca cuối tuần 60k/ca tối T7/CN và sáng CN/T2, chuyên cần 7k/ngày, phụ cấp điện thoại 200k, khấu trừ BHXH 400k).
+- **Tính toán bảng lương chu kỳ:**
+  - *Shipper:* `baseSalary = (monthlyBaseSalary / 28) * actualWorkedDays`, cộng bonus ca cuối tuần, cộng chuyên cần, cộng phụ cấp điện thoại, cộng chi phí xăng & sửa xe đã duyệt, trừ khấu trừ BHXH 400k.
+  - *Thợ xưởng:* Tổng hợp tiền công các phiên làm việc theo giờ $\times$ hệ số đã chốt.
+- **Vòng đời kỳ lương:** `OPEN` $\rightarrow$ `CALCULATING` $\rightarrow$ `LOCKED` (đóng băng dữ liệu nguồn chấm công, công việc, chi phí xe) $\rightarrow$ `PAID`. Chỉ `ADMIN` mới có quyền mở khóa kỳ lương kèm lý do audit log.
+- **Bảo mật phiếu lương cá nhân (`payslips`):** Nhân viên chỉ được xem phiếu lương của chính mình và chỉ khi kỳ lương đã ở trạng thái `LOCKED` hoặc `PAID`. Phiếu lương hiển thị chi tiết minh bạch `shipperDetails` hoặc `workerDetails`.
 
 #### BE-FR-07: Báo Cáo Phân Tích & Streaming Export (`/api/v1/internal/reports`)
 - 6 Báo cáo Aggregation chuyên sâu:
@@ -192,17 +192,16 @@ export class HandoverRecordRepository extends BaseRepository<HandoverRecordDocum
 4. `ApprovalRequestRepository`
 5. `PartnerRepository`
 6. `ItemCatalogRepository`
-7. `HandoverRecordRepository`
-8. `RecountTaskRepository`
-9. `PieceworkLogRepository`
-10. `AttendanceRecordRepository`
-11. `FuelLogRepository`
-12. `PaySettingsRepository`
-13. `PayrollPeriodRepository`
-14. `PayslipRepository`
-15. `AuditLogRepository`
-16. `NotificationRepository`
-17. `CounterRepository` *(Atomic Sequence Generator, dùng `findByIdAndUpdate` với `$inc`)*.
+7. `HandoverRecordRepository` *(Xử lý toàn bộ vòng đời phiếu, đếm lại recount và concurrency lock)*
+8. `PieceworkLogRepository`
+9. `AttendanceRecordRepository`
+10. `FuelLogRepository`
+11. `PaySettingsRepository`
+12. `PayrollPeriodRepository`
+13. `PayslipRepository`
+14. `AuditLogRepository`
+15. `NotificationRepository`
+*(Lưu ý: `CounterRepository` và `RecountTaskRepository` đã được xóa bỏ hoàn toàn từ Plan 24).*
 
 ---
 
@@ -242,22 +241,19 @@ export class HandoverRecordRepository extends BaseRepository<HandoverRecordDocum
 
 | Phương thức | Tuyến API | Guard / Xác thực | Vai trò cho phép | Ghi chú & Ràng buộc |
 | :--- | :--- | :--- | :--- | :--- |
-| `POST` | `/api/v1/internal/handover` | `InternalJwtGuard` + `InternalRolesGuard` | SHIPPER, ADMIN, MANAGER | Tạo phiếu giao nhận mới (`GN-YYYYMMDD-NNN`, `SCHEDULED`). |
-| `GET` | `/api/v1/internal/handover` | `InternalJwtGuard` | Phân quyền theo vai trò | SHIPPER chỉ xem của mình; RM/RS chỉ xem chi nhánh mình; ADMIN/MG xem toàn bộ. |
+| `POST` | `/api/v1/internal/handover` | `InternalJwtGuard` + `InternalRolesGuard` | SHIPPER, ADMIN, MANAGER | Tạo phiếu giao nhận mới (`GN-YYYYMMDD-XXXX`, `SCHEDULED`). |
+| `GET` | `/api/v1/internal/handover` | `InternalJwtGuard` | Phân quyền theo vai trò | SHIPPER chỉ xem của mình; RM/RS chỉ xem chi nhánh mình; ADMIN/MG/WM xem toàn bộ. |
 | `GET` | `/api/v1/internal/handover/:recordCode` | `InternalJwtGuard` | Phân quyền theo vai trò | Xem chi tiết phiếu giao nhận theo mã. |
 | `GET` | `/api/v1/internal/handover/monthly` | `InternalJwtGuard` + `InternalRolesGuard` | RESTAURANT_MANAGER, RESTAURANT_STAFF, ADMIN | Bảng kê giao nhận theo tháng cho nhà hàng (bảo mật ẩn hoàn toàn đơn giá). |
-| `POST` | `/api/v1/internal/handover/prep-order` | `InternalJwtGuard` + `InternalRolesGuard` | WAREHOUSE_MANAGER, ADMIN, MANAGER | Soạn đồ sạch cho ngày mai: lưu 3 loại số lượng (*Đã giao*, *Chưa giao*, *Giao trả*), ghi chú từng dòng và chữ ký điện tử. |
-| `POST` | `/api/v1/internal/handover/partner-count` | `InternalJwtGuard` + `InternalRolesGuard` | RESTAURANT_MANAGER, RESTAURANT_STAFF, PARTNER_MANAGER, PARTNER_STAFF | Đếm đồ bẩn đối tác gửi về xưởng: lưu số lượng chưa giặt, chữ ký và họ tên người đếm. |
-| `POST` | `/api/v1/internal/handover/auto-schedule` | `InternalJwtGuard` + `InternalRolesGuard` | WAREHOUSE_MANAGER, ADMIN, MANAGER | Tự động sinh phiếu giao nhận theo lịch định kỳ (`DAILY`, `ALTERNATE_DAYS`), prefill số lượng đồ bẩn hôm trước. |
-| `GET` | `/api/v1/internal/handover/previous-dirty` | `InternalJwtGuard` | Mọi vai trò nội bộ | Lấy số lượng đồ bẩn đã nhận hôm trước của đối tác để điền sẵn vào phiếu soạn đồ. |
-| `POST` | `/api/v1/internal/handover/clean-planned` | `InternalJwtGuard` + `InternalRolesGuard` | WAREHOUSE_MANAGER, ADMIN, MANAGER | Thủ kho lên kế hoạch soạn đồ sạch tại kho. |
-| `PATCH` | `/api/v1/internal/handover/:id/clean-delivery` | `InternalJwtGuard` + `InternalRolesGuard` | SHIPPER, ADMIN, MANAGER | Cập nhật số lượng đồ sạch bàn giao. |
-| `PATCH` | `/api/v1/internal/handover/:id/dirty-pickup` | `InternalJwtGuard` + `InternalRolesGuard` | SHIPPER, ADMIN, MANAGER, RESTAURANT_STAFF | Cập nhật số lượng đồ bẩn thu gom (`ON_SITE` hoặc `AT_FACTORY`). |
-| `PATCH` | `/api/v1/internal/handover/:id/sign` | `InternalJwtGuard` + `InternalRolesGuard` | SHIPPER, ADMIN, MANAGER | Ký nhận điện tử Base64 PNG. Tự động kích hoạt check-in ca làm việc nếu là phiếu đầu tiên của Shipper. Chuyển sang `IN_TRANSIT`. |
-| `PATCH` | `/api/v1/internal/handover/:id/deliver` | `InternalJwtGuard` + `InternalRolesGuard` | SHIPPER, ADMIN | Tài xế xác nhận giao đồ sạch đến nhà hàng. |
-| `PATCH` | `/api/v1/internal/handover/:id/receipt-check` | `InternalJwtGuard` + `InternalRolesGuard` | RESTAURANT_MANAGER, RESTAURANT_STAFF | Nhà hàng kiểm nhận đồ sạch (`ENOUGH`, `SHORT`, `EXCESS`). |
-| `POST` | `/api/v1/internal/handover/:id/request-recount` | `InternalJwtGuard` + `InternalRolesGuard` | SHIPPER, RESTAURANT_MANAGER, ADMIN | Yêu cầu rạch bao đếm lại tại xưởng (`recount_tasks`). |
-| `PATCH` | `/api/v1/internal/handover/:id/complete-recount`| `InternalJwtGuard` + `InternalRolesGuard` | WAREHOUSE_MANAGER, ADMIN | Hoàn tất đếm lại xưởng kèm ảnh chụp đối chứng. |
+| `POST` | `/api/v1/internal/handover/prep-order` | `InternalJwtGuard` + `InternalRolesGuard` | WAREHOUSE_MANAGER, ADMIN, MANAGER | Soạn đồ sạch cho ngày mai (chặn ngày đã qua): lưu `cleanClothes`, `notes`, chữ ký thủ kho, ảnh WebP Canvas (`slipImageUrl`). |
+| `POST` | `/api/v1/internal/handover/auto-schedule` | `InternalJwtGuard` + `InternalRolesGuard` | WAREHOUSE_MANAGER, ADMIN, MANAGER | Cron 12:00 trưa hoặc thủ công sinh phiếu theo lịch định kỳ (`DAILY`, `ALTERNATE_DAYS`), prefill đồ bẩn hôm trước. |
+| `GET` | `/api/v1/internal/handover/previous-dirty` | `InternalJwtGuard` | Mọi vai trò nội bộ | Lấy số lượng đồ bẩn đã nhận phiếu hôm trước của đối tác để điền sẵn vào phiếu soạn đồ. |
+| `GET` | `/api/v1/internal/handover/slip-gallery` | `InternalJwtGuard` + `InternalRolesGuard` | WAREHOUSE_MANAGER, ADMIN, MANAGER | Thư viện ảnh phiếu giao nhận: lọc theo brand, partner, khoảng ngày, xem fullscreen và tải ảnh. |
+| `PATCH` | `/api/v1/internal/handover/:id/dirty-item-onblur` | `InternalJwtGuard` | RESTAURANT_MANAGER, RESTAURANT_STAFF, SHIPPER, ADMIN | Cập nhật nguyên tử từng ô đồ bẩn dùng `$set` (`quantityReceived`, `actualQuantityReceived`), ngăn chặn race condition. |
+| `PATCH` | `/api/v1/internal/handover/:id/partner-count-signature` | `InternalJwtGuard` | RESTAURANT_MANAGER, RESTAURANT_STAFF, PARTNER_STAFF, ADMIN | Đối tác ký nhận đếm đồ bẩn (`signatures.partnerCount`). |
+| `PATCH` | `/api/v1/internal/handover/:id/shipper-confirm` | `InternalJwtGuard` | SHIPPER, ADMIN, MANAGER | Shipper ký nhận và bàn giao đồ, hỗ trợ cờ `isRecount` và lý do đếm lại, chuyển sang `IN_TRANSIT` hoặc `DELIVERED`. |
+| `PATCH` | `/api/v1/internal/handover/:id/recount-actual` | `InternalJwtGuard` | WORKER, WAREHOUSE_MANAGER, ADMIN | Trạm đếm lại xưởng cập nhật `actualQuantityReceived`, hoàn tất yêu cầu recount (`recount.status = 'DONE'`). |
+| `PATCH` | `/api/v1/internal/handover/:id/partner-check-signature` | `InternalJwtGuard` | RESTAURANT_MANAGER, RESTAURANT_STAFF, PARTNER_STAFF, ADMIN | Đối tác kiểm nhận đồ sạch và ký nhận, chuyển trạng thái phiếu sang `COMPLETED`. |
 | `PATCH` | `/api/v1/internal/handover/:id/fields` | `InternalJwtGuard` + `InternalRolesGuard` | SHIPPER, ADMIN | Sửa đổi sau ký $\rightarrow$ sinh `edit_marks`, audit log, gửi notification. |
 | `PATCH` | `/api/v1/internal/handover/:id/review-edits` | `InternalJwtGuard` + `InternalRolesGuard` | MANAGER, ADMIN | Quản lý xác nhận đã rà soát các trường sửa đổi sau ký. |
 | `POST` | `/api/v1/internal/handover/:id/adjustments` | `InternalJwtGuard` + `InternalRolesGuard` | ADMIN, MANAGER, ACCOUNTANT | Điều chỉnh số liệu sau khi phiếu đã hoàn tất do khiếu nại. |
@@ -269,11 +265,11 @@ export class HandoverRecordRepository extends BaseRepository<HandoverRecordDocum
 | `/api/v1/internal/attendance/check-in` | `POST` | `InternalJwtGuard` (Worker/Shipper) | Bắt buộc ảnh selfie camera, chặn trùng 1 ca/người (409 Conflict). |
 | `/api/v1/internal/attendance/check-out` | `POST` | `InternalJwtGuard` | Chốt ca kèm ảnh selfie, tính `workedMinutes`. |
 | `/api/v1/internal/attendance/today` | `GET` | `InternalJwtGuard` | Lấy trạng thái ca làm việc hiện tại của nhân sự. |
-| `/api/v1/internal/piecework/me/tasks` | `POST` | `InternalJwtGuard` (Worker) | Ghi nhận sản lượng khoán (snapshot đơn giá, hỗ trợ số âm sửa sai). |
-| `/api/v1/internal/piecework/:id/confirm` | `PATCH` | ADMIN, MANAGER | Quản lý xưởng xác nhận chốt sản lượng (`CONFIRMED`). |
-| `/api/v1/internal/fuel` | `POST` | `InternalJwtGuard` (Shipper) | Nộp đề xuất xăng (ảnh hóa đơn + ảnh vạch xăng). |
-| `/api/v1/internal/fuel/:id/approve` | `PATCH` | ACCOUNTANT, ADMIN | Kế toán/Admin duyệt đề xuất hoàn tiền xăng. |
-| `/api/v1/internal/payroll/periods/calculate` | `POST` | ACCOUNTANT, ADMIN | Tính toán bảng lương chu kỳ tháng. |
+| `/api/v1/internal/piecework/me/tasks` | `POST` | `InternalJwtGuard` (Worker) | Ghi nhận công việc thợ xưởng theo giờ (`jobType`, `minutesWorked`, tính theo hệ số). |
+| `/api/v1/internal/piecework/:id/confirm` | `PATCH` | ADMIN, MANAGER | Quản lý xưởng xác nhận chốt công việc (`CONFIRMED`). |
+| `/api/v1/internal/fuel` | `POST` | `InternalJwtGuard` (Shipper) | Nộp đề xuất chi phí xe (`expenseType: 'FUEL' | 'REPAIR'`, `amountMoney`, ảnh biên lai, ảnh xe). |
+| `/api/v1/internal/fuel/:id/approve` | `PATCH` | ACCOUNTANT, ADMIN | Kế toán/Admin duyệt đề xuất chi phí xe. |
+| `/api/v1/internal/payroll/periods/calculate` | `POST` | ACCOUNTANT, ADMIN | Tính toán bảng lương chu kỳ tháng (Shipper chuẩn 28 ngày, Thợ xưởng theo giờ x hệ số). |
 | `/api/v1/internal/payroll/periods/:id/lock` | `PATCH` | ACCOUNTANT, ADMIN | Khóa kỳ lương (`LOCKED`), đóng băng dữ liệu nguồn. |
 | `/api/v1/internal/payroll/me/payslips` | `GET` | `InternalJwtGuard` | Nhân sự tra cứu phiếu lương cá nhân (chỉ kỳ LOCKED/PAID). |
 | `/api/v1/internal/reports/*` | `GET` | AC, MG, AD, WM | 6 Báo cáo Aggregation tổng hợp (≤ 31 ngày). Bóc tách trường tiền đối với MG. |

@@ -49,10 +49,15 @@ Một thay đổi coi là xong khi:
 2. Lint, typecheck và test pass cho **từng app bị ảnh hưởng**.
 3. Build pass cho từng app bị ảnh hưởng (`pnpm build`).
 4. Thay đổi API contract (DTO, response) ở Backend thì phía gọi (Web, Internal) đã được cập nhật đồng bộ.
-5. **Cập nhật Database Dictionary:** Bất kỳ thay đổi nào liên quan đến Schema/Field/Index MongoDB Mongoose bắt buộc cập nhật đồng bộ tại `.agents/docs/DATABASE_DICTIONARY.md`.
+5. **Cập nhật Database Dictionary, Sắp Xếp Thứ Tự & Dọn Dẹp Bảng Đã Xóa:**
+   - Bất kỳ thay đổi nào liên quan đến Schema/Field/Index/Collection MongoDB Mongoose bắt buộc cập nhật đồng bộ tại `.agents/docs/DATABASE_DICTIONARY.md`.
+   - **Sắp xếp thứ tự bảng:** Đảm bảo thứ tự các bảng trong tài liệu luôn liền mạch, khoa học theo nhóm phân vùng nghiệp vụ (Auth $\rightarrow$ Thương hiệu/Đối tác $\rightarrow$ Giao nhận $\rightarrow$ Chấm công/Công thợ $\rightarrow$ Chi phí xe $\rightarrow$ Lương/Báo cáo), đánh số STT liên tục từ 1 đến N không đứt đoạn.
+   - **Xóa bỏ hoàn toàn bảng đã xóa khỏi tài liệu:** Khi một bảng bị xóa hoặc thay thế, **tuyệt đối không để lại tên bảng đã xóa trong tài liệu** (kể cả ghi chú deprecated hay giữ dòng STT trong bảng tra cứu). Phải xóa triệt để định nghĩa và xóa khỏi bảng tra cứu.
+   - **Dọn dẹp Database thực tế:** Bắt buộc cập nhật và chạy script dọn dẹp `pnpm run db:drop-legacy` để drop/rename các collection cũ đã bị xóa/đổi tên khỏi cơ sở dữ liệu MongoDB thực tế, đảm bảo DB sạch sẽ không tồn đọng rác dữ liệu.
 6. **Cập nhật Codebase Atlas:** Tạo mới module, endpoint, service, hoặc cấu trúc component chính phải cập nhật tại `.agents/docs/CODEBASE_ATLAS.md`.
 7. Tài liệu phân hệ tương ứng (`.agents/docs/srs_sdd/srs_sdd_<app>.md`) và `SRS_SDD.md` (nếu có đổi tổng thể) phản ánh đúng thay đổi, kèm 1 dòng Document History ở `SRS_SDD.md`.
 8. Code sạch sẽ, không còn log debug, mock data thừa hay TODO chưa giải quyết.
+9. **Xóa bỏ triệt để file/alias tương thích ngược tạm thời:** Các file re-export hoặc alias tạo ra trong quá trình refactor/đổi tên (DTO, Schema, Type...) chỉ là giải pháp tạm thời để chống lỗi compile tức thời giữa các bước trung gian. Khi hoàn tất code, BẮT BUỘC xóa bỏ các file re-export này, cập nhật mọi nơi gọi trỏ trực tiếp vào file mới, rồi mới được chạy test/build để verify.
 
 ## 5. Quy tắc code bắt buộc
 
@@ -130,6 +135,9 @@ Agent chủ động thấu hiểu khẩu ngữ và cách diễn đạt tự nhi�
    - Trước khi sửa bất kỳ bug nào: tìm chính xác nguyên nhân gốc (đọc log, kiểm tra trace, phân tích điều kiện biên), tuyệt đối không che giấu lỗi bằng `try/catch` rỗng hay ép kiểu `any`.
 3. **KISS & YAGNI:**
    - Không tạo abstraction thừa thãi. Giải pháp tốt nhất là giải pháp ít dòng code nhất mà vẫn thỏa mãn 100% ràng buộc nghiệp vụ và kiến trúc của dự án.
+4. **Không để lại file tương thích ngược tạm thời (No Stale Bridge/Re-export Files):**
+   - Khi tái cấu trúc hoặc đổi tên (file, DTO, schema, interface, component), việc tạo file bridge/re-export tương thích ngược chỉ được xem là bước đệm tạm thời trong quá trình chuyển đổi để chống lỗi biên dịch tức thời.
+   - Sau khi hoàn thành việc cập nhật toàn bộ các file liên quan, **BẮT BUỘC phải xóa bỏ hoàn toàn các file re-export tạm thời này**, sửa lại import ở mọi nơi gọi đến nguồn chuẩn, rồi mới được chạy test/build để nghiệm thu.
 
 ## 9. Giám Sát Ngữ Cảnh & Chống Ảo Giác (Context Health & /compact)
 

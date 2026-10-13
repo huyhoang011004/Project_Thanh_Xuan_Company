@@ -2,6 +2,180 @@
 
 Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâng cấp, bugfix và triển khai tính năng của Hệ sinh thái Công ty Thanh Xuân qua từng Plan.
 
+## 2026-10-13
+
+### Plan 25: Hợp Nhất Thư Viện Ảnh Phiếu Dùng Chung, Sửa Lỗi Load Ảnh Kho, Đồng Bộ URL Search Params & Nâng Cấp Luồng Shipper Đếm Thay (`be-nestjs-thanhxuan`, `fe-react-thanhxuan-internal`)
+- **Khắc phục triệt để lỗi không tải được ảnh phiếu ở Kho (`/operations/warehouse-manager/warehouse`):**
+  - **Backend (`handover-record.service.ts`):** 
+    * Cải tiến hàm `getSlipGallery`: Khi truy vấn theo `brand`, hệ thống tự động tra cứu danh sách các cơ sở `partnerIds` thuộc thương hiệu đó để lọc `$or: [{ brand }, { partnerId: { $in: partnerIds } }]`. 
+    * Gỡ bỏ bộ lọc cứng `slipImageUrl: { $exists: true }` để các phiếu vừa tạo chưa kịp đồng bộ Cloudinary không bị biến mất khỏi danh sách.
+    * Tự động snapshot `brand` và `partnerName` khi tạo phiếu tại `createRecord` và `createOrUpdatePrepOrder`.
+  - **Phân quyền Shipper (`permissions.map.ts`):** Cấp thêm quyền `PERMISSIONS.HANDOVER_PARTNER_COUNT` và `PERMISSIONS.PARTNER_VIEW` cho vai trò `SHIPPER` để Shipper không bị chặn 403 Forbidden khi đếm thay đồ bẩn và khi truy vấn catalog đối tác.
+  - **Route Backend (`partners.controller.ts`):** Đăng ký song song `@Get(['catalogs', 'item-catalogs'])` để hỗ trợ tương thích cả 2 route truy vấn danh mục đồ vải.
+- **Xây dựng Component Thư viện ảnh phiếu dùng chung (`HandoverSlipGalleryComponent.tsx`):**
+  - Hợp nhất hoàn toàn giao diện Thư viện ảnh phiếu của cả 3 phân hệ: Thủ kho (`WarehousePage`), Đối tác (`PartnerPortalPage`) và Tài xế (`HandoverListPage`).
+  - Hỗ trợ 3 chế độ (`mode: 'WAREHOUSE' | 'SHIPPER' | 'PARTNER'`):
+    * `WAREHOUSE`: Bộ lọc Thương hiệu, Chi nhánh đối tác, Từ ngày, Đến ngày, Tìm mã phiếu.
+    * `SHIPPER`: Bộ lọc Chi nhánh đối tác, Từ ngày, Đến ngày, Tìm mã phiếu.
+    * `PARTNER`: Cố định chi nhánh `fixedPartnerId`, chỉ hiện bộ lọc Từ ngày, Đến ngày, Tìm mã phiếu.
+  - Thẻ phiếu trực quan cao cấp (Card Grid responsive 1-4 cột): Ảnh thumbnail phiếu, badge thương hiệu, ngày giao nhận, trạng thái phiếu, 3 chấm tròn kiểm soát chữ ký (Kho, Shipper, Quán) kèm tooltip chi tiết.
+  - Nút **Xem Phóng To** kết nối trực tiếp modal lightbox `SlipFullscreenViewerModal`, nút **Tải ảnh** WebP/PNG an toàn (hỗ trợ CORS fallback), nút **Chi tiết**.
+  - Phân trang mượt mà 12 phiếu/trang.
+- **Component Lightbox Phóng to ảnh phiếu dùng chung (`SlipFullscreenViewerModal.tsx`):**
+  - Hỗ trợ zoom đa cấp 75% - 250%, thanh công cụ floating (Zoom In, Zoom Out, 100%, Tải ảnh, Đóng).
+  - Tích hợp cuộn pan tự do, phím tắt bàn phím `Escape` tự động đóng, double-tap zoom trên mobile.
+  - Tích hợp đồng bộ vào `PrepOrderSlipPreviewComponent`, `HandoverDeliverySlipModal`, `ShipperHandoverItemCardComponent` và `HandoverSlipGalleryComponent`.
+- **Đồng bộ hóa URL Search Params (`?tab=...`):**
+  - `WarehousePage.tsx`: Chuyển sang quản lý `useSearchParams` với `?tab=CLEAN_PLAN | SUMMARY | SLIP_GALLERY`. Người dùng có thể bookmark, refresh hoặc gửi link trực tiếp tới tab Thư viện ảnh phiếu.
+  - `HandoverListPage.tsx`: Chuyển sang quản lý `useSearchParams` với `?tab=ROUTE | HISTORY`.
+  - `PartnerPortalPage.tsx`: Tích hợp `HandoverSlipGalleryComponent` vào tab `?tab=HISTORY`.
+- **Sửa lỗi thẻ Lộ trình Shipper & Modal Đếm thay đối tác (`ShipperHandoverItemCardComponent.tsx` & `ShipperCountPartnerModal.tsx`):**
+  - **Hàm tải ảnh:** Cải tiến `handleDownloadSlipImage` tạo thẻ `<a>` download mượt mà, hỗ trợ fallback CORS tự động mở tab mới để tải.
+  - **Nút Phóng to:** Kết nối trực tiếp modal dùng chung `SlipFullscreenViewerModal`.
+  - **Nút Đếm thay:** Thay thế form inline tạm thời bằng modal chuyên dụng `ShipperCountPartnerModal`.
+  - **Đồng bộ UI Modal Đếm thay:** Thiết kế giao diện y hệt màn hình đếm đồ bẩn đối tác (`PartnerCountTabComponent.tsx`) với khung thông tin cố định khóa 3 trường (Thương hiệu, Chi nhánh, Ngày), chuyển đổi linh hoạt dạng Thẻ / Bảng, nhập biểu thức thông minh `12 34` hoặc `10+5`, bảng ký tên điện tử Canvas và Live Preview phiếu in A4.
+- **Kiểm thử & Nghiệm thu:**
+  - `pnpm exec tsc --noEmit` pass 100% trên `fe-react-thanhxuan-internal`.
+  - `pnpm build` pass 100% trên `be-nestjs-thanhxuan` và `fe-react-thanhxuan-internal`.
+
+- **Thư viện ảnh phiếu lịch sử cho Đối tác (`PartnerHistoryTabComponent.tsx`):**
+  - Chuyển đổi tab `HISTORY` (`/operations/partner-manager/partner?tab=HISTORY`) sang giao diện **Thư viện ảnh phiếu** tương đồng với tab Gallery của Thủ kho (`WarehouseSlipGalleryTabComponent.tsx`).
+  - Lưới ảnh phiếu tỷ lệ chuẩn `aspect-[3/4]`, hiển thị ảnh phiếu xuất bản WebP kèm mã phiếu, ngày, thương hiệu, chi nhánh.
+  - Hover / Click hiển thị nút phóng to ảnh (Lightbox Dialog), nút tải trực tiếp ảnh phiếu WebP về thiết bị.
+  - Bộ lọc thông minh theo ngày giao nhận và tìm kiếm theo mã phiếu, phân trang tiện lợi.
+  - Badges trạng thái chữ ký 3 bên: Thủ kho, Shipper, Quán (Đếm bẩn / Kiểm nhận).
+- **Tối ưu toàn diện màn hình điều phối Shipper (`HandoverListPage.tsx` & `ShipperHandoverItemCardComponent.tsx`):**
+  - **Bổ sung tab Lịch sử phiếu đã giao (`ShipperHistoryTabComponent.tsx`):** Shipper có thể chuyển đổi linh hoạt giữa "Lộ Trình Giao Nhận" trong ngày và "Lịch Sử Phiếu Đã Giao" của các chi nhánh đối tác mình phụ trách, hiển thị dạng lưới thư viện ảnh phiếu kèm bộ lọc đối tác, khoảng ngày và mã phiếu.
+  - **Cụm điều hướng ngày mới:** Bỏ các nút rời "Hôm qua", "Hôm nay", "Ngày mai"; thay thế bằng cụm `[< Ngày trước]` - `[Ngày hiển thị ở giữa (click mở lịch chọn ngày)]` - `[Ngày sau >]` cực kỳ gọn gàng, trực quan.
+  - **Loại bỏ nút lập phiếu và form tạo phiếu:** Xóa bỏ hoàn toàn nút "Lập Phiếu Ngay" và modal tạo phiếu khỏi màn hình Shipper; Shipper chỉ tập trung vào lộ trình được phân công.
+  - **Hiển thị trực tiếp ảnh phiếu xuất kho:** Thẻ phiếu hiển thị trực tiếp ảnh phiếu giống tab `RECEIPT` (`PartnerReceiptTabComponent.tsx`).
+  - **Nút "Đếm thay" tích hợp ngay trên ảnh phiếu:** Khi bấm "Đếm thay", form đếm thay mở ra **trực tiếp trên khu vực ảnh phiếu** (inline, không dùng popup dialog), giao diện đơn giản như tab `COUNT`: stepper +/- tăng giảm nhanh, nhập số lượng thông minh (hỗ trợ cộng dồn `10+5` hoặc `12 34`), nhập số bao/túi gom đồ bẩn (`bagsCount`), lưu số lượng đếm thay trực tiếp qua API `PATCH /handover/${id}/dirty-items`.
+  - **Checkbox đếm lại tại xưởng (`isRecount`):** Tích chọn chuyển xưởng đếm lại khi nghi ngờ số lượng.
+  - **Tinh giản thông tin thẻ phiếu:** Ngày giao nhận hiển thị cùng hàng ở góc phải (`formatDateVN`), loại bỏ hoàn toàn badge `SCHEDULED` và dòng tóm tắt số lượng sạch/bẩn rườm rà.
+- **Kiểm thử & Xác thực:** `tsc --noEmit` pass 100%, Vite build `fe-react-thanhxuan-internal` pass 100% (7.43s).
+
+### Nâng Cấp UX Shipper, Chuẩn Hóa Mã Phiếu `GN-XXX-DDMMYYYY`, Bắt Buộc Mã Viết Tắt Partner & Fix Tab Lịch Sử Đối Tác (`be-nestjs-thanhxuan`, `fe-react-thanhxuan-internal`)
+- **Chuẩn hóa mã phiếu giao nhận `recordCode` & Tên viết tắt đối tác (`shortCode`):**
+  - Schema `Partner` (`partner.schema.ts`): Bổ sung `shortCode` (String, Bắt buộc, Unique, uppercase, index) và `deliveryShift` (`MORNING` | `EVENING`).
+  - Thêm validation nghiêm ngặt trong `CreatePartnerDto` và `UpdatePartnerDto`.
+  - Backend sinh mã phiếu định dạng `GN-XXX-DDMMYYYY` (ví dụ `GN-TT-14102026` với `TT` là tên viết tắt của cơ sở Tràng Tiền), tự động chuyển ngày sang định dạng `DDMMYYYY` theo múi giờ Việt Nam UTC+7. Kèm vòng lặp retry 3 lần tự động gắn hậu tố `-1`, `-2` nếu phát sinh nhiều chuyến trong cùng ngày cho một cơ sở.
+  - Cập nhật giao diện `PartnerModal.tsx`: Thêm ô nhập bắt buộc "Tên Viết Tắt (Mã Chi Nhánh)" (auto-uppercase, tối đa 8 ký tự, chú thích rõ dùng tạo mã phiếu `GN-[MÃ]-DDMMYYYY`), dropdown chọn Ca giao nhận mặc định (`Ca Sáng` / `Ca Tối`).
+  - `PartnerCardComponent.tsx`: Hiển thị badge mã viết tắt `shortCode` và ca giao nhận nổi bật.
+- **Tái cấu trúc màn hình giao nhận Shipper (`HandoverListPage.tsx` & `ShipperHandoverItemCardComponent.tsx`):**
+  - Xóa bỏ hoàn toàn nút "Tải ZIP" và "Tạo Phiếu" thừa thãi.
+  - Gộp Lịch giao nhận và Phiếu giao nhận thành **1 danh sách duy nhất** các điểm cần giao nhận trong ngày (`deliveryPoints`).
+  - Phân ca giao nhận linh hoạt: Thêm bộ lọc ca `Tất Cả`, `Ca Sáng` (mặt trời), `Ca Tối` (mặt trăng).
+  - Cụm nút chuyển nhanh ngày: Cụm nút bấm `[<]`, `[Hôm qua]`, `[Hôm nay]`, `[Ngày mai]`, `[>]` thao tác cực nhanh trên điện thoại di động.
+  - Địa chỉ chi tiết kèm nút **"Chỉ đường"**: Mở trực tiếp Google Maps (`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`) sang tab mới.
+  - Card dạng Accordion (mở rộng/thu gọn): Khi nhấn mở rộng hiển thị dời ngày nhanh, nút mở modal Đếm thay đối tác, xem ảnh phiếu xuất kho thủ kho đã lập, ký tên Canvas, họ tên shipper, checkbox tích yêu cầu đếm lại (`isRecount`), nút xác nhận bàn giao $\rightarrow$ khi hoàn tất hiển thị ngay ảnh phiếu mới kèm nút tải ảnh WebP về máy.
+- **Nâng cấp Modal Đếm thay đối tác (`ShipperCountPartnerModal.tsx`):**
+  - Đồng bộ chuẩn giao diện với màn hình đếm đồ bẩn nhà hàng: Smart Math Input cộng dồn phép tính (ví dụ `10+5+2`), chuyển đổi 2 chế độ xem Thẻ / Bảng, hiển thị tổng số món, số túi/bao gom đồ bẩn (`bagsCount`), bảng ký tên Canvas và Live Preview Canvas A4.
+- **Loại bỏ mục "Hàng đợi đếm lại" trong `WarehousePage.tsx`:**
+  - Xóa bỏ triệt để tab `RECOUNT_QUEUE` khỏi giao diện Thủ kho do đây là nghiệp vụ riêng biệt của Thợ xưởng tại trạm `/operations/worker/recount`.
+- **Sửa triệt để lỗi crash tại tab HISTORY (`PartnerPortalPage.tsx` & `PartnerHistoryTabComponent.tsx`):**
+  - Sửa lỗi crash do đọc schema cũ (`clean`, `dirty`, `restaurant_count`), map chuẩn xác sang `cleanClothes`, `dirtyClothes`, `recordDate`.
+  - Hiển thị đầy đủ số lượng, trạng thái, và cho phép xem / tải trực tiếp ảnh phiếu Cloudinary đã ký nghiệm thu.
+  - Giữ lại tab Lịch sử vì đây là tính năng cốt lõi phục vụ đối soát sản lượng và công nợ cuối tháng của đối tác nhà hàng.
+- **Cập nhật tài liệu kỹ thuật & từ điển dữ liệu:**
+  - **Đổi tên collection:** Chuyển `piecework_logs` thành `hourly_work` trong `piecework-log.schema.ts` phản ánh chính xác mô hình ghi nhận công việc theo giờ nhân hệ số.
+  - **Dọn dẹp DB thực tế:** Tạo và chạy thành công script `pnpm run db:drop-legacy` (`drop-legacy-collections.ts`), drop sạch collection cũ `counters`, đồng bộ dữ liệu và drop `piecework_logs` sang `hourly_work`.
+  - **Tái cấu trúc DATABASE_DICTIONARY.md:** Xóa sạch các bảng đã xóa (`counters`, `recount_tasks`), sắp xếp lại thứ tự 14 bảng trong `internal_express` theo luồng phân vùng nghiệp vụ logic, đánh số liền mạch từ 1 đến 32 Collections toàn hệ thống.
+  - **Bổ sung quy định vào Rule:** Cập nhật `.agents/rules/AGENTS.md` (DoD) và `.agents/rules/backend.md` quy định bắt buộc đồng bộ `DATABASE_DICTIONARY.md`, xóa bỏ hoàn toàn tên bảng đã xóa và chạy script dọn dẹp DB thực tế mỗi khi thay đổi schema.
+  - Kiểm thử: 110 tests Jest Backend pass 100%, NestJS build pass 100%, Vite build frontend pass 100%.
+
+### Plan 24 - Tái Cấu Trúc Toàn Diện CSDL internal_express, Chuẩn Hóa Quy Trình Giao Nhận 5 Bước, Thư Viện Ảnh Phiếu & Cơ Chế Lương Mới (`be-nestjs-thanhxuan`, `fe-react-thanhxuan-internal`)
+- **Tái Cấu Trúc Toàn Diện Cơ Sở Dữ Liệu `internal_express` (MongoDB):**
+  - **Xóa bỏ hoàn toàn bảng `counters` & sinh mã phiếu tự sinh ngẫu nhiên:** Loại bỏ `counter.schema.ts`, `counter.repository.ts` và collection `counters`. Sinh mã phiếu giao nhận `GN-YYYYMMDD-XXXX` (tiền tố ngày giờ chuẩn múi giờ Việt Nam UTC+7 và 4 ký tự ngẫu nhiên uppercase) kết hợp vòng lặp retry 3 lần và bắt lỗi `E11000` của MongoDB trên Unique Index `recordCode`. Triệt tiêu hoàn toàn điểm nghẽn cổ chai và nguy cơ race condition do bộ đếm tập trung gây ra.
+  - **Tinh gọn cấu trúc đồ vải & thay thế defects:**
+    * Nhánh đồ sạch (`cleanClothes`): Lưu trữ danh sách `items: CleanItemLine[]` gồm `itemCode`, `itemName`, `deliveryQuantity` (số lượng giao), `undeliveredQuantity` (chưa giao), `quantityReturned` (giao trả).
+    * Nhánh đồ bẩn (`dirtyClothes`): Lưu trữ danh sách `items: DirtyItemLine[]` gồm `itemCode`, `itemName`, `quantityReceived` (số lượng đối tác đếm), `actualQuantityReceived` (số lượng xưởng đếm lại).
+    * Ghi chú theo từng món (`notes`): Mảng `HandoverItemNote[]` gồm `itemCode`, `itemName`, `note`, thay thế hoàn toàn sub-schema `defects` phức tạp cũ.
+  - **Chuẩn hóa thời gian lưu trữ & múi giờ nghiệp vụ:** DB MongoDB lưu trữ chuẩn UTC0 (`Date`), toàn bộ tính toán nghiệp vụ, tiền tố mã phiếu và hiển thị giao diện tuân thủ múi giờ Việt Nam `Asia/Ho_Chi_Minh` (UTC+7).
+- **Quy Trình Giao Nhận 5 Bước Khép Kín & Cơ Chế Cập Nhật Nguyên Tử (Anti-Race Condition):**
+  - **Bước 1 - Thủ kho soạn đồ (17h-21h) & Cron Job 12:00 trưa:**
+    * Cron Job chạy tự động lúc 12:00 trưa mỗi ngày (`0 12 * * *`) quét các đối tác cần giao theo `deliveryFrequency` (`DAILY` hoặc `ALTERNATE_DAYS`), tự động tạo phiếu giao nhận với ngày giao `recordDate` là ngày mai và prefill đồ bẩn hôm trước.
+    * Modal soạn đồ `PrepOrderModal.tsx`: Chặn chọn ngày đã qua (`min = getTodayVN()`), mặc định ngày mai khi thủ kho soạn đồ buổi tối, nhập đồ sạch và ghi chú từng món, ký tên Canvas thủ kho, render canvas WebP nén tải lên Cloudinary lưu link `slipImageUrl`.
+  - **Bước 2 - Đối tác đếm đồ bẩn (21h-23h59) & Auto-Save Onblur Nguyên Tử:**
+    * Cổng đối tác `PartnerPortalPage.tsx`: Tự động nhận diện khung giờ đêm $\ge 21\text{h}00$ để nhảy ngày sang ngày mai (`getTargetRecordDateVN`).
+    * Triệt tiêu xung đột đồng thời trong giờ cao điểm 21h-23h59 bằng endpoint nguyên tử `PATCH /api/v1/internal/handover/:id/dirty-item-onblur`: Cập nhật trực tiếp từng ô số lượng đồ bẩn bằng toán tử `$set` trên path con của MongoDB, không ghi đè toàn bộ document.
+    * Đối tác ký nhận đếm đồ bẩn qua endpoint `PATCH /api/v1/internal/handover/:id/partner-count-signature`.
+  - **Bước 3 - Shipper nhận bàn giao & Ký nhận di động:**
+    * Danh sách phiếu `HandoverListPage.tsx` mặc định ngày theo `getTargetRecordDateVN()`.
+    * Chi tiết phiếu `HandoverDetailPage.tsx` và `SignatureModal.tsx`: Shipper kiểm đếm, xác nhận qua `PATCH /api/v1/internal/handover/:id/shipper-confirm`.
+    * Hỗ trợ checkbox `isRecount` (Yêu cầu đếm lại tại xưởng) và lý do `recountReason` khi đối tác bận chưa đếm hoặc nghi ngờ sai lệch.
+  - **Bước 4 - Trạm rạch bao đếm lại xưởng (`RecountStationPage.tsx`):**
+    * Tự động lọc danh sách các phiếu có `isRecount === true` hoặc đồ bẩn trống số lượng mà Shipper đã ký nhận giao về.
+    * Thợ xưởng rạch bao đếm lại, nhập số lượng thực tế và hoàn tất qua endpoint `PATCH /api/v1/internal/handover/:id/recount-actual` (`recount.status = 'DONE'`).
+  - **Bước 5 - Đối tác kiểm nhận đồ sạch & Ký nhận hoàn tất:**
+    * Cổng đối tác `PartnerReceiptTabComponent`: Hiển thị ảnh phiếu WebP trực tiếp từ Cloudinary `slipImageUrl`. Đối tác kiểm nhận số lượng đồ sạch đã nhận, ký tên xác nhận qua `PATCH /api/v1/internal/handover/:id/partner-check-signature`, chuyển trạng thái phiếu sang `COMPLETED`.
+- **Thư Viện Ảnh Phiếu Giao Nhận (`WarehouseSlipGalleryTabComponent.tsx`):**
+  - Tích hợp tab Thư viện ảnh phiếu trực tiếp trong `WarehousePage.tsx` cho Thủ kho và Quản lý.
+  - Bộ lọc trực quan: Thương hiệu (`BrandSelect`), Chi nhánh đối tác (`PartnerSelect`), Khoảng thời gian (Từ ngày - Đến ngày).
+  - Backend cung cấp endpoint `GET /api/v1/internal/handover/slip-gallery` tối ưu truy vấn `.lean()`.
+  - Hỗ trợ xem ảnh phóng to Modal Lightbox và tải ảnh WebP gốc trực tiếp về máy.
+- **Quản Lý Toàn Diện Chi Phí Xe Máy Của Shipper (`FuelPage.tsx`, `fuel_logs`):**
+  - Nâng cấp schema `FuelLog`: Bổ sung `expenseType: 'FUEL' | 'REPAIR'`, `amountMoney`, `odometerOrMotorcyclePhotoUrl`, `description`.
+  - Giao diện `FuelPage.tsx`: Hỗ trợ 2 tabs nghiệp vụ chuyên biệt: Đổ Xăng (`FUEL`) và Sửa Chữa Xe (`REPAIR`).
+  - Bắt buộc đính kèm ảnh chụp hóa đơn/biên lai và ảnh đồng hồ xe máy (với đổ xăng) hoặc ảnh xe máy sửa chữa (với sửa xe).
+  - Kế toán và Admin duyệt chi phí; khoản duyệt được tự động cộng vào phiếu lương của Shipper trong kỳ.
+- **Cơ Chế Tính Lương Mới Toàn Diện (Shipper 28 Ngày Chuẩn & Thợ Xưởng Theo Giờ x Hệ Số):**
+  - **Thuật toán tính lương Shipper:**
+    * Định mức tháng dựa trên 28 ngày công chuẩn: `dailySalaryRate = monthlyBaseSalary / 28`. Lương cơ bản tính theo ngày thực tế: `dailySalaryRate * actualWorkedDays`.
+    * Thưởng ca cuối tuần: 60.000 VNĐ / ca cho ca tối Thứ 7, Chủ Nhật và ca sáng Chủ Nhật, Thứ 2 (`shipperWeekendShiftBonus`).
+    * Thưởng chuyên cần: 7.000 VNĐ / ngày có chấm công thực tế (`shipperAttendanceBonusDaily`).
+    * Phụ cấp điện thoại: 200.000 VNĐ / kỳ lương (`shipperPhoneAllowance`).
+    * Hoàn chi phí phương tiện: Tự động cộng toàn bộ các khoản Đổ xăng và Sửa xe đã được Kế toán duyệt trong kỳ.
+    * Khấu trừ Bảo hiểm xã hội: Trừ 400.000 VNĐ / kỳ lương (`shipperInsuranceDeduction`).
+  - **Thuật toán tính lương Thợ xưởng:**
+    * Thay thế hoàn toàn mô hình khoán sản lượng đơn chiếc cũ bằng tính lương theo thời gian làm việc nhân hệ số công việc (`WorkshopJobType`: `IRONING`, `FOLDING`, `PACKING`, `WASHING`, `DRYING`, `OTHER`).
+    * Công thức: `Tiền công = (minutesWorked / 60) * hourlyBaseRate * coefficient`.
+    * Hệ số lấy từ `PaySettings.jobCoefficients`, đơn giá giờ cơ bản snapshot từ hồ sơ thợ `StaffAccount.hourlyRate`.
+  - **Minh bạch phiếu lương cá nhân (`MyPayslipPage.tsx`):**
+    * Tách biệt 2 cấu trúc chi tiết riêng: `shipperDetails` (chi tiết ngày công, ca cuối tuần, chuyên cần, xăng/sửa xe, phụ cấp, trừ BHXH) và `workerDetails` (bảng tổng hợp thời gian và tiền công theo từng loại việc).
+- **Đồng Bộ Tài Liệu Kỹ Thuật (Modular SRS/SDD & Harness Data):**
+  - Cập nhật [DATABASE_DICTIONARY.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/DATABASE_DICTIONARY.md): Tổng số bảng điều chỉnh thành 33 Collections (15 Collections trong `internal_express`); đánh dấu `counters` đã xóa bỏ; cập nhật `piecework_logs`, `fuel_logs`, `pay_settings`, `payslips`.
+  - Cập nhật [CODEBASE_ATLAS.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/CODEBASE_ATLAS.md): Bổ sung các endpoints handover mới, phân hệ chi phí xe và cấu trúc màn hình/component mới.
+  - Cập nhật [srs_sdd_backend.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_backend.md) và [srs_sdd_fe_internal.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_internal.md) lên phiên bản 2.3.
+  - Cập nhật 1 dòng Document History tại [SRS_SDD.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/SRS_SDD.md).
+- **Kiểm Thử & Biên Dịch:**
+  - Backend: `pnpm exec tsc --noEmit` PASS 100%, `nest build` PASS 100%.
+  - Frontend Internal: `pnpm exec tsc --noEmit` PASS 100%, `vite build` PASS 100% (6.84s).
+
+## 2026-10-11
+
+### Plan 23 - Tái Cấu Trúc Toàn Diện HandoverRecord, Sinh Mã Nguyên Tử, 4 Chữ Ký, Cloudinary WebP, Live Canvas Preview & Gộp Trạm Đếm Recount (`be-nestjs-thanhxuan`, `fe-react-thanhxuan-internal`)
+- **Tái Cấu Trúc Backend HandoverRecord & Loại Bỏ Collection Phụ:**
+  - **Sinh mã phiếu nguyên tử không qua Counter:** Thay thế logic sinh mã dựa trên collection `Counter` bằng cơ chế tìm mã lớn nhất trong ngày qua regex `^GN-YYYYMMDD-(\\d{3})$` trên `HandoverRecordRepository`, tăng tiến nguyên tử và xử lý retry tự động khi gặp conflict `E11000`.
+  - **Chuẩn hóa ngày và người lập phiếu:** Đổi `datePrefix` string sang `recordDate` kiểu `Date` (chuẩn hóa đầu ngày múi giờ Việt Nam `Asia/Ho_Chi_Minh` qua `startOfDayVN`), bổ sung thuộc tính `warehouseManagerId` (`Types.ObjectId`) bắt buộc truy vết danh tính thủ kho tạo phiếu.
+  - **Tái cấu trúc cấu trúc dữ liệu đồ vải:**
+    * Đồ sạch: Đổi từ `cleanDelivery` sang `cleanClothes` phẳng gồm: `preparedQuantity`, `undeliveredQuantity`, `debtDeliveryQuantity`, `note` từng dòng.
+    * Đồ bẩn: Đổi từ `dirtyPickup` sang `dirtyClothes` phẳng gồm: `partnerCount.items` (số lượng đối tác hoặc shipper đếm), `actualQuantity` (số lượng đếm thực tế tại xưởng), `variance` (chênh lệch) và `countedByRole` (`'PARTNER' | 'SHIPPER'`).
+  - **Gộp trạm đếm gom bao xưởng vào HandoverRecord:**
+    * Xóa bỏ hoàn toàn collection riêng `recount_tasks`, `RecountTaskRepository` và `recount-task.schema.ts`.
+    * Tích hợp trực tiếp trường `recount` vào `HandoverRecord`: `{ isRecount: boolean, status: 'PENDING' | 'COMPLETED', recountedAt?: Date, recountedBy?: Types.ObjectId }`.
+    * Chuyển API hoàn thành kiểm đếm sang `POST /api/v1/internal/handover/:id/recount`, cập nhật `dirtyClothes.actualQuantity`, tự động tính toán `variance` và sinh lại ảnh phiếu `slipImageUrl`.
+  - **Hệ thống 4 chữ ký điện tử độc lập (`signatures`):**
+    * Tách biệt rõ ràng 4 vai trò ký: `warehouseManager` (Thủ kho xuất đồ), `shipper` (Tài xế giao nhận), `partnerCount` (Người đếm đồ bẩn), và `receiptCheck` (Người kiểm nhận đồ sạch).
+    * Hỗ trợ lưu trữ alias tương thích giữa DB (`signedByName, signatureUrl, signedAt`) và Client (`name, signature, at`).
+  - **Tương thích ngược đọc kép (Dual-Read Backward Compatibility):**
+    * Cập nhật `ReportsService` và `PieceworkService` hỗ trợ đọc song song cả schema mới (`cleanClothes`, `dirtyClothes`) lẫn schema cũ (`cleanDelivery`, `dirtyPickup`) để bảo toàn dữ liệu lịch sử không bị gián đoạn.
+- **Tối Ưu Hóa Ảnh Phiếu & Lưu Trữ Đám Mây (Client WebP & Cloudinary):**
+  - **Nén ảnh WebP từ Client:** Xây dựng tiện ích `renderHandoverSlipToWebpBase64` nén canvas phiếu giao nhận sang định dạng `image/webp` chất lượng `0.85`, ép kích thước dưới 120KB giúp giảm 70% băng thông tải lên mạng di động.
+  - **Upload Cloudinary & Dọn dẹp ảnh cũ:** Backend NestJS tích hợp `MediaService` nhận `slipImageBase64` tải lên folder `thanhxuan/handovers`, lưu link CDN vào `slipImageUrl` và kích hoạt tác vụ nền xóa ảnh cũ an toàn tránh phát sinh chi phí lưu trữ.
+- **Nâng Cấp Toàn Diện Giao Diện Vận Hành & Trải Nghiệm Người Dùng (Frontend Internal):**
+  - **Xem trước Canvas trực tiếp cho Thủ kho (`PrepOrderModal.tsx`, `PrepOrderSlipPreviewComponent.tsx`):** Tích hợp khung xem trước Live Canvas ngay trong modal soạn đồ, cho phép thủ kho rà soát chính xác bố cục phiếu in A4 trước khi bấm lưu.
+  - **Shipper đếm thay đối tác (`ShipperCountPartnerModal.tsx`, `ShipperHandoverItemCardComponent.tsx`):**
+    * Bổ sung nút "Đếm thay đối tác" trên danh sách phiếu, tự động gán `countedByRole: 'SHIPPER'`.
+    * Tách component thẻ món đồ tối ưu hóa cảm ứng 1 tay cho tài xế, hỗ trợ xem và tải trực tiếp ảnh phiếu Cloudinary sắc nét.
+  - **Xem trước Canvas trên Cổng đối tác (`PartnerCountTabComponent.tsx`):** Render Canvas xem trước trực tiếp trên form đếm đồ bẩn, đặt phía trên nút lưu phiếu để đối tác quan sát dữ liệu ghép 2 chiều trước khi xác nhận.
+  - **Tăng tốc hiển thị Tab kiểm nhận (`PartnerReceiptTabComponent.tsx`):** Hiển thị trực tiếp thẻ `<img>` từ Cloudinary `slipImageUrl` (tốc độ tải tức thì, triệt tiêu 100% hiện tượng đơ giật do vẽ Canvas trên máy cấu hình yếu), kèm fallback vẽ Canvas nếu phiếu cũ chưa có ảnh.
+  - **Trạm kiểm đếm xưởng không cần ký tên (`RecountStationPage.tsx`):** Lọc các phiếu gom bao `recount.isRecount: true` và `recount.status: 'PENDING'`. Thợ xưởng chỉ cần nhập số lượng đếm thực tế của từng món và lưu thẳng, không yêu cầu ký tên Canvas.
+- **Kỷ Luật Cấu Trúc Mã Nguồn Frontend:**
+  - Bóc tách triệt để các file lớn thành các modal và component độc lập (`PrepOrderSlipPreviewComponent`, `ShipperCountPartnerModal`, `ShipperHandoverItemCardComponent`), bảo đảm mọi file mã nguồn đều dưới 250 - 300 dòng theo đúng quy chuẩn dự án.
+- **Kiểm Thử & Biên Dịch:**
+  - Backend: Chạy kiểm thử tự động `pnpm test src/modules/internal/handovers` đạt **PASS 35/35 tests**, biên dịch `pnpm build` **PASS 100%**.
+  - Frontend: Kiểm tra kiểu dữ liệu `pnpm exec tsc --noEmit` đạt **PASS 100%**, đóng gói `vite build` đạt **PASS 100%**.
+
 ## 2026-10-10
 
 ### Plan 22 - Tách Database `core_express` (CORE_CONNECTION), Migration Dữ Liệu An Toàn & Chuẩn Hóa Kiến Trúc 4 CSDL Độc Lập (`be-nestjs-thanhxuan`)

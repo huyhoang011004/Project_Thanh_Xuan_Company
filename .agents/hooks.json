@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .agents/hooks/guard.js",
+            "command": "node hooks/guard.js",
             "timeout": 10
           }
         ]
@@ -17,7 +17,7 @@
     "Stop": [
       {
         "type": "command",
-        "command": "node .agents/hooks/verify-on-stop.js",
+        "command": "node hooks/verify-on-stop.js",
         "timeout": 300
       }
     ]
