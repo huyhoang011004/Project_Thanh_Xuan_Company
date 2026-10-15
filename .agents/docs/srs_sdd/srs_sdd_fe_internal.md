@@ -1,4 +1,5 @@
 # ĐẶC TẢ YÊU CẦU & THIẾT KẾ CỔNG VẬN HÀNH NỘI BỘ (SRS & SDD)
+
 ## PHÂN HỆ CỔNG VẬN HÀNH XƯỞNG & ĐIỀU PHỐI ĐỐI TÁC (fe-react-thanhxuan-internal)
 
 > **Tài liệu tham chiếu cấp cao:** [SRS_SDD.md (Kiến Trúc Tổng Quan)](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/SRS_SDD.md)  
@@ -11,14 +12,16 @@
 ## 1. YÊU CẦU NGHIỆP VỤ (SRS)
 
 ### 1.1. Mục Tiêu & Đối Tượng Sử Dụng
+
 Phân hệ `fe-react-thanhxuan-internal` là cổng điều hành số hóa toàn diện xưởng giặt là công nghiệp và chuỗi cung ứng B2B của Công ty Thanh Xuân:
+
 1. **Đối tượng người dùng đa dạng (8 vai trò RBAC):**
    - **Tài xế giao nhận (`SHIPPER`)**: Thao tác trên thiết bị di động (Mobile PWA) tại đối tác để giao nhận đồ sạch/đồ bẩn, lấy chữ ký điện tử, bật cờ yêu cầu đếm lại xưởng (`isRecount`), nộp đề xuất chi phí xe máy (xăng xe và sửa chữa).
    - **Thợ xưởng (`WORKER`)**: Chấm công vào/ra ca bằng camera selfie di động, ghi nhận thời gian làm việc theo giờ nhân hệ số công việc (`WorkshopJobType`), rạch bao đếm lại đồ bẩn tại xưởng.
    - **Thủ kho (`WAREHOUSE_MANAGER`)**: Soạn đồ sạch xuất xưởng (chặn ngày đã qua), duyệt xem thư viện ảnh phiếu giao nhận (`WarehouseSlipGalleryTabComponent`), kiểm đếm trạm đếm.
-   - **Quản lý xưởng (`MANAGER`)**: Giám sát vận hành xưởng, phê duyệt tài khoản thợ/tài xế, chốt công thợ cuối ngày, rà soát các ca công bất thường. *(Ràng buộc: Bị ẩn 100% thông tin tiền bạc/lương)*.
+   - **Quản lý xưởng (`MANAGER`)**: Giám sát vận hành xưởng, phê duyệt tài khoản thợ/tài xế, chốt công thợ cuối ngày, rà soát các ca công bất thường. _(Ràng buộc: Bị ẩn 100% thông tin tiền bạc/lương)_.
    - **Đại diện đối tác (`PARTNER_MANAGER`, `PARTNER_STAFF`)**: Quản lý đối tác và Nhân viên đối tác. Tự động tính ngày hôm sau khi đếm đêm 21h-23h59, auto-save onblur từng ô đồ bẩn chống xung đột, ký nhận đếm đồ bẩn, kiểm nhận đồ sạch qua ảnh Cloudinary và ký nhận hoàn tất.
-   - **Kế toán (`ACCOUNTANT`)**: Phê duyệt đề xuất chi phí xe máy (xăng & sửa xe), cấu hình tham số định mức và hệ số lương, chạy tính bảng lương chu kỳ và xuất các báo cáo tài chính. *(Ràng buộc: Không tham gia phê duyệt tài khoản nhân sự)*.
+   - **Kế toán (`ACCOUNTANT`)**: Phê duyệt đề xuất chi phí xe máy (xăng & sửa xe), cấu hình tham số định mức và hệ số lương, chạy tính bảng lương chu kỳ và xuất các báo cáo tài chính. _(Ràng buộc: Không tham gia phê duyệt tài khoản nhân sự)_.
    - **Quản trị viên hệ thống (`ADMIN`, `SYSTEM_ADMIN`)**: Toàn quyền quản trị nhân sự, đối tác, danh mục đồ giặt, khóa/mở khóa kỳ lương và giám sát toàn hệ thống.
 
 ---
@@ -26,24 +29,26 @@ Phân hệ `fe-react-thanhxuan-internal` là cổng điều hành số hóa toà
 ### 1.2. Danh Sách Tính Năng Theo Nhóm Nghiệp Vụ (Functional Requirements)
 
 #### FE-INT-FR-01: Xác Thực, Quản Trị Nhân Sự & Profile Header (`features/auth`, `features/management/auth`, `components/layout/AppHeader`)
+
 - **Đăng nhập & Tài khoản mẫu:** Xác thực Email/Mật khẩu với Backend NestJS. Lưới tài khoản mẫu gồm 8 nút (Admin, Quản lý xưởng, Quản lý kho, Kế toán trưởng, Tài xế, Thợ xưởng, QL Đối Tác, NV Đối Tác) với mật khẩu mặc định `ThanhXuan@2026`, hỗ trợ đăng nhập tức thì.
 - **Đăng ký tài khoản công khai (`/register`, `RegisterModal`):** Chỉ cho phép đăng ký 3 vai trò thực thi: **NV Xưởng** (`WORKER`), **NV Giao Hàng** (`SHIPPER`) và **Nhân Viên Đối Tác** (`PARTNER_STAFF`). Bỏ hoàn toàn vai trò Quản lý đối tác khỏi trang đăng ký công khai. Khi chọn Nhân viên đối tác, cascade chọn Thương hiệu (Brand) trước rồi lọc Chi nhánh (Partner).
 - **Header Profile, Avatar & Dropdown Menu:**
   - Góc phải Header hiển thị Avatar tròn (ảnh Cloudinary hoặc ký tự viết tắt), Họ tên và Huy hiệu vai trò.
   - Dropdown Popover gồm 3 chức năng:
-    * 👤 **Thông tin cá nhân:** Mở `ProfileEditModal` cho phép sửa họ tên, SĐT và chọn ảnh trực tiếp từ máy tính để upload lên Cloudinary. Cập nhật tức thì avatar trên Header.
-    * 🔑 **Đổi mật khẩu:** Mở `ChangePasswordModal` nhập mật khẩu cũ, mật khẩu mới, xác nhận mật khẩu mới.
-    * 🚪 **Đăng xuất:** Gọi `logout()` và xóa toàn bộ session storage.
+    - 👤 **Thông tin cá nhân:** Mở `ProfileEditModal` cho phép sửa họ tên, SĐT và chọn ảnh trực tiếp từ máy tính để upload lên Cloudinary. Cập nhật tức thì avatar trên Header.
+    - 🔑 **Đổi mật khẩu:** Mở `ChangePasswordModal` nhập mật khẩu cũ, mật khẩu mới, xác nhận mật khẩu mới.
+    - 🚪 **Đăng xuất:** Gọi `logout()` và xóa toàn bộ session storage.
 - **Quản lý nhân sự toàn diện (`StaffManagementView`):**
-  - **Tabs phân loại tài khoản:** 6 nhóm: *Tất Cả*, *Ban Quản Trị & Kế Toán*, *Vận Hành Xưởng & Kho*, *Giao Nhận*, *Khối Đối Tác B2B*, *Tài Khoản Tạm Khóa*.
+  - **Tabs phân loại tài khoản:** 6 nhóm: _Tất Cả_, _Ban Quản Trị & Kế Toán_, _Vận Hành Xưởng & Kho_, _Giao Nhận_, _Khối Đối Tác B2B_, _Tài Khoản Tạm Khóa_.
   - **Thêm nhân sự:** Modal tạo mới tài khoản cho `ADMIN` và `MANAGER`, hỗ trợ tạo cả tài khoản Quản lý đối tác (`PARTNER_MANAGER`) kèm chọn Brand và Chi nhánh. Mật khẩu khởi tạo: `ThanhXuan@2026`.
   - **Chỉnh sửa nhân sự:** Cập nhật họ tên, SĐT, vai trò, thương hiệu và chi nhánh.
-  - **Tạm khóa tài khoản & Cơ chế 60 ngày:** Chuyển trạng thái sang `LOCKED`, ghi nhận thời điểm `lockedAt`, hiển thị số ngày còn lại (ví dụ: *Còn 59 ngày trước khi xóa vĩnh viễn*). Backend tự động xóa các tài khoản đã khóa quá 60 ngày. Hỗ trợ Mở khóa (`ACTIVE`).
+  - **Tạm khóa tài khoản & Cơ chế 60 ngày:** Chuyển trạng thái sang `LOCKED`, ghi nhận thời điểm `lockedAt`, hiển thị số ngày còn lại (ví dụ: _Còn 59 ngày trước khi xóa vĩnh viễn_). Backend tự động xóa các tài khoản đã khóa quá 60 ngày. Hỗ trợ Mở khóa (`ACTIVE`).
   - **Xóa tài khoản vĩnh viễn:** **Chỉ hiển thị và cho phép thực hiện đối với vai trò `ADMIN`**. Quản lý xưởng (`MANAGER`) không có nút xóa.
 - **Phê duyệt tài khoản (`approval_requests`):** Quản lý đối tác (`PARTNER_MANAGER`) duyệt nhân viên đối tác thuộc cơ sở mình; Quản lý xưởng và Admin duyệt nhân sự nội bộ (`WORKER`, `SHIPPER`). Kế toán bị tước bỏ hoàn toàn quyền duyệt nhân sự.
 - **Quên mật khẩu & Đặt lại mật khẩu:** Quy trình khôi phục mật khẩu 2 bước thông qua OTP email.
 
 #### FE-INT-FR-02: Phân Hệ Phiếu Giao Nhận Kép & Quy Trình 5 Bước Vận Hành (`features/operations/handovers`)
+
 - **Tạo phiếu & Soạn đồ sạch xuất kho (`WarehousePage`, `PrepOrderModal`):**
   - Quản lý tab qua URL Search Param `?tab=CLEAN_PLAN | SUMMARY | SLIP_GALLERY`.
   - Thủ kho chuẩn bị số lượng đồ sạch dự kiến giao theo lịch đối tác vào ngày chọn (`recordDate`), mặc định ngày mai khi soạn tối (17h-21h), chặn chọn ngày đã qua (`min = getTodayVN()`).
@@ -52,9 +57,9 @@ Phân hệ `fe-react-thanhxuan-internal` là cổng điều hành số hóa toà
 - **Component Thư viện ảnh phiếu dùng chung (`HandoverSlipGalleryComponent`):**
   - Component dùng chung hợp nhất toàn diện Thư viện ảnh phiếu cho cả 3 phân hệ: Thủ kho (`WarehousePage?tab=SLIP_GALLERY`), Cổng đối tác (`PartnerPortalPage?tab=HISTORY`) và Tài xế (`HandoverListPage?tab=HISTORY`).
   - Hỗ trợ 3 chế độ (`mode: 'WAREHOUSE' | 'SHIPPER' | 'PARTNER'`):
-    * *Kho (`WAREHOUSE`)*: Bộ lọc Thương hiệu (Brand), Chi nhánh đối tác (Partner), Từ ngày, Đến ngày, Tìm mã phiếu.
-    * *Tài xế (`SHIPPER`)*: Bộ lọc Chi nhánh đối tác (Partner), Từ ngày, Đến ngày, Tìm mã phiếu.
-    * *Đối tác (`PARTNER`)*: Khóa cố định đối tác `fixedPartnerId`, chỉ hiện bộ lọc Từ ngày, Đến ngày, Tìm mã phiếu.
+    - _Kho (`WAREHOUSE`)_: Bộ lọc Thương hiệu (Brand), Chi nhánh đối tác (Partner), Từ ngày, Đến ngày, Tìm mã phiếu.
+    - _Tài xế (`SHIPPER`)_: Bộ lọc Chi nhánh đối tác (Partner), Từ ngày, Đến ngày, Tìm mã phiếu.
+    - _Đối tác (`PARTNER`)_: Khóa cố định đối tác `fixedPartnerId`, chỉ hiện bộ lọc Từ ngày, Đến ngày, Tìm mã phiếu.
   - Lưới hiển thị Card đồng nhất tỷ lệ `aspect-[3/4]`: Ảnh thumbnail phiếu, badge thương hiệu, ngày giao nhận, trạng thái phiếu, 3 chấm tròn kiểm soát chữ ký (Kho, Shipper, Quán) kèm tooltip chi tiết.
   - Nút **Xem Phóng To** kết nối modal `SlipFullscreenViewerModal`, nút **Tải ảnh** WebP/PNG an toàn (hỗ trợ CORS fallback), nút **Chi tiết**. Phân trang mượt mà 12 phiếu/trang.
 - **Component Lightbox Phóng to ảnh phiếu dùng chung (`SlipFullscreenViewerModal`):**
@@ -74,11 +79,13 @@ Phân hệ `fe-react-thanhxuan-internal` là cổng điều hành số hóa toà
   - **Chỉ đường Google Maps & Ngày góc phải:** Nút chỉ đường mở Google Maps, ngày giao nhận hiển thị cùng hàng ở góc phải.
 
 #### FE-INT-FR-03: Trạm Đếm Đồ Bẩn Tại Xưởng (`features/operations/handovers` - `RecountStationPage`)
+
 - Phân quyền chuyên biệt cho Thợ xưởng (`WORKER`) và Thủ kho (`WAREHOUSE_MANAGER`).
 - Tự động lọc danh sách phiếu cần đếm lại: các phiếu có `isRecount === true` hoặc phiếu có đồ bẩn chưa đếm số lượng mà Shipper đã ký nhận giao về.
-- **Thao tác rạch bao đếm lại:** Thợ xưởng nhập số lượng thực tế từng món đồ (`actualQuantityReceived`), cập nhật trực tiếp vào hệ thống qua endpoint `PATCH /recount-actual`, hoàn tất quy trình kiểm đếm đối chứng.
+- **Thao tác rạch bao đếm lại:** Thợ xưởng nhập số lượng thực tế từng chiếc đồ (`actualQuantityReceived`), cập nhật trực tiếp vào hệ thống qua endpoint `PATCH /recount-actual`, hoàn tất quy trình kiểm đếm đối chứng.
 
 #### FE-INT-FR-04: Chấm Công Camera Selfie & Ghi Nhận Công Thợ Theo Giờ x Hệ Số (`features/attendance`, `features/piecework`)
+
 - **Chấm công camera selfie (`WorkerAttendancePage`):** Bắt buộc chụp ảnh trực tiếp từ camera trước của điện thoại, nén ảnh client trước khi tải lên. Chặn chấm ca trùng trong ngày.
 - **Ghi nhận thời gian công việc thợ (`PieceworkStationPage`):**
   - Thợ chọn loại công việc (`WorkshopJobType`: Ủi đồ, Gấp đồ, Đóng gói, Giặt, Sấy, Khác) và nhập số phút làm việc (`minutesWorked`).
@@ -86,6 +93,7 @@ Phân hệ `fe-react-thanhxuan-internal` là cổng điều hành số hóa toà
 - **Chốt duyệt công thợ cuối ngày (`PieceworkConfirmPage`):** Quản lý xưởng rà soát tổng hợp thời gian làm việc của thợ và chốt duyệt trạng thái `CONFIRMED`.
 
 #### FE-INT-FR-05: Quản Lý Chi Phí Xe Máy Của Shipper (`features/operations/fuel`, `features/management/fuel`)
+
 - **Tài xế nộp đề xuất chi phí xe (`FuelPage`):**
   - Hỗ trợ 2 tabs nghiệp vụ: **Đổ Xăng (`FUEL`)** và **Sửa Chữa Xe (`REPAIR`)**.
   - Nhập số tiền đề xuất hoàn (`amountMoney`), số lít xăng, số Km đồng hồ (nếu đổ xăng) hoặc mô tả chi tiết sửa chữa (nếu sửa xe).
@@ -93,14 +101,16 @@ Phân hệ `fe-react-thanhxuan-internal` là cổng điều hành số hóa toà
 - **Kế toán duyệt chi phí xe (`FuelReviewPage`):** Kế toán và Admin duyệt hoặc từ chối đề xuất. Số tiền được duyệt tự động tính vào phiếu lương shipper. Quản lý xưởng bị ẩn chức năng này.
 
 #### FE-INT-FR-06: Quản Trị Bảng Lương & Tra Cứu Phiếu Lương (`features/operations/payroll`, `features/management/payroll`)
+
 - **Quản lý kỳ lương (`PayrollManagementPage`):** Kế toán và Admin cấu hình tham số, chạy tính toán bảng lương chu kỳ và đóng băng (`LOCKED`).
 - **Tra cứu phiếu lương cá nhân (`MyPayslipPage`):**
   - Nhân viên tự tra cứu chi tiết phiếu lương cá nhân khi kỳ lương đã `LOCKED` hoặc `PAID`.
   - **Minh bạch theo chức danh:**
-    * *Tài xế Shipper:* Bảng tính chi tiết gồm ngày công chuẩn (28 ngày), ngày thực tế, lương cơ bản theo ngày, thưởng ca cuối tuần (60k/ca tối T7/CN và sáng CN/T2), chuyên cần (7k/ngày), phụ cấp điện thoại (200k), hoàn chi phí xăng và sửa xe đã duyệt, khấu trừ BHXH (400k) và thực nhận.
-    * *Thợ xưởng:* Bảng tổng hợp tổng phút làm việc và thu nhập theo từng nhóm công việc nhân hệ số.
+    - _Tài xế Shipper:_ Bảng tính chi tiết gồm ngày công chuẩn (28 ngày), ngày thực tế, lương cơ bản theo ngày, thưởng ca cuối tuần (60k/ca tối T7/CN và sáng CN/T2), chuyên cần (7k/ngày), phụ cấp điện thoại (200k), hoàn chi phí xăng và sửa xe đã duyệt, khấu trừ BHXH (400k) và thực nhận.
+    - _Thợ xưởng:_ Bảng tổng hợp tổng phút làm việc và thu nhập theo từng nhóm công việc nhân hệ số.
 
 #### FE-INT-FR-07: Trung Tâm Báo Cáo Phân Tích & Xuất File (`features/operations/reports`, `features/management/reports`)
+
 - Giao diện trực quan hóa 6 báo cáo aggregation: Báo cáo kho, Đối soát đối tác, Chấm công thợ, Lịch trình shipper, Sự cố chênh lệch và Báo cáo xăng xe.
 - Bộ lọc khoảng ngày linh hoạt (tối đa 31 ngày).
 - Xuất file tải về trực tiếp: Xuất file Excel XLSX và PDF streaming.
@@ -188,16 +198,16 @@ fe-react-thanhxuan-internal/src/
 
 Dựa trên cấu hình chuẩn hóa từ Plan 13, Plan 14 và Plan 16:
 
-| Nhóm Tài Khoản | Tuyến Đường Mặc Định | Quyền Truy Cập Vận Hành (`/operations`) | Quyền Truy Cập Quản Lý (`/management`) |
-| :--- | :--- | :--- | :--- |
-| **`SHIPPER`** | `/operations/shipper/handover` | `/operations/shipper/handover`, `/operations/shipper/fuel`, `/operations/payslip` | ❌ Không có quyền |
-| **`WORKER`** | `/operations/worker/piecework` | `/operations/worker/piecework`, `/operations/attendance`, `/operations/worker/recount`, `/operations/payslip` | ❌ Không có quyền |
-| **`WAREHOUSE_MANAGER`**| `/operations/warehouse-manager/warehouse` | `/operations/warehouse-manager/warehouse`, `/operations/worker/recount`, `/operations/shipper/handover` (chế độ xem), `/operations/payslip` | ❌ Không có quyền *(Bị ẩn trường tiền)* |
-| **`RESTAURANT_MANAGER`**| `/operations/partner-manager/partner`| `/operations/partner-manager/partner`, `/operations/shipper/handover` (chỉ chi nhánh mình) | `/management/manager/approval` (Chỉ xem và duyệt nhân viên chi nhánh mình) |
-| **`RESTAURANT_STAFF`** | `/operations/partner-staff/partner` | `/operations/partner-staff/partner`, `/operations/shipper/handover` (chỉ chi nhánh mình) | ❌ Không có quyền |
-| **`ACCOUNTANT`** | `/dashboard` | `/operations/payslip`, `/operations/report` | Quản lý kế toán & đối tác: `/management/accountant/payroll`, `/management/accountant/fuel`, `/management/manager/partner`, `/management/manager/personnel` *(Không có quyền duyệt tài khoản)* |
-| **`MANAGER`** | `/dashboard` | `/operations/shipper/handover` (chế độ xem), `/operations/report` | Quản lý vận hành xưởng: `/management/manager/personnel`, `/management/manager/partner`, `/management/manager/attendance`, `/management/manager/piecework`, `/management/manager/approval` *(Ẩn hoàn toàn bảng lương & tiền)* |
-| **`ADMIN`** | `/dashboard` | Toàn bộ các trang vận hành | Toàn quyền tuyệt đối 100% các chức năng quản lý |
+| Nhóm Tài Khoản           | Tuyến Đường Mặc Định                      | Quyền Truy Cập Vận Hành (`/operations`)                                                                                                     | Quyền Truy Cập Quản Lý (`/management`)                                                                                                                                                                                       |
+| :----------------------- | :---------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`SHIPPER`**            | `/operations/shipper/handover`            | `/operations/shipper/handover`, `/operations/shipper/fuel`, `/operations/payslip`                                                           | ❌ Không có quyền                                                                                                                                                                                                            |
+| **`WORKER`**             | `/operations/worker/piecework`            | `/operations/worker/piecework`, `/operations/attendance`, `/operations/worker/recount`, `/operations/payslip`                               | ❌ Không có quyền                                                                                                                                                                                                            |
+| **`WAREHOUSE_MANAGER`**  | `/operations/warehouse-manager/warehouse` | `/operations/warehouse-manager/warehouse`, `/operations/worker/recount`, `/operations/shipper/handover` (chế độ xem), `/operations/payslip` | ❌ Không có quyền _(Bị ẩn trường tiền)_                                                                                                                                                                                      |
+| **`RESTAURANT_MANAGER`** | `/operations/partner-manager/partner`     | `/operations/partner-manager/partner`, `/operations/shipper/handover` (chỉ chi nhánh mình)                                                  | `/management/manager/approval` (Chỉ xem và duyệt nhân viên chi nhánh mình)                                                                                                                                                   |
+| **`RESTAURANT_STAFF`**   | `/operations/partner-staff/partner`       | `/operations/partner-staff/partner`, `/operations/shipper/handover` (chỉ chi nhánh mình)                                                    | ❌ Không có quyền                                                                                                                                                                                                            |
+| **`ACCOUNTANT`**         | `/dashboard`                              | `/operations/payslip`, `/operations/report`                                                                                                 | Quản lý kế toán & đối tác: `/management/accountant/payroll`, `/management/accountant/fuel`, `/management/manager/partner`, `/management/manager/personnel` _(Không có quyền duyệt tài khoản)_                                |
+| **`MANAGER`**            | `/dashboard`                              | `/operations/shipper/handover` (chế độ xem), `/operations/report`                                                                           | Quản lý vận hành xưởng: `/management/manager/personnel`, `/management/manager/partner`, `/management/manager/attendance`, `/management/manager/piecework`, `/management/manager/approval` _(Ẩn hoàn toàn bảng lương & tiền)_ |
+| **`ADMIN`**              | `/dashboard`                              | Toàn bộ các trang vận hành                                                                                                                  | Toàn quyền tuyệt đối 100% các chức năng quản lý                                                                                                                                                                              |
 
 ---
 
@@ -215,7 +225,7 @@ sequenceDiagram
     Shipper->>UI: Ký nhận phiếu khi mất mạng (Offline)
     UI->>Queue: Lưu thao tác vào IndexedDB kèm Idempotency-Key (UUIDv4)
     UI-->>Shipper: Hiển thị trạng thái "Đã lưu offline, đang chờ kết nối mạng..."
-    
+
     Note over Worker: Thiết bị kết nối Internet trở lại (Online event)
     Worker->>Queue: Đọc các request tồn đọng trong IndexedDB
     loop Từng request ngoại tuyến
@@ -253,7 +263,7 @@ sequenceDiagram
 - **Soạn Đồ Thủ Công & Prefill Thông Minh (`PrepOrderModal`):**
   - Cho phép chọn Thương hiệu -> Chi nhánh đối tác -> nạp danh mục đồ giặt (`item_catalogs`).
   - Tự động gọi API `/handover/previous-dirty` lấy số lượng đồ bẩn nhận hôm trước để điền sẵn vào cột số lượng sẽ giao ngày mai.
-  - Hỗ trợ nhập 3 loại số lượng sạch: *Đã giao*, *Chưa giao*, *Giao trả nợ* kèm cột *Ghi chú* từng dòng (ví dụ: *"đã giao trước trong ngày xxx chiếc"*).
+  - Hỗ trợ nhập 3 loại số lượng sạch: _Đã giao_, _Chưa giao_, _Giao trả nợ_ kèm cột _Ghi chú_ từng dòng (ví dụ: _"đã giao trước trong ngày xxx chiếc"_).
   - Tích hợp khung Canvas ký tên điện tử và tự động điền họ tên người lập phiếu theo tài khoản đăng nhập.
   - Tối ưu hiển thị Responsive trên di động: Hỗ trợ chuyển đổi linh hoạt Dual View Mode giữa **Dạng Thẻ (`Card View`)** tiện bấm stepper và **Dạng Bảng (`Table View`)** cuộn ngang với cột STT, Tên đồ giặt ghim cố định bên trái (ẩn mã đồ phụ).
 - **Xuất Phiếu Xuất Nhập Kho Vận Chuyển Chuẩn Mẫu Thực Tế (`HandoverDeliverySlipModal` & `HandoverExportHelper`):**
@@ -292,9 +302,9 @@ sequenceDiagram
 - **Form Đếm Đồ Bẩn Thông Minh & Ghép Phiếu Giao Nhận Kép (`PartnerCountTabComponent.tsx`):**
   - Tái cấu trúc chuẩn theo form `PrepOrderModal` hỗ trợ chuyển đổi linh hoạt Dual View Mode giữa **Dạng Thẻ (`Card View`)** và **Dạng Bảng (`Table View`)**.
   - Tự động nhận diện tài khoản để khóa cứng (disabled / read-only) Thương hiệu, Chi nhánh và Ngày (mặc định lấy theo ngày của phiếu soạn đồ do quản lý kho tạo).
-  - Thay thế các cột soạn đồ thành duy nhất **1 cột số lượng: "Đồ chưa giặt"**. Bỏ ghi chú chung, giữ ghi chú từng món nếu có phát sinh rách/hỏng.
+  - Thay thế các cột soạn đồ thành duy nhất **1 cột số lượng: "Đồ chưa giặt"**. Bỏ ghi chú chung, giữ ghi chú từng chiếc nếu có phát sinh rách/hỏng.
   - **Cơ chế Smart Math Input & Tự động lưu khi rời ô (`onBlur`):** Hàm `parseSmartQtyExpression(input)` an toàn (không dùng `eval`), hỗ trợ nhập biểu thức tính toán phân cách bằng dấu cách hoặc phép tính (`12 34`, `12 + 34` => tính ra `46`, `50-10` => tính ra `40`); tự động tính kết quả và lưu ngay khi rời ô input.
-  - **Lưu & Xuất Phiếu Kép:** Bấm *"Lưu và xem phiếu giao nhận"* sẽ ghi nhận dữ liệu đếm đồ bẩn và chữ ký người đếm vào phiếu giao nhận (cột *Số lượng đã nhận* `dirtyReceivedQty`), đồng thời ghép dữ liệu đồ sạch xưởng đã soạn trong ngày để hiển thị đồng thời cả 2 chiều trên phiếu xuất nhập kho Canvas.
+  - **Lưu & Xuất Phiếu Kép:** Bấm _"Lưu và xem phiếu giao nhận"_ sẽ ghi nhận dữ liệu đếm đồ bẩn và chữ ký người đếm vào phiếu giao nhận (cột _Số lượng đã nhận_ `dirtyReceivedQty`), đồng thời ghép dữ liệu đồ sạch xưởng đã soạn trong ngày để hiển thị đồng thời cả 2 chiều trên phiếu xuất nhập kho Canvas.
 - **Kiểm Nhận Đồ Sạch Trực Quan Bằng Canvas 2 Chiều (Tab `RECEIPT` - `PartnerReceiptTabComponent.tsx`):**
   - Hiển thị trực tiếp phiếu giao nhận 2 chiều xuất nhập kho vẽ bằng HTML5 Canvas sắc nét để đối tác kiểm đếm đồ sạch đối soát với đồ bẩn.
   - Nút điều hướng ngày: **Sang trái (`ChevronLeft`)** lùi 1 ngày, **Sang phải (`ChevronRight`)** tiến 1 ngày để dễ dàng lật xem phiếu giao nhận theo ngày.
@@ -312,7 +322,7 @@ sequenceDiagram
 ### 2.7. Tái Cấu Trúc HandoverRecord, Xem Trước Canvas Trực Quan, WebP Cloudinary & Gộp Trạm Đếm (Plan 23)
 
 - **Xem Trước Canvas Trực Tiếp Trước Khi Lưu (Live Slip Preview):**
-  - **Thủ kho (`PrepOrderModal.tsx` & `PrepOrderSlipPreviewComponent.tsx`):** Tích hợp component xem trước toàn bộ phiếu in ngay trong modal soạn đồ. Thủ kho kiểm tra trực quan các món đồ đã soạn, chưa giao, giao trả nợ và chữ ký trước khi bấm lưu.
+  - **Thủ kho (`PrepOrderModal.tsx` & `PrepOrderSlipPreviewComponent.tsx`):** Tích hợp component xem trước toàn bộ phiếu in ngay trong modal soạn đồ. Thủ kho kiểm tra trực quan các chiếc đồ đã soạn, chưa giao, giao trả nợ và chữ ký trước khi bấm lưu.
   - **Đại diện đối tác (`PartnerCountTabComponent.tsx`):** Render Canvas xem trước trực tiếp trên form đếm đồ bẩn, đặt phía trên nút lưu phiếu để đối tác quan sát dữ liệu ghép 2 chiều trước khi xác nhận.
 - **Tối Ưu Hóa Ảnh Phiếu & Lưu Trữ Đám Mây (WebP Client Compress & Cloudinary CDN):**
   - Hàm tiện ích `renderHandoverSlipToWebpBase64` nén canvas sang định dạng `image/webp` chất lượng `0.85` (dung lượng < 120KB), truyền qua thuộc tính `slipImageBase64` khi lưu phiếu.
@@ -322,11 +332,11 @@ sequenceDiagram
   - Giữ lại fallback vẽ Canvas cục bộ chỉ khi phiếu cũ chưa có `slipImageUrl`.
 - **Shipper Đếm Thay Đối Tác (`ShipperCountPartnerModal.tsx` & `ShipperHandoverItemCardComponent.tsx`):**
   - Shipper kích hoạt tính năng đếm thay khi đối tác bận rộn; tự động đánh dấu `countedByRole: 'SHIPPER'`.
-  - Thẻ món đồ tách thành `ShipperHandoverItemCardComponent` với nút stepper bấm nhạy trên di động.
+  - Thẻ chiếc đồ tách thành `ShipperHandoverItemCardComponent` với nút stepper bấm nhạy trên di động.
   - Shipper có thể xem và tải trực tiếp ảnh phiếu Cloudinary đã lưu.
 - **Gộp Trạm Đếm Lại Xưởng Vào HandoverRecord (`RecountStationPage.tsx`):**
   - Xóa bỏ collection `recount_tasks`, quản lý trạng thái kiểm đếm trực tiếp qua `recount` (`isRecount`, `status`, `recountedAt`, `recountedBy`) và `dirtyClothes.actualQuantity` của `HandoverRecord`.
-  - Thợ kiểm đếm chỉ cần nhập số lượng đếm thực tế của từng món hàng và lưu thẳng (`POST /handover/:id/recount`), không yêu cầu ký tên Canvas; hệ thống tự động sinh lại Canvas phiếu và cập nhật `slipImageUrl`.
+  - Thợ kiểm đếm chỉ cần nhập số lượng đếm thực tế của từng chiếc hàng và lưu thẳng (`POST /handover/:id/recount`), không yêu cầu ký tên Canvas; hệ thống tự động sinh lại Canvas phiếu và cập nhật `slipImageUrl`.
 - **Kỷ Luật Cấu Trúc Mã Nguồn Frontend:**
   - Bóc tách toàn diện các file lớn sang `modals/*Modal.tsx` và `components/*Component.tsx` (ví dụ `PrepOrderSlipPreviewComponent`, `ShipperCountPartnerModal`, `ShipperHandoverItemCardComponent`), đảm bảo mọi file dưới 250 - 300 dòng, tuân thủ nghiêm ngặt quy tắc dự án.
 
@@ -358,7 +368,3 @@ sequenceDiagram
   - Ràng buộc ca làm việc: Thợ phải có ca `OPEN` trong ngày mới được phép ghi nhận công việc; giao diện có cảnh báo và nút chuyển sang trang chấm công nếu chưa check-in.
 - **Menu điều hướng (`nav-config.ts`):**
   - Đổi tiêu đề menu từ "Khoán Việc" sang **"Công Thợ Theo Giờ"** (vận hành) và **"Duyệt Công Thợ Theo Giờ"** (quản lý).
-
-
-
-

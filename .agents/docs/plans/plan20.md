@@ -11,13 +11,13 @@
    - Tải danh mục đồ giặt của nhà hàng đó (`item_catalogs` đã cấu hình ở `/management/manager/partner`).
    - Mặc định tự động điền sẵn (prefill) số lượng từ lượng đồ bẩn đã nhận của ngày hôm trước để thủ kho không phải gõ lại từ đầu.
    - Nhập/chỉnh sửa linh hoạt:
-     + **Số lượng sẽ giao** (cột *Số lượng đã giao* trên phiếu).
-     + **Số lượng chưa giao** (hàng thiếu/giặt chưa kịp).
-     + **Số lượng giao trả** (trả nợ đồ từ các hôm trước).
-     + **Ghi chú từng món / ghi chú phiếu** (ví dụ: *"đã giao trước trong ngày xxx chiếc"*, hoặc ghi chú đồ rách, thay thế...).
+     - **Số lượng sẽ giao** (cột _Số lượng đã giao_ trên phiếu).
+     - **Số lượng chưa giao** (hàng thiếu/giặt chưa kịp).
+     - **Số lượng giao trả** (trả nợ đồ từ các hôm trước).
+     - **Ghi chú từng chiếc / ghi chú phiếu** (ví dụ: _"đã giao trước trong ngày xxx chiếc"_, hoặc ghi chú đồ rách, thay thế...).
    - Khung ký tên điện tử (Canvas Signature Pad) và ô nhập họ tên người lập phiếu (mặc định lấy họ tên tài khoản đang đăng nhập).
 2. **Hiển thị & Tải ảnh Phiếu Xuất Nhập Kho Vận Chuyển (Ảnh 1)**:
-   - Hiển thị bản xem trước phiếu giao nhận chuẩn theo mẫu thực tế của Pizza 4P's (Ảnh 1): đầy đủ logo/thông tin công ty Thanh Xuân, mã QR Zalo, bảng chi tiết dịch vụ (STT, Danh mục, Đơn vị, Đồ chưa giặt, Đồ sạch đã giặt gồm 3 cột *Đã giao - Chưa giao - Giao trả*, Ghi chú, Tổng cộng), khu vực 4 chữ ký (*Thủ kho, Người giao hàng, Người nhận hàng, Người lập phiếu / Người đếm đồ bẩn* kèm chữ ký điện tử), footer cam kết dịch vụ.
+   - Hiển thị bản xem trước phiếu giao nhận chuẩn theo mẫu thực tế của Pizza 4P's (Ảnh 1): đầy đủ logo/thông tin công ty Thanh Xuân, mã QR Zalo, bảng chi tiết dịch vụ (STT, Danh mục, Đơn vị, Đồ chưa giặt, Đồ sạch đã giặt gồm 3 cột _Đã giao - Chưa giao - Giao trả_, Ghi chú, Tổng cộng), khu vực 4 chữ ký (_Thủ kho, Người giao hàng, Người nhận hàng, Người lập phiếu / Người đếm đồ bẩn_ kèm chữ ký điện tử), footer cam kết dịch vụ.
    - Cung cấp nút **"Tải Xuống Thành Ảnh (.PNG)"** để thủ kho gửi ngay vào nhóm Zalo giao hàng.
 3. **Setting tự động lên đơn soạn đồ theo lịch định kỳ**:
    - Tự động sinh phiếu giao nhận/soạn đồ cho các đối tác có lịch giao định kỳ (`DAILY` - Hàng ngày, `ALTERNATE_DAYS` - Cách ngày) vào ngày mai.
@@ -43,21 +43,21 @@
 
 ### 1.4. Bảng File Ảnh Hưởng
 
-| Path | Action | Lý do |
-| :--- | :--- | :--- |
-| `fe-react-thanhxuan-internal/src/components/ui/dialog.tsx` | Edit | Sửa lỗi bố cục modal: bổ sung padding hợp lý, hỗ trợ body scroll, sửa border light/dark mode. |
-| `fe-react-thanhxuan-internal/src/features/management/partners/components/PartnerDialog.tsx` | Edit | Khắc phục lỗi popup Ảnh 2: đưa form fields vào vùng cuộn `overflow-y-auto`, footer cố định không đè input. |
-| `fe-react-thanhxuan-internal/src/features/operations/handovers/WarehousePage.tsx` | Edit | Thêm nút "Soạn Đồ", nút "Tự Động Lên Đơn Theo Lịch", nút "Cài Đặt Lịch", tích hợp mở modal soạn hàng. |
-| `fe-react-thanhxuan-internal/src/features/operations/handovers/PrepOrderModal.tsx` | Add | Modal soạn đồ: chọn Brand -> Partner -> nạp prefill đồ bẩn hôm trước -> bảng số lượng 3 cột (*Đã giao*, *Chưa giao*, *Giao trả*) + Ghi chú -> ô ký tên + họ tên -> nút xem phiếu. |
-| `fe-react-thanhxuan-internal/src/features/operations/handovers/HandoverDeliverySlipModal.tsx` | Add | Modal hiển thị phiếu giao nhận xuất kho chuẩn mẫu Ảnh 1, nút tải ảnh PNG gửi Zalo. |
-| `fe-react-thanhxuan-internal/src/features/operations/handovers/HandoverExportHelper.ts` | Edit | Cập nhật hàm render canvas vẽ chuẩn phiếu giấy trắng A4, QR Zalo, bảng 16 dòng (3 cột đồ sạch + ghi chú), chữ ký điện tử. |
-| `fe-react-thanhxuan-internal/src/features/operations/handovers/WarehouseScheduleSettingsDialog.tsx` | Add | Modal cài đặt tự động lên đơn soạn đồ định kỳ, danh sách chi nhánh có lịch vs không có lịch. |
-| `fe-react-thanhxuan-internal/src/features/operations/handovers/index.ts` | Edit | Export các component mới. |
-| `be-nestjs-thanhxuan/src/modules/internal/handovers/schemas/handover-record.schema.ts` | Edit | Mở rộng sub-schema `CleanPlanned`: thêm `undeliveredQty`, `returnedDebtQty`, `note`, `preparedByName`, `preparedBySignature`. |
-| `be-nestjs-thanhxuan/src/modules/internal/handovers/dto/clean-planned.dto.ts` | Edit | Mở rộng DTO nhận các trường chi tiết đồ sạch và chữ ký người lập. |
-| `be-nestjs-thanhxuan/src/modules/internal/handovers/controllers/handover.controller.ts` | Edit | Thêm endpoint `POST /handover/auto-schedule`, `POST /handover/prep-order`, `GET /handover/previous-dirty`. |
-| `be-nestjs-thanhxuan/src/modules/internal/handovers/services/handover-record.service.ts` | Edit | Xử lý logic tạo phiếu soạn đồ thủ công & tự động sinh phiếu theo lịch ngày mai kèm prefill số lượng đồ bẩn hôm trước. |
-| `be-nestjs-thanhxuan/src/modules/internal/handovers/handover.service.ts` | Edit | Chuyển tiếp facade method cho `autoSchedule`, `createPrepOrder`, `getPreviousDirtyItems`. |
+| Path                                                                                                | Action | Lý do                                                                                                                                                                             |
+| :-------------------------------------------------------------------------------------------------- | :----- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `fe-react-thanhxuan-internal/src/components/ui/dialog.tsx`                                          | Edit   | Sửa lỗi bố cục modal: bổ sung padding hợp lý, hỗ trợ body scroll, sửa border light/dark mode.                                                                                     |
+| `fe-react-thanhxuan-internal/src/features/management/partners/components/PartnerDialog.tsx`         | Edit   | Khắc phục lỗi popup Ảnh 2: đưa form fields vào vùng cuộn `overflow-y-auto`, footer cố định không đè input.                                                                        |
+| `fe-react-thanhxuan-internal/src/features/operations/handovers/WarehousePage.tsx`                   | Edit   | Thêm nút "Soạn Đồ", nút "Tự Động Lên Đơn Theo Lịch", nút "Cài Đặt Lịch", tích hợp mở modal soạn hàng.                                                                             |
+| `fe-react-thanhxuan-internal/src/features/operations/handovers/PrepOrderModal.tsx`                  | Add    | Modal soạn đồ: chọn Brand -> Partner -> nạp prefill đồ bẩn hôm trước -> bảng số lượng 3 cột (_Đã giao_, _Chưa giao_, _Giao trả_) + Ghi chú -> ô ký tên + họ tên -> nút xem phiếu. |
+| `fe-react-thanhxuan-internal/src/features/operations/handovers/HandoverDeliverySlipModal.tsx`       | Add    | Modal hiển thị phiếu giao nhận xuất kho chuẩn mẫu Ảnh 1, nút tải ảnh PNG gửi Zalo.                                                                                                |
+| `fe-react-thanhxuan-internal/src/features/operations/handovers/HandoverExportHelper.ts`             | Edit   | Cập nhật hàm render canvas vẽ chuẩn phiếu giấy trắng A4, QR Zalo, bảng 16 dòng (3 cột đồ sạch + ghi chú), chữ ký điện tử.                                                         |
+| `fe-react-thanhxuan-internal/src/features/operations/handovers/WarehouseScheduleSettingsDialog.tsx` | Add    | Modal cài đặt tự động lên đơn soạn đồ định kỳ, danh sách chi nhánh có lịch vs không có lịch.                                                                                      |
+| `fe-react-thanhxuan-internal/src/features/operations/handovers/index.ts`                            | Edit   | Export các component mới.                                                                                                                                                         |
+| `be-nestjs-thanhxuan/src/modules/internal/handovers/schemas/handover-record.schema.ts`              | Edit   | Mở rộng sub-schema `CleanPlanned`: thêm `undeliveredQty`, `returnedDebtQty`, `note`, `preparedByName`, `preparedBySignature`.                                                     |
+| `be-nestjs-thanhxuan/src/modules/internal/handovers/dto/clean-planned.dto.ts`                       | Edit   | Mở rộng DTO nhận các trường chi tiết đồ sạch và chữ ký người lập.                                                                                                                 |
+| `be-nestjs-thanhxuan/src/modules/internal/handovers/controllers/handover.controller.ts`             | Edit   | Thêm endpoint `POST /handover/auto-schedule`, `POST /handover/prep-order`, `GET /handover/previous-dirty`.                                                                        |
+| `be-nestjs-thanhxuan/src/modules/internal/handovers/services/handover-record.service.ts`            | Edit   | Xử lý logic tạo phiếu soạn đồ thủ công & tự động sinh phiếu theo lịch ngày mai kèm prefill số lượng đồ bẩn hôm trước.                                                             |
+| `be-nestjs-thanhxuan/src/modules/internal/handovers/handover.service.ts`                            | Edit   | Chuyển tiếp facade method cho `autoSchedule`, `createPrepOrder`, `getPreviousDirtyItems`.                                                                                         |
 
 ---
 
@@ -109,24 +109,25 @@
 ### 2.3. Thiết Kế Phiếu Giao Nhận Giống Ảnh 1 (Ảnh Phiếu Xuất Nhập Kho Vận Chuyển)
 
 Phiếu hiển thị trên modal và xuất ra ảnh PNG có tỷ lệ chuẩn A4 (chiều rộng 800px, chiều cao 1130px), nền trắng `#ffffff`, chữ đen nét đậm:
+
 - **Thông tin công ty (Header)**:
   - Khung viền chữ nhật góc trên: CÔNG TY TNHH KINH DOANH THƯƠNG MẠI VÀ DỊCH VỤ THANH XUÂN.
   - Mã số thuế: `0108942736` | Điện thoại: `0769 270 676`.
   - Địa chỉ: `Thửa đất số DV14-LK643, tờ bản đồ số 00, khu dịch vụ Đào Đất Hàng Bè, đường Mậu Lương, Phường Kiến Hưng, Thành phố Hà Nội, Việt Nam`.
 - **Mã QR Zalo & Tiêu đề**:
   - Bên trái: Mã QR Zalo CSKH Thanh Xuân.
-  - Ở giữa: **PHIẾU XUẤT NHẬP KHO VẬN CHUYỂN** - *Ngày ... tháng ... năm ...*.
+  - Ở giữa: **PHIẾU XUẤT NHẬP KHO VẬN CHUYỂN** - _Ngày ... tháng ... năm ..._.
 - **Thông tin bên nhận**:
   - Nơi nhận: Tên chuỗi (VD: PIZZA 4P's) | Bộ phận: Tên chi nhánh (VD: HNC / Tràng Tiền).
   - Địa chỉ: Địa chỉ chi nhánh | Điện thoại: SĐT liên hệ.
 - **Bảng dịch vụ**:
   - Gồm đầy đủ các cột:
-    + Cột 1: `STT`
-    + Cột 2: `Danh mục dịch vụ`
-    + Cột 3: `Đơn vị`
-    + Cột 4 & 5 (Đồ chưa giặt): `Số lượng đã nhận` | `Số lượng thực nhận`
-    + Cột 6, 7 & 8 (Đồ sạch đã giặt): `Số lượng đã giao` | `Số lượng chưa giao` | `Số lượng giao trả`
-    + Cột 9: `Ghi chú` (hiển thị ghi chú từng dòng, VD: *"đã giao trước trong ngày 20 chiếc"*)
+    - Cột 1: `STT`
+    - Cột 2: `Danh mục dịch vụ`
+    - Cột 3: `Đơn vị`
+    - Cột 4 & 5 (Đồ chưa giặt): `Số lượng đã nhận` | `Số lượng thực nhận`
+    - Cột 6, 7 & 8 (Đồ sạch đã giặt): `Số lượng đã giao` | `Số lượng chưa giao` | `Số lượng giao trả`
+    - Cột 9: `Ghi chú` (hiển thị ghi chú từng dòng, VD: _"đã giao trước trong ngày 20 chiếc"_)
   - Dòng `TỔNG CỘNG` ở đáy bảng tính tổng số lượng của các cột số lượng.
   - Đảm bảo tối thiểu 16 hàng kẻ ô để giữ đúng form phiếu in chuẩn khổ A4.
 - **Khu vực 4 chữ ký**:
@@ -142,10 +143,10 @@ Phiếu hiển thị trên modal và xuất ra ảnh PNG có tỷ lệ chuẩn A
 // DTO CleanItemDetail mở rộng
 export class CleanItemDetailDto {
   itemCode: string;
-  quantity: number;          // Số lượng đã giao
-  undeliveredQty?: number;   // Số lượng chưa giao
-  returnedDebtQty?: number;  // Số lượng giao trả nợ
-  note?: string;             // Ghi chú từng dòng
+  quantity: number; // Số lượng đã giao
+  undeliveredQty?: number; // Số lượng chưa giao
+  returnedDebtQty?: number; // Số lượng giao trả nợ
+  note?: string; // Ghi chú từng dòng
 }
 
 // DTO CleanPlanned mở rộng
@@ -167,10 +168,10 @@ export interface PrepOrderPayload {
 }
 
 // API Endpoints
-POST /handover/prep-order             // Tạo hoặc cập nhật phiếu soạn đồ sạch ngày mai
-POST /handover/auto-schedule          // Tự động sinh phiếu theo lịch & prefill đồ bẩn hôm trước
-GET  /handover/previous-dirty         // Lấy số lượng đồ bẩn nhận gần nhất để điền sẵn
-GET  /handover/schedule-preview       // Xem trước danh sách đối tác định kỳ ngày mai
+POST / handover / prep - order; // Tạo hoặc cập nhật phiếu soạn đồ sạch ngày mai
+POST / handover / auto - schedule; // Tự động sinh phiếu theo lịch & prefill đồ bẩn hôm trước
+GET / handover / previous - dirty; // Lấy số lượng đồ bẩn nhận gần nhất để điền sẵn
+GET / handover / schedule - preview; // Xem trước danh sách đối tác định kỳ ngày mai
 ```
 
 ---
@@ -178,28 +179,31 @@ GET  /handover/schedule-preview       // Xem trước danh sách đối tác đ�
 ## 3. Implementation Tasks (Checklist)
 
 ### Giai đoạn 1: Sửa lỗi Popup Form Đối Tác (Ảnh 2)
+
 - [x] T1: `fe-react-thanhxuan-internal/src/components/ui/dialog.tsx` - Cải tiến cấu trúc `Dialog`, `DialogHeader`, `DialogFooter`: thêm layout flex-col chống tràn, padding cân đối, border đổi theo token theme light/dark - Tiêu chí: Dialog có khung viền chuẩn, không cắt chữ, footer tách bạch.
 - [x] T2: `fe-react-thanhxuan-internal/src/features/management/partners/components/PartnerDialog.tsx` - Sắp xếp lại form: tách cố định Header & Footer, bọc 7 input vào container cuộn `overflow-y-auto max-h-[60vh] px-6 py-3` - Tiêu chí: Không còn lỗi footer cắt ngang ô input "Người liên hệ trực tiếp tại quán", khoảng cách label và input thoáng đãng, sang trọng.
 
 ### Giai đoạn 2: Nâng cấp Backend Handovers (API Soạn Đồ, Prefill Đồ Bẩn & Tự Động Định Kỳ)
+
 - [x] T3: `be-nestjs-thanhxuan/src/modules/internal/handovers/schemas/handover-record.schema.ts` - Mở rộng sub-schema `CleanPlanned`: hỗ trợ `undeliveredQty`, `returnedDebtQty`, `note`, `preparedByName`, `preparedBySignature` - Tiêu chí: Mongoose schema build pass và giữ nguyên tính tương thích ngược.
 - [x] T4: `be-nestjs-thanhxuan/src/modules/internal/handovers/dto/clean-planned.dto.ts` - Bổ sung `@IsOptional()` cho các trường mới trong DTO - Tiêu chí: Validation class-validator pass.
 - [x] T5: `be-nestjs-thanhxuan/src/modules/internal/handovers/services/handover-record.service.ts` & `handover-flow.service.ts`:
-  + Viết method `getPreviousDirtyItems(partnerId, date)` lấy danh sách đồ bẩn hôm trước để prefill.
-  + Cập nhật `autoCreateDailyHandovers(targetDate)`: tự động lấy số lượng đồ bẩn hôm trước nạp sẵn vào `clean.planned` cho các chi nhánh định kỳ.
-  + Viết method `createOrUpdatePrepOrder(dto, actor)`: lưu đầy đủ 3 loại số lượng sạch + ghi chú + chữ ký.
+  - Viết method `getPreviousDirtyItems(partnerId, date)` lấy danh sách đồ bẩn hôm trước để prefill.
+  - Cập nhật `autoCreateDailyHandovers(targetDate)`: tự động lấy số lượng đồ bẩn hôm trước nạp sẵn vào `clean.planned` cho các chi nhánh định kỳ.
+  - Viết method `createOrUpdatePrepOrder(dto, actor)`: lưu đầy đủ 3 loại số lượng sạch + ghi chú + chữ ký.
 - [x] T6: `be-nestjs-thanhxuan/src/modules/internal/handovers/controllers/handover.controller.ts` & `handover.service.ts` - Thêm route `POST /handover/prep-order`, `POST /handover/auto-schedule`, `GET /handover/previous-dirty` với Permission Guard - Tiêu chí: Gọi API trả về kết quả thành công với HTTP 200/201.
 
 ### Giai đoạn 3: Phát triển Giao diện Soạn Đồ & Phiếu Giao Nhận Zalo (Frontend)
-- [x] T7: `fe-react-thanhxuan-internal/src/features/operations/handovers/HandoverExportHelper.ts` - Viết hàm `renderHandoverDeliverySlipToCanvas(data)` vẽ phiếu xuất kho chuẩn A4 giống hệt Ảnh 1 (Header công ty, QR code Zalo, bảng 16 dòng gồm 3 cột đồ sạch *Đã giao - Chưa giao - Giao trả* và cột *Ghi chú*, 4 cột chữ ký, footer cam kết) và xuất ảnh PNG chất lượng cao - Tiêu chí: Tạo ảnh PNG nền trắng rõ nét từng chữ số, tỷ lệ chuẩn để gửi Zalo.
+
+- [x] T7: `fe-react-thanhxuan-internal/src/features/operations/handovers/HandoverExportHelper.ts` - Viết hàm `renderHandoverDeliverySlipToCanvas(data)` vẽ phiếu xuất kho chuẩn A4 giống hệt Ảnh 1 (Header công ty, QR code Zalo, bảng 16 dòng gồm 3 cột đồ sạch _Đã giao - Chưa giao - Giao trả_ và cột _Ghi chú_, 4 cột chữ ký, footer cam kết) và xuất ảnh PNG chất lượng cao - Tiêu chí: Tạo ảnh PNG nền trắng rõ nét từng chữ số, tỷ lệ chuẩn để gửi Zalo.
 - [x] T8: `fe-react-thanhxuan-internal/src/features/operations/handovers/HandoverDeliverySlipModal.tsx` - Tạo component modal hiển thị trực quan Phiếu xuất nhập kho vận chuyển theo mẫu Ảnh 1, tích hợp nút "Tải ảnh về máy (.PNG)" và nút "Sao chép ảnh" - Tiêu chí: Xem trước chuẩn xác, tải ảnh thành công.
 - [x] T9: `fe-react-thanhxuan-internal/src/features/operations/handovers/PrepOrderModal.tsx` - Xây dựng modal soạn đồ:
-  + Chọn Brand (Pizza 4P's, Haidilao...) -> Chọn Chi nhánh.
-  + Tự động tải danh mục đồ giặt (`item_catalogs`) và gọi API lấy số lượng đồ bẩn hôm trước để prefill vào cột "Số lượng sẽ giao".
-  + Hỗ trợ nhập thêm: Số lượng chưa giao, Số lượng giao trả nợ, Ghi chú từng dòng (VD: "đã giao trước trong ngày xxx chiếc").
-  + Khung ký tên điện tử Canvas pad (`react-signature-canvas`) với nút xóa chữ ký.
-  + Ô họ tên người lập phiếu (mặc định lấy `user.fullName`).
-  + Nút "Lưu & Xem Phiếu Giao Nhận" gọi API `prep-order` và mở `HandoverDeliverySlipModal`.
+  - Chọn Brand (Pizza 4P's, Haidilao...) -> Chọn Chi nhánh.
+  - Tự động tải danh mục đồ giặt (`item_catalogs`) và gọi API lấy số lượng đồ bẩn hôm trước để prefill vào cột "Số lượng sẽ giao".
+  - Hỗ trợ nhập thêm: Số lượng chưa giao, Số lượng giao trả nợ, Ghi chú từng dòng (VD: "đã giao trước trong ngày xxx chiếc").
+  - Khung ký tên điện tử Canvas pad (`react-signature-canvas`) với nút xóa chữ ký.
+  - Ô họ tên người lập phiếu (mặc định lấy `user.fullName`).
+  - Nút "Lưu & Xem Phiếu Giao Nhận" gọi API `prep-order` và mở `HandoverDeliverySlipModal`.
 - [x] T10: `fe-react-thanhxuan-internal/src/features/operations/handovers/WarehouseScheduleSettingsDialog.tsx` - Tạo modal cài đặt: cấu hình tự động lên đơn định kỳ, hiển thị thống kê chi nhánh có lịch (`DAILY`, `ALTERNATE_DAYS`) vs chi nhánh thủ công (`ON_DEMAND`).
 - [x] T11: `fe-react-thanhxuan-internal/src/features/operations/handovers/WarehousePage.tsx` & `index.ts` - Bổ sung nút "Soạn Đồ", nút "Tự Động Lên Đơn Theo Lịch", nút "Cài Đặt Lịch Giao" trên thanh `PageActionBar`; kết nối modal soạn đồ và modal xem phiếu - Tiêu chí: Luồng thao tác mượt mà, UX chuyên nghiệp, không lỗi giật lag.
 
@@ -228,7 +232,7 @@ GET  /handover/schedule-preview       // Xem trước danh sách đối tác đ�
    - Mở `/operations/warehouse-manager/warehouse`, bấm nút "Soạn Đồ".
    - Chọn thương hiệu "Pizza 4P's" -> chọn chi nhánh "Pizza 4P's Tràng Tiền".
    - Kiểm tra: Hệ thống tự động nạp danh mục và điền sẵn số lượng từ đợt đồ bẩn hôm trước (VD: 409 khăn ăn xám, 6 xanh lau bát...).
-   - Nhập thêm số lượng chưa giao (VD: 5), giao trả nợ (VD: 2) và ghi chú dòng (VD: *"giao bổ sung ca trưa"*).
+   - Nhập thêm số lượng chưa giao (VD: 5), giao trả nợ (VD: 2) và ghi chú dòng (VD: _"giao bổ sung ca trưa"_).
    - Ký tên vào khung Canvas và kiểm tra ô họ tên người lập phiếu hiển thị đúng tên tài khoản.
    - Bấm "Lưu & Xem Phiếu": modal phiếu mẫu Ảnh 1 hiện lên đầy đủ thông tin; bấm "Tải ảnh về máy" kiểm tra file ảnh PNG sắc nét.
 3. **Kiểm tra Lên Đơn Tự Động Định Kỳ**:
@@ -248,9 +252,9 @@ GET  /handover/schedule-preview       // Xem trước danh sách đối tác đ�
 ## 5. Risks & Rollback
 
 - **Rủi ro 1**: Kích thước ảnh chữ ký Canvas Base64 quá lớn làm phình document MongoDB.
-  - *Giải pháp*: Giới hạn kích thước Canvas tối đa 500x200px, dùng `getTrimmedCanvas()` và nén PNG hoặc giới hạn kích thước chuỗi < 280KB như chuẩn hiện có của `SignatureModal.tsx`.
+  - _Giải pháp_: Giới hạn kích thước Canvas tối đa 500x200px, dùng `getTrimmedCanvas()` và nén PNG hoặc giới hạn kích thước chuỗi < 280KB như chuẩn hiện có của `SignatureModal.tsx`.
 - **Rủi ro 2**: Trùng lặp phiếu khi chạy tự động lên đơn nhiều lần trong ngày.
-  - *Giải pháp*: Duy trì cơ chế Idempotent dựa trên Compound Index `{ partnerId: 1, dateKey: 1, seq: 1 }` và kiểm tra `findByPartnerAndDateKey` trước khi tạo mới.
+  - _Giải pháp_: Duy trì cơ chế Idempotent dựa trên Compound Index `{ partnerId: 1, dateKey: 1, seq: 1 }` và kiểm tra `findByPartnerAndDateKey` trước khi tạo mới.
 - **Rollback**:
   - Nếu gặp sự cố, khôi phục code frontend và schema qua `git checkout`, không ảnh hưởng đến dữ liệu cũ.
 
@@ -259,7 +263,7 @@ GET  /handover/schedule-preview       // Xem trước danh sách đối tác đ�
 ## Changelog
 
 - 2026-10-10: Cập nhật Plan 20 bổ sung 3 điểm quan trọng từ người dùng:
-  1. Form soạn đồ hỗ trợ nhập đủ 3 loại số lượng sạch (*Đã giao*, *Chưa giao*, *Giao trả nợ*) kèm cột *Ghi chú*.
+  1. Form soạn đồ hỗ trợ nhập đủ 3 loại số lượng sạch (_Đã giao_, _Chưa giao_, _Giao trả nợ_) kèm cột _Ghi chú_.
   2. Tự động lấy số lượng đồ bẩn nhận hôm trước để prefill sang số lượng sẽ giao ngày tiếp theo.
   3. Cột chữ ký số thứ 4: Người lập phiếu / Người đếm đồ bẩn.
 
@@ -277,4 +281,3 @@ GET  /handover/schedule-preview       // Xem trước danh sách đối tác đ�
   - **T10**: Hoàn thành `WarehouseScheduleSettingsDialog.tsx` cấu hình tự động lên đơn định kỳ vs thủ công.
   - **T11**: Tích hợp các nút hành động lên thanh tác vụ Kho tại `WarehousePage.tsx` và export barrel `index.ts`.
   - **Verify**: Typecheck `fe-react-thanhxuan-internal` pass 0 lỗi. Build pass thành công 100% trên cả Backend (`nest build`) và Frontend (`tsc -b && vite build`).
-

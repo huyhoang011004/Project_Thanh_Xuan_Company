@@ -18,7 +18,7 @@
   - Tái cấu trúc tab Đếm đồ bẩn trong `PartnerPortalPage` / `PartnerCountTabComponent` theo ngôn ngữ giao diện của [PrepOrderModal.tsx](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/operations/handovers/modals/PrepOrderModal.tsx) (hỗ trợ chuyển đổi linh hoạt dạng Card / Table).
   - Tự động nhận diện chi nhánh & thương hiệu của tài khoản (`user.brand`, `user.partnerId`), **khóa cứng (disabled / read-only)** Thương hiệu, Chi nhánh và Ngày (mặc định là ngày theo phiếu soạn đồ đã được quản lý kho tạo).
   - Thay thế các cột soạn đồ thành duy nhất **1 cột số lượng: "Đồ chưa giặt"**.
-  - Bỏ trường "Ghi chú chung", giữ ghi chú theo từng món (nếu có lỗi/hỏng).
+  - Bỏ trường "Ghi chú chung", giữ ghi chú theo từng chiếc (nếu có lỗi/hỏng).
   - **Cơ chế Smart Math Input & Auto-Save on Blur**: Cho phép nhân viên gõ phép tính đếm gom dồn (`12 34`, `12 + 34` => tính ra `46`, `50-10` => tính ra `40`); hiển thị kết quả và tự động lưu ngay khi rời ô (`onBlur`).
 - **Lưu & Xuất Phiếu Giao Nhận Kép (Đồ Sạch + Đồ Bẩn)**:
   - Khi nhấn _"Lưu và xem phiếu giao nhận"_: Lưu dữ liệu đếm đồ bẩn vào phiếu giao nhận (cột _Số lượng đã nhận_ `dirtyReceivedQty` và chữ ký đối tác), đồng thời truy vấn dữ liệu đồ sạch đã soạn từ phía `warehouse-manager` trong ngày để hiển thị đồng thời cả 2 chiều trên phiếu xuất nhập kho canvas.
@@ -149,7 +149,7 @@ export function parseSmartQtyExpression(input: string): number {
   - **Khung Thông Tin Khóa Cứng**: Thương hiệu (disabled), Chi nhánh (disabled), Ngày (mặc định là ngày theo phiếu soạn đồ đã được quản lý kho tạo cho chi nhánh; fallback hôm nay `getTodayVN()`, disabled).
   - **Bộ Chuyển Đổi Chế Độ Xem**: Dạng Thẻ (Card - tối ưu mobile) và Dạng Bảng (Table - tối ưu desktop).
   - **Cột Dữ Liệu**: Duy nhất **1 cột số lượng: "Đồ chưa giặt"** (Smart Math Input + Auto-save onBlur).
-  - **Ghi chú**: Ghi chú theo từng món đồ, bỏ ô ghi chú chung.
+  - **Ghi chú**: Ghi chú theo từng chiếc đồ, bỏ ô ghi chú chung.
   - **Chữ Ký & Nút Lưu**: Khung Canvas ký tên và nút _"Lưu và xem phiếu giao nhận"_.
   - Khi lưu: Lưu số lượng đếm đồ bẩn, chữ ký đối tác, đồng thời kéo số lượng đồ sạch đã soạn từ xưởng để ghép thành phiếu giao nhận 2 chiều mở ra modal xem ảnh phiếu.
 
@@ -292,4 +292,3 @@ export function parseSmartQtyExpression(input: string): number {
   - T9: Hoàn thiện `PartnerReceiptTabComponent.tsx` vẽ Canvas phiếu 2 chiều, nút lùi/tiến ngày `ChevronLeft`/`ChevronRight`, tự động nạp họ tên và khung chữ ký xác nhận kiểm nhận.
   - T10: Nâng cấp `PartnerHistoryTabComponent.tsx` dùng `ResponsiveCardGrid`, sắp xếp mới đến cũ, phân trang tối đa 12 phiếu/trang, bộ lọc ngày cụ thể và nút xem chi tiết phiếu canvas.
   - Kiểm thử & Build: Backend NestJS (`tsc`, `build`) và Frontend Vite (`tsc -b`, `vite build`) đều PASS 100% không có lỗi.
-

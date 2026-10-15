@@ -2,6 +2,7 @@
 
 > **Phân hệ thực thi:** `fe-react-thanhxuan-internal`  
 > **Mục tiêu:** Đáp ứng toàn diện các cải tiến trải nghiệm người dùng theo nghiệp vụ thực tế xưởng giặt và đối tác:
+>
 > 1. Bộ lọc mặc định từ ngày đầu tháng đến ngày mai (hôm nay + 1) cho tất cả các tab Lịch sử / Thư viện ảnh phiếu (`Warehouse`, `Shipper`, `Partner`).
 > 2. Tab Kiểm Nhận Đối Tác (`PartnerPortalPage` - `tab=RECEIPT`): Tự động chọn ngày hôm sau (ngày hiện tại + 1) khi truy cập trong khung giờ đêm 21h00 - 23h59.
 > 3. Tab Kho Sạch (`WarehousePage` - `tab=CLEAN_PLAN`):
@@ -15,6 +16,7 @@
 ## 1. Hiện Trạng & Vấn Đề Kỹ Thuật
 
 ### 1.1. Bộ lọc ngày tại Thư viện ảnh phiếu (`HandoverSlipGalleryComponent.tsx`)
+
 - Hiện tại dòng [39-47](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/operations/handovers/components/HandoverSlipGalleryComponent.tsx#L39-L47):
   ```ts
   const today = getTodayVN();
@@ -25,6 +27,7 @@
   => Chưa đáp ứng yêu cầu: Kho và tài xế thường xuất nhập phiếu cho ngày mai hoặc cần đối soát trọn vẹn từ ngày đầu tháng đến ngày hiện tại + 1.
 
 ### 1.2. Tab Kiểm nhận Đối tác (`PartnerPortalPage.tsx`)
+
 - Dòng [259](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/operations/partners/PartnerPortalPage.tsx#L259):
   `const [currentReceiptDate, setCurrentReceiptDate] = useState<string>(getTodayVN());`
   => Khi nhà hàng kiểm nhận ca đêm (21h00 - 23h59), đồ sạch nhận vào chuẩn bị cho hoạt động của ngày hôm sau (phiếu mang ngày mai). Hiện tại state đang cứng theo `getTodayVN()`.
@@ -33,6 +36,7 @@
   => Thiếu trường chuẩn `h.recordDate` của Schema V2, khiến một số phiếu mới tạo không tìm thấy.
 
 ### 1.3. Tab Soạn đồ kho (`WarehousePage.tsx` & `WarehouseCleanPlanTabComponent.tsx`)
+
 - Dòng [49-57](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/operations/handovers/WarehousePage.tsx#L49-L57):
   Lấy danh sách phiếu cố định theo `today`, không có bộ chọn ngày để thủ kho xem trước hoặc soạn bù cho các ngày khác.
 - Dòng [129 & 173-272](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/operations/handovers/components/WarehouseCleanPlanTabComponent.tsx#L129):
@@ -44,10 +48,12 @@
 ## 2. Kế Hoạch Triển Khai Chi Tiết
 
 ### Task 1: Bổ sung Helper Ngày Tháng trong `src/lib/utils.ts`
+
 - [x] Bổ sung helper `getFirstDayOfMonthVN(date?: Date | string): string`: Trả về ngày đầu tiên của tháng theo định dạng `YYYY-MM-01` theo múi giờ `Asia/Ho_Chi_Minh`.
 - [x] Đảm bảo `getTomorrowVN()` hoạt động chuẩn xác theo múi giờ `Asia/Ho_Chi_Minh`.
 
 ### Task 2: Chuẩn Hóa Bộ Lọc Thư Viện Ảnh Phiếu (`HandoverSlipGalleryComponent.tsx`)
+
 - [x] Sửa giá trị khởi tạo của `fromDate` và `toDate`:
   - `fromDate`: Mặc định là ngày đầu tháng hiện tại `getFirstDayOfMonthVN()`.
   - `toDate`: Mặc định là ngày mai `getTomorrowVN()` (tức ngày hiện tại + 1).
@@ -57,19 +63,22 @@
   - `http://localhost:3001/operations/partner-manager/partner?tab=HISTORY`
 
 ### Task 3: Tự Động Hóa Ca Đêm Tab Kiểm Nhận Đối Tác (`PartnerPortalPage.tsx`)
+
 - [x] Khởi tạo `currentReceiptDate`: Sử dụng `getTargetRecordDateVN()` (đã có sẵn logic nếu 21h00 - 23h59 thì lấy ngày mai, ngược lại lấy ngày hôm nay).
 - [x] Cập nhật logic tìm `currentReceiptRecord`: Tìm theo `h.recordDate === currentReceiptDate || h.dateKey === currentReceiptDate || h.date === currentReceiptDate`.
 - [x] Bổ sung nhãn thông báo trực quan khi hệ thống tự động chuyển sang ngày mai vào ca đêm để người dùng nắm rõ.
 
 ### Task 4: Nâng Cấp `PrepOrderModal.tsx` Hỗ Trợ Chế Độ Sửa Phiếu Giao Nhận
+
 - [x] Bổ sung prop `initialRecord?: HandoverRecord | null` vào `PrepOrderModalProps`.
 - [x] Khi có `initialRecord`:
   - Chuyển tiêu đề modal thành: **"Sửa Phiếu Giao Nhận [Mã Phiếu]"**; nút submit thành **"Cập Nhật Phiếu Giao Nhận"**.
   - Tự động nạp: `selectedBrand` từ `initialRecord.brand`, `selectedPartnerId` từ `initialRecord.partnerId`, `targetDate` từ `initialRecord.recordDate`.
-  - Điền sẵn số lượng các món từ `initialRecord.cleanClothes?.items` (gồm `deliveryQuantity`, `undeliveredQuantity`, `quantityReturned`, `note`).
+  - Điền sẵn số lượng các chiếc từ `initialRecord.cleanClothes?.items` (gồm `deliveryQuantity`, `undeliveredQuantity`, `quantityReturned`, `note`).
   - Điền sẵn chữ ký thủ kho đã lưu từ `initialRecord.signatures?.warehouseManager?.signature`.
 
 ### Task 5: Cải Tiến Giao Diện & Bộ Chọn Ngày Tab Kho (`WarehousePage.tsx` & `WarehouseCleanPlanTabComponent.tsx`)
+
 - [x] Trong `WarehousePage.tsx`:
   - Chuyển `selectedDate` mặc định thành `getTomorrowVN()` (ngày hiện tại + 1).
   - Tích hợp thanh điều khiển chọn ngày (Hôm nay, Ngày mai, Ngày trước, Ngày sau, ô chọn ngày DatePicker).
@@ -85,6 +94,7 @@
 ---
 
 ## 3. Tiêu Chí Nghiệm Thu (Definition of Done)
+
 1. Truy cập `?tab=SLIP_GALLERY` (Kho) và `?tab=HISTORY` (Shipper, Partner): Bộ lọc hiển thị từ ngày đầu tháng đến ngày hiện tại + 1.
 2. Truy cập `?tab=RECEIPT` (Partner) sau 21h00: Ngày hiển thị tự động chuyển sang ngày mai.
 3. Truy cập `?tab=CLEAN_PLAN` (Kho):
@@ -97,6 +107,7 @@
 ---
 
 ## 4. Execution Log
+
 - **Trạng thái:** Done (2026-10-15)
 - **Thực thi:**
   - Task 1: Thêm helper `getFirstDayOfMonthVN` vào `src/lib/utils.ts`.
