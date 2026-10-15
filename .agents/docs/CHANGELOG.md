@@ -2,6 +2,27 @@
 
 Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâng cấp, bugfix và triển khai tính năng của Hệ sinh thái Công ty Thanh Xuân qua từng Plan.
 
+## 2026-10-15
+
+### Fix: Xử Lý Triệt Để Lỗi 500 Khi Bấm "Lưu & Xem Phiếu Giao Nhận" Trong Soạn Đồ (`be-nestjs-thanhxuan`)
+- **Nguyên nhân gốc rễ (Root Cause):**
+  1. **MongoDB Atlas Duplicate Key Error (`E11000`):** Trên collection `handover_records` trong cơ sở dữ liệu `internal_express` vẫn còn sót lại index phức hợp `partnerId_1_dateKey_1_seq_1` từ kiến trúc V1 cũ (có cờ `unique: true`). Khi chuyển sang Schema V2, hệ thống dùng `recordDate` và `recordCode`, bỏ trường `dateKey` và `seq` (cả 2 giá trị này đều là `null`). Khi thủ kho tạo phiếu mới cho một chi nhánh đối tác đã có bản ghi trước đó, MongoDB bắt lỗi trùng khóa `dup key: { partnerId: ObjectId(...), dateKey: null, seq: null }` và trả về mã lỗi `E11000`, dẫn đến `AllExceptionsFilter` biến thành HTTP 500 Internal Server Error.
+  2. **Lệch mapping DTO khi lưu đồ nợ/trả nợ:** DTO `PrepOrderDto` nhận `undeliveredQty` và `returnedDebtQty`, trong khi tầng Service đọc `it.undeliveredQuantity` và `it.quantityReturned`, khiến số lượng đồ chưa giao / giao trả nợ không được lưu vào CSDL.
+  3. **Rủi ro ném ngoại lệ ép kiểu ObjectId:** `new Types.ObjectId(actor.sub)` và `new Types.ObjectId(partner.defaultShipperId)` chưa kiểm tra `Types.ObjectId.isValid()`, có thể gây lỗi BSONError nếu ID không hợp lệ.
+- **Giải pháp xử lý:**
+  - **Dọn dẹp Index CSDL thực tế:** Cập nhật script `drop-legacy-collections.ts` để tự động phát hiện và drop toàn bộ các index lỗi thời chứa trường cũ (`dateKey`, `seq`, `status`) trên collection `handover_records`:
+    * Drop thành công index `partnerId_1_dateKey_1_seq_1` (triệt tiêu nguyên nhân chính gây lỗi 500).
+    * Drop thành công index `partnerId_1_recordDate_1_seq_1`, `shipperId_1_dateKey_1`, `dateKey_-1`, `status_1`, `status_1_date_-1`.
+    * Chạy script `pnpm run db:drop-legacy` trực tiếp trên MongoDB Atlas thành công.
+  - **Tối ưu hóa `handover-record.service.ts`:**
+    * Bổ sung kiểm tra an toàn `Types.ObjectId.isValid()` cho `warehouseManagerId` và `shipperId`.
+    * Đồng bộ hóa mapping lấy đúng cả hai định dạng `undeliveredQuantity ?? undeliveredQty` và `quantityReturned ?? returnedDebtQty`.
+  - **Kiểm thử & Nghiệm thu:**
+    * Bổ sung unit test cho `createOrUpdatePrepOrder` trong [handover.service.spec.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/handovers/specs/handover.service.spec.ts), 36/36 tests pass 100%.
+    * Gọi kiểm thử thực tế `POST /handover/prep-order` tới Backend, API phản hồi thành công `200 OK` (mã phiếu sinh đúng chuẩn `GN-TT-15102026`).
+    * Build pass 100% cho cả `be-nestjs-thanhxuan` và `fe-react-thanhxuan-internal`.
+    * Commit và push code lên nhánh `dev` thành công.
+
 ## 2026-10-13
 
 ### Plan 28: Chuẩn Hóa Toàn Diện Schema & Dọn Rác Dữ Liệu Các Bảng (Accounts, ItemCatalogs, HandoverRecords) (`be-nestjs-thanhxuan`, `fe-react-thanhxuan-internal`)
