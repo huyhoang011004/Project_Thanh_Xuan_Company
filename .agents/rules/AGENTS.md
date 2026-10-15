@@ -18,15 +18,15 @@ Tài liệu này là nguồn quy ước chung cho mọi agent và workflow trong
 
 ## 2. Thông tin dự án & Lệnh kiểm thử
 
-Monorepo gồm 3 app, mỗi app chạy lệnh ở đúng thư mục của nó:
+Monorepo gồm 4 app, mỗi app chạy lệnh ở đúng thư mục của nó:
 
-| Mục | Backend (`be-nestjs-thanhxuan/`) | Web + CMS (`fe-nextjs-thanhxuan-laundry/`) | Internal (`fe-react-thanhxuan-internal/`) |
-| :--- | :--- | :--- | :--- |
-| **Port dev** | `5001` (`pnpm start:dev`) | `3000` (`pnpm dev`) | `3001` (`pnpm dev`) |
-| **Lint** | `pnpm lint` | `pnpm lint` | `pnpm lint` |
-| **Typecheck** | `pnpm exec tsc --noEmit` | `pnpm exec tsc --noEmit` | `pnpm exec tsc --noEmit` |
-| **Test** | `pnpm test` | `pnpm test` | `pnpm test` |
-| **Build** | `pnpm build` | `pnpm build` | `pnpm build` |
+| Mục | Backend (`be-nestjs-thanhxuan/`) | Web Giặt Là & CMS (`fe-nextjs-thanhxuan-laundry/`) | Cổng Nội Bộ (`fe-react-thanhxuan-internal/`) | Web Chuyển Nhà (`fe-nextjs-chuyennhatietkiem/`) |
+| :--- | :--- | :--- | :--- | :--- |
+| **Port dev** | `5001` (`pnpm start:dev`) | `3000` (`pnpm dev`) | `3001` (`pnpm dev`) | `3002` (`pnpm dev`) |
+| **Lint** | `pnpm lint` | `pnpm lint` | `pnpm lint` | `pnpm lint` |
+| **Typecheck** | `pnpm exec tsc --noEmit` | `pnpm exec tsc --noEmit` | `pnpm exec tsc --noEmit` | `pnpm exec tsc --noEmit` |
+| **Test** | `pnpm test` | `pnpm test` | `pnpm test` | `pnpm test` |
+| **Build** | `pnpm build` | `pnpm build` | `pnpm build` | `pnpm build` |
 
 ## 3. Quy trình làm việc & Tài liệu
 
