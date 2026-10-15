@@ -4,6 +4,33 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
 
 ## 2026-10-15
 
+### Plan 31: Dọn Dẹp File Thừa Mồ Côi & Chuẩn Hóa Tên Màn Hình Frontend Ánh Xạ Backend (`fe-react-thanhxuan-internal`)
+- **Mục tiêu & Động lực:**
+  - Codebase `fe-react-thanhxuan-internal` sau quá trình tiến hóa qua các Plan 26 - 30 tồn tại một số file component mồ côi (dead code) không còn nơi nào import.
+  - Tên các màn hình cấp cao nhất (`Page.tsx`) chưa ánh xạ rõ ràng 1-1 với 8 module Backend (`be-nestjs-thanhxuan/src/modules/internal/`), gây khó khăn khi định vị và nhận diện vai trò sử dụng.
+  - Chuyển đổi tên trạm khoán việc cũ (`PieceworkStationPage`, `PieceworkConfirmPage`) sang nhận diện chuẩn xác theo nghiệp vụ tính công theo giờ `HourlyWork` đã hoàn thành ở Plan 30.
+- **Chi tiết thực thi:**
+  - **Giai đoạn 1 - Dọn dẹp triệt để 6 file thừa / mồ côi (Dead Code):**
+    * Xóa bỏ [ItemCounterCardComponent.tsx](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/operations/piecework/components/ItemCounterCardComponent.tsx) (card đếm sản lượng khoán cũ không còn dùng), dọn dẹp barrel exports trong `piecework/components/index.ts` và `piecework/index.ts`.
+    * Xóa bỏ [WarehouseSlipGalleryTabComponent.tsx](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/operations/handovers/components/WarehouseSlipGalleryTabComponent.tsx) (tab mồ côi bị thay thế bởi `HandoverSlipGalleryComponent`), dọn barrel exports.
+    * Xóa bỏ [WarehouseRecountQueueTabComponent.tsx](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/operations/handovers/components/WarehouseRecountQueueTabComponent.tsx) (tab đếm lại rạch bao cũ mồ côi), dọn barrel exports.
+    * Xóa bỏ [CreateHandoverModal.tsx](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/operations/handovers/modals/CreateHandoverModal.tsx) (modal mồ côi thừa, chức năng đã nằm trong `PrepOrderModal`), dọn barrel exports.
+    * Xóa bỏ [RegisterModal.tsx](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/auth/modals/RegisterModal.tsx) (modal đăng ký tài khoản mồ côi, tài khoản nhân viên do admin cấp), dọn barrel exports.
+    * Xóa bỏ thư mục [management/reports/](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/management/reports) chứa duy nhất file `index.ts` rỗng (báo cáo đã chuyển về `features/reports/`), dọn barrel exports tại `management/index.ts`.
+  - **Giai đoạn 2 - Chuẩn hóa tên 6 màn hình Frontend ánh xạ 1-1 Backend Module:**
+    * `PieceworkStationPage.tsx` $\rightarrow$ [HourlyWorkStationPage.tsx](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/operations/piecework/HourlyWorkStationPage.tsx): Màn hình trạm ghi nhận giờ công và khâu làm việc của thợ xưởng, ánh xạ `PieceworkModule`. Cập nhật route Next.js wrapper tại `src/app/(internal)/operations/worker/piecework/page.tsx`.
+    * `PieceworkConfirmPage.tsx` $\rightarrow$ [HourlyWorkReviewPage.tsx](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/management/piecework/HourlyWorkReviewPage.tsx): Màn hình quản lý xem xét và phê duyệt bảng công thợ theo giờ, xóa bỏ alias `PieceworkConfirmView`, cập nhật tiêu đề Tiếng Việt tự nhiên "Duyệt Công Thợ Theo Giờ". Cập nhật [ManagementPage.tsx](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/management/ManagementPage.tsx) và route wrapper tại `src/app/(internal)/management/manager/piecework/page.tsx`.
+    * `WarehousePage.tsx` $\rightarrow$ [WarehouseHandoverPage.tsx](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/operations/handovers/WarehouseHandoverPage.tsx): Màn hình thủ kho tạo/sửa phiếu giao nhận đồ sạch và xem thư viện ảnh phiếu, ánh xạ `HandoversModule`. Cập nhật route wrapper tại `src/app/(internal)/operations/warehouse-manager/warehouse/page.tsx`.
+    * `HandoverListPage.tsx` $\rightarrow$ [ShipperHandoverPage.tsx](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/operations/handovers/ShipperHandoverPage.tsx): Màn hình tài xế thực hiện nhận/giao đồ giặt và ký số trên đường vận chuyển, ánh xạ `HandoversModule`. Cập nhật route wrapper tại `src/app/(internal)/operations/shipper/handover/page.tsx`.
+    * `FuelPage.tsx` $\rightarrow$ [ShipperFuelPage.tsx](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/operations/fuel/ShipperFuelPage.tsx): Màn hình tài xế đề xuất đổ xăng kèm chụp ảnh đồng hồ công-tơ-mét, ánh xạ `FuelModule`. Cập nhật route wrapper tại `src/app/(internal)/operations/shipper/fuel/page.tsx`.
+    * `PartnersPage.tsx` $\rightarrow$ [PartnersManagementPage.tsx](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/management/partners/PartnersManagementPage.tsx): Màn hình quản lý thông tin, chi nhánh và danh mục đơn giá đồ giặt của đối tác B2B, ánh xạ `PartnersModule`. Cập nhật route wrapper tại `src/app/(internal)/management/manager/partner/page.tsx`.
+  - **Triệt tiêu toàn bộ file/alias bridge tương thích ngược:**
+    * Tuân thủ nghiêm ngặt mục 4 và mục 8 trong `AGENTS.md`, toàn bộ các alias trung gian dạng `export { A as B }` đã được xóa bỏ triệt để. Mọi nơi gọi đều trỏ trực tiếp vào định danh mới.
+  - **Kiểm thử & Nghiệm thu:**
+    * `pnpm exec tsc --noEmit` pass 100% (0 errors, strict mode).
+    * `pnpm build` pass 100% (Vite production bundle built thành công trong 4.95s).
+    * Đồng bộ tài liệu kiến trúc [CODEBASE_ATLAS.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/CODEBASE_ATLAS.md), [srs_sdd_fe_internal.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_internal.md), [SRS_SDD.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/SRS_SDD.md).
+
 ### Plan 29 & Plan 30: Chuẩn Hóa Bộ Lọc Ngày Phiếu Giao Nhận & Chuyển Đổi Trạm Khoán Việc Sang HourlyWork (`be-nestjs-thanhxuan`, `fe-react-thanhxuan-internal`)
 - **Plan 29 - Chuẩn hóa bộ lọc ngày & trải nghiệm Tạo/Sửa Phiếu Giao Nhận (`fe-react-thanhxuan-internal`):**
   - **Bộ lọc Thư viện ảnh phiếu (`HandoverSlipGalleryComponent.tsx`):**

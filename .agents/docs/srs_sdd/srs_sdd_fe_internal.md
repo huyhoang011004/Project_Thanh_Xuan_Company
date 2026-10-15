@@ -165,17 +165,17 @@ fe-react-thanhxuan-internal/src/
 │   │   ├── attendance/                  # AttendanceReviewPage
 │   │   ├── auth/                        # StaffManagementPage, ApprovalManagementPage, AuditLogPage; modals/ (*Modal.tsx); components/ (*Component.tsx)
 │   │   ├── fuel/                        # FuelReviewPage
-│   │   ├── partners/                    # PartnersPage; modals/ (PartnerModal, BrandModal, CatalogModal...); components/ (*Component.tsx)
+│   │   ├── partners/                    # PartnersManagementPage; modals/ (PartnerModal, BrandModal, CatalogModal...); components/ (*Component.tsx)
 │   │   ├── payroll/                     # PayrollManagementPage
-│   │   └── piecework/                   # PieceworkConfirmPage
+│   │   └── piecework/                   # HourlyWorkReviewPage
 │   │
 │   └── operations/                      # Module Vận hành hiện trường xưởng & di động
 │       ├── attendance/                  # AttendancePage
-│       ├── fuel/                        # FuelPage
-│       ├── handovers/                   # HandoverListPage, HandoverDetailPage, WarehousePage, RecountStationPage; modals/ (*Modal.tsx); components/ (*Component.tsx)
+│       ├── fuel/                        # ShipperFuelPage
+│       ├── handovers/                   # ShipperHandoverPage, HandoverDetailPage, WarehouseHandoverPage, RecountStationPage; modals/ (*Modal.tsx); components/ (*Component.tsx)
 │       ├── partners/                    # PartnerPortalPage; components/ (*Component.tsx)
 │       ├── payroll/                     # MyPayslipPage
-│       ├── piecework/                   # PieceworkStationPage; components/ (*Component.tsx)
+│       ├── piecework/                   # HourlyWorkStationPage
 │       └── reports/                     # ReportsPage; components/ (*Component.tsx)
 │
 ├── lib/                                 # Tiện ích hạ tầng (api-client, permissions, offline-queue, utils)
