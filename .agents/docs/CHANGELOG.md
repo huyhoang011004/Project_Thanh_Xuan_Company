@@ -4,7 +4,38 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
 
 ## 2026-10-15
 
-### Fix: Xử Lý Triệt Để Lỗi 500 Khi Bấm "Lưu & Xem Phiếu Giao Nhận" Trong Soạn Đồ (`be-nestjs-thanhxuan`)
+### Plan 29 & Plan 30: Chuẩn Hóa Bộ Lọc Ngày Phiếu Giao Nhận & Chuyển Đổi Trạm Khoán Việc Sang HourlyWork (`be-nestjs-thanhxuan`, `fe-react-thanhxuan-internal`)
+- **Plan 29 - Chuẩn hóa bộ lọc ngày & trải nghiệm Tạo/Sửa Phiếu Giao Nhận (`fe-react-thanhxuan-internal`):**
+  - **Bộ lọc Thư viện ảnh phiếu (`HandoverSlipGalleryComponent.tsx`):**
+    * Thêm helper `getFirstDayOfMonthVN()` tại `src/lib/utils.ts`.
+    * Chuẩn hóa bộ lọc ngày mặc định trên cả 3 tab sử dụng component này (`WarehousePage?tab=SLIP_GALLERY`, `HandoverListPage?tab=HISTORY`, `PartnerPortalPage?tab=HISTORY`): từ ngày đầu tháng hiện tại (`YYYY-MM-01`) đến ngày mai (`today + 1`).
+  - **Tab Kiểm nhận đối tác (`PartnerPortalPage.tsx` & `PartnerReceiptTabComponent.tsx`):**
+    * Tự động nhận diện khung giờ đêm 21h00 - 23h59 bằng helper `getTargetRecordDateVN()` để chọn ngày mai (`today + 1`) cho việc kiểm nhận sớm đồ sạch ca đêm, các giờ khác chọn ngày hiện tại.
+    * Sửa điều kiện tìm phiếu bao gồm cả `recordDate` bên cạnh `partnerId` và `branchName` để đảm bảo hiển thị chính xác phiếu của ngày được chọn.
+    * Bổ sung Badge trực quan nhận diện phiếu "Hôm nay" và "Ngày mai (Ca đêm)".
+  - **Tab Kho Sạch (`WarehousePage.tsx` & `WarehouseCleanPlanTabComponent.tsx`):**
+    * Chuẩn hóa toàn bộ thuật ngữ hiển thị: thay "Soạn đồ / Soạn đồ sạch" thành "Phiếu Giao Nhận" và "Tạo Phiếu Giao Nhận".
+    * Đổi mặc định danh sách phiếu hiển thị ngày mai (`getTomorrowVN()`) phù hợp với quy trình đóng gói chiều/tối giao vào sáng mai.
+    * Thêm thanh điều hướng ngày linh hoạt: nút "Hôm nay", nút "Ngày mai", nút Trước/Sau, bộ chọn ngày DatePicker.
+    * Đổi nút hành động thành "Sửa Phiếu Giao Nhận".
+    * Tái cấu trúc modal sửa phiếu: Sử dụng trực tiếp [PrepOrderModal.tsx](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/handovers/modals/PrepOrderModal.tsx) với prop `initialRecord`, tự động nạp toàn bộ danh mục đồ sạch, số lượng nợ cũ, chữ ký thủ kho; chuyển tiêu đề thành "Sửa Phiếu Giao Nhận #[recordCode]" và nút "Cập Nhật Phiếu Giao Nhận". Dọn dẹp hoàn toàn modal inline cũ.
+- **Plan 30 - Chuyển đổi trạm khoán việc thợ xưởng sang mô hình HourlyWork (`be-nestjs-thanhxuan`, `fe-react-thanhxuan-internal`):**
+  - **Backend API & Kiến trúc NestJS (`be-nestjs-thanhxuan`):**
+    * Triển khai công thức tính tiền công thợ theo giờ chuẩn CSDL (Mục 1.10 Data Dictionary): $\text{subtotal} = (\text{minutesWorked} / 60) \times \text{hourlyBaseRate} \times \text{coefficient}$.
+    * Tạo DTO `RecordHourlyWorkTaskDto` tại `src/modules/internal/piecework/dto/record-hourly-work.dto.ts` với strict validation: `@IsEnum(HourlyJobType)`, `@IsInt()`, `@Min(1)`, `@Max(720)`.
+    * Cung cấp 3 API mới trong `PieceworkController`:
+      - `GET /piecework/job-types`: Trả về danh sách 7 khâu công việc chuẩn kèm tên tiếng Việt và hệ số mặc định (Rũ đồ x1.2, Giặt & Sấy x1.3, Gấp x1.0, Đếm/Phân loại x1.1, Là/Ủi x1.2, Đóng gói x1.0, Khác x1.0) và đơn giá cơ sở lấy từ `PaySettings`.
+      - `POST /piecework/me/tasks`: Ghi nhận giờ làm việc cho thợ, tự động kiểm tra ca làm việc đang mở (`OPEN` trong `AttendanceRecord`), tính snapshot đơn giá, hệ số và thành tiền, lưu vào mảng `tasks` của `PieceworkRecord`.
+      - `DELETE /piecework/me/tasks/:taskIndex`: Xóa mục công việc bị ghi nhầm trong ca, tự động trừ lại `totalAmount` an toàn.
+    * Đăng ký schema `PaySettings` trực tiếp trong `PieceworkModule` qua `INTERNAL_CONNECTION` và `PaySettingsRepository`, bảo vệ kiến trúc Clean Architecture, tránh circular dependency với `PayrollModule`.
+    * Viết bổ sung 4 unit test toàn diện trong `piecework.service.spec.ts` kiểm thử đầy đủ kịch bản tính tiền, chặn khi chưa mở ca, lấy hệ số và xóa task (10/10 tests pass).
+  - **Frontend Trạm Ghi Công Thợ (`fe-react-thanhxuan-internal`):**
+    * Bổ sung interface `JobCoefficientSetting`, `HourlyWorkTask`, `HourlyWorkDailyLog` tại `src/types/index.ts`.
+    * Viết lại toàn diện `PieceworkStationPage.tsx`: Banner thông tin thợ, trạng thái ca làm việc, hiển thị 7 thẻ khâu làm việc dạng card lớn dễ thao tác trên tablet/mobile xưởng kèm badge hệ số, bộ nút chọn nhanh phút (30p, 1h, 1.5h, 2h, 3h, 4h) và ô nhập phút tùy biến.
+    * Hộp tính nhẩm thành tiền thời gian thực hiển thị rõ ràng: $(\text{phút} / 60) \times \text{đơn giá cơ sở} \times \text{hệ số} = \text{thành tiền VND}$.
+    * Bảng nhật ký ca làm việc hiển thị danh sách khâu đã làm trong ca, tổng phút, tổng tiền và nút xóa mục rác tiện lợi.
+    * Cập nhật `nav-config.ts` đổi tên menu hiển thị sang "Công Thợ Theo Giờ" và "Duyệt Công Thợ Theo Giờ".
+    * Xử lý tương thích ngược an toàn cho `DashboardPage.tsx` và `PieceworkConfirmPage.tsx`.
 - **Nguyên nhân gốc rễ (Root Cause):**
   1. **MongoDB Atlas Duplicate Key Error (`E11000`):** Trên collection `handover_records` trong cơ sở dữ liệu `internal_express` vẫn còn sót lại index phức hợp `partnerId_1_dateKey_1_seq_1` từ kiến trúc V1 cũ (có cờ `unique: true`). Khi chuyển sang Schema V2, hệ thống dùng `recordDate` và `recordCode`, bỏ trường `dateKey` và `seq` (cả 2 giá trị này đều là `null`). Khi thủ kho tạo phiếu mới cho một chi nhánh đối tác đã có bản ghi trước đó, MongoDB bắt lỗi trùng khóa `dup key: { partnerId: ObjectId(...), dateKey: null, seq: null }` và trả về mã lỗi `E11000`, dẫn đến `AllExceptionsFilter` biến thành HTTP 500 Internal Server Error.
   2. **Lệch mapping DTO khi lưu đồ nợ/trả nợ:** DTO `PrepOrderDto` nhận `undeliveredQty` và `returnedDebtQty`, trong khi tầng Service đọc `it.undeliveredQuantity` và `it.quantityReturned`, khiến số lượng đồ chưa giao / giao trả nợ không được lưu vào CSDL.

@@ -269,8 +269,10 @@ export class HandoverRecordRepository extends BaseRepository<HandoverRecordDocum
 | `/api/v1/internal/attendance/check-in` | `POST` | `InternalJwtGuard` (Worker/Shipper) | Bắt buộc ảnh selfie camera, chặn trùng 1 ca/người (409 Conflict). |
 | `/api/v1/internal/attendance/check-out` | `POST` | `InternalJwtGuard` | Chốt ca kèm ảnh selfie, tính `workedMinutes`. |
 | `/api/v1/internal/attendance/today` | `GET` | `InternalJwtGuard` | Lấy trạng thái ca làm việc hiện tại của nhân sự. |
-| `/api/v1/internal/piecework/me/tasks` | `POST` | `InternalJwtGuard` (Worker) | Ghi nhận công việc thợ xưởng theo giờ (`jobType`, `minutesWorked`, tính theo hệ số). |
-| `/api/v1/internal/piecework/:id/confirm` | `PATCH` | ADMIN, MANAGER | Quản lý xưởng xác nhận chốt công việc (`CONFIRMED`). |
+| `/api/v1/internal/piecework/job-types` | `GET` | `InternalJwtGuard` | Lấy danh mục 7 công việc chuẩn, hệ số thù lao snapshot từ PaySettings và đơn giá giờ cơ bản. |
+| `/api/v1/internal/piecework/me/tasks` | `POST` | `InternalJwtGuard` (Worker) | Ghi nhận công việc thợ xưởng theo giờ (`jobType`, `minutesWorked`, tính theo hệ số và đơn giá giờ, ràng buộc ca OPEN). |
+| `/api/v1/internal/piecework/me/tasks/:taskIndex` | `DELETE` | `InternalJwtGuard` (Worker) | Thợ xóa một dòng công việc đã ghi nhầm trong ngày khi bản ghi chưa bị CONFIRMED. |
+| `/api/v1/internal/piecework/confirm` | `POST` | ADMIN, MANAGER | Quản lý xưởng xác nhận chốt công việc (`CONFIRMED`). |
 | `/api/v1/internal/fuel` | `POST` | `InternalJwtGuard` (Shipper) | Nộp đề xuất chi phí xe (`expenseType: 'FUEL' | 'REPAIR'`, `amountMoney`, ảnh biên lai, ảnh xe). |
 | `/api/v1/internal/fuel/:id/approve` | `PATCH` | ACCOUNTANT, ADMIN | Kế toán/Admin duyệt đề xuất chi phí xe. |
 | `/api/v1/internal/payroll/periods/calculate` | `POST` | ACCOUNTANT, ADMIN | Tính toán bảng lương chu kỳ tháng (Shipper chuẩn 28 ngày, Thợ xưởng theo giờ x hệ số). |

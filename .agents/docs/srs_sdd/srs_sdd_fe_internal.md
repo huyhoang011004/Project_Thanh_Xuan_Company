@@ -330,6 +330,35 @@ sequenceDiagram
 - **Kỷ Luật Cấu Trúc Mã Nguồn Frontend:**
   - Bóc tách toàn diện các file lớn sang `modals/*Modal.tsx` và `components/*Component.tsx` (ví dụ `PrepOrderSlipPreviewComponent`, `ShipperCountPartnerModal`, `ShipperHandoverItemCardComponent`), đảm bảo mọi file dưới 250 - 300 dòng, tuân thủ nghiêm ngặt quy tắc dự án.
 
+---
+
+### 2.8. Chuẩn Hóa Bộ Lọc Ngày & Trải Nghiệm Tạo/Sửa Phiếu Giao Nhận (Plan 29)
+
+- **Bộ lọc Thư viện ảnh phiếu (`HandoverSlipGalleryComponent.tsx`):**
+  - Mặc định ngày bắt đầu `fromDate` là ngày đầu tháng hiện tại (`getFirstDayOfMonthVN()`) và ngày kết thúc `toDate` là ngày mai (`getTomorrowVN()`, tức ngày hiện tại + 1), áp dụng đồng bộ cho cả 3 tab: `WarehousePage?tab=SLIP_GALLERY`, `HandoverListPage?tab=HISTORY`, `PartnerPortalPage?tab=HISTORY`.
+- **Tab Kiểm nhận đối tác (`PartnerPortalPage.tsx` & `PartnerReceiptTabComponent.tsx`):**
+  - Tự động chuyển sang ngày mai khi truy cập vào khung giờ đêm 21h00 - 23h59 (`getTargetRecordDateVN()`).
+  - Logic tìm phiếu hỗ trợ cả `h.recordDate === currentReceiptDate`.
+  - Hiển thị badge trực quan "Hôm nay" hoặc "Giao ngày mai (Ca đêm)".
+- **Tab Kho Sạch (`WarehousePage.tsx` & `WarehouseCleanPlanTabComponent.tsx`):**
+  - Danh sách phiếu mặc định hiển thị ngày mai (`getTomorrowVN()`), tích hợp thanh điều khiển chọn ngày linh hoạt (Hôm nay, Ngày mai, Lùi/Tiến ngày, DatePicker).
+  - Đổi tên toàn diện sang "Phiếu Giao Nhận" và nút "Tạo Phiếu Giao Nhận".
+  - Đổi nút "Nhập đồ sạch sẽ giao" thành "Sửa Phiếu Giao Nhận", tích hợp chung modal `PrepOrderModal` nhận prop `initialRecord` để tự động điền dữ liệu đã tạo trước đó.
+
+---
+
+### 2.9. Chuyển Đổi Trạm Khoán Việc Thợ Xưởng Sang Mô Hình HourlyWork (Plan 30)
+
+- **Trạm công việc thợ theo giờ (`PieceworkStationPage.tsx`):**
+  - Thay thế mô hình đếm sản lượng từng chiếc cũ sang mô hình tính công thợ theo thời gian làm việc nhân hệ số loại công việc: $\text{Tiền công} = (\text{minutesWorked} / 60) \times \text{hourlyBaseRate} \times \text{coefficient}$.
+  - Danh mục 7 khâu công việc chuẩn: Rũ đồ (`SHAKE` - x1.2), Giặt & Sấy (`WASH_DRY` - x1.3), Gấp (`FOLD` - x1.0), Đếm/Phân loại (`COUNT` - x1.1), Là/Ủi (`IRON` - x1.2), Đóng gói (`PACK` - x1.0), Khác (`OTHER` - x1.0).
+  - Bộ chọn thời gian tiện dụng cho thợ (các nút nhanh 15p, 30p, 45p, 60p, 120p kèm nút cộng/trừ và input phút tự do).
+  - Khung tính trước tiền công ước tính hiển thị trực tiếp.
+  - Bảng nhật ký công việc trong ngày, hỗ trợ thợ xóa mục đã ghi nhầm khi phiếu chưa bị xác nhận/CONFIRMED.
+  - Ràng buộc ca làm việc: Thợ phải có ca `OPEN` trong ngày mới được phép ghi nhận công việc; giao diện có cảnh báo và nút chuyển sang trang chấm công nếu chưa check-in.
+- **Menu điều hướng (`nav-config.ts`):**
+  - Đổi tiêu đề menu từ "Khoán Việc" sang **"Công Thợ Theo Giờ"** (vận hành) và **"Duyệt Công Thợ Theo Giờ"** (quản lý).
+
 
 
 
