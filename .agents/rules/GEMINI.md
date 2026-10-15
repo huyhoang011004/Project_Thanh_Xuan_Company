@@ -5,6 +5,7 @@ Tài liệu định hướng tổng quan nghiệp vụ toàn hệ sinh thái. C�
 ## 1. Nghiệp Vụ Cốt Lõi & Bối Cảnh Doanh Nghiệp
 
 Công ty Thanh Xuân vận hành hệ sinh thái dịch vụ đa ngành kết hợp giữa tiếp thị trực tuyến và điều hành chuỗi cung ứng sản xuất thực tế, gồm 4 ứng dụng trong Monorepo:
+
 - `be-nestjs-thanhxuan/`: Backend API tập trung (NestJS, 3 MongoDB độc lập: `laundry_express`, `moving_express`, `internal_express`, Port `5001`).
 - `fe-nextjs-thanhxuan-laundry/`: Web Khách Hàng B2B & SEO Google + CMS Quản Trị Marketing (`thanhxuanlaundry.com`, Next.js App Router, Port `3000`).
 - `fe-react-thanhxuan-internal/`: Cổng Vận Hành Xưởng & Quản Vận B2B PWA (`noibo.thanhxuanlaundry.com`, React + Vite SPA, Port `3001`).
@@ -22,7 +23,7 @@ Công ty Thanh Xuân vận hành hệ sinh thái dịch vụ đa ngành kết h�
    - Lập & sửa phiếu giao nhận đồ sạch (`PrepOrderModal`) xuất xưởng với mã chuẩn `GN-YYYYMMDD-NNN`.
    - Quy trình giao nhận 2 chiều giữa xưởng và đối tác: Thủ kho soạn đồ sạch $\rightarrow$ Tài xế giao đồ sạch, nhận đồ bẩn $\rightarrow$ Quản lý đối tác ký số xác nhận $\rightarrow$ Về xưởng trạm rạch bao đếm lại (`RecountStationPage`).
    - Thư viện ảnh phiếu (`HandoverSlipGalleryComponent`) lọc linh hoạt từ đầu tháng đến ngày mai, hỗ trợ kiểm nhận sớm ca đêm 21h-24h.
-2. **Công Thợ Theo Giờ (`piecework` / HourlyWork):**
+2. **Công Thợ Theo Giờ (HourlyWork):**
    - Chuyển đổi toàn diện từ khoán sản lượng cũ sang mô hình tính tiền công theo giờ: $\text{thành tiền} = (\text{phút} / 60) \times \text{đơn giá cơ sở} \times \text{hệ số khâu}$.
    - 7 khâu công việc chuẩn: Rũ đồ (x1.2), Giặt & Sấy (x1.3), Gấp (x1.0), Đếm/Phân loại (x1.1), Là/Ủi (x1.2), Đóng gói (x1.0), Khác (x1.0).
    - Ràng buộc ca làm việc đang mở (`OPEN` trong `AttendanceRecord`).
@@ -57,4 +58,3 @@ Hệ thống tài liệu kỹ thuật được module hóa và cập nhật liê
 - **Từ Điển Dữ Liệu Toàn Diện:** [.agents/docs/DATABASE_DICTIONARY.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/DATABASE_DICTIONARY.md) (34+ collection thuộc 3 DB, chi tiết kiểu dữ liệu, index, quan hệ và tác dụng nghiệp vụ).
 - **Bản Đồ Định Vị Mã Nguồn:** [.agents/docs/CODEBASE_ATLAS.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/CODEBASE_ATLAS.md) (Chỉ mục tra cứu tức thì: Endpoint $\leftrightarrow$ Controller $\leftrightarrow$ Service $\leftrightarrow$ Schema $\leftrightarrow$ Route $\leftrightarrow$ Page).
 - **Nhật Ký Tiến Hóa Kỹ Thuật:** [.agents/docs/CHANGELOG.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/CHANGELOG.md) (Lưu vết bài luận chi tiết toàn bộ các Plan và Bugfix).
-
