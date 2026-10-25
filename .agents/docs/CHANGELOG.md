@@ -4,6 +4,38 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
 
 ## 2026-10-25
 
+### Plan 34: Tái Cấu Trúc UI/UX Trang Chủ (Hero Diagonal Split Video-Ảnh & Di Dời Form Liên Hệ Xuống Pre-Footer)
+
+- **Mục tiêu & Động lực:**
+  - Nâng cấp trải nghiệm người dùng (UX) và thẩm mỹ giao diện (UI) trang chủ fe-nextjs-thanhxuan-laundry theo phong cách Industrial Clean / Neo-Precision B2B.
+  - Giải quyết trọn vẹn yêu cầu của khách hàng:
+    1. Di dời khối Form "Liên Hệ Với Chúng Tôi" từ màn hình đầu tiên (Hero) xuống vị trí Pre-Footer (ngay trên Footer) nhằm tạo luồng tâm lý chuyển đổi tự nhiên (Lead Magnet: Cam kết giặt mẫu 01 tuần, giao nhận 24/7, bồi thường 100%).
+    2. Tái cấu trúc Hero Section theo bố cục chia chéo (Diagonal Split): Nửa bên trái là video reel xưởng giặt sấy công nghiệp tự động hóa kết hợp tiêu đề & CTA kép; nửa bên phải là ảnh thành phẩm chất lượng cao kèm các thẻ nổi bảo chứng năng lực (5+ Tấn Đồ/Ngày, 99.8% Giao Đúng Hẹn).
+    3. Tích hợp hiệu ứng xuất hiện mượt mà (Framer Motion entrance cascade 60fps) và tối ưu hóa hiệu năng (Intersection Observer tạm dừng video khi cuộn khỏi màn hình, Poster image nạp tức thì bằng priority={true}).
+    4. Mở rộng Backend Schema/DTO và giao diện Admin CMS (/admin/settings) để quản trị viên có thể tự đổi link video xưởng, ảnh poster, ảnh thành phẩm bên phải linh hoạt.
+- **Chi tiết thực thi:**
+  - **Giai đoạn 1 - Backend Schema & DTO (be-nestjs-thanhxuan):**
+    - Cập nhật Mongoose Schema Setting tại src/modules/laundry/settings/schemas/setting.schema.ts, mở rộng homepageConfig bổ sung: heroVideoUrl?: string, heroVideoPoster?: string, heroSideImage?: string.
+    - Cập nhật DTO trong update-settings.dto.ts.
+  - **Giai đoạn 2 - Admin CMS Settings UI (fe-nextjs-thanhxuan-laundry):**
+    - Cập nhật SettingEditorHomeComponent.tsx thêm các control nhập Hero Video URL, upload ảnh Poster đại diện và upload ảnh thành phẩm bên phải Hero kèm xem trước và nút xóa ảnh.
+  - **Giai đoạn 3 - Pre-Footer B2B Lead Magnet Component:**
+    - Tạo mới src/features/public/home/components/PreFooterCtaComponent.tsx với thiết kế 2 cột: Cột trái chứa 4 cam kết vàng (Tặng 01 tuần giặt mẫu, Giao nhận định kỳ 24/7, Đền bù 100%, Hóa đơn VAT) + Hotline 24/7; Cột phải nhúng form liên hệ <Contact defaultCategory="tin-tuc-gioi-thieu" /> bọc trong thẻ Card kính mờ.
+    - Export tại src/features/public/home/components/index.ts.
+  - **Giai đoạn 4 - Hero Section "Diagonal Split" & Framer Motion:**
+    - Tái cấu trúc hoàn toàn HeroSectionComponent.tsx: Nửa trái vát nghiêng góc 12°-14° ([clip-path:polygon(0_0,100%_0,88%_100%,0_100%)] trên desktop), nền video loop tự động + lớp phủ gradient điện ảnh giúp nổi bật tiêu đề trắng, subtitle và bộ đôi nút CTA ("Khám Phá Dịch Vụ B2B" + "Đăng Ký Giặt Mẫu"). Đường phân cách chéo viền phát sáng cyan/blue công nghệ. Nửa phải là ảnh thành phẩm kèm 2 floating badges ("5+ Tấn / Ngày", "99.8% Đúng Hẹn"). Framer Motion entrance reveal tuần tự, hook IntersectionObserver tạm dừng video khi out-of-view; Responsive tự gỡ clip-path trên mobile (< 768px).
+  - **Giai đoạn 5 - Lắp ráp Trang Chủ (HomePage.tsx):**
+    - Cập nhật HomePage.tsx: Truyền cấu hình video/poster/sideImage vào HeroSectionComponent, đặt <PreFooterCtaComponent /> tại đáy trang chủ ngay trước Footer.
+- **Kiểm thử & Xác thực:**
+  - pnpm --filter be-nestjs-thanhxuan exec tsc --noEmit & pnpm --filter be-nestjs-thanhxuan build: PASS 100%.
+  - pnpm --filter frontend-nextjs exec tsc --noEmit: PASS 100% (0 errors).
+  - pnpm --filter frontend-nextjs build: PASS 100% toàn bộ 13 static pages và dynamic routes.
+- **Đồng bộ tài liệu:**
+  - Cập nhật srs_sdd_fe_nextjs.md (v2.2, bổ sung PreFooterCtaComponent & Hero Diagonal Split).
+  - Cập nhật SRS_SDD.md (Document History).
+  - Cập nhật plan34.md (Checklist & Status: Done).
+
+
 ### Plan 32: Tái Cấu Trúc Toàn Diện Thư Mục & Chuẩn Hóa Kiến Trúc fe-nextjs-thanhxuan-laundry Theo Chuẩn fe-react-thanhxuan-internal
 
 - **Mục tiêu & Động lực:**

@@ -2,7 +2,7 @@
 ## PHÂN HỆ WEB KHÁCH HÀNG & QUẢN TRỊ CMS (fe-nextjs-thanhxuan-laundry)
 
 > **Tài liệu tham chiếu cấp cao:** [SRS_SDD.md (Kiến Trúc Tổng Quan)](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/SRS_SDD.md)  
-> **Phiên bản:** 2.1 | **Môi trường:** Next.js 14+ (App Router), React 18/19, TailwindCSS, shadcn/ui  
+> **Phiên bản:** 2.2 | **Môi trường:** Next.js 14+ (App Router), React 18/19, TailwindCSS, shadcn/ui  
 > **Phạm vi mã nguồn:** `fe-nextjs-thanhxuan-laundry/src/**`  
 > **Quy chuẩn kỹ thuật:** Server Components mặc định, Feature-based Colocation, Metadata SEO & JSON-LD, React Hook Form + Zod
 
@@ -24,7 +24,7 @@ Phân hệ đảm nhiệm 2 vai trò cốt lõi trong hệ sinh thái Thanh Xuâ
 ### 1.2. Danh Sách Tính Năng Theo Nhóm (Functional Requirements)
 
 #### FE-NEXT-FR-01: Phân Hệ Web Khách Hàng Công Khai (`(public)`)
-- **Trang chủ (`/`):** Giới thiệu năng lực xưởng giặt là công nghiệp, quy trình giặt sấy tiêu chuẩn, danh sách đối tác lớn (Pizza 4P's, Golden Gate, Haidilao Hotpot...), đánh giá của khách hàng, bảng giá tóm tắt và form đăng ký tư vấn.
+- **Trang chủ (`/`):** Hero Section chia chéo (Diagonal Split) video reel xưởng giặt công nghiệp + ảnh thành phẩm cao cấp & floating badges, giới thiệu năng lực xưởng giặt là công nghiệp, quy trình giặt sấy tiêu chuẩn, danh sách đối tác lớn, bảng giá tóm tắt và Pre-Footer CTA (cam kết tặng 01 tuần giặt mẫu, giao nhận 24/7, bồi thường 100% kèm form thu thập lead chuyển đổi).
 - **Giới thiệu (`/gioi-thieu`):** Lịch sử phát triển công ty, quy mô máy móc công nghệ, cam kết chất lượng dịch vụ.
 - **Dịch vụ giặt là (`/dich-vu`, `/dich-vu/[slug]`):**
   - Danh mục dịch vụ chuyên sâu: Giặt ủi nhà hàng, giặt chăn ga khách sạn, giặt đồ spa, giặt sấy công nghiệp, giặt hấp đồ hiệu.
@@ -117,7 +117,7 @@ fe-nextjs-thanhxuan-laundry/src/
 │   │   └── index.ts                     # Barrel export 11 feature quản trị
 │   │
 │   └── public/                          # 6 Modules Web Khách Hàng B2B & Public
-│       ├── home/                        # HomePage.tsx, components/ (HeroSection, IntroSection, ServicesGrid, WhyChooseUs, FaqSection)
+│       ├── home/                        # HomePage.tsx, components/ (HeroSection, IntroSection, ServicesGrid, WhyChooseUs, FaqSection, PreFooterCta)
 │       ├── articles/                    # ArticleListPage.tsx, components/ (ArticleList, ArticleSortFilter)
 │       ├── contacts/                    # ContactPage.tsx, public-contacts.service.ts, public-contacts.action.ts
 │       ├── services/                    # ServiceDetailPage.tsx, public-services.service.ts
