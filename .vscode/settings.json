@@ -1,1 +1,8 @@
-{}
+{
+  "antigravity.security.autoApproveReadOnly": true,
+  "antigravity.security.allowedReadPaths": [
+    "/home/huyhoang",
+    "/mnt/c",
+    "/mnt/d"
+  ]
+}

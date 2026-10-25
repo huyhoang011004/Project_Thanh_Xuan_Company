@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thanh Xuan Ecosystem - Interactive Architecture (Archify)</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: #111827;
+      --card-hover: #1f2937;
+      --border: #1f2937;
+      --border-focus: #3b82f6;
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+      --primary: #3b82f6;
+      --accent: #10b981;
+      --warning: #f59e0b;
+      --purple: #8b5cf6;
+      --danger: #ef4444;
+      --cyan: #06b6d4;
+    }
+    .light {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --card-hover: #f1f5f9;
+      --border: #e2e8f0;
+      --border-focus: #2563eb;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --primary: #2563eb;
+      --accent: #059669;
+      --warning: #d97706;
+      --purple: #7c3aed;
+      --danger: #dc2626;
+      --cyan: #0891b2;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body { background: var(--bg); color: var(--text); overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
+    
+    /* Top Header */
+    header {
+      height: 64px;
+      border-bottom: 1px solid var(--border);
+      background: var(--card-bg);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      z-index: 20;
+      flex-shrink: 0;
+    }
+    .logo-area { display: flex; align-items: center; gap: 12px; }
+    .badge {
+      display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 9999px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .badge-blue { background: rgba(59, 130, 246, 0.15); color: var(--primary); border: 1px solid rgba(59, 130, 246, 0.3); }
+    .badge-green { background: rgba(16, 185, 129, 0.15); color: var(--accent); border: 1px solid rgba(16, 185, 129, 0.3); }
+    
+    .toolbar { display: flex; gap: 10px; align-items: center; }
+    .view-select {
+      background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 7px 12px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; outline: none;
+    }
+    input[type="text"] {
+      background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 7px 14px; border-radius: 6px; font-size: 13px; width: 230px; outline: none; transition: border-color 0.2s;
+    }
+    input[type="text"]:focus { border-color: var(--border-focus); }
+    
+    .btn {
+      background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 7px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; transition: all 0.15s ease;
+    }
+    .btn:hover { border-color: var(--primary); background: var(--card-hover); }
+    .btn-primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .btn-primary:hover { opacity: 0.9; }
+
+    /* Canvas Area */
+    main { flex: 1; position: relative; overflow: hidden; background: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.03) 0%, transparent 80%); }
+    svg#canvas { width: 100%; height: 100%; cursor: grab; user-select: none; }
+    svg#canvas:active { cursor: grabbing; }
+
+    /* SVG Elements */
+    .cluster-rect { fill: rgba(31, 41, 55, 0.35); stroke: var(--border); stroke-dasharray: 6, 6; stroke-width: 1.5px; rx: 14px; }
+    .cluster-title { font-size: 12px; font-weight: 700; fill: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+    
+    .node-group { cursor: pointer; transition: transform 0.2s, opacity 0.2s; }
+    .node-box { rx: 10px; stroke-width: 1.5px; transition: all 0.2s ease; }
+    .node-group:hover .node-box { stroke-width: 2.5px !important; filter: drop-shadow(0 6px 16px rgba(0,0,0,0.4)); }
+    .node-group.active .node-box { stroke: var(--primary) !important; stroke-width: 3px !important; filter: drop-shadow(0 0 12px rgba(59, 130, 246, 0.6)); }
+    .node-group.dimmed { opacity: 0.15; }
+
+    .node-title { font-size: 13px; font-weight: 700; fill: var(--text); }
+    .node-sub { font-size: 11px; fill: var(--text-muted); }
+    .node-port { font-size: 10px; font-weight: 600; fill: var(--primary); }
+
+    .edge-line { stroke: #475569; stroke-width: 1.8px; fill: none; transition: stroke 0.2s, stroke-width 0.2s, opacity 0.2s; }
+    .edge-line.active { stroke: var(--primary) !important; stroke-width: 3.5px !important; }
+    .edge-line.dimmed { opacity: 0.08; }
+    .edge-label { font-size: 10px; fill: var(--text-muted); font-weight: 500; }
+
+    /* Side Drawer */
+    #drawer {
+      position: absolute; right: 0; top: 0; bottom: 0; width: 400px; background: var(--card-bg); border-left: 1px solid var(--border); padding: 24px; transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); z-index: 30; overflow-y: auto; box-shadow: -10px 0 30px rgba(0,0,0,0.3);
+    }
+    #drawer.open { transform: translateX(0); }
+    .drawer-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+    .drawer-field { margin-bottom: 16px; }
+    .drawer-label { font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; letter-spacing: 0.5px; }
+    .drawer-val { font-size: 14px; color: var(--text); line-height: 1.5; }
+    .code-tag { background: var(--bg); border: 1px solid var(--border); padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 12px; color: var(--primary); }
+    .pill-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+    .pill { font-size: 11px; background: var(--bg); border: 1px solid var(--border); padding: 3px 8px; border-radius: 6px; font-weight: 500; }
+
+    /* Bottom Info Bar */
+    footer {
+      height: 38px; border-top: 1px solid var(--border); background: var(--card-bg); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; font-size: 12px; color: var(--text-muted); flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Toolbar -->
+  <header>
+    <div class="logo-area">
+      <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#3b82f6,#10b981);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:16px;">TX</div>
+      <div>
+        <h1 style="font-size:15px;font-weight:800;letter-spacing:-0.2px;">THANH XUAN ECOSYSTEM</h1>
+        <p style="font-size:11px;color:var(--text-muted);">Interactive Living Architecture (Powered by Archify Engine)</p>
+      </div>
+      <span class="badge badge-blue">Monorepo 4 Apps</span>
+      <span class="badge badge-green">3 MongoDBs</span>
+    </div>
+
+    <div class="toolbar">
+      <select id="viewSelect" class="view-select">
+        <option value="topology">🌐 1. System Topology & Multi-DB</option>
+        <option value="handover">📋 2. Quy Trình Giao Nhận Kép 2 Chiều</option>
+        <option value="hourly">⏱️ 3. Công Thợ Theo Giờ (HourlyWork)</option>
+      </select>
+      <input type="text" id="search" placeholder="🔍 Tìm node, port, db, module..." />
+      <button class="btn" id="zoomIn" title="Phóng to">➕</button>
+      <button class="btn" id="zoomOut" title="Thu nhỏ">➖</button>
+      <button class="btn" id="resetZoom" title="Đặt lại kích thước">🔄 Reset</button>
+      <button class="btn" id="themeToggle" title="Đổi màu sáng/tối">🌓 Theme</button>
+    </div>
+  </header>
+
+  <!-- SVG Visualizer -->
+  <main>
+    <svg id="canvas">
+      <defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b" />
+        </marker>
+        <marker id="arrow-active" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#3b82f6" />
+        </marker>
+      </defs>
+      <g id="viewport"></g>
+    </svg>
+
+    <!-- Slide-in Detail Drawer -->
+    <div id="drawer">
+      <div class="drawer-header">
+        <div>
+          <span id="drawerBadge" class="badge badge-blue">APP</span>
+          <h2 id="drawerTitle" style="font-size:18px;font-weight:800;margin-top:6px;">Node Name</h2>
+        </div>
+        <button id="closeDrawer" class="btn" style="padding:4px 8px;border-radius:6px;">✕</button>
+      </div>
+
+      <div class="drawer-field">
+        <div class="drawer-label">Mô tả & Trọng tâm</div>
+        <div id="drawerDesc" class="drawer-val">...</div>
+      </div>
+
+      <div class="drawer-field">
+        <div class="drawer-label">Công nghệ / Tech Stack</div>
+        <div id="drawerTech" class="pill-list"></div>
+      </div>
+
+      <div class="drawer-field" id="drawerPortRow">
+        <div class="drawer-label">Cổng & Kết Nối</div>
+        <div id="drawerPort" class="drawer-val code-tag">...</div>
+      </div>
+
+      <div class="drawer-field">
+        <div class="drawer-label">Đường dẫn mã nguồn (Codebase Atlas)</div>
+        <div id="drawerPath" class="drawer-val code-tag" style="word-break:break-all;">...</div>
+      </div>
+
+      <div class="drawer-field">
+        <div class="drawer-label">Liên kết dữ liệu (Connected Nodes)</div>
+        <div id="drawerConnections" class="pill-list"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer Stats -->
+  <footer>
+    <div>Trạng thái: 🟢 Hệ sinh thái chuẩn hóa 100% TypeScript Strict | Múi giờ Asia/Ho_Chi_Minh (GMT+7)</div>
+    <div>Nhấn vào từng node để mở thanh tra cứu chi tiết | Kéo chuột để Pan | Lăn chuột để Zoom</div>
+  </footer>
+
+  <script>
+    // --- DATABASE OF ARCHITECTURE DATA (GROUNDED ON LIVING DOCS) ---
+    const VIEWS = {
+      topology: {
+        clusters: [
+          { x: 30, y: 40, w: 320, h: 560, title: "1. CLIENT & PUBLIC LAYER (FRONTEND)" },
+          { x: 390, y: 40, w: 380, h: 560, title: "2. BACKEND API & GATEWAY (NESTJS 10)" },
+          { x: 810, y: 40, w: 310, h: 360, title: "3. MULTI-DATABASE (MONGODB)" },
+          { x: 810, y: 430, w: 310, h: 170, title: "4. EXTERNAL INTEGRATIONS" }
+        ],
+        nodes: [
+          // Clients
+          { id: "fe_laundry", cx: 190, cy: 110, w: 260, h: 80, fill: "#1e293b", stroke: "#3b82f6", title: "fe-nextjs-thanhxuan-laundry", sub: "Web Khách Hàng B2B & CMS Marketing", port: "Port 3000", tag: "Next.js 15 (RSC)", path: "fe-nextjs-thanhxuan-laundry/", desc: "Trang tiếp thị giặt là công nghiệp cao cấp, tối ưu SEO Google, thu lead báo giá và CMS quản trị bài viết.", tech: ["Next.js 15 App Router", "Server Components", "TailwindCSS", "shadcn/ui", "Lucide Icons"] },
+          { id: "fe_internal", cx: 190, cy: 250, w: 260, h: 80, fill: "#1e293b", stroke: "#10b981", title: "fe-react-thanhxuan-internal", sub: "Cổng Vận Hành Xưởng & Logistics", port: "Port 3001", tag: "React 19 Vite (PWA)", path: "fe-react-thanhxuan-internal/", desc: "Cổng vận hành xưởng Mobile-First cho thợ và tài xế xe tải: Phiếu giao nhận kép, ký số Canvas, chấm công selfie, offline queue IndexedDB.", tech: ["React 19", "Vite SPA", "TanStack Query v5", "PWA IndexedDB", "Canvas Signature", "Mobile-First"] },
+          { id: "fe_moving", cx: 190, cy: 390, w: 260, h: 80, fill: "#1e293b", stroke: "#f59e0b", title: "fe-nextjs-chuyennhatietkiem", sub: "Web Dịch Vụ Chuyển Nhà Trọn Gói", port: "Port 3002", tag: "Next.js 16 (RSC)", path: "fe-nextjs-chuyennhatietkiem/", desc: "Dịch vụ chuyển nhà trọn gói & tính cước taxi tải tự động theo khoảng cách Km, tiếp nhận thông tin khảo sát 24/7.", tech: ["Next.js 16", "Server Components", "TailwindCSS v4", "Google Maps Distance API"] },
+          { id: "driver_mobile", cx: 190, cy: 510, w: 260, h: 65, fill: "#0f172a", stroke: "#06b6d4", title: "Tài Xế & Thợ Xưởng (Tablet/Mobile)", sub: "Ký số giao nhận & Selfie điểm danh", port: "Client Touchscreen", tag: "End Users", path: "PWA Offline Queue (idb)", desc: "Giao diện cảm ứng tối thiểu 44x44px touch target, hoạt động mượt mà khi mất sóng mạng 4G lúc đi giao hàng.", tech: ["PWA", "IndexedDB", "Idempotency-Key UUIDv4"] },
+
+          // Backend
+          { id: "be_gateway", cx: 580, cy: 110, w: 320, h: 80, fill: "#1e1e38", stroke: "#8b5cf6", title: "be-nestjs-thanhxuan (Core API)", sub: "API Gateway & Multi-DB Manager", port: "Port 5001", tag: "NestJS 10 API", path: "be-nestjs-thanhxuan/", desc: "Backend API tập trung kết nối 3 MongoDB độc lập, bảo vệ qua JWT Passport (aud: 'internal'), RBAC 8 vai trò, Streaming PDF/Excel.", tech: ["NestJS 10", "TypeScript Strict", "Repository Pattern", "Mongoose 8", "Passport JWT", "Class Validator"] },
+          { id: "mod_handover", cx: 580, cy: 220, w: 320, h: 65, fill: "#1e293b", stroke: "#3b82f6", title: "Handovers Module (Phiếu Giao Nhận)", sub: "Mã chuẩn GN-YYYYMMDD-NNN", port: "Internal Service", tag: "Core Logistics", path: "src/modules/internal/handovers/", desc: "Quản lý phiếu giao nhận 2 chiều giữa xưởng và đối tác B2B (Pizza 4P's, Golden Gate), trạm rạch bao đếm lại xưởng.", tech: ["HandoverSlipRepository", "HandoverSlipGallery", "Auto Counter Sequence"] },
+          { id: "mod_hourly", cx: 580, cy: 305, w: 320, h: 65, fill: "#1e293b", stroke: "#10b981", title: "HourlyWork Module (Công Thợ)", sub: "Tính công giờ: Phút x Đơn giá x Hệ số", port: "Internal Service", tag: "Production Payroll", path: "src/modules/internal/piecework/", desc: "Chuyển đổi toàn diện từ khoán sản lượng cũ sang tính tiền công theo giờ cho 7 khâu xưởng (Rũ, Giặt/Sấy, Gấp, Đếm, Là, Đóng gói).", tech: ["HourlyWorkRepository", "AttendanceShiftGuard", "Multiplier Engine"] },
+          { id: "mod_attendance", cx: 580, cy: 390, w: 320, h: 65, fill: "#1e293b", stroke: "#f59e0b", title: "Attendance & Fuel (Chấm Công & Xăng)", sub: "Selfie ca xưởng & Auto check-in tài xế", port: "Internal Service", tag: "Operations", path: "src/modules/internal/attendance/ & fuel/", desc: "Chấm công bằng ảnh selfie camera; tự động mở ca cho tài xế khi ký phiếu giao nhận đầu ngày; duyệt chi phí xăng qua ảnh ODO.", tech: ["AttendanceRecordRepository", "FuelRequestRepository", "Cloudinary Upload"] },
+          { id: "mod_payroll", cx: 580, cy: 475, w: 320, h: 65, fill: "#1e293b", stroke: "#ec4899", title: "Payroll & Streaming Reports", sub: "Báo cáo streaming PDF/Excel concurrency=1", port: "Internal Service", tag: "Finance & Analytics", path: "src/modules/internal/payroll/ & reports/", desc: "Tổng hợp bảng lương nhân viên tự động; xuất báo cáo streaming tối ưu RAM VPS (<512MB); PayFieldFilterInterceptor che giấu lương.", tech: ["ExcelJS Streaming", "Puppeteer PDF", "PayFieldFilterInterceptor"] },
+
+          // Databases
+          { id: "db_internal", cx: 965, cy: 110, w: 260, h: 75, fill: "#0f172a", stroke: "#10b981", title: "internal_express (MongoDB)", sub: "Giao nhận, Công thợ, Chấm công, Xăng, Lương", port: "INTERNAL_CONNECTION", tag: "Database 1", path: "DATABASE_DICTIONARY.md #3", desc: "CSDL vận hành nội bộ: 15+ collections (handover_slips, hourly_works, attendance_records, fuel_requests, accounts...).", tech: ["MongoDB ReplicaSet", "Mongoose Multi-Conn", "Lean Query Indexing"] },
+          { id: "db_laundry", cx: 965, cy: 210, w: 260, h: 75, fill: "#0f172a", stroke: "#3b82f6", title: "laundry_express (MongoDB)", sub: "Khách hàng B2B, Lead Báo Giá, CMS Tin Tức", port: "Default Connection", tag: "Database 2", path: "DATABASE_DICTIONARY.md #1", desc: "CSDL cổng giặt là B2C/B2B: leads_crm, articles, categories, contact_submissions.", tech: ["MongoDB", "Compound Indexing", "Text Search"] },
+          { id: "db_moving", cx: 965, cy: 310, w: 260, h: 75, fill: "#0f172a", stroke: "#f59e0b", title: "moving_express (MongoDB)", sub: "Báo giá cước taxi tải & Khảo sát chuyển nhà", port: "MOVING_CONNECTION", tag: "Database 3", path: "DATABASE_DICTIONARY.md #2", desc: "CSDL cổng chuyển nhà: quotes, moving_orders, vehicles, pricing_rules.", tech: ["MongoDB", "Distance Formula Index"] },
+
+          // External
+          { id: "ext_zalo", cx: 965, cy: 475, w: 260, h: 50, fill: "#172554", stroke: "#0284c7", title: "Zalo OA (Open API)", sub: "Gửi thông báo & tin nhắn CSKH", port: "HTTPS REST API", tag: "Third-party", path: "src/modules/core/zalo/", desc: "Tự động gửi thông báo báo giá, tình trạng giao nhận đồ giặt đến Zalo khách hàng.", tech: ["Zalo ZNS", "Webhook Listener"] },
+          { id: "ext_cloud", cx: 965, cy: 540, w: 260, h: 50, fill: "#14532d", stroke: "#16a34a", title: "Cloudinary & SMTP Mail", sub: "Lưu ảnh giao nhận, ODO & gửi Email", port: "Cloud Storage", tag: "Third-party", path: "src/modules/core/cloudinary/", desc: "Lưu trữ media ảnh phiếu rạch bao, ảnh đồng hồ xăng xe, ảnh selfie chấm công và chữ ký số Canvas.", tech: ["Cloudinary SDK", "Nodemailer SMTP"] }
+        ],
+        edges: [
+          { from: "driver_mobile", to: "fe_internal", label: "Touchscreen PWA" },
+          { from: "fe_laundry", to: "be_gateway", label: "REST / Leads / Articles" },
+          { from: "fe_internal", to: "be_gateway", label: "JWT (aud: 'internal')" },
+          { from: "fe_moving", to: "be_gateway", label: "REST / Quotes" },
+          
+          { from: "be_gateway", to: "mod_handover", label: "Dispatch / Recount" },
+          { from: "be_gateway", to: "mod_hourly", label: "Hourly Work Logs" },
+          { from: "be_gateway", to: "mod_attendance", label: "Selfie / ODO" },
+          { from: "be_gateway", to: "mod_payroll", label: "Aggregate Wages" },
+
+          { from: "mod_handover", to: "db_internal", label: "handover_slips" },
+          { from: "mod_hourly", to: "db_internal", label: "hourly_works" },
+          { from: "mod_attendance", to: "db_internal", label: "attendance_records" },
+          { from: "mod_payroll", to: "db_internal", label: "payrolls" },
+
+          { from: "be_gateway", to: "db_laundry", label: "leads / articles" },
+          { from: "be_gateway", to: "db_moving", label: "quotes / orders" },
+          { from: "be_gateway", to: "ext_zalo", label: "ZNS Messages" },
+          { from: "be_gateway", to: "ext_cloud", label: "Upload Images" }
+        ]
+      },
+
+      handover: {
+        clusters: [
+          { x: 50, y: 50, w: 1040, h: 520, title: "QUY TRÌNH GIAO NHẬN KÉP 2 CHIỀU (HANDOVER SLIP WORKFLOW)" }
+        ],
+        nodes: [
+          { id: "h1", cx: 200, cy: 150, w: 240, h: 90, fill: "#1e293b", stroke: "#3b82f6", title: "1. Thủ Kho Soạn Đồ Sạch", sub: "PrepOrderModal.tsx", port: "Mã GN-YYYYMMDD-NNN", tag: "Bước 1: Xuất xưởng", path: "fe-react-thanhxuan-internal/.../PrepOrderModal.tsx", desc: "Thủ kho kiểm đếm đồ sạch chuẩn bị xuất xưởng, đóng gói bao bì và chỉ định Tài xế phụ trách chuyến giao.", tech: ["HandoverSlipForm", "ItemCatalog Selection"] },
+          { id: "h2", cx: 580, cy: 150, w: 240, h: 90, fill: "#1e293b", stroke: "#f59e0b", title: "2. Tài Xế Giao Đồ Sạch", sub: "ShipperHandoverPage.tsx", port: "Status: DELIVERING", tag: "Bước 2: Vận chuyển", path: "fe-react-thanhxuan-internal/.../ShipperHandoverPage.tsx", desc: "Tài xế chở đồ sạch đến đối tác B2B (Nhà hàng Pizza 4P's, Golden Gate...), bàn giao cho quản lý nhà hàng.", tech: ["Mobile-first PWA", "Offline Sync"] },
+          { id: "h3", cx: 950, cy: 150, w: 220, h: 90, fill: "#1e293b", stroke: "#10b981", title: "3. Đối Tác Ký Số Xác Nhận", sub: "SignaturePadModal.tsx", port: "Canvas Digital Sign", tag: "Bước 3: Xác thực B2B", path: "fe-react-thanhxuan-internal/.../SignaturePadModal.tsx", desc: "Quản lý phía khách hàng ký số trực tiếp trên màn hình cảm ứng để xác nhận số lượng đồ sạch đã nhận.", tech: ["HTML5 Canvas", "Cloudinary Signature Upload"] },
+          { id: "h4", cx: 950, cy: 370, w: 220, h: 90, fill: "#1e293b", stroke: "#8b5cf6", title: "4. Nhận Đồ Bẩn & Niêm Phong", sub: "Dirty Linen Bag Tags", port: "Trọng lượng / Số bao", tag: "Bước 4: Chiều về", path: "fe-react-thanhxuan-internal/.../ShipperHandoverPage.tsx", desc: "Tài xế nhận các bao đồ bẩn từ nhà hàng, ghi nhận số lượng bao tải và mã kẹp chì niêm phong để chở về xưởng.", tech: ["Bag Tag Verification", "Sealing Stamps"] },
+          { id: "h5", cx: 580, cy: 370, w: 240, h: 90, fill: "#1e293b", stroke: "#ec4899", title: "5. Trạm Rạch Bao Đếm Lại", sub: "RecountStationPage.tsx", port: "Status: RECOUNTED", tag: "Bước 5: Kiểm kê xưởng", path: "fe-react-thanhxuan-internal/.../RecountStationPage.tsx", desc: "Thợ xưởng rạch bao niêm phong, đếm chi tiết từng chiếc khăn/áo, phát hiện rách/hỏng và chốt số liệu thanh toán.", tech: ["Recount Discrepancy Matrix", "Defect Tagging"] },
+          { id: "h6", cx: 200, cy: 370, w: 240, h: 90, fill: "#1e293b", stroke: "#06b6d4", title: "6. Xuất Hóa Đơn & Báo Cáo", sub: "Monthly Invoicing", port: "Status: COMPLETED", tag: "Bước 6: Kế toán B2B", path: "be-nestjs-thanhxuan/.../reports.service.ts", desc: "Hệ thống đồng bộ số liệu sạch/bẩn vào bảng đối soát cuối tháng của từng chi nhánh nhà hàng để xuất hóa đơn VAT.", tech: ["Excel Streaming Export", "B2B Price Engine"] }
+        ],
+        edges: [
+          { from: "h1", to: "h2", label: "Bàn giao chuyến xe" },
+          { from: "h2", to: "h3", label: "Đến nhà hàng đối tác" },
+          { from: "h3", to: "h4", label: "Ký nhận đồ sạch xong" },
+          { from: "h4", to: "h5", label: "Chở đồ bẩn về xưởng" },
+          { from: "h5", to: "h6", label: "Chốt biên bản kiểm kê" }
+        ]
+      },
+
+      hourly: {
+        clusters: [
+          { x: 50, y: 50, w: 1040, h: 520, title: "MÔ HÌNH TÍNH TIỀN CÔNG THỢ THEO GIỜ (HOURLYWORK PIPELINE)" }
+        ],
+        nodes: [
+          { id: "w1", cx: 220, cy: 150, w: 260, h: 90, fill: "#1e293b", stroke: "#f59e0b", title: "1. Điểm Danh Mở Ca Làm Việc", sub: "AttendanceRecord (Status: OPEN)", port: "Selfie Camera", tag: "Điều kiện tiên quyết", path: "fe-react-thanhxuan-internal/.../AttendancePage.tsx", desc: "Thợ bắt buộc chụp ảnh selfie camera xác thực ca làm việc tại xưởng trước khi có thể log giờ công vào trạm.", tech: ["Facial Selfie Capture", "startOfDayVN Timestamp"] },
+          { id: "w2", cx: 580, cy: 150, w: 280, h: 90, fill: "#1e293b", stroke: "#10b981", title: "2. Trạm Ghi Nhận Giờ Công", sub: "HourlyWorkStationPage.tsx", port: "Ghi nhận theo phút", tag: "Màn hình thợ xưởng", path: "fe-react-thanhxuan-internal/.../HourlyWorkStationPage.tsx", desc: "Thợ chọn khâu làm việc, chọn đối tác (Golden Gate, Pizza 4P's...) và nhập số phút thực tế làm việc.", tech: ["7 Khâu Tiêu Chuẩn", "Touch-friendly Numpad"] },
+          { id: "w3", cx: 940, cy: 150, w: 260, h: 90, fill: "#1e293b", stroke: "#3b82f6", title: "3. Công Thức Tính Tiền Chuẩn", sub: "(Phút/60) x Đơn Giá x Hệ Số Khâu", port: "Math Formula", tag: "Logic Backend", path: "be-nestjs-thanhxuan/.../hourly-works.service.ts", desc: "Rũ đồ (x1.2), Giặt/Sấy (x1.3), Gấp (x1.0), Đếm/Phân loại (x1.1), Là/Ủi (x1.2), Đóng gói (x1.0), Khác (x1.0).", tech: ["Multiplier Multi-Factor", "HourlyRate Lookup"] },
+          { id: "w4", cx: 940, cy: 370, w: 260, h: 90, fill: "#1e293b", stroke: "#8b5cf6", title: "4. Quản Lý Thẩm Định & Chốt", sub: "HourlyWorkReviewPage.tsx", port: "Status: APPROVED", tag: "Xét duyệt cấp quản lý", path: "fe-react-thanhxuan-internal/.../HourlyWorkReviewPage.tsx", desc: "Quản lý xưởng đối chiếu thời lượng ca và sản lượng thực tế, duyệt hoặc yêu cầu điều chỉnh biên độ thời gian.", tech: ["Batch Approval", "Discrepancy Highlighting"] },
+          { id: "w5", cx: 580, cy: 370, w: 280, h: 90, fill: "#1e293b", stroke: "#ec4899", title: "5. Tích Hợp Bảng Lương Chu Kỳ", sub: "Payroll Aggregator Service", port: "Chu kỳ 1-15 & 16-hết tháng", tag: "Kế toán tiền lương", path: "be-nestjs-thanhxuan/.../payroll.service.ts", desc: "Tự động cộng dồn tiền công giờ, ngày công điểm danh, phụ cấp và khấu trừ ứng lương.", tech: ["Automated Wage Consolidation", "PayFieldFilterInterceptor"] },
+          { id: "w6", cx: 220, cy: 370, w: 260, h: 90, fill: "#1e293b", stroke: "#06b6d4", title: "6. Báo Cáo Năng Suất VPS-Safe", sub: "Streaming Excel/PDF Service", port: "Concurrency = 1", tag: "Xuất dữ liệu", path: "be-nestjs-thanhxuan/.../reports.service.ts", desc: "Xuất file báo cáo chi tiết hiệu suất từng nhân sự xưởng, an toàn bộ nhớ VPS <512MB RAM.", tech: ["ExcelJS Memory Pipeline", "Single-queue Concurrency"] }
+        ],
+        edges: [
+          { from: "w1", to: "w2", label: "Mở ca thành công" },
+          { from: "w2", to: "w3", label: "Áp hệ số 7 khâu" },
+          { from: "w3", to: "w4", label: "Gửi phê duyệt" },
+          { from: "w4", to: "w5", label: "Đã chốt công" },
+          { from: "w5", to: "w6", label: "Xuất bảng lương" }
+        ]
+      }
+    };
+
+    // --- CANVAS ENGINE (PAN & ZOOM & RENDER) ---
+    const svg = document.getElementById("canvas");
+    const viewport = document.getElementById("viewport");
+    let currentView = "topology";
+    let scale = 0.9;
+    let panX = 40;
+    let panY = 20;
+    let isPanning = false;
+    let startX = 0, startY = 0;
+    let activeNodeId = null;
+
+    function updateTransform() {
+      viewport.setAttribute("transform", `translate(${panX}, ${panY}) scale(${scale})`);
+    }
+
+    function renderView(viewKey) {
+      currentView = viewKey;
+      viewport.innerHTML = "";
+      const data = VIEWS[viewKey];
+
+      // 1. Render Clusters
+      data.clusters.forEach(c => {
+        const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        rect.setAttribute("x", c.x);
+        rect.setAttribute("y", c.y);
+        rect.setAttribute("width", c.w);
+        rect.setAttribute("height", c.h);
+        rect.setAttribute("class", "cluster-rect");
+        viewport.appendChild(rect);
+
+        const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        txt.setAttribute("x", c.x + 18);
+        txt.setAttribute("y", c.y + 26);
+        txt.setAttribute("class", "cluster-title");
+        txt.textContent = c.title;
+        viewport.appendChild(txt);
+      });
+
+      // 2. Render Edges
+      data.edges.forEach((e, idx) => {
+        const source = data.nodes.find(n => n.id === e.from);
+        const target = data.nodes.find(n => n.id === e.to);
+        if (!source || !target) return;
+
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        const sx = source.cx, sy = source.cy;
+        const tx = target.cx, ty = target.cy;
+        const dx = tx - sx;
+        const dy = ty - sy;
+        const cx1 = sx + dx * 0.45;
+        const cy1 = sy;
+        const cx2 = sx + dx * 0.55;
+        const cy2 = ty;
+        
+        path.setAttribute("d", `M ${sx} ${sy} C ${cx1} ${cy1}, ${cx2} ${cy2}, ${tx} ${ty}`);
+        path.setAttribute("class", "edge-line");
+        path.setAttribute("id", `edge_${e.from}_${e.to}`);
+        path.setAttribute("marker-end", "url(#arrow)");
+        viewport.appendChild(path);
+      });
+
+      // 3. Render Nodes
+      data.nodes.forEach(n => {
+        const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        g.setAttribute("class", "node-group");
+        g.setAttribute("id", `node_${n.id}`);
+        g.setAttribute("transform", `translate(${n.cx - n.w / 2}, ${n.cy - n.h / 2})`);
+
+        // Box
+        const box = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        box.setAttribute("width", n.w);
+        box.setAttribute("height", n.h);
+        box.setAttribute("fill", n.fill);
+        box.setAttribute("stroke", n.stroke);
+        box.setAttribute("class", "node-box");
+        g.appendChild(box);
+
+        // Header Title
+        const title = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        title.setAttribute("x", 14);
+        title.setAttribute("y", 24);
+        title.setAttribute("class", "node-title");
+        title.textContent = n.title;
+        g.appendChild(title);
+
+        // Subtitle
+        const sub = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        sub.setAttribute("x", 14);
+        sub.setAttribute("y", 44);
+        sub.setAttribute("class", "node-sub");
+        sub.textContent = n.sub;
+        g.appendChild(sub);
+
+        // Port / Badge
+        const port = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        port.setAttribute("x", 14);
+        port.setAttribute("y", n.h - 14);
+        port.setAttribute("class", "node-port");
+        port.textContent = `${n.port} • ${n.tag}`;
+        g.appendChild(port);
+
+        // Click Event
+        g.addEventListener("click", () => selectNode(n));
+
+        viewport.appendChild(g);
+      });
+
+      updateTransform();
+    }
+
+    // --- INTERACTION & SELECTION ---
+    function selectNode(node) {
+      activeNodeId = node.id;
+      const data = VIEWS[currentView];
+
+      // Highlight active node and connected edges
+      document.querySelectorAll(".node-group").forEach(el => {
+        el.classList.remove("active", "dimmed");
+      });
+      document.querySelectorAll(".edge-line").forEach(el => {
+        el.classList.remove("active", "dimmed");
+        el.setAttribute("marker-end", "url(#arrow)");
+      });
+
+      const activeGroup = document.getElementById(`node_${node.id}`);
+      if (activeGroup) activeGroup.classList.add("active");
+
+      // Find connections
+      const connectedNodeIds = new Set([node.id]);
+      data.edges.forEach(e => {
+        if (e.from === node.id || e.to === node.id) {
+          connectedNodeIds.add(e.from);
+          connectedNodeIds.add(e.to);
+          const edgeEl = document.getElementById(`edge_${e.from}_${e.to}`);
+          if (edgeEl) {
+            edgeEl.classList.add("active");
+            edgeEl.setAttribute("marker-end", "url(#arrow-active)");
+          }
+        }
+      });
+
+      // Dim unconnected
+      document.querySelectorAll(".node-group").forEach(el => {
+        const id = el.id.replace("node_", "");
+        if (!connectedNodeIds.has(id)) el.classList.add("dimmed");
+      });
+      document.querySelectorAll(".edge-line").forEach(el => {
+        if (!el.classList.contains("active")) el.classList.add("dimmed");
+      });
+
+      // Populate Drawer
+      document.getElementById("drawerTitle").textContent = node.title;
+      document.getElementById("drawerBadge").textContent = node.tag;
+      document.getElementById("drawerDesc").textContent = node.desc;
+      document.getElementById("drawerPort").textContent = `${node.port} [${node.tag}]`;
+      document.getElementById("drawerPath").textContent = node.path;
+
+      // Tech Pills
+      const techList = document.getElementById("drawerTech");
+      techList.innerHTML = "";
+      (node.tech || []).forEach(t => {
+        const pill = document.createElement("span");
+        pill.className = "pill";
+        pill.textContent = t;
+        techList.appendChild(pill);
+      });
+
+      // Connections List
+      const connList = document.getElementById("drawerConnections");
+      connList.innerHTML = "";
+      data.edges.filter(e => e.from === node.id || e.to === node.id).forEach(e => {
+        const otherId = e.from === node.id ? e.to : e.from;
+        const otherNode = data.nodes.find(n => n.id === otherId);
+        if (otherNode) {
+          const pill = document.createElement("span");
+          pill.className = "pill";
+          pill.textContent = `${e.from === node.id ? '➡️ Gửi đến' : '⬅️ Nhận từ'}: ${otherNode.title}`;
+          connList.appendChild(pill);
+        }
+      });
+
+      document.getElementById("drawer").classList.add("open");
+    }
+
+    function closeDrawer() {
+      document.getElementById("drawer").classList.remove("open");
+      document.querySelectorAll(".node-group").forEach(el => el.classList.remove("active", "dimmed"));
+      document.querySelectorAll(".edge-line").forEach(el => {
+        el.classList.remove("active", "dimmed");
+        el.setAttribute("marker-end", "url(#arrow)");
+      });
+      activeNodeId = null;
+    }
+
+    // --- MOUSE PAN & ZOOM HANDLERS ---
+    svg.addEventListener("mousedown", (e) => {
+      if (e.target.closest(".node-group")) return;
+      isPanning = true;
+      startX = e.clientX - panX;
+      startY = e.clientY - panY;
+    });
+
+    window.addEventListener("mousemove", (e) => {
+      if (!isPanning) return;
+      panX = e.clientX - startX;
+      panY = e.clientY - startY;
+      updateTransform();
+    });
+
+    window.addEventListener("mouseup", () => isPanning = false);
+
+    svg.addEventListener("wheel", (e) => {
+      e.preventDefault();
+      const zoomFactor = e.deltaY < 0 ? 1.1 : 0.9;
+      scale = Math.min(Math.max(0.4, scale * zoomFactor), 2.5);
+      updateTransform();
+    });
+
+    // --- BUTTON CONTROLS ---
+    document.getElementById("zoomIn").addEventListener("click", () => {
+      scale = Math.min(2.5, scale * 1.2);
+      updateTransform();
+    });
+    document.getElementById("zoomOut").addEventListener("click", () => {
+      scale = Math.max(0.4, scale / 1.2);
+      updateTransform();
+    });
+    document.getElementById("resetZoom").addEventListener("click", () => {
+      scale = 0.9;
+      panX = 40;
+      panY = 20;
+      updateTransform();
+      closeDrawer();
+    });
+    document.getElementById("closeDrawer").addEventListener("click", closeDrawer);
+
+    // View Selector
+    document.getElementById("viewSelect").addEventListener("change", (e) => {
+      closeDrawer();
+      renderView(e.target.value);
+    });
+
+    // Search Filter
+    document.getElementById("search").addEventListener("input", (e) => {
+      const q = e.target.value.toLowerCase().trim();
+      if (!q) {
+        document.querySelectorAll(".node-group").forEach(el => el.classList.remove("dimmed"));
+        return;
+      }
+      const data = VIEWS[currentView];
+      data.nodes.forEach(n => {
+        const match = n.title.toLowerCase().includes(q) ||
+                      n.sub.toLowerCase().includes(q) ||
+                      n.port.toLowerCase().includes(q) ||
+                      n.path.toLowerCase().includes(q) ||
+                      (n.tech || []).some(t => t.toLowerCase().includes(q));
+        const el = document.getElementById(`node_${n.id}`);
+        if (el) {
+          if (match) el.classList.remove("dimmed");
+          else el.classList.add("dimmed");
+        }
+      });
+    });
+
+    // Theme Toggle
+    document.getElementById("themeToggle").addEventListener("click", () => {
+      document.documentElement.classList.toggle("dark");
+      document.documentElement.classList.toggle("light");
+    });
+
+    // Initial render
+    renderView("topology");
+  </script>
+</body>
+</html>

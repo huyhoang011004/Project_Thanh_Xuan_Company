@@ -1,6 +1,6 @@
 ---
 trigger: glob
-glob: {fe-nextjs-*,fe-react-*}/**
+glob: "{fe-nextjs-*,fe-react-*}/**"
 description: Quy tắc phát triển Frontend (Next.js & React SPA) dự án Thanh Xuan Company
 ---
 
