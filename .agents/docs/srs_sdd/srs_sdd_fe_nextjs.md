@@ -67,48 +67,65 @@ Phân hệ đảm nhiệm 2 vai trò cốt lõi trong hệ sinh thái Thanh Xuâ
 fe-nextjs-thanhxuan-laundry/src/
 ├── app/
 │   ├── (public)/                        # Route Group: Web Khách Hàng (Server Components)
-│   │   ├── page.tsx                     # Trang chủ
+│   │   ├── page.tsx                     # Trang chủ (Server Component render HomePage)
 │   │   ├── layout.tsx                   # Header, Footer, Zalo Widget chung cho public
-│   │   ├── dich-vu/                     # Danh sách và chi tiết dịch vụ
-│   │   ├── tin-tuc/                     # Cẩm nang & bài viết SEO
+│   │   ├── dich-vu/                     # Danh sách và chi tiết dịch vụ ([...slug]/page.tsx -> ServiceDetailPage)
+│   │   ├── tin-tuc/                     # Cẩm nang & bài viết SEO (page.tsx -> ArticleListPage)
 │   │   ├── gioi-thieu/                  # Giới thiệu công ty
-│   │   └── lien-he/                     # Form liên hệ & bản đồ
+│   │   └── lien-he/                     # Form liên hệ & bản đồ (page.tsx -> ContactPage)
 │   │
 │   ├── (admin)/admin/                   # Route Group: CMS Quản Trị
-│   │   ├── layout.tsx                   # Layout Sidebar & Topbar CMS
-│   │   ├── login/                       # Trang đăng nhập Admin
-│   │   ├── dashboard/                   # Bảng điều khiển tổng hợp
-│   │   ├── articles/                    # Quản lý bài viết SEO
-│   │   ├── categories/                  # Quản lý danh mục bài viết / dịch vụ
-│   │   ├── contacts/                    # Quản lý khách hàng liên hệ
-│   │   ├── crm/                         # Pipeline chăm sóc khách hàng
-│   │   ├── orders/                      # Quản trị đơn giặt sấy
-│   │   ├── zalo-marketing/              # Quản lý chiến dịch Zalo OA
-│   │   ├── email-marketing/             # Quản lý chiến dịch Email
-│   │   └── settings/                    # Cấu hình website
+│   │   ├── layout.tsx                   # AdminShellComponent (Sidebar & Topbar CMS)
+│   │   ├── login/                       # Trang đăng nhập Admin (LoginFormComponent)
+│   │   ├── dashboard/                   # Bảng điều khiển tổng hợp (DashboardPage)
+│   │   ├── articles/                    # Quản lý bài viết SEO (ArticleManagerPage)
+│   │   ├── categories/                  # Quản lý danh mục bài viết / dịch vụ (CategoryManagerPage)
+│   │   ├── contacts/                    # Quản lý khách hàng liên hệ (ContactManagerPage)
+│   │   ├── crm/                         # Pipeline chăm sóc khách hàng (CrmManagerPage)
+│   │   ├── orders/                      # Quản trị đơn giặt sấy (OrdersManagerPage)
+│   │   ├── zalo-marketing/              # Quản lý chiến dịch Zalo OA (ZaloMarketingPage)
+│   │   ├── email-marketing/             # Quản lý chiến dịch Email (EmailMarketingPage)
+│   │   ├── accounts/                    # Quản lý tài khoản Admin (AccountManagerPage)
+│   │   └── settings/                    # Cấu hình website (SettingEditor*Component)
 │   │
-│   ├── api/                             # Route Handlers nội bộ (proxy, webhook)
+│   ├── api/                             # Route Handlers nội bộ (proxy, upload)
 │   ├── globals.css                      # Tailwind tokens & CSS Variables
 │   ├── layout.tsx                       # Root Layout (Font Inter, Metadata chung)
 │   ├── robots.ts                        # Trả về robots.txt tự động
 │   └── sitemap.ts                       # Sinh sitemap.xml động từ Backend API
 │
-├── components/                          # UI Components dùng chung
-│   ├── ui/                              # shadcn/ui components (Button, Input, Dialog...)
-│   ├── public/                          # Header, Footer, ContactModal, ZaloWidget
-│   └── admin/                           # Sidebar, DataTable, ImageUploader
+├── components/                          # UI & Shared Components dùng chung
+│   ├── common/                          # Tiện ích chung (ConfirmAlertDialogComponent, ProfileModal, ThemeToggleComponent, ThemeProvider)
+│   ├── layout/                          # Layout shells & navigation
+│   │   ├── admin/                       # AdminShellComponent, AdminHeaderComponent, AdminSidebarComponent
+│   │   └── public/                      # PublicHeaderComponent, PublicFooterComponent, DraggableFloatingContactComponent
+│   └── ui/                              # shadcn/ui primitives (Button, Input, Dialog, Table, Form...)
 │
-├── features/                            # Feature-based logic colocation
-│   ├── articles/                        # ArticleCard, ArticleList, ArticleEditor
-│   ├── contacts/                        # ContactForm, ContactActions
-│   └── orders/                          # OrderForm, OrderStatusBadge
+├── features/                            # Feature-based Flat Colocation
+│   ├── admin/                           # 11 Modules Quản Trị CMS
+│   │   ├── articles/                    # ArticleManagerPage.tsx, modals/ (ArticleEditorModal, ArticleTrashModal), components/
+│   │   ├── categories/                  # CategoryManagerPage.tsx, modals/ (CategoryEditorModal), admin-categories.service.ts
+│   │   ├── contacts/                    # ContactManagerPage.tsx, modals/ (ContactTrashModal), components/
+│   │   ├── crm/                         # CrmManagerPage.tsx, components/ (CrmManagerTable, CrmManagerToolbar)
+│   │   ├── dashboard/                   # DashboardPage.tsx
+│   │   ├── email-marketing/             # EmailMarketingPage.tsx, modals/, components/
+│   │   ├── orders/                      # OrdersManagerPage.tsx, modals/, components/
+│   │   ├── settings/                    # SettingsPage.tsx, components/ (SettingEditor*Component)
+│   │   ├── users/                       # AccountManagerPage.tsx, modals/ (AccountEditorModal)
+│   │   ├── auth/                        # LoginFormComponent.tsx, admin-auth.service.ts
+│   │   ├── zalo/                        # ZaloMarketingPage.tsx, admin-zalo.service.ts
+│   │   └── index.ts                     # Barrel export 11 feature quản trị
+│   │
+│   └── public/                          # 6 Modules Web Khách Hàng B2B & Public
+│       ├── home/                        # HomePage.tsx, components/ (HeroSection, IntroSection, ServicesGrid, WhyChooseUs, FaqSection)
+│       ├── articles/                    # ArticleListPage.tsx, components/ (ArticleList, ArticleSortFilter)
+│       ├── contacts/                    # ContactPage.tsx, public-contacts.service.ts, public-contacts.action.ts
+│       ├── services/                    # ServiceDetailPage.tsx, public-services.service.ts
+│       ├── settings/                    # public-settings.service.ts
+│       ├── seo/                         # Cấu hình Metadata & Schema.org JSON-LD
+│       └── index.ts                     # Barrel export các feature public
 │
-├── services/                            # Tầng kết nối API Backend tập trung
-│   ├── api-client.ts                    # Axios / Fetch client cấu hình baseURL
-│   ├── article.service.ts               # Gọi API bài viết từ Backend NestJS
-│   ├── contact.service.ts               # Gửi dữ liệu lead sang Backend
-│   └── order.service.ts                 # Quản trị đơn hàng
-│
+├── services/                            # Tầng kết nối API Backend tập trung (api.service.ts)
 ├── types/                               # TypeScript Interfaces & DTOs
 └── middleware.ts                        # Bảo vệ route /admin/*, kiểm tra JWT Cookie
 ```
@@ -143,6 +160,13 @@ sequenceDiagram
 ---
 
 ### 2.3. Quy Chuẩn Kỹ Thuật Bắt Buộc
-1. **Server Components:** Mọi trang đọc dữ liệu hiển thị trong thư mục `(public)` bắt buộc là Server Component. Chỉ thêm `"use client"` cho các component tương tác ở lá (Leaf Components) như `ContactForm.tsx`, `Carousel.tsx`, `HeaderDropdown.tsx`.
+1. **Server Components:** Mọi trang đọc dữ liệu hiển thị trong thư mục `(public)` bắt buộc là Server Component. Chỉ thêm `"use client"` cho các component tương tác ở lá (Leaf Components) như form, slider, dynamic UI.
 2. **Form Validation:** Sử dụng `react-hook-form` kết hợp `zod` schema để validate dữ liệu form phía client trước khi gửi lên API Backend.
 3. **Quản lý Media:** Hình ảnh tải lên bài viết được gửi qua Backend để lưu trữ trực tiếp trên Cloudinary, không lưu trữ file tĩnh trên server Next.js.
+4. **Quy Chuẩn Cấu Trúc & Đặt Tên File Frontend (Đồng bộ với `fe-react-thanhxuan-internal` theo AGENTS.md Mục 5.5):**
+   - File màn hình chính cấp cao nhất: `[Tên]Page.tsx` đặt trực tiếp tại root của feature (VD: `ArticleManagerPage.tsx`, `HomePage.tsx`).
+   - Thư mục `modals/`: Chứa các modal nghiệp vụ `[Tên]Modal.tsx` kèm `modals/index.ts`.
+   - Thư mục `components/`: Chứa các subcomponent hiển thị `[Tên]Component.tsx` kèm `components/index.ts`.
+   - Shared components: Phân tách rõ ràng `components/layout/` (`admin/`, `public/`), `components/common/`, `components/ui/`.
+   - Giới hạn kích thước file 250 - 300 dòng; bóc tách modal và subcomponents kịp thời, không dồn hàng nghìn dòng vào 1 file.
+

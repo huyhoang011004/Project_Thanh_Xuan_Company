@@ -4,6 +4,48 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
 
 ## 2026-10-25
 
+### Plan 32: Tái Cấu Trúc Toàn Diện Thư Mục & Chuẩn Hóa Kiến Trúc fe-nextjs-thanhxuan-laundry Theo Chuẩn fe-react-thanhxuan-internal
+
+- **Mục tiêu & Động lực:**
+  - Đồng bộ hóa toàn diện cấu trúc thư mục và quy chuẩn đặt tên mã nguồn của ứng dụng Web Khách Hàng & CMS (`fe-nextjs-thanhxuan-laundry`) với chuẩn kiến trúc của `fe-react-thanhxuan-internal` theo AGENTS.md Mục 5.3, 5.5 và Mục 8.
+  - Áp dụng triệt để quy ước đặt tên file Frontend: Màn hình chính cấp cao nhất: `[Tên]Page.tsx` (trực tiếp tại root feature); Modal nghiệp vụ: `modals/[Tên]Modal.tsx`; Subcomponent hiển thị: `components/[Tên]Component.tsx`.
+  - Bóc tách rõ ràng giữa Shared Components dùng chung toàn app (`components/layout/` gồm `admin/` & `public/`, `components/common/`, `components/ui/`) và Feature Components colocation (`features/admin/*` và `features/public/*`).
+  - Triệt tiêu 100% các file tương thích ngược/re-export mồ côi (No Stale Bridge Files), loại bỏ hoàn toàn TypeScript `any` trong các route public App Router.
+- **Chi tiết thực thi:**
+  - **Giai đoạn 1 - Tái cấu trúc Shared Components (`src/components/`):**
+    - Di chuyển các component layout quản trị từ `components/admin/` sang `components/layout/admin/`: `AdminShellComponent.tsx`, `AdminHeaderComponent.tsx`, `AdminSidebarComponent.tsx`, kèm barrel export `components/layout/admin/index.ts`.
+    - Di chuyển các component layout khách hàng từ `components/public/` sang `components/layout/public/`: `PublicHeaderComponent.tsx`, `PublicFooterComponent.tsx`, `DraggableFloatingContactComponent.tsx`, `HeaderClientWrapperComponent.tsx`, các thư mục con `header/` và `footer/`, kèm barrel export `components/layout/public/index.ts`.
+    - Tổ chức lại thư mục `components/common/`: Chuyển `ConfirmAlertDialogComponent.tsx`, `ProfileModal.tsx`, `ThemeToggleComponent.tsx`, `ThemeProvider.tsx`, tạo barrel export `components/common/index.ts`.
+    - Xóa bỏ hoàn toàn 2 thư mục cũ `src/components/admin/` và `src/components/public/`.
+  - **Giai đoạn 2 - Chuẩn hóa 11 Feature Quản Trị Admin (`src/features/admin/`):**
+    - `articles`: Tạo `ArticleManagerPage.tsx` làm màn hình chính; bóc tách `modals/ArticleEditorModal.tsx`, `modals/ArticleTrashModal.tsx`; bóc tách subcomponents `ArticleManagerTableComponent.tsx`, `ArticleManagerToolbarComponent.tsx`, `ArticleEditorAiAssistantComponent.tsx`, `ArticleEditorBasicComponent.tsx`, `ArticleEditorSeoComponent.tsx`, `ArticleEditorSettingsComponent.tsx`.
+    - `categories`: Tạo `CategoryManagerPage.tsx`; bóc tách `modals/CategoryEditorModal.tsx`.
+    - `contacts`: Tạo `ContactManagerPage.tsx`; bóc tách `modals/ContactTrashModal.tsx`; subcomponents `ContactManagerTableComponent.tsx`, `ContactManagerToolbarComponent.tsx`, `ContactManagerBulkActionsComponent.tsx`.
+    - `crm`: Tạo `CrmManagerPage.tsx`; subcomponents `CrmManagerTableComponent.tsx`, `CrmManagerToolbarComponent.tsx`.
+    - `dashboard`: Tạo `DashboardPage.tsx`.
+    - `email-marketing`: Tạo `EmailMarketingPage.tsx`; bóc tách modals (`EmailCampaignModal`, `EmailTemplateModal`) và components (`EmailCampaignsTableComponent`, `EmailTemplatesTableComponent`).
+    - `orders`: Tạo `OrdersManagerPage.tsx`; bóc tách modal `OrdersManagerModal.tsx` và components (`OrdersManagerTableComponent`, `OrdersManagerToolbarComponent`).
+    - `settings`: Tạo `SettingsPage.tsx`; bóc tách subcomponents `SettingEditorAboutComponent.tsx`, `SettingEditorContactComponent.tsx`, `SettingEditorFooterComponent.tsx`, `SettingEditorHeaderComponent.tsx`, `SettingEditorHomeComponent.tsx`, `SettingEditorServiceComponent.tsx`, `SettingEditorZaloComponent.tsx`.
+    - `users`: Tạo `AccountManagerPage.tsx`; bóc tách `modals/AccountEditorModal.tsx`.
+    - `auth`: Tạo `LoginFormComponent.tsx`.
+    - `zalo`: Tạo `ZaloMarketingPage.tsx`.
+    - Khởi tạo barrel export `src/features/admin/index.ts` xuất tập trung toàn bộ 11 module quản trị.
+  - **Giai đoạn 3 - Chuẩn hóa các Feature Khách Hàng Public (`src/features/public/`):**
+    - `home`: Tạo `HomePage.tsx` tại root feature; đổi tên các subcomponent thành `HeroSectionComponent.tsx`, `IntroSectionComponent.tsx`, `ServicesGridComponent.tsx`, `WhyChooseUsSectionComponent.tsx`, `FaqSectionComponent.tsx`.
+    - `articles`: Tạo `ArticleListPage.tsx`; đổi tên component thành `ArticleListComponent.tsx`, `ArticleSortFilterComponent.tsx`.
+    - `contacts`: Tạo `ContactPage.tsx` làm màn hình liên hệ chính.
+    - `services`: Tạo `ServiceDetailPage.tsx` làm màn hình chi tiết dịch vụ.
+    - Khởi tạo barrel export `src/features/public/index.ts` xuất tập trung toàn bộ feature public.
+  - **Giai đoạn 4 - Cập nhật App Router Routes & Loại bỏ TypeScript `any`:**
+    - Cập nhật toàn bộ các route App Router trong `(admin)/admin/**/page.tsx` và `layout.tsx` trỏ trực tiếp vào các Page/Component chuẩn mới.
+    - Cập nhật toàn bộ các route trong `(public)/**/page.tsx` và `layout.tsx` trỏ vào các Page/Component mới.
+    - Loại bỏ hoàn toàn kiểu dữ liệu `any` trong `src/app/(public)/page.tsx`, thay bằng typing chặt chẽ.
+    - Quét toàn bộ codebase Next.js, triệt tiêu 100% file re-export tạm thời và không để lại bất kỳ import lỗi thời nào.
+  - **Kiểm thử & Đồng bộ tài liệu:**
+    - Typecheck `pnpm exec tsc --noEmit` pass 100% (0 errors).
+    - Build production Next.js `pnpm build` pass 100% toàn bộ static pages và dynamic server routes.
+    - Cập nhật tài liệu: [srs_sdd_fe_nextjs.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_nextjs.md), [CODEBASE_ATLAS.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/CODEBASE_ATLAS.md), [SRS_SDD.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/SRS_SDD.md).
+
 ### Plan 33: Tái Cấu Trúc Thư Mục Laundry Đồng Bộ Với Internal & Chuẩn NestJS (`be-nestjs-thanhxuan`)
 
 - **Mục tiêu & Động lực:**

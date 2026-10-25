@@ -56,21 +56,30 @@ Cổng Backend API tập trung chia thành 3 phân vùng Database và 1 lớp Co
 # 2. MA TRẬN WEB KHÁCH HÀNG & CMS (`fe-nextjs-thanhxuan-laundry`)
 
 Thư mục: `fe-nextjs-thanhxuan-laundry/src/`  
-Kiến trúc: Next.js App Router, Server Components mặc định cho SEO (`src/app/(public)`), Quản trị CMS (`src/app/(admin)/admin`), Feature Colocation (`src/features/*`).
+Kiến trúc: Next.js App Router, Server Components mặc định cho SEO (`src/app/(public)`), Quản trị CMS (`src/app/(admin)/admin`), Feature Colocation đồng bộ với `fe-react-thanhxuan-internal`:
+- Màn hình chính: `[Tên]Page.tsx`
+- Modal nghiệp vụ: `modals/[Tên]Modal.tsx`
+- Component con: `components/[Tên]Component.tsx`
+- Layout shells: `components/layout/` (`admin/`, `public/`)
+- Tiện ích dùng chung: `components/common/`
 
-| Tuyến URL | Loại Component | File Trang (Page Entry) | Features / Components Con | Server Action / API Service |
+| Tuyến URL | Loại | File Trang (Page Entry) | Màn Hình / Modals / Subcomponents | Service / Hooks |
 | :--- | :---: | :--- | :--- | :--- |
-| `/` (Trang chủ) | RSC | `src/app/(public)/page.tsx` | HeroBanner, ServiceGrid, WhyChooseUs, CTAContact | `src/services/article.service.ts` |
-| `/dich-vu` | RSC | `src/app/(public)/dich-vu/page.tsx` | ServiceList, ServiceCard, PriceTable | `src/services/service.service.ts` |
-| `/dich-vu/[slug]` | RSC (SEO) | `src/app/(public)/dich-vu/[slug]/page.tsx` | ServiceDetailContent, LeadCaptureForm, RelatedServices | `generateMetadata()`, `getServiceBySlug()` |
-| `/bang-gia` | RSC | `src/app/(public)/bang-gia/page.tsx` | PriceEstimatorCalculator, PriceTabs | `src/services/pricing.service.ts` |
-| `/tin-tuc` | RSC | `src/app/(public)/tin-tuc/page.tsx` | BlogGrid, CategoryFilter, Pagination | `src/services/article.service.ts` |
-| `/tin-tuc/[slug]` | RSC (SEO) | `src/app/(public)/tin-tuc/[slug]/page.tsx` | ArticleContent, TableOfContents, SocialShare, CTAForm | `generateMetadata()`, `getArticleBySlug()` |
-| `/lien-he` | Client Form | `src/app/(public)/lien-he/page.tsx` | ContactForm (react-hook-form + zod), GoogleMapEmbed | `src/features/contact/actions/submit-contact.ts` |
-| `/chuyen-nha` | Client Calc | `src/app/(public)/chuyen-nha/page.tsx` | MovingQuoteCalculator (tính km & cước), TruckSelector | `src/services/moving.service.ts` |
-| `/admin/articles` | Client / CMS | `src/app/(admin)/admin/articles/page.tsx` | ArticleDataTable, TipTapEditorModal, CategorySelect | `src/features/cms/services/article-admin.service.ts` |
-| `/admin/orders` | Client / CMS | `src/app/(admin)/admin/orders/page.tsx` | OrderDataTable, OrderStatusBadge, OrderDetailDrawer | `src/features/cms/services/order-admin.service.ts` |
-| `/admin/contacts` | Client / CRM | `src/app/(admin)/admin/contacts/page.tsx` | ContactDataTable, LeadStatusToggle, NotesDrawer | `src/features/cms/services/contact-admin.service.ts` |
+| `/` (Trang chủ) | RSC | `src/app/(public)/page.tsx` | `HomePage.tsx`<br>`src/features/public/home/` | `HeroSectionComponent`, `IntroSectionComponent`, `ServicesGridComponent`, `WhyChooseUsSectionComponent`, `FaqSectionComponent` |
+| `/dich-vu/[...slug]` | RSC (SEO) | `src/app/(public)/dich-vu/[...slug]/page.tsx` | `ServiceDetailPage.tsx`<br>`src/features/public/services/` | `public-services.service.ts` |
+| `/tin-tuc` | RSC | `src/app/(public)/tin-tuc/page.tsx` | `ArticleListPage.tsx`<br>`src/features/public/articles/` | `ArticleListComponent`, `ArticleSortFilterComponent` |
+| `/lien-he` | Client Form | `src/app/(public)/lien-he/page.tsx` | `ContactPage.tsx`<br>`src/features/public/contacts/` | `public-contacts.service.ts`<br>`public-contacts.action.ts` |
+| `/admin/login` | Client / Auth | `src/app/(admin)/admin/login/page.tsx` | `LoginFormComponent.tsx`<br>`src/features/admin/auth/` | `admin-auth.service.ts` |
+| `/admin/dashboard` | Client / CMS | `src/app/(admin)/admin/dashboard/page.tsx` | `DashboardPage.tsx`<br>`src/features/admin/dashboard/` | `admin-dashboard.service.ts` |
+| `/admin/articles` | Client / CMS | `src/app/(admin)/admin/articles/page.tsx` | `ArticleManagerPage.tsx`<br>`src/features/admin/articles/` | Modals: `ArticleEditorModal`, `ArticleTrashModal`<br>Components: `ArticleManagerTableComponent`, `ArticleManagerToolbarComponent`, `ArticleEditor*Component`<br>Hooks: `useAdminArticles` |
+| `/admin/categories` | Client / CMS | `src/app/(admin)/admin/categories/page.tsx` | `CategoryManagerPage.tsx`<br>`src/features/admin/categories/` | Modals: `CategoryEditorModal`<br>Hooks: `useAdminCategories` |
+| `/admin/contacts` | Client / CRM | `src/app/(admin)/admin/contacts/page.tsx` | `ContactManagerPage.tsx`<br>`src/features/admin/contacts/` | Modals: `ContactTrashModal`<br>Components: `ContactManagerTableComponent`, `ContactManagerToolbarComponent`, `ContactManagerBulkActionsComponent`<br>Hooks: `useAdminContacts` |
+| `/admin/crm` | Client / CRM | `src/app/(admin)/admin/crm/page.tsx` | `CrmManagerPage.tsx`<br>`src/features/admin/crm/` | Components: `CrmManagerTableComponent`, `CrmManagerToolbarComponent`<br>Hooks: `useAdminCrm` |
+| `/admin/orders` | Client / CMS | `src/app/(admin)/admin/orders/page.tsx` | `OrdersManagerPage.tsx`<br>`src/features/admin/orders/` | Modals: `OrdersManagerModal`<br>Components: `OrdersManagerTableComponent`, `OrdersManagerToolbarComponent`<br>Hooks: `useAdminOrders` |
+| `/admin/email-marketing` | Client / CMS | `src/app/(admin)/admin/email-marketing/page.tsx` | `EmailMarketingPage.tsx`<br>`src/features/admin/email-marketing/` | Modals: `EmailCampaignModal`, `EmailTemplateModal`<br>Components: `EmailCampaignsTableComponent`, `EmailTemplatesTableComponent`<br>Hooks: `useAdminEmailMarketing` |
+| `/admin/accounts` | Client / CMS | `src/app/(admin)/admin/accounts/page.tsx` | `AccountManagerPage.tsx`<br>`src/features/admin/users/` | Modals: `AccountEditorModal`<br>Hooks: `useAdminUsers` |
+| `/admin/settings/**` | Client / CMS | `src/app/(admin)/admin/settings/**/page.tsx` | `SettingsPage.tsx`<br>`src/features/admin/settings/` | Components: `SettingEditorAboutComponent`, `SettingEditorContactComponent`, `SettingEditorFooterComponent`, `SettingEditorHeaderComponent`, `SettingEditorHomeComponent`, `SettingEditorServiceComponent`, `SettingEditorZaloComponent` |
+| `/admin/zalo-marketing` | Client / CMS | `src/app/(admin)/admin/zalo-marketing/page.tsx` | `ZaloMarketingPage.tsx`<br>`src/features/admin/zalo/` | `admin-zalo.service.ts` |
 
 ---
 
