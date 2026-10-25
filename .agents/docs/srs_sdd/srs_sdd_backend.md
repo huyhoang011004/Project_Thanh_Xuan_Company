@@ -128,7 +128,21 @@ be-nestjs-thanhxuan/src/
 ├── mail/                                # MailService gửi email OTP & thông báo (Nodemailer/Resend)
 └── modules/
     ├── core/                            # Upload (Cloudinary/Local), AI (Gemini), Audit, Idempotency
-    ├── laundry/                         # 12 modules Giặt Là Website & CMS (DB: laundry_express)
+    ├── laundry/                         # LaundryModule: Đóng gói 12 submodule Giặt Là & CMS (DB: laundry_express)
+    │   ├── laundry.constants.ts         # Hằng số cấu hình domain LAUNDRY_CONNECTION
+    │   ├── laundry.module.ts            # Gom cụm và export 12 submodule giặt là
+    │   ├── articles/                    # dto/, schemas/, repositories/, specs/, controllers/, services/
+    │   ├── categories/                  # dto/, schemas/, repositories/, specs/, controllers/, services/
+    │   ├── contacts/                    # dto/, schemas/, repositories/, specs/, controllers/, services/
+    │   ├── crm/                         # dto/, schemas/, repositories/, controllers/, services/
+    │   ├── orders/                      # dto/, schemas/, repositories/, controllers/, services/
+    │   ├── settings/                    # dto/, schemas/, repositories/, specs/, controllers/, services/
+    │   ├── users/                       # schemas/, repositories/, specs/, controllers/, services/
+    │   ├── auth/                        # dto/, guards/, strategies/, specs/, controllers/, services/
+    │   ├── dashboard/                   # specs/, controllers/, services/
+    │   ├── email-marketing/             # schemas/, controllers/, services/
+    │   ├── zalo/                        # services/, controllers/
+    │   └── zalo-marketing/              # schemas/, services/, controllers/
     ├── moving/                          # Quotes, Services, Articles (DB: moving_express)
     └── internal/                        # Vận Hành Nội Bộ & Quản Trị Đối Tác (DB: internal_express)
         ├── auth/                        # dto/, schemas/, repositories/, specs/, controllers/, strategies/

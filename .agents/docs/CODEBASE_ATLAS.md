@@ -39,13 +39,15 @@ Cổng Backend API tập trung chia thành 3 phân vùng Database và 1 lớp Co
 
 ### 1.2. Phân Hệ Web Khách Hàng, CMS & Chuyển Nhà
 
-| Nghiệp Vụ | Tuyến API | Controller & File | Service & File | Repository / Schema |
+| Nghiệp Vụ | Tuyến API | Controller & File | Service & File | Repository & Schema |
 | :--- | :--- | :--- | :--- | :--- |
-| **Bài viết & Dịch vụ Giặt** | `/api/v1/articles` | `ArticlesController` | `ArticlesService` | [articles.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/laundry/articles/schemas/articles.schema.ts) |
-| **Chuyên mục Giặt** | `/api/v1/categories` | `CategoriesController` | `CategoriesService` | [categories.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/laundry/categories/schemas/categories.schema.ts) |
-| **Đơn đặt lịch Web** | `/api/v1/orders` | `OrdersController` | `OrdersService` | [orders.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/laundry/orders/schemas/orders.schema.ts) |
-| **Form liên hệ B2B (Leads)** | `/api/v1/contacts` | `ContactsController` | `ContactsService` | [contacts.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/laundry/contacts/schemas/contacts.schema.ts) |
-| **CRM Khách hàng** | `/api/v1/crm` | `CrmController` | `CrmService` | [customer.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/laundry/crm/schemas/customer.schema.ts) |
+| **Bài viết & Dịch vụ Giặt** | `/api/v1/articles` | `ArticlesController` | `ArticlesService` | `ArticlesRepository` (`articles/repositories/articles.repository.ts`)<br>[articles.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/laundry/articles/schemas/articles.schema.ts) |
+| **Chuyên mục Giặt** | `/api/v1/categories` | `CategoriesController` | `CategoriesService` | `CategoriesRepository` (`categories/repositories/categories.repository.ts`)<br>[categories.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/laundry/categories/schemas/categories.schema.ts) |
+| **Đơn đặt lịch Web** | `/api/v1/orders` | `OrdersController` | `OrdersService` | `OrdersRepository` (`orders/repositories/orders.repository.ts`)<br>[orders.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/laundry/orders/schemas/orders.schema.ts) |
+| **Form liên hệ B2B (Leads)** | `/api/v1/contacts` | `ContactsController` | `ContactsService` | `ContactsRepository` (`contacts/repositories/contacts.repository.ts`)<br>[contacts.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/laundry/contacts/schemas/contacts.schema.ts) |
+| **CRM Khách hàng** | `/api/v1/crm` | `CrmController` | `CrmService` | `CrmRepository` (`crm/repositories/crm.repository.ts`)<br>[customer.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/laundry/crm/schemas/customer.schema.ts) |
+| **Cấu hình & Metadata Web** | `/api/v1/settings` | `SettingsController` | `SettingsService` | `SettingsRepository` (`settings/repositories/settings.repository.ts`)<br>[setting.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/laundry/settings/schemas/setting.schema.ts) |
+| **Tài khoản Quản trị CMS** | `/api/v1/users` | `UsersController` | `UsersService` | `UsersRepository` (`users/repositories/users.repository.ts`)<br>[user.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/laundry/users/schemas/user.schema.ts) |
 | **Khảo sát Báo giá Chuyển nhà** | `/api/v1/moving/quotes` | `MovingQuotesController` | `MovingQuotesService` | [moving-quote.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/moving/quotes/schemas/moving-quote.schema.ts) |
 | **Dịch vụ & Xe tải Chuyển nhà** | `/api/v1/moving/services` | `MovingServicesController` | `MovingServicesService` | [moving-service.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/moving/services/schemas/moving-service.schema.ts) |
 

@@ -2,6 +2,38 @@
 
 Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâng cấp, bugfix và triển khai tính năng của Hệ sinh thái Công ty Thanh Xuân qua từng Plan.
 
+## 2026-10-25
+
+### Plan 33: Tái Cấu Trúc Thư Mục Laundry Đồng Bộ Với Internal & Chuẩn NestJS (`be-nestjs-thanhxuan`)
+
+- **Mục tiêu & Động lực:**
+  - Đồng bộ hóa cấu trúc kiến trúc thư mục domain `laundry` tương đồng với `internal` và tuân thủ skill `create-nestjs-module`.
+  - Khởi tạo `laundry.constants.ts` (chứa `LAUNDRY_CONNECTION`) và `laundry.module.ts` đóng gói tập trung 12 submodules của phân hệ Giặt Là (Website & CMS).
+  - Tái cấu trúc `app.module.ts`: thay thế việc khai báo rời rạc 12 modules bằng duy nhất `LaundryModule`.
+  - Di chuyển toàn bộ các file `*.repository.ts` đang nằm ở root các submodules của laundry vào thư mục `repositories/` chuẩn mực (`articles`, `categories`, `contacts`, `crm`, `orders`, `settings`, `users`).
+  - Xóa bỏ triệt để 7 file repository cũ tại root, không để lại file rác hay alias bridge tương thích ngược.
+- **Chi tiết thực thi:**
+  - **Tạo Laundry Root Module & Constants:**
+    - Khởi tạo [laundry.constants.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/laundry/laundry.constants.ts) định nghĩa hằng số kết nối `LAUNDRY_CONNECTION`.
+    - Khởi tạo [laundry.module.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/laundry/laundry.module.ts) import và export toàn bộ 12 submodule giặt là (`ArticlesModule`, `ContactsModule`, `CategoriesModule`, `AuthModule`, `UsersModule`, `DashboardModule`, `SettingsModule`, `CrmModule`, `OrdersModule`, `ZaloModule`, `ZaloMarketingModule`, `EmailMarketingModule`).
+    - Cập nhật [app.module.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/app.module.ts) import tập trung `LaundryModule`.
+  - **Chuẩn hóa thư mục `repositories/` cho 7 Submodules:**
+    - `articles/repositories/articles.repository.ts`: Di chuyển và cập nhật imports `BaseRepository`, schema/dto; cập nhật `articles.module.ts`, `articles.service.ts`, `articles.service.spec.ts`, `categories.service.ts`, `categories.service.spec.ts`, `dashboard.service.ts`, `dashboard.service.spec.ts`.
+    - `categories/repositories/categories.repository.ts`: Di chuyển và cập nhật imports; cập nhật `categories.module.ts`, `categories.service.ts`, `categories.service.spec.ts`, `articles.service.ts`, `articles.service.spec.ts`, `dashboard.service.ts`, `dashboard.service.spec.ts`.
+    - `contacts/repositories/contacts.repository.ts`: Di chuyển và cập nhật imports; cập nhật `contacts.module.ts`, `contacts.service.ts`, `contacts.service.spec.ts`, `dashboard.service.ts`, `dashboard.service.spec.ts`.
+    - `crm/repositories/crm.repository.ts`: Di chuyển và cập nhật imports; cập nhật `crm.module.ts`, `crm.service.ts`, `zalo.service.ts`, `zalo-marketing.service.ts`.
+    - `orders/repositories/orders.repository.ts`: Di chuyển và cập nhật imports; cập nhật `orders.module.ts`, `orders.service.ts`.
+    - `settings/repositories/settings.repository.ts`: Di chuyển và cập nhật imports; cập nhật `settings.module.ts`, `settings.service.ts`, `settings.service.spec.ts`.
+    - `users/repositories/users.repository.ts`: Di chuyển và cập nhật imports; cập nhật `users.module.ts`, `users.service.ts`, `users.service.spec.ts`.
+  - **Dọn dẹp triệt để file cũ (Zero Dead Code):**
+    - Sử dụng `git rm` xóa 7 file repository cũ tại root submodules.
+    - Quét toàn bộ codebase không còn bất kỳ import nào trỏ vào đường dẫn cũ.
+  - **Kiểm thử & Đồng bộ tài liệu:**
+    - Typecheck `pnpm exec tsc -p tsconfig.build.json --noEmit` pass 100% (0 errors).
+    - Build `pnpm build` pass 100% (`nest build` thành công).
+    - Unit tests `pnpm test src/modules/laundry` pass 100% (14 test suites, 36/36 tests passed).
+    - Cập nhật tài liệu: [CODEBASE_ATLAS.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/CODEBASE_ATLAS.md), [srs_sdd_backend.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_backend.md), [SRS_SDD.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/SRS_SDD.md).
+
 ## 2026-10-15
 
 ### Plan 31: Dọn Dẹp File Thừa Mồ Côi & Chuẩn Hóa Tên Màn Hình Frontend Ánh Xạ Backend (`fe-react-thanhxuan-internal`)

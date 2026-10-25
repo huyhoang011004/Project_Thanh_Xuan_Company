@@ -1,0 +1,1 @@
+require('../../hooks/guard.js');
