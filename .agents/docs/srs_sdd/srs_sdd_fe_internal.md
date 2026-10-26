@@ -118,11 +118,11 @@ Phân hệ `fe-react-thanhxuan-internal` là cổng điều hành số hóa toà
     - _Tài xế Shipper:_ Bảng tính chi tiết gồm ngày công chuẩn (28 ngày), ngày thực tế, lương cơ bản theo ngày, thưởng ca cuối tuần (60k/ca tối T7/CN và sáng CN/T2), chuyên cần (7k/ngày), phụ cấp điện thoại (200k), hoàn chi phí xăng và sửa xe đã duyệt, khấu trừ BHXH (400k) và thực nhận.
     - _Thợ xưởng:_ Bảng tổng hợp tổng phút làm việc và thu nhập theo từng nhóm công việc nhân hệ số.
 
-#### FE-INT-FR-07: Trung Tâm Báo Cáo Phân Tích & Xuất File (`features/operations/reports`, `features/management/reports`)
+#### FE-INT-FR-07: Trung Tâm Báo Cáo Phân Tích & Xuất File (`features/operations/reports`)
 
-- Giao diện trực quan hóa 6 báo cáo aggregation: Báo cáo kho, Đối soát đối tác, Chấm công thợ, Lịch trình shipper, Sự cố chênh lệch và Báo cáo xăng xe.
-- Bộ lọc khoảng ngày linh hoạt (tối đa 31 ngày).
-- Xuất file tải về trực tiếp: Xuất file Excel XLSX và PDF streaming.
+- Giao diện trực quan hóa 8 phân hệ báo cáo: (1) Báo cáo kho, (2) Đối soát toàn bộ đối tác & chi tiết từng đối tác, (3) Chấm công thợ, (4) Phân tích 7 khâu công thợ theo giờ, (5) Lịch trình shipper, (6) Sự cố chênh lệch & rủi ro 4 sub-tabs, (7) Báo cáo xăng xe, và (8) Quyết toán bảng lương tháng.
+- Bộ lọc khoảng ngày linh hoạt (tối đa 31 ngày) kết hợp các phím chọn nhanh (Hôm nay, 7 ngày, Tháng này, Tháng trước).
+- Xuất file tải về trực tiếp: Xuất file Excel XLSX và PDF streaming tốc độ cao.
 - Tự động bóc tách trường tiền lương khi Quản lý xưởng (`MANAGER`) truy cập.
 
 ---
@@ -162,7 +162,6 @@ fe-react-thanhxuan-internal/src/
 │   │   │       └── partner.tsx     # /operations/partner-staff/partner - Cổng đối tác (Nhân viên)
 │   │   │
 │   │   └── management/                  # Phân hệ Quản Trị theo vai trò (/management/* - 100% số ít)
-│   │       ├── management.tsx           # /management - Hub điều hành chung (thích ứng theo role)
 │   │       ├── manager/
 │   │       │   ├── approval.tsx    # /management/manager/approval - Phê duyệt tài khoản (số ít)
 │   │       │   ├── personnel.tsx   # /management/manager/personnel - Quản trị nhân sự & RBAC
@@ -179,7 +178,7 @@ fe-react-thanhxuan-internal/src/
 ├── components/                          # Layout (nav-config, AppHeader, Sidebar), Shell, shadcn/ui
 ├── features/                            # Phân định rõ ràng Management vs Operations, chuẩn hóa file: *Page.tsx, modals/*Modal.tsx, components/*Component.tsx
 │   ├── auth/                            # LoginPage, RegisterPage; modals/ (*Modal.tsx); components/ (*Component.tsx)
-│   ├── dashboard/                       # DashboardPage, KPICards, QuickActions
+│   ├── dashboard/                       # DashboardPage; hooks: useDashboardData; components: DashboardHandoverPanel, DashboardWorkforcePanel
 │   ├── management/                      # Module Quản trị cấp quản lý & văn phòng
 │   │   ├── attendance/                  # AttendanceReviewPage
 │   │   ├── auth/                        # StaffManagementPage, ApprovalManagementPage, AuditLogPage; modals/ (*Modal.tsx); components/ (*Component.tsx)
@@ -194,7 +193,7 @@ fe-react-thanhxuan-internal/src/
 │       ├── handovers/                   # ShipperHandoverPage, WarehouseHandoverPage, PartnerHandoverPage, RecountStationPage; modals/ (*Modal.tsx); components/ (*Component.tsx); hooks/ (use*Flow.ts)
 │       ├── payroll/                     # MyPayslipPage; components: DailyEarningsTable, OfficialPayslipCard; hooks: useMyPayslip
 │       ├── piecework/                   # HourlyWorkStationPage; components: CurrentSegmentCard, JobStagePicker, HourlyWorkTaskList; hooks: useHourlyWorkStation
-│       └── reports/                     # ReportsPage; components/ (*Component.tsx)
+│       └── reports/                     # ReportsPage; hooks: useReports; components: ReportsFilterBar, WarehouseReportSection, WorkforceReportSection, QualityFuelReportSection
 │
 ├── lib/                                 # Tiện ích hạ tầng (api-client, permissions, offline-queue, utils)
 └── types/                               # TypeScript Interfaces & Enums chuẩn hóa

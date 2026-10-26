@@ -94,6 +94,7 @@ Kiến trúc: React Router v7, Vite SPA, TailwindCSS, Mobile-First PWA, Flat Col
 
 | Menu / Tuyến Đường URL | Màn Hình Chính (`Page.tsx`) | Thư Mục Modals (`/modals`) | Thư Mục Components (`/components`) | Custom Hooks & Service |
 | :--- | :--- | :--- | :--- | :--- |
+| `/dashboard`<br>(Trung tâm điều hành xưởng thời gian thực) | `DashboardPage.tsx`<br>`src/features/dashboard/` | - | `DashboardHandoverPanelComponent.tsx`<br>`DashboardWorkforcePanelComponent.tsx` | `useDashboardData.ts`<br>`apiClient` |
 | `/operations/shipper/handover`<br>(Phiếu giao nhận xe tải & Đếm thay) | `ShipperHandoverPage.tsx`<br>`HandoverDetailPage.tsx`<br>`src/features/operations/handovers/` | `PrepOrderModal.tsx`<br>`ShipperCountPartnerModal.tsx`<br>`SlipFullscreenViewerModal.tsx`<br>`DisputeModal.tsx` | `ShipperHandoverItemCardComponent.tsx`<br>`HandoverSlipGalleryComponent.tsx`<br>`HandoverHeaderComponent.tsx` | `apiClient`<br>`HandoverExportHelper.ts` |
 | `/operations/warehouse-manager/warehouse`<br>(Lập phiếu xuất kho & Thư viện ảnh phiếu) | `WarehouseHandoverPage.tsx`<br>`src/features/operations/handovers/` | `PrepOrderModal.tsx`<br>`HandoverDeliverySlipModal.tsx`<br>`WarehouseScheduleSettingsModal.tsx`<br>`WarehouseItemFilterSettingsModal.tsx` | `HandoverSlipGalleryComponent.tsx`<br>`WarehouseCleanPlanTabComponent.tsx`<br>`WarehouseSummaryTabComponent.tsx` | `apiClient`<br>`HandoverExportHelper.ts`<br>`warehouseItemDisplayHelper.ts` |
 | `/operations/worker/recount`<br>(Trạm kiểm đếm lại gom bao xưởng) | `RecountStationPage.tsx`<br>`src/features/operations/handovers/` | - | `PrepOrderSlipPreviewComponent.tsx` | `apiClient`<br>`HandoverExportHelper.ts` |
@@ -107,7 +108,7 @@ Kiến trúc: React Router v7, Vite SPA, TailwindCSS, Mobile-First PWA, Flat Col
 | `/management/manager/personnel`<br>(Duyệt & phân quyền tài khoản) | `StaffManagementPage.tsx`<br>`ApprovalManagementPage.tsx`<br>`AuditLogPage.tsx`<br>`src/features/management/auth/` | `StaffFormModal.tsx`<br>`StaffDeleteModal.tsx` | `StaffTableComponent.tsx`<br>`StaffFilterComponent.tsx` | `apiClient` |
 | `/management/accountant/payroll`<br>(Chốt bảng lương chu kỳ) | `PayrollManagementPage.tsx`<br>`src/features/management/payroll/` | - | - | `apiClient` |
 | `/management/accountant/fuel`<br>(Duyệt chi phí xe máy) | `FuelReviewPage.tsx`<br>`src/features/management/fuel/` | - | - | `apiClient` |
-| `/operations/report`<br>(Trung tâm báo cáo streaming) | `ReportsPage.tsx`<br>`src/features/operations/reports/` | - | `ReportsViewComponent.tsx` | `reports.service.ts` |
+| `/operations/report`<br>(Trung tâm báo cáo streaming 8 phân hệ) | `ReportsPage.tsx`<br>`src/features/operations/reports/` | - | `ReportsFilterBarComponent.tsx`<br>`WarehouseReportSectionComponent.tsx`<br>`WorkforceReportSectionComponent.tsx`<br>`QualityFuelReportSectionComponent.tsx` | `useReports.ts`<br>`reports.service.ts` |
 
 ---
 

@@ -1,4 +1,4 @@
-﻿# TÀI LIỆU PHÂN TÍCH & THIẾT KẾ HỆ THỐNG TỔNG THỂ (MASTER SRS & SDD)
+# TÀI LIỆU PHÂN TÍCH & THIẾT KẾ HỆ THỐNG TỔNG THỂ (MASTER SRS & SDD)
 
 ## HỆ SINH THÁI CÔNG NGHỆ CÔNG TY THANH XUÂN (THANH XUAN COMPANY)
 
@@ -154,6 +154,7 @@ Website_Thanh_Xuan_Company/
 
 > 📌 **Chi tiết toàn bộ nhật ký các Plan và Bugfix:** Xem đầy đủ tại [CHANGELOG.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/CHANGELOG.md).
 
+- **2026-10-26 - Plan 39 - Xóa Trang /management, Thiết Kế Lại /dashboard & Trung Tâm Báo Cáo /operations/report 8 Phân Hệ:** Xóa bỏ hoàn toàn trang Hub trung gian /management (chuyển tab AuditLogPage sang StaffManagementPage và redirect /management sang /dashboard); thiết kế lại giao diện Dashboard và Trung tâm Báo cáo theo chuẩn bố cục 4 tầng công thái học (< 250-300 dòng); sửa lỗi hiển thị công thợ và sửa đứt gãy hợp đồng API báo cáo giữa FE & BE; nâng cấp Backend hỗ trợ đối soát tất cả đối tác và mở rộng 8 loại báo cáo vận hành - tài chính.
 - **2026-10-26 - Plan 37 - Công Thợ Theo Khâu Mặc Định Gắn Chấm Công, Đơn Giá Giờ Theo Khâu & Phiếu Lương Theo Ngày:** Chuyển đổi toàn diện công thợ theo giờ sang mô hình phiên khâu thời gian thực (Job Segment), gắn kết tự động với ca chấm công camera selfie (/attendance); quản lý phân khâu mặc định cho thợ xưởng, cài đặt đơn giá giờ VNĐ/khâu độc lập (bỏ hệ số cũ); checkout khâu phụ tự động quay lại khâu mặc định; tích hợp bảng lương tạm tính theo từng ngày (/operations/payslip) và phiếu lương chính thức đã chốt kỳ.
 - **2026-10-26 - Plan 36 - Chuẩn Hóa Kiến Trúc Domain Handovers & Partners và Đồng Bộ Frontend Với Backend Internal:** Di chuyển trọn vẹn Cổng đối tác (PartnerHandoverPage, các tabs đếm đồ bẩn, kiểm nhận đồ sạch và hooks) từ operations/partners sang operations/handovers, xóa bỏ thư mục operations/partners đặt sai vị trí nghiệp vụ; giữ management/partners là nơi duy nhất quản lý dữ liệu đối tác (partners, item_catalogs, brands); loại bỏ 100% any trong StaffManagementPage.
 - **2026-10-26 - Plan 35 - Chức Năng Lưu & Chọn Chữ Ký Đã Lưu Trong Tài Khoản Cho Web Internal:** Bổ sung trường signatureUrl vào bảng accounts (StaffAccount) và DTO UpdateProfileDto ở Backend; xây dựng SignatureInputComponent hỗ trợ toggle dùng chữ ký đã lưu / ký tay mới và checkbox lưu làm mặc định; tích hợp trọn vẹn vào ProfileEditModal và 5 vị trí ký nhận (PrepOrderModal, SignatureModal, ShipperCountPartnerModal, PartnerReceiptTabComponent, PartnerCountTabComponent).
