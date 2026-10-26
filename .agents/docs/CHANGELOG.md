@@ -4,6 +4,33 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
 
 ## 2026-10-26
 
+### Plan 35: Chức Năng Lưu & Chọn Chữ Ký Đã Lưu Trong Tài Khoản Cho Web Internal
+
+- **Mục tiêu & Bối cảnh nghiệp vụ:**
+  - Trong quá trình vận hành xưởng giặt là công nghiệp và chuỗi cung ứng giao nhận, nhân sự xưởng (Thủ kho soạn đồ sạch xuất xưởng, Shipper kiểm đếm đồ bẩn xe tải, Nhân sự quản lý hoặc nhân viên chi nhánh đối tác) phải ký xác nhận chứng từ liên tục hàng ngày.
+  - Việc phải dùng chuột hoặc ngón tay vẽ lại chữ ký trên màn hình cảm ứng ở mỗi lần thao tác gây tốn nhiều thời gian và nét ký thường không đồng nhất.
+  - Triển khai tính năng lưu trữ chữ ký mẫu trực tiếp vào thông tin tài khoản cá nhân (`accounts` / `StaffAccount`), đồng thời cung cấp trợ thủ chọn chữ ký mẫu tức thì tại tất cả các điểm ký nhận trong toàn hệ sinh thái Cổng Nội Bộ.
+- **Chi tiết thực thi kỹ thuật:**
+  - **Phân Hệ Backend (`be-nestjs-thanhxuan`):**
+    - Mở rộng Mongoose Schema [`staff-account.schema.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/auth/schemas/staff-account.schema.ts): Bổ sung thuộc tính `@Prop({ type: String }) signatureUrl?: string;` lưu trữ chuỗi PNG Base64 đã trim viền hoặc URL ảnh chữ ký.
+    - Cập nhật DTO [`update-profile.dto.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/auth/dto/update-profile.dto.ts) & [`update-account.dto.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/auth/dto/update-account.dto.ts): Bổ sung field `signatureUrl?: string` có decorator `@IsOptional() @IsString()`.
+    - Cập nhật Services [`account-auth.service.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/auth/services/account-auth.service.ts) và [`account-management.service.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/auth/services/account-management.service.ts): Trả về `signatureUrl` trong object của `getMe()` và `getAccountMe()`, đồng thời xử lý gán hoặc xóa chữ ký trong `updateProfile()`.
+  - **Phân Hệ Frontend Internal (`fe-react-thanhxuan-internal`):**
+    - Mở rộng kiểu dữ liệu [`types/index.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/types/index.ts): Bổ sung `signatureUrl?: string;` vào interface `StaffUser`.
+    - Đồng bộ Auth Context [`AuthContext.tsx`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/auth/AuthContext.tsx): Nạp `signatureUrl` vào `normalizedUser` khi giải mã token qua `/auth/me`.
+    - Hồ sơ cá nhân [`ProfileEditModal.tsx`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/auth/modals/ProfileEditModal.tsx): Tích hợp khu vực "Chữ Ký Điện Tử Đã Lưu", cho phép xem trước chữ ký hiện tại, chuyển sang chế độ vẽ chữ ký mẫu mới trên Canvas (tự động `trimCanvas`), xóa nét ký hoặc xóa bỏ vĩnh viễn chữ ký mẫu.
+    - Xây dựng Component dùng chung [`SignatureInputComponent.tsx`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/components/common/SignatureInputComponent.tsx): Đóng gói toàn bộ logic nhận diện `user.signatureUrl`, toggle mượt mà giữa "Chữ ký đã lưu" và "Ký tay mới", hiển thị thẻ preview sắc nét, và checkbox "Lưu làm chữ ký mặc định vào tài khoản cho các lần sau" khi đang ký tay mới.
+    - Đồng bộ tích hợp vào 5 vị trí ký nhận trọng yếu:
+      1. [`SignatureModal.tsx`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/operations/handovers/modals/SignatureModal.tsx): Thay thế canvas tĩnh bằng `SignatureInputComponent`, hỗ trợ lưu tự động vào profile khi tick chọn mặc định.
+      2. [`PrepOrderModal.tsx`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/operations/handovers/modals/PrepOrderModal.tsx): Thủ kho soạn đồ sạch tự động nhận chữ ký mẫu từ tài khoản, có nút "Dùng chữ ký tài khoản" và checkbox lưu mặc định.
+      3. [`ShipperCountPartnerModal.tsx`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/operations/handovers/modals/ShipperCountPartnerModal.tsx): Shipper kiểm đếm đồ bẩn cùng đối tác tự động nhận diện chữ ký mẫu, hỗ trợ chuyển đổi linh hoạt.
+      4. [`PartnerReceiptTabComponent.tsx`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/operations/partners/components/PartnerReceiptTabComponent.tsx): Đối tác xác nhận nhận đồ sạch hỗ trợ dùng chữ ký tài khoản.
+      5. [`PartnerCountTabComponent.tsx`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/operations/partners/components/PartnerCountTabComponent.tsx) & [`PartnerPortalPage.tsx`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/operations/partners/PartnerPortalPage.tsx): Đối tác xuất giao đồ bẩn tự động nhận diện chữ ký mẫu khi canvas rỗng.
+- **Kiểm thử & Xác thực:**
+  - Backend: `pnpm --prefix be-nestjs-thanhxuan run build`: PASS 100%.
+  - Frontend Internal: `pnpm --prefix fe-react-thanhxuan-internal exec tsc --noEmit`: PASS 100% (0 errors).
+  - Frontend Internal: `pnpm --prefix fe-react-thanhxuan-internal exec tsc -b`: PASS 100%.
+
 ### Cài Đặt Hiển Thị Lọc Loại Đồ Kho (Pizza 4P's: Khăn Xám) Tại Phân Hệ Kho Sạch & Tổng Hợp Kho
 
 - **Mục tiêu & Động lực:**
