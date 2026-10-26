@@ -2,6 +2,36 @@
 
 Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâng cấp, bugfix và triển khai tính năng của Hệ sinh thái Công ty Thanh Xuân qua từng Plan.
 
+## 2026-10-26
+
+### Cài Đặt Hiển Thị Lọc Loại Đồ Kho (Pizza 4P's: Khăn Xám) Tại Phân Hệ Kho Sạch & Tổng Hợp Kho
+
+- **Mục tiêu & Động lực:**
+  - Đáp ứng yêu cầu nghiệp vụ thực tế của thủ kho xưởng giặt là: Khi theo dõi danh sách phiếu giao nhận xuất kho (`?tab=CLEAN_PLAN`) và bảng tổng hợp đồ kho hôm nay (`?tab=SUMMARY`), người dùng cần có thiết lập để chọn hiển thị 1 loại đồ cụ thể (ví dụ: với đối tác Pizza 4P's, chỉ cần theo dõi **Khăn xám**, không cần cộng gộp các loại đồ phụ khác).
+  - Tách bạch rõ ràng giữa số lượng của món chủ lực và tổng số lượng toàn bộ các mặt hàng để thủ kho không bị nhầm lẫn khi đối soát và kiểm đếm.
+- **Chi tiết thực thi:**
+  - **Module & Helper (`warehouseItemDisplayHelper.ts`):**
+    - Thiết kế cấu trúc `WarehouseItemDisplaySettings`: Hỗ trợ lọc theo từng Thương hiệu đối tác (`BY_BRAND`) hoặc toàn cục (`GLOBAL`), lưu trạng thái vĩnh viễn trong `localStorage` (`warehouse_item_display_settings`).
+    - Xây dựng hàm `calculateRecordCounts()`: Tính toán chính xác số lượng `filteredClean`, `totalClean`, `filteredDirty`, `totalDirty`, và nhãn lọc `filterLabel` cho từng phiếu.
+    - Xây dựng hàm `isItemMatchingFilter()`: So sánh thông minh đa chiều qua `itemCode`, tra chéo danh mục `ItemCatalog`, và so sánh mềm `itemName` (chuẩn hóa tiếng Việt không dấu).
+    - Helper `getAvailableItemsForBrand()`: Tự động trích xuất danh sách các loại đồ có sẵn của từng thương hiệu từ Catalog và từ các phiếu giao nhận thực tế.
+  - **Modal Cài Đặt (`WarehouseItemFilterSettingsModal.tsx`):**
+    - Cung cấp giao diện trực quan cho phép bật/tắt chế độ lọc loại đồ.
+    - Cung cấp nút 1-chạm: "✨ Mẫu phổ biến: Pizza 4P's chỉ hiện Khăn xám".
+    - Cho phép chọn loại đồ hiển thị từ dropdown đồ giặt của từng thương hiệu hoặc khôi phục mặc định xem tất cả.
+  - **Giao diện Kho Sạch & Phiếu Giao Nhận (`WarehouseCleanPlanTabComponent.tsx`):**
+    - Số lượng đồ sạch trong phiếu hiển thị theo loại đồ lọc: `{counts.filteredClean} chiếc ({counts.filterLabel})`.
+    - Tự động hiển thị phụ chú tổng nếu có mặt hàng khác: `(Tổng: {counts.totalClean})`.
+  - **Giao diện Tổng Hợp Kho (`WarehouseSummaryTabComponent.tsx`):**
+    - Thêm 2 Thẻ KPI tổng kết ở đầu màn hình: "Tổng Đồ Bẩn Vào Hôm Nay" và "Tổng Đồ Sạch Ra Hôm Nay" (kèm badge chỉ thị lọc và tổng mọi loại).
+    - Mỗi dòng chi nhánh đối tác hiển thị chi tiết "Bẩn vào" và "Sạch ra" tương ứng với loại đồ đang được lọc.
+  - **Thanh Điều Khiển & Banner Trang Chủ Kho (`WarehouseHandoverPage.tsx`):**
+    - Bổ sung nút `Cài Đặt Đồ Hiển Thị` (icon `SlidersHorizontal`) trên thanh `PageActionBar`.
+    - Tích hợp banner thông tin trực quan khi chế độ lọc đang bật, cho phép bấm "Đổi Cài Đặt" hoặc "Tắt Lọc (Hiện Tất Cả)" ngay lập tức.
+- **Kiểm thử & Xác thực:**
+  - `pnpm --filter fe-react-thanhxuan-internal exec tsc --noEmit`: PASS 100% (0 errors).
+  - `pnpm --filter fe-react-thanhxuan-internal build`: PASS 100%, PWA Service Worker tạo thành công.
+
 ## 2026-10-25
 
 ### Plan 34: Tái Cấu Trúc UI/UX Trang Chủ (Hero Diagonal Split Video-Ảnh & Di Dời Form Liên Hệ Xuống Pre-Footer)

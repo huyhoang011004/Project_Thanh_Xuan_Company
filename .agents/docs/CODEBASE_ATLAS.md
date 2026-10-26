@@ -95,7 +95,7 @@ Kiến trúc: React Router v7, Vite SPA, TailwindCSS, Mobile-First PWA, Flat Col
 | Menu / Tuyến Đường URL | Màn Hình Chính (`Page.tsx`) | Thư Mục Modals (`/modals`) | Thư Mục Components (`/components`) | Custom Hooks & Service |
 | :--- | :--- | :--- | :--- | :--- |
 | `/operations/shipper/handover`<br>(Phiếu giao nhận xe tải & Đếm thay) | `ShipperHandoverPage.tsx`<br>`HandoverDetailPage.tsx`<br>`src/features/operations/handovers/` | `PrepOrderModal.tsx`<br>`ShipperCountPartnerModal.tsx`<br>`SlipFullscreenViewerModal.tsx`<br>`DisputeModal.tsx` | `ShipperHandoverItemCardComponent.tsx`<br>`HandoverSlipGalleryComponent.tsx`<br>`HandoverHeaderComponent.tsx` | `apiClient`<br>`HandoverExportHelper.ts` |
-| `/operations/warehouse-manager/warehouse`<br>(Lập phiếu xuất kho & Thư viện ảnh phiếu) | `WarehouseHandoverPage.tsx`<br>`src/features/operations/handovers/` | `PrepOrderModal.tsx`<br>`HandoverDeliverySlipModal.tsx`<br>`WarehouseScheduleSettingsModal.tsx` | `HandoverSlipGalleryComponent.tsx`<br>`WarehouseCleanPlanTabComponent.tsx`<br>`WarehouseSummaryTabComponent.tsx` | `apiClient`<br>`HandoverExportHelper.ts` |
+| `/operations/warehouse-manager/warehouse`<br>(Lập phiếu xuất kho & Thư viện ảnh phiếu) | `WarehouseHandoverPage.tsx`<br>`src/features/operations/handovers/` | `PrepOrderModal.tsx`<br>`HandoverDeliverySlipModal.tsx`<br>`WarehouseScheduleSettingsModal.tsx`<br>`WarehouseItemFilterSettingsModal.tsx` | `HandoverSlipGalleryComponent.tsx`<br>`WarehouseCleanPlanTabComponent.tsx`<br>`WarehouseSummaryTabComponent.tsx` | `apiClient`<br>`HandoverExportHelper.ts`<br>`warehouseItemDisplayHelper.ts` |
 | `/operations/worker/recount`<br>(Trạm kiểm đếm lại gom bao xưởng) | `RecountStationPage.tsx`<br>`src/features/operations/handovers/` | - | `PrepOrderSlipPreviewComponent.tsx` | `apiClient`<br>`HandoverExportHelper.ts` |
 | `/operations/attendance`<br>(Chấm công camera selfie) | `AttendancePage.tsx`<br>`src/features/operations/attendance/` | - | - | `apiClient` |
 | `/operations/worker/piecework`<br>(Trạm ghi công thợ theo giờ x hệ số) | `HourlyWorkStationPage.tsx`<br>`src/features/operations/piecework/` | - | - | `apiClient` |
@@ -131,3 +131,7 @@ Kiến trúc: React Router v7, Vite SPA, TailwindCSS, Mobile-First PWA, Flat Col
 - **Điều hướng thanh đáy Mobile:** [`MobileBottomBar.tsx`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/components/layout/MobileBottomBar.tsx) (Menu 4 tab nhanh cho thợ và tài xế).
 - **Ngăn kéo menu trượt:** [`MobileNavDrawer.tsx`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/components/layout/MobileNavDrawer.tsx) (Danh sách tính năng theo quyền người dùng).
 - **Cấu hình menu tập trung:** [`nav-config.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/components/layout/nav-config.ts) (Định nghĩa route, icon, nhãn tiếng Việt và điều kiện quyền RBAC hiển thị).
+
+
+### 4.3. Tiện Ích & Component Dùng Chung Frontend Internal (fe-react-thanhxuan-internal/src/components/common)
+- **Chữ ký điện tử thông minh:** [SignatureInputComponent.tsx](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/components/common/SignatureInputComponent.tsx) (Tự động nhận diện chữ ký mẫu từ tài khoản `StaffAccount.signatureUrl`, hỗ trợ toggle dùng chữ ký đã lưu / ký tay mới, và checkbox lưu làm chữ ký mặc định).
