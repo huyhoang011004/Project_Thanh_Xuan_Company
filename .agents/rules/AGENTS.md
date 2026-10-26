@@ -102,10 +102,11 @@ Một thay đổi coi là xong khi:
 - Form dùng **react-hook-form** + **zod** kết hợp `Form` của shadcn.
 - Text hiển thị tiếng Việt tự nhiên, chú trọng accessibility (label, focus, keyboard).
 - **Quy chuẩn cấu trúc & đặt tên file Frontend (Áp dụng cả Next.js và React Internal):**
-  - File lớn nhất / màn hình chính cấp cao nhất: `[Tên]Page.tsx`.
-  - Thư mục `modals/`: chứa các file `[Tên liên quan đến page]Modal.tsx`.
-  - Thư mục `components/`: chứa các file `[Tên]Component.tsx`.
-  - Kiểm tra và chia nhỏ file kịp thời khi kích thước vượt quá 250 - 300 dòng; bóc tách modal sang `modals/` và các thành phần con sang `components/`. Không dồn nhiều nghìn dòng trong một file.
+  - File lớn nhất / màn hình chính cấp cao nhất: `[Tên]Page.tsx` (chỉ đóng vai trò điều phối layout, tabs, orchestration).
+  - Thư mục `modals/`: chứa các file `[Tên liên quan đến page]Modal.tsx` (mỗi modal một file độc lập).
+  - Thư mục `components/`: chứa các file `[Tên]Component.tsx` (chia tách sub-component: card item, table, toolbar, form section, canvas/preview, signature).
+  - Thư mục `hooks/`: chứa `use[Tên].ts` nếu logic state/query/mutation phức tạp.
+  - **Kỷ luật chia nhỏ file tối đa 250 - 300 dòng:** BẮT BUỘC luôn chủ động chia nhỏ file khi code bắt đầu dài (> 250 - 300 dòng). Tuyệt đối không để file tích tụ lên 500 - 1000 dòng nếu không cần thiết. Chia nhỏ các khối con (sub-component, modal, hook) giúp người đọc code và reviewer dễ dàng review code, kiểm soát diff khi merge và bảo trì dài hạn.
 
 ## 6. Deployment & CI/CD
 
@@ -144,6 +145,10 @@ Agent chủ động thấu hiểu khẩu ngữ và cách diễn đạt tự nhi�
 4. **Không để lại file tương thích ngược tạm thời (No Stale Bridge/Re-export Files):**
    - Khi tái cấu trúc hoặc đổi tên (file, DTO, schema, interface, component), việc tạo file bridge/re-export tương thích ngược chỉ được xem là bước đệm tạm thời trong quá trình chuyển đổi để chống lỗi biên dịch tức thời.
    - Sau khi hoàn thành việc cập nhật toàn bộ các file liên quan, **BẮT BUỘC phải xóa bỏ hoàn toàn các file re-export tạm thời này**, sửa lại import ở mọi nơi gọi đến nguồn chuẩn, rồi mới được chạy test/build để nghiệm thu.
+5. **Kỷ luật chia nhỏ file & Tối ưu khả năng Code Review (File Granularity & Anti-Bloat):**
+   - BẮT BUỘC luôn chủ động chia nhỏ file khi code bắt đầu dài (> 250 - 300 dòng) hoặc khi file gánh vác nhiều trách nhiệm hỗn tạp (modal, form inline, bảng danh sách, thẻ preview canvas, cụm chữ ký...).
+   - Tuyệt đối không để phát sinh những file "god-component" 500 - 1000 dòng. Mọi tính năng hay màn hình phải được module hóa thành các sub-components con, modals độc lập và custom hooks.
+   - Mục đích: Giúp lập trình viên và reviewer đọc hiểu luồng code nhanh chóng, diff ngắn gọn, dễ bảo trì, dễ kiểm thử và tránh conflict code.
 
 ## 9. Giám Sát Ngữ Cảnh & Chống Ảo Giác (Context Health & /compact)
 

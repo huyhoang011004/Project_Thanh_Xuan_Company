@@ -12,11 +12,13 @@ description: Quy tắc phát triển Frontend (Next.js & React SPA) dự án Tha
 - **Múi giờ Việt Nam (`Asia/Ho_Chi_Minh`):** Hiển thị và gửi `recordDate` lên API bắt buộc dùng date helper chuẩn (`getTodayVN`, `getTomorrowVN`, `getFirstDayOfMonthVN`). Tuyệt đối không dùng `new Date().toISOString().split('T')[0]` lúc nửa đêm để tránh bị lùi ngày.
 - **Biến môi trường:** Next.js chỉ expose biến có tiền tố `NEXT_PUBLIC_*`; React Vite chỉ dùng tiền tố `VITE_*`.
 - **Gọi API tập trung:** Gọi qua Service fetcher tập trung (mỗi feature có service riêng trong `features/<feature>/services/` hoặc `src/services/`), không rải `fetch` hay `axios` trực tiếp trong JSX.
-- **Quy chuẩn chia nhỏ file & đặt tên (DoD):**
-  - Màn hình chính cấp cao nhất: `[Tên]Page.tsx`.
-  - Thư mục `modals/`: chứa các file `[Tên liên quan đến page]Modal.tsx`.
-  - Thư mục `components/`: chứa các file `[Tên]Component.tsx`.
-  - Giới hạn kích thước file: Chủ động chia nhỏ file khi phình to (> 250 - 300 dòng); tách modal sang `modals/` và các sub-component sang `components/`.
+- **Quy chuẩn chia nhỏ file & đặt tên (DoD - Bắt buộc chia nhỏ file):**
+  - **Mục tiêu:** Giữ từng file ngắn gọn, rõ ràng, ranh giới trách nhiệm đơn nhất (SRP), giúp người đọc và reviewer dễ dàng theo dõi, review code và kiểm tra diff khi merge.
+  - Màn hình chính cấp cao nhất: `[Tên]Page.tsx` (chỉ đóng vai trò điều phối layout, tabs, orchestration).
+  - Thư mục `modals/`: chứa các file `[Tên liên quan đến page]Modal.tsx` (mỗi modal một file độc lập).
+  - Thư mục `components/`: chứa các file `[Tên]Component.tsx` (chia tách sub-component: card item, table, toolbar, form section, canvas/preview, signature).
+  - Thư mục `hooks/`: chứa `use[Tên].ts` nếu logic state/query/mutation phức tạp.
+  - **Giới hạn kích thước file:** BẮT BUỘC chủ động chia nhỏ file khi phình to (> 250 - 300 dòng). Tuyệt đối không để một file tích tụ lên 500 - 1000 dòng nếu không cần thiết. Nếu một component bắt đầu phình to, phải lập tức bóc tách các sub-components con sang thư mục `components/` hoặc `modals/`.
 - **Kỷ luật dọn dẹp mã nguồn:**
   - Tuyệt đối không để lại component mồ côi (dead code) không còn nơi nào import.
   - Sau khi refactor/đổi tên, xóa bỏ hoàn toàn file/alias bridge re-export tạm thời, cập nhật mọi nơi gọi trỏ trực tiếp vào file mới.
