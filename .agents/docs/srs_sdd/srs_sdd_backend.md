@@ -111,6 +111,13 @@ Backend API tập trung phục vụ toàn bộ các kênh tương tác của Cô
 - Tiếp nhận yêu cầu khảo sát chuyển nhà trọn gói, địa chỉ đi/đến, tầng lầu, thang máy, danh mục đồ đạc cồng kềnh và ảnh hiện trường.
 - Bảng cước vận tải xe tải 1.25 tấn - 2.4 tấn và tự động ước tính cước sơ bộ (`estimatedPrice`).
 
+#### BE-FR-09: Lưu Trữ Kép & Sao Lưu Tự Động Google Drive (`/api/v1/internal/archive`)
+- **Lưu trữ kép (Hybrid Dual-Storage):** Mọi ảnh nội bộ upload lên (`handovers`, `attendance`, `fuel`) được lưu đồng thời một bản vật lý tại ổ cứng VPS `/uploads/internal-thanhxuan/` và tải lên Cloudinary folder `internal-thanhxuan/` phân cấp theo năm/tháng. Khi cập nhật sinh ảnh mới, tự động xóa đè file ảnh cũ cả trên Cloudinary và VPS.
+- **Nén ZIP gửi email đối soát tháng (02:00 sáng ngày 1 hàng tháng):** Tự động gom toàn bộ ảnh phiếu giao nhận tháng trước theo từng đối tác, nén ZIP `PhieuGiaoNhan_ThangMM_YYYY_[TenDoiTac].zip`. Nếu $\le 20$ MB: Đính kèm gửi email đối soát cho Kế toán & Quản lý. Nếu $> 20$ MB: Đẩy lên Google Drive qua Rclone (`gdrive:Anh_Giao_Nhan_Luu_Tru/HangThang/`) và gửi email thông báo.
+- **Quét và dọn dẹp ảnh mồ côi (02:30 sáng ngày 1 hàng tháng):** Quét đối chiếu toàn bộ file thực tế trên VPS với dữ liệu trong MongoDB. Gom các file mồ côi nén ZIP đẩy lên Google Drive `gdrive:Anh_Mo_Coi_Du_Phong/` rồi xóa triệt để khỏi VPS và Cloudinary.
+- **Dọn dẹp ảnh phụ 90 ngày (03:00 sáng mùng 1 mỗi quý):** Dọn dẹp ảnh chấm công camera và ảnh đổ xăng xe tải cũ hơn 90 ngày.
+- **Kiểm soát dung lượng Google Drive 5GB (04:00 sáng Chủ nhật hàng tuần):** Quét dung lượng Drive qua `rclone about`. Khi dung lượng $\ge 80\%$ (hoặc trống $< 1$ GB), tự động dọn dẹp các bản sao lưu cũ nhất theo FIFO và gửi email cảnh báo cho Admin.
+
 ---
 
 ## 2. THIẾT KẾ KIẾN TRÚC BACKEND (SDD)

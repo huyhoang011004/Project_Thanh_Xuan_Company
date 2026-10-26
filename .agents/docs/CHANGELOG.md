@@ -4,6 +4,41 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
 
 ## 2026-10-27
 
+### Plan 42: Kiến Trúc Lưu Trữ Kép (Cloudinary + VPS), Tự Động Nén ZIP Gửi Mail Đối Tác & Quản Lý Google Drive 5GB Qua Rclone
+
+- **Mục tiêu & Bối cảnh nghiệp vụ:**
+  - **Quản trị rủi ro & tối ưu chi phí lưu trữ hình ảnh:**
+    - Hiện thực hóa kiến trúc Lưu trữ kép (Hybrid Dual-Storage): Khi sinh ảnh mới (phiếu giao nhận, camera chấm công, nhiên liệu xe tải), hệ thống lưu đồng thời 1 bản copy vật lý gốc vào ổ cứng cục bộ VPS theo thư mục phân cấp `internal-thanhxuan/.../YYYY/MM/`, song song với việc tải lên Cloudinary để lấy link CDN tốc độ cao phục vụ ứng dụng di động.
+    - Cơ chế này giúp công ty không bị phụ thuộc hoàn toàn vào Cloudinary Free (tránh nguy cơ đầy quota hay cạn kiệt credits hàng tháng), đồng thời khi cần nén file ZIP thì đọc trực tiếp từ ổ cứng VPS trong tích tắc (0đ băng thông, tốc độ đọc ổ đĩa cực nhanh).
+  - **Cơ chế Xóa Ghi Đè (Overwrite & Delete Old):**
+    - Khi một phiếu giao nhận được cập nhật (soạn đồ, giao hàng, ký nhận, đếm lại) sinh ra ảnh mới, hệ thống tự động xóa ngay lập tức ảnh cũ trên cả Cloudinary và file vật lý cũ trên ổ cứng VPS (`slipLocalPath`), triệt tiêu 100% tình trạng rò rỉ dung lượng rác.
+  - **Tự động Nén ZIP & Gửi Mail Đối Soát Hàng Tháng (02:00 sáng mùng 1 hàng tháng):**
+    - Tự động gom toàn bộ ảnh phiếu giao nhận tháng trước ($T-1$) theo từng đối tác. Đổi tên file chuẩn mực: `[MãPhiếu]_[Ngày]_[Ca].webp` và nén thành `PhieuGiaoNhan_ThangMM_YYYY_[TenDoiTac].zip`.
+    - Nếu $\le 20$ MB: Đính kèm trực tiếp vào Email gửi cho Quản lý cơ sở đối tác và Kế toán công ty.
+    - Nếu $> 20$ MB: Tự động đẩy lên Google Drive qua Rclone (`gdrive:Anh_Giao_Nhan_Luu_Tru/HangThang/`) và gửi email thông báo kèm đường link tải.
+  - **Quét định kỳ hàng tháng dọn "Ảnh mồ côi" (02:30 sáng mùng 1 hàng tháng):**
+    - Quét toàn bộ file thực tế trên VPS, đối chiếu với các URL đang lưu trong MongoDB (`handover_records`, `attendance_records`, `fuel_logs`).
+    - Các file mồ côi (tồn tại trên đĩa nhưng không có trong DB) được gom nén thành `Orphaned_Images_YYYY_MM.zip`, đẩy lên Google Drive (`gdrive:Anh_Mo_Coi_Du_Phong/`), sau đó xóa sạch khỏi VPS và Cloudinary.
+  - **Bảo vệ dung lượng Google Drive 5GB (Capacity Guard):**
+    - Kiểm tra dung lượng Drive qua lệnh `rclone about gdrive: --json`. Khi dung lượng $\ge 80\%$ (hoặc trống $< 1$ GB), tự động kích hoạt xoay vòng (xóa các bản sao lưu database và file zip ảnh mồ côi cũ nhất theo thứ tự FIFO) để giải phóng không gian về mức an toàn ($ge 1.5$ GB), đồng thời gửi email cảnh báo cho Admin.
+
+- **Chi tiết thực thi kỹ thuật:**
+  - **Backend (`be-nestjs-thanhxuan`):**
+    - **Cài đặt thư viện:** Bổ sung `archiver` và `@types/archiver` hỗ trợ nén stream ZIP hiệu năng cao, tối ưu bộ nhớ RAM (< 512MB VPS).
+    - [`mail.service.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/mail/mail.service.ts): Mở rộng hàm `sendMail` hỗ trợ tham số `attachments` và `cc`.
+    - [`upload.service.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/core/upload/upload.service.ts): Nâng cấp lưu trữ kép, thêm `uploadFileWithDetails`, `saveLocalCopy`, `deleteLocalFile`, `listLocalFiles`.
+    - [`handover-record.schema.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/handovers/schemas/handover-record.schema.ts): Bổ sung trường `slipLocalPath?: string` lưu đường dẫn file gốc trên đĩa VPS.
+    - [`handover-record.service.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/handovers/services/handover-record.service.ts): Cập nhật `uploadSlipImage` hỗ trợ xóa đè ảnh cũ cả Cloudinary và VPS, lưu trữ vào `internal-thanhxuan/handovers/YYYY/MM/`.
+    - [`archive-zip.helper.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/archive/helpers/archive-zip.helper.ts): Module helper nén file ZIP streaming bằng `archiver`.
+    - [`archive-rclone.helper.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/archive/helpers/archive-rclone.helper.ts): Module helper giao tiếp Rclone CLI (`checkDriveCapacity`, `copyToDrive`, `autoPruneDriveIfNeeded`).
+    - [`archive.service.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/archive/archive.service.ts): Xử lý toàn bộ logic nén phiếu tháng, dọn ảnh mồ côi, dọn ảnh phụ 90 ngày.
+    - [`archive.cron.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/archive/archive.cron.ts): Tác vụ Cron tự động chạy mùng 1 hàng tháng, định kỳ quý và Chủ nhật hàng tuần.
+    - [`archive.controller.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/archive/archive.controller.ts): API thủ công dành cho `ADMIN` và `ACCOUNTANT` (`/archive/drive-status`, `/archive/trigger-monthly-handovers`, `/archive/trigger-cleanup-orphaned`, v.v.).
+    - [`archive.module.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/archive/archive.module.ts): Đóng gói module và tích hợp vào `InternalModule`, `AppModule`.
+    - Unit Tests: [`archive.service.spec.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/archive/specs/archive.service.spec.ts) (PASS 4/4 tests). Toàn bộ 16 test suites của `internal` (126/126 tests) PASS 100%. `pnpm build` PASS.
+
+## 2026-10-27
+
 ### Plan 41: Tích Hợp Xác Thực IP Wi-Fi Router Xưởng & Màn Hình Admin Cấu Hình Xưởng (/management/admin/workshop)
 
 - **Mục tiêu & Bối cảnh nghiệp vụ:**
