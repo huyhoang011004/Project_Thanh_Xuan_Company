@@ -33,24 +33,28 @@ Bạn là Senior System Architect & Documentation Agent. Nhiệm vụ: đối ch
 ### QUY TRÌNH
 
 **Bước 0 - Kiểm tra đầu vào**
+
 - Nếu chưa có `.agents/docs/SRS_SDD.md`: DỪNG, đề nghị chạy `/srs-sdd` để tạo baseline.
 - Đọc tài liệu hiện có: `SRS_SDD.md`, các file phân hệ trong `.agents/docs/srs_sdd/`, `DATABASE_DICTIONARY.md`, và `CODEBASE_ATLAS.md`.
 
 **Bước 1 - Xác định vùng cần quét**
+
 - Dùng `git status`, `git log` trên các repo/sub-repo để xác định vùng code đã đổi gần nhất, quét kỹ vùng đó trước.
 - Monorepo 4 ứng dụng: quét theo từng app (`be-nestjs-thanhxuan`, `fe-nextjs-thanhxuan-laundry`, `fe-react-thanhxuan-internal`, `fe-nextjs-chuyennhatietkiem`); ghi rõ phần chưa quét ở Coverage.
 
 **Bước 2 - Đối chiếu và phân loại drift**
 Đối chiếu từng nhóm:
+
 - **Database Schema & Index** $\leftrightarrow$ `DATABASE_DICTIONARY.md` & `srs_sdd_backend.md`.
 - **Endpoint / Controller / Service / Repository / Route / Page / Modal / Component** $\leftrightarrow$ `CODEBASE_ATLAS.md`.
 - **Module / FR-xx / RBAC / API Contracts / Sequence** $\leftrightarrow$ `srs_sdd_<app>.md` & `SRS_SDD.md`.
-Mỗi chênh lệch thuộc một loại:
+  Mỗi chênh lệch thuộc một loại:
 - **Thiếu trong tài liệu:** có trong code, chưa có trong tài liệu → bổ sung.
 - **Sai/lỗi thời:** tài liệu mô tả khác code → sửa theo code.
 - **Tài liệu thừa:** tài liệu có, code không còn → nếu chắc chắn đã bị gỡ khỏi code thì xóa mục đó (đặc biệt các bảng DB cũ trong `DATABASE_DICTIONARY.md` và file cũ trong `CODEBASE_ATLAS.md`).
 
 **Bước 3 - Cập nhật tài liệu theo mô hình 5 trụ cột** (bỏ qua nếu ở chế độ check)
+
 - Cập nhật `DATABASE_DICTIONARY.md`, `CODEBASE_ATLAS.md` và file phân hệ `.agents/docs/srs_sdd/srs_sdd_<app>.md` tương ứng.
 - Cập nhật `.agents/docs/SRS_SDD.md` nếu có thay đổi kiến trúc tổng thể, và thêm 1 dòng vào Document History: `<YYYY-MM-DD> - Docs-sync: <tóm tắt ngắn>`.
 - Ghi chi tiết các mục lệch đã sync vào `.agents/docs/CHANGELOG.md`.

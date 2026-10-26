@@ -1,4 +1,4 @@
-# TÀI LIỆU PHÂN TÍCH & THIẾT KẾ HỆ THỐNG TỔNG THỂ (MASTER SRS & SDD)
+﻿# TÀI LIỆU PHÂN TÍCH & THIẾT KẾ HỆ THỐNG TỔNG THỂ (MASTER SRS & SDD)
 
 ## HỆ SINH THÁI CÔNG NGHỆ CÔNG TY THANH XUÂN (THANH XUAN COMPANY)
 
@@ -154,6 +154,7 @@ Website_Thanh_Xuan_Company/
 
 > 📌 **Chi tiết toàn bộ nhật ký các Plan và Bugfix:** Xem đầy đủ tại [CHANGELOG.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/CHANGELOG.md).
 
+- **2026-10-26 - Plan 36 - Chuẩn Hóa Kiến Trúc Domain Handovers & Partners và Đồng Bộ Frontend Với Backend Internal:** Di chuyển trọn vẹn Cổng đối tác (PartnerHandoverPage, các tabs đếm đồ bẩn, kiểm nhận đồ sạch và hooks) từ operations/partners sang operations/handovers, xóa bỏ thư mục operations/partners đặt sai vị trí nghiệp vụ; giữ management/partners là nơi duy nhất quản lý dữ liệu đối tác (partners, item_catalogs, brands); loại bỏ 100% any trong StaffManagementPage.
 - **2026-10-26 - Plan 35 - Chức Năng Lưu & Chọn Chữ Ký Đã Lưu Trong Tài Khoản Cho Web Internal:** Bổ sung trường signatureUrl vào bảng accounts (StaffAccount) và DTO UpdateProfileDto ở Backend; xây dựng SignatureInputComponent hỗ trợ toggle dùng chữ ký đã lưu / ký tay mới và checkbox lưu làm mặc định; tích hợp trọn vẹn vào ProfileEditModal và 5 vị trí ký nhận (PrepOrderModal, SignatureModal, ShipperCountPartnerModal, PartnerReceiptTabComponent, PartnerCountTabComponent).
 
 - **2026-10-25 - Plan 34 - Tái Cấu Trúc UI/UX Trang Chủ (Hero Diagonal Split Video-Ảnh & Di Dời Form Liên Hệ Xuống Pre-Footer):** Tái cấu trúc Hero Section thành dạng chia chéo (Diagonal Split 12°-14°) với video loop xưởng giặt tự động hóa bên trái và ảnh thành phẩm chất lượng cao kèm floating trust badges bên phải; tích hợp framer-motion entrance reveal và tự động pause video khi out-of-view; di dời form liên hệ xuống vị trí Pre-Footer tích hợp cam kết chuyển đổi B2B (tặng 01 tuần giặt mẫu, giao nhận 24/7, bồi thường 100%); mở rộng schema Setting và CMS Admin cho phép tùy biến video URL, poster và ảnh bên phải.
@@ -163,4 +164,5 @@ Website_Thanh_Xuan_Company/
 - **2026-10-15 - Plan 29 & Plan 30 - Chuẩn Hóa Bộ Lọc Ngày Phiếu Giao Nhận & Chuyển Đổi Trạm Khoán Việc Sang HourlyWork:** Chuẩn hóa bộ lọc ngày thư viện ảnh phiếu (từ ngày đầu tháng đến ngày mai), kiểm nhận đối tác ca đêm 21h-24h tự động chọn ngày mai, đổi tên Kho Sạch sang Phiếu Giao Nhận và tích hợp sửa phiếu qua PrepOrderModal; chuyển đổi trạm khoán việc thợ xưởng sang tính tiền công theo giờ (minutesWorked/60 * hourlyBaseRate * coefficient) với 7 khâu công việc chuẩn, ràng buộc ca OPEN và giao diện trạm ghi công thợ trực quan.
 - **2026-10-13 - Plan 28 - Chuẩn Hóa Toàn Diện Schema & Dọn Rác Dữ Liệu Các Bảng (Accounts, ItemCatalogs, HandoverRecords):** Chuẩn hóa bảng accounts (xóa bỏ roles: string[] trùng lặp, dùng duy nhất role: StaffRole, bỏ pay_profile rỗng mặc định); chuẩn hóa bảng item_catalogs đúng 8 trường cốt lõi (đổi customerPrice -> priceToCustomer, giữ sortOrder, loại bỏ 100% khoán thợ cũ foldingRateWorker/ironingRateWorker); triệt tiêu mảng rỗng mặc định notes: [] trong handover_records bằng default: undefined; chạy script dọn dẹp và $unset dữ liệu sạch sẽ trên MongoDB Atlas.
 - **2026-10-13 - Plan 27 - Tinh Gọn Triệt Để Bản Ghi HandoverRecord, Triệt Tiêu Lặp Base64 Chữ Ký & Mảng Mặc Định Rỗng:** Loại bỏ preparedByName/Signature/at/warehouseManagerId khỏi cleanClothes, lưu chữ ký duy nhất 1 nơi tại signatures.warehouseManager (tiết kiệm 50% dung lượng byte do nhân đôi Base64); loại bỏ các giá trị mặc định rỗng (dirtyClothes, notes, recount) trong Mongoose Schema; dọn dẹp sạch sẽ toàn bộ collection handover_records trên MongoDB Atlas.
+
 

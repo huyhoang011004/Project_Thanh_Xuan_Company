@@ -1,4 +1,4 @@
-# ĐẶC TẢ YÊU CẦU & THIẾT KẾ CỔNG VẬN HÀNH NỘI BỘ (SRS & SDD)
+﻿# ĐẶC TẢ YÊU CẦU & THIẾT KẾ CỔNG VẬN HÀNH NỘI BỘ (SRS & SDD)
 
 ## PHÂN HỆ CỔNG VẬN HÀNH XƯỞNG & ĐIỀU PHỐI ĐỐI TÁC (fe-react-thanhxuan-internal)
 
@@ -182,8 +182,7 @@ fe-react-thanhxuan-internal/src/
 │   └── operations/                      # Module Vận hành hiện trường xưởng & di động
 │       ├── attendance/                  # AttendancePage
 │       ├── fuel/                        # ShipperFuelPage
-│       ├── handovers/                   # ShipperHandoverPage, HandoverDetailPage, WarehouseHandoverPage, RecountStationPage; modals/ (*Modal.tsx); components/ (*Component.tsx)
-│       ├── partners/                    # PartnerPortalPage; components/ (*Component.tsx)
+│       ├── handovers/                   # ShipperHandoverPage, WarehouseHandoverPage, PartnerHandoverPage, RecountStationPage; modals/ (*Modal.tsx); components/ (*Component.tsx); hooks/ (use*Flow.ts)
 │       ├── payroll/                     # MyPayslipPage
 │       ├── piecework/                   # HourlyWorkStationPage
 │       └── reports/                     # ReportsPage; components/ (*Component.tsx)
@@ -393,3 +392,4 @@ sequenceDiagram
   - `ShipperCountPartnerModal.tsx`: Shipper kiểm đếm đồ bẩn cùng đối tác.
   - `PartnerReceiptTabComponent.tsx`: Đối tác xác nhận nhận đồ sạch.
   - `PartnerCountTabComponent.tsx`: Đối tác kiểm đếm và giao đồ bẩn.
+

@@ -52,13 +52,13 @@ Backend `be-nestjs-thanhxuan/src/modules/internal` được chia tách rõ ràng
 
 ## 3. Các Bước Thực Thi Chi Tiết
 
-- [ ] **Bước 1: Di chuyển các files từ `operations/partners` sang `operations/handovers`**
+- [x] **Bước 1: Di chuyển các files từ `operations/partners` sang `operations/handovers`**
   - Di chuyển `PartnerPortalPage.tsx` $\rightarrow$ `src/features/operations/handovers/PartnerHandoverPage.tsx`.
   - Di chuyển components sang `src/features/operations/handovers/components/`.
   - Di chuyển hooks sang `src/features/operations/handovers/hooks/`.
   - Cập nhật các đường dẫn import nội bộ giữa các file vừa di chuyển.
 
-- [ ] **Bước 2: Cập nhật Barrel Exports & Router**
+- [x] **Bước 2: Cập nhật Barrel Exports & Router**
   - Cập nhật `src/features/operations/handovers/components/index.ts` và `src/features/operations/handovers/hooks/index.ts`.
   - Cập nhật `src/features/operations/handovers/index.ts` để export `PartnerHandoverPage` (và alias `PartnerPortalPage`).
   - Cập nhật `src/features/operations/index.ts` (loại bỏ export `./partners`).
@@ -67,16 +67,16 @@ Backend `be-nestjs-thanhxuan/src/modules/internal` được chia tách rõ ràng
     - `src/app/(internal)/operations/partner-staff/partner/page.tsx`
   - Xóa bỏ thư mục cũ `src/features/operations/partners`.
 
-- [ ] **Bước 3: Khắc phục lỗi `any` trong `StaffManagementPage.tsx`**
+- [x] **Bước 3: Khắc phục lỗi `any` trong `StaffManagementPage.tsx`**
   - Khai báo kiểu `CreateAccountPayload` và `UpdateAccountPayload` theo model `StaffUser` / `StaffRole`.
   - Đảm bảo 100% không còn `any` trong file.
 
-- [ ] **Bước 4: Kiểm thử và Verify**
+- [x] **Bước 4: Kiểm thử và Verify**
   - Chạy `pnpm exec tsc --noEmit` tại `fe-react-thanhxuan-internal`.
   - Chạy `pnpm build` tại `fe-react-thanhxuan-internal`.
   - Kiểm tra các liên kết trong codebase atlas và SRS/SDD.
 
-- [ ] **Bước 5: Commit & Push**
+- [x] **Bước 5: Commit & Push**
   - Tự động commit và push lên nhánh `dev` của `fe-react-thanhxuan-internal` và root repository.
 
 ---
@@ -86,3 +86,14 @@ Backend `be-nestjs-thanhxuan/src/modules/internal` được chia tách rõ ràng
 - Toàn bộ nghiệp vụ giao nhận 4 trạm nằm trọn vẹn trong `features/operations/handovers`.
 - Phân hệ `features/management/partners` là nơi duy nhất quản lý dữ liệu đối tác (`partners`, `item_catalogs`, `brands`).
 - 0 lỗi compile TypeScript, 0 lỗi build production, 0 `any`.
+
+---
+
+## 5. Nhật Ký Thực Thi (Execution Log)
+
+- **2026-10-26 18:00:** Khảo sát toàn bộ phân hệ vận hành và quản lý, đối chiếu Backend `modules/internal` ↔ Frontend `src/features`. Xác nhận chỉ có `operations/partners` là đặt nhầm vị trí của trạm đối tác giao nhận đồ bẩn/sạch.
+- **2026-10-26 18:05:** Di chuyển `PartnerPortalPage.tsx` sang `handovers/PartnerHandoverPage.tsx`, di chuyển 7 components và 2 hooks liên quan sang `handovers/components` và `handovers/hooks`.
+- **2026-10-26 18:10:** Cập nhật các wrapper routes và barrel exports; xóa bỏ triệt để thư mục `operations/partners`.
+- **2026-10-26 18:15:** Sửa lỗi import `./components` trong `ManagementPage.tsx`, loại bỏ toàn bộ `any` trong `StaffManagementPage.tsx`.
+- **2026-10-26 18:20:** Kiểm thử `tsc --noEmit` và `pnpm build` pass 100%. Cập nhật đồng bộ `CODEBASE_ATLAS.md`, `srs_sdd_fe_internal.md`, `SRS_SDD.md`, `CHANGELOG.md`. Đã commit và push lên nhánh `dev`.
+

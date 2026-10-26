@@ -4,6 +4,36 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
 
 ## 2026-10-26
 
+### Plan 36: Chuẩn Hóa Kiến Trúc Handovers & Partners và Đồng Bộ Frontend Với Backend Internal
+
+- **Mục tiêu & Bối cảnh nghiệp vụ:**
+  - Qua rà soát cấu trúc phân hệ vận hành và quản lý tại Frontend (`fe-react-thanhxuan-internal`) đối chiếu với Backend (`be-nestjs-thanhxuan/src/modules/internal`), phát hiện thư mục `src/features/operations/partners` chứa các tính năng đếm đồ bẩn, kiểm nhận đồ sạch và lịch sử phiếu giao nhận.
+  - Về bản chất nghiệp vụ và dữ liệu, 100% các chức năng này là Trạm thứ 3 (Nhà hàng/Khách sạn đối tác) của quy trình Giao Nhận Kép, thao tác trực tiếp với bảng `handover_records` qua các endpoint `/handover/*`. Trong khi đó, module `partners` thực tế chỉ quản lý hồ sơ đối tác, chi nhánh, bảng giá đồ vải `item_catalogs` và thương hiệu `brands` (đã đặt chuẩn xác tại `src/features/management/partners`).
+  - Việc duy trì `operations/partners` gây phân mảnh nghiệp vụ giao nhận, khiến người đọc nhầm lẫn vai trò domain giữa `handovers` và `partners`.
+  - Đồng thời, xử lý triệt để các vi phạm kiểu `any` trong `StaffManagementPage.tsx` và khắc phục lỗi import baseline trong `ManagementPage.tsx`.
+- **Chi tiết thực thi kỹ thuật:**
+  - **Quy tụ 4 Trạm Giao Nhận Kép vào `src/features/operations/handovers`:**
+    - Trạm 1 (Thủ kho soạn đồ sạch): [`WarehouseHandoverPage.tsx`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/operations/handovers/WarehouseHandoverPage.tsx).
+    - Trạm 2 (Tài xế giao nhận xe tải): [`ShipperHandoverPage.tsx`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/operations/handovers/ShipperHandoverPage.tsx).
+    - Trạm 3 (Chi nhánh đối tác giao đồ bẩn & nhận đồ sạch): [`PartnerHandoverPage.tsx`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/operations/handovers/PartnerHandoverPage.tsx) (di chuyển từ `PartnerPortalPage.tsx`, export kèm alias `PartnerPortalPage`, `RestaurantPage`).
+    - Trạm 4 (Thợ xưởng rạch bao đếm lại): [`RecountStationPage.tsx`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/operations/handovers/RecountStationPage.tsx).
+  - **Di chuyển Components & Hooks sang `handovers`:**
+    - Di chuyển 7 components: `PartnerCountTabComponent`, `PartnerReceiptTabComponent`, `PartnerReceiptItemsTableComponent`, `PartnerReceiptSignatureSectionComponent`, `PartnerReceiptSlipPreviewComponent`, `PartnerHistoryTabComponent`, `PartnerStaffTabComponent` $\rightarrow$ `src/features/operations/handovers/components/`.
+    - Di chuyển 2 hooks luồng: `usePartnerCountFlow.ts`, `usePartnerReceiptFlow.ts` $\rightarrow$ `src/features/operations/handovers/hooks/`.
+    - Cập nhật barrel exports: `handovers/components/index.ts`, `handovers/hooks/index.ts`, `handovers/index.ts`.
+    - Cập nhật router wrapper pages: `src/app/(internal)/operations/partner-manager/partner/page.tsx` và `partner-staff/partner/page.tsx`.
+    - Dọn dẹp hoàn toàn thư mục cũ `src/features/operations/partners`.
+  - **Sửa lỗi baseline & Xóa bỏ 100% `any`:**
+    - Sửa lỗi import `./components` không tồn tại trong [`ManagementPage.tsx`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/management/ManagementPage.tsx), trỏ đúng vào các submodules: `./auth`, `./attendance`, `./piecework`, `./fuel`, `./payroll`.
+    - Định nghĩa interface `StaffFormSubmitPayload` và loại bỏ toàn bộ `any` trong `getStaffId`, `queryFn`, `createAccountMutation`, `updateAccountMutation` tại [`StaffManagementPage.tsx`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/management/auth/StaffManagementPage.tsx).
+  - **Đồng bộ tài liệu kiến trúc:**
+    - Cập nhật [`CODEBASE_ATLAS.md`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/CODEBASE_ATLAS.md): Cổng đối tác trỏ chuẩn xác vào `PartnerHandoverPage.tsx` thuộc `src/features/operations/handovers/`.
+    - Cập nhật [`srs_sdd_fe_internal.md`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_internal.md): Cây thư mục loại bỏ `operations/partners`, thể hiện trọn vẹn 4 trạm trong `operations/handovers`.
+    - Cập nhật [`SRS_SDD.md`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/SRS_SDD.md): Ghi nhận 1 dòng Document History cho Plan 36.
+- **Kiểm thử & Xác thực:**
+  - TypeScript Compilation: `pnpm --filter fe-react-thanhxuan-internal exec tsc --noEmit` $\rightarrow$ **PASS 100% (0 errors)**.
+  - Production Build: `pnpm --filter fe-react-thanhxuan-internal build` $\rightarrow$ **PASS 100% (built trong 8.13s, Service Worker PWA hoàn chỉnh)**.
+
 ### Plan 35: Chức Năng Lưu & Chọn Chữ Ký Đã Lưu Trong Tài Khoản Cho Web Internal
 
 - **Mục tiêu & Bối cảnh nghiệp vụ:**
