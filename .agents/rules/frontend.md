@@ -16,6 +16,7 @@ description: Quy tắc phát triển Frontend (Next.js & React SPA) dự án Tha
   - **Mục tiêu:** Giữ từng file ngắn gọn, rõ ràng, ranh giới trách nhiệm đơn nhất (SRP), giúp người đọc và reviewer dễ dàng theo dõi, review code và kiểm tra diff khi merge.
   - Màn hình chính cấp cao nhất: `[Tên]Page.tsx` (chỉ đóng vai trò điều phối layout, tabs, orchestration).
   - Thư mục `modals/`: chứa các file `[Tên liên quan đến page]Modal.tsx` (mỗi modal một file độc lập).
+  - Thư mục `components/`: chứa các file `[Tên]Component.tsx` (chia tách sub-component: card item, table, toolbar, form section, canvas/preview, signature).
   - Thư mục `hooks/`: BẮT BUỘC tách thành Custom Hook `use[Tên].ts` nếu logic (state, query, mutation, validation, calculation) phức tạp hoặc nhiều dòng. Nếu logic đơn giản, chỉ có vài state cơ bản thì giữ nguyên tại component, KHÔNG CẦN tách hook để tránh tạo abstraction thừa thãi (tuân thủ KISS).
   - **Giới hạn kích thước file:** BẮT BUỘC chủ động chia nhỏ file khi phình to (> 250 - 300 dòng). Tuyệt đối không để một file tích tụ lên 500 - 1000 dòng nếu không cần thiết. Nếu một component bắt đầu phình to, phải lập tức bóc tách các sub-components con sang thư mục `components/` hoặc `modals/`.
 - **Kỷ luật dọn dẹp mã nguồn:**
@@ -36,4 +37,3 @@ description: Quy tắc phát triển Frontend (Next.js & React SPA) dự án Tha
 
 - Mọi text hiển thị trên UI viết bằng **100% tiếng Việt tự nhiên**, đúng ngữ cảnh nghiệp vụ (ví dụ: "Phiếu Giao Nhận", "Công Thợ Theo Giờ", "Đề Xuất Xăng Xe", "Soạn Đồ Xuất Xưởng").
 - Luôn xử lý đầy đủ 3 trạng thái: `loading` (Skeleton), `empty` (EmptyState), và `error` (thông báo lỗi thân thiện) cho mọi màn hình có dữ liệu.
-
