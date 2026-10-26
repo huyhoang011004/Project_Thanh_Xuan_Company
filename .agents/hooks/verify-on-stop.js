@@ -13,6 +13,7 @@ const APPS = [
 const TYPECHECK_CMD = 'pnpm exec tsc --noEmit';
 const MAX_EXECUTIONS = 2; // chống lặp vô hạn nếu lỗi baseline có sẵn
 const TIMEOUT_MS = 120000;
+const STOP_REASONS = new Set(['NO_TOOL_CALL', 'model_stop']);
 
 const readStdin = () =>
   new Promise((resolve) => {
@@ -36,7 +37,7 @@ const allowStop = () => respond({ decision: 'stop' });
     return allowStop();
   }
 
-  if (input.terminationReason !== 'model_stop' || input.fullyIdle === false) return allowStop();
+  if (!STOP_REASONS.has(input.terminationReason) || input.fullyIdle === false) return allowStop();
   if ((input.executionNum ?? 1) > MAX_EXECUTIONS) return allowStop();
 
   const root = (input.workspacePaths || [])[0];
@@ -83,4 +84,3 @@ const allowStop = () => respond({ decision: 'stop' });
     reason: `Typecheck chưa pass, hãy sửa trước khi kết thúc (nếu là lỗi baseline có sẵn thì báo cáo riêng, không sửa lan man):\n${failures.join('\n\n')}`,
   });
 })();
-

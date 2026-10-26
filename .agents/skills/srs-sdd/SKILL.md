@@ -5,12 +5,12 @@ description: Khảo sát toàn diện codebase để khởi tạo hoặc cập n
 
 # System Architecture & Baseline Documentation Skill (/srs-sdd)
 
-Bạn là Senior System Architect & Documentation Agent. Nhiệm vụ: khảo sát codebase hiện tại để khởi tạo tài liệu SRS/SDD chuẩn xác tại `.agents/docs/SRS_SDD.md`. Viết bằng tiếng Việt, giữ nguyên identifier/thuật ngữ kỹ thuật bằng tiếng Anh.
+Bạn là Senior System Architect & Documentation Agent. Nhiệm vụ: khảo sát codebase hiện tại để khởi tạo hoặc cập nhật hệ thống tài liệu kiến trúc chuẩn xác tại `.agents/docs/`. Viết bằng tiếng Việt, giữ nguyên identifier/thuật ngữ kỹ thuật bằng tiếng Anh.
 
 ### RÀNG BUỘC CỐT LÕI
 
 1. CHỈ ĐỌC MÃ NGUỒN: không thay đổi bất kỳ file mã nguồn/config nào. Được dùng lệnh chỉ-đọc (đọc file, grep, glob, `git log`, `git rev-parse`). KHÔNG build, install dependency, migrate, chạy server hoặc script có tác dụng phụ.
-2. PHẠM VI GHI: chỉ được tạo thư mục `.agents/docs/`, `.agents/docs/srs_sdd/`, ghi file `.agents/docs/SRS_SDD.md` (tài liệu tổng) và các file phân hệ `.agents/docs/srs_sdd/srs_sdd_<app>.md` (khi là Monorepo / dự án nhiều phân hệ). Không ghi file nào khác ngoài phạm vi này.
+2. PHẠM VI GHI: chỉ được tạo/cập nhật thư mục `.agents/docs/`, `.agents/docs/srs_sdd/`, ghi file `.agents/docs/SRS_SDD.md` (tài liệu tổng), các file phân hệ `.agents/docs/srs_sdd/srs_sdd_<app>.md`, `.agents/docs/DATABASE_DICTIONARY.md`, và `.agents/docs/CODEBASE_ATLAS.md`. Không ghi file nào khác ngoài phạm vi này.
 3. BẢO MẬT: không đọc/in giá trị trong `.env`, secrets, key. Chỉ ghi TÊN biến môi trường.
 4. TÍNH CHÂN THỰC:
    - Mọi module, bảng, endpoint, business rule phải suy ra từ code đã đọc, kèm nguồn `path:line`.
@@ -24,14 +24,15 @@ Bạn là Senior System Architect & Documentation Agent. Nhiệm vụ: khảo s�
 
 1. **Khảo sát** (theo thứ tự): manifest/package/lockfile → entry point & cấu trúc thư mục → routes/controllers → models/schema/migrations → auth/middleware/phân quyền → config & tên biến môi trường → test, CI/CD, Docker/deploy.
 2. **Monorepo / Kiến trúc Modular SRS/SDD:**
-   - **Tài liệu tổng (`.agents/docs/SRS_SDD.md`):** Mô tả System Context, Topology kết nối các app, Multi-Database, Deploy/VPS constraints, Shared Conventions (Timezone, Security, Token, Error Handling) và bảng Master Index liên kết sang các phân hệ chi tiết.
-   - **Tài liệu phân hệ (`.agents/docs/srs_sdd/srs_sdd_<app>.md`):** Đặc tả chi tiết từng app (Backend API, Web Client/CMS, PWA Vận hành...). Mỗi file chứa đầy đủ FR-xx, RBAC, ERD/Schema, API Contracts, Routing Map, State Machines và Sequence Diagram của riêng app đó.
+   - **Tài liệu tổng (`.agents/docs/SRS_SDD.md`):** Mô tả System Context, Topology kết nối 4 apps (`be-nestjs-thanhxuan`, `fe-nextjs-thanhxuan-laundry`, `fe-react-thanhxuan-internal`, `fe-nextjs-chuyennhatietkiem`), Multi-Database (`laundry_express`, `moving_express`, `internal_express`, `core_express`), Deploy/VPS constraints, Shared Conventions (Timezone, Security, Token, Error Handling) và bảng Master Index liên kết sang các phân hệ chi tiết.
+   - **Tài liệu phân hệ (`.agents/docs/srs_sdd/srs_sdd_<app>.md`):** Đặc tả chi tiết từng app (`srs_sdd_backend.md`, `srs_sdd_fe_nextjs.md`, `srs_sdd_fe_internal.md`). Mỗi file chứa đầy đủ FR-xx, RBAC, ERD/Schema, API Contracts, Routing Map, State Machines và Sequence Diagram của riêng app đó.
+   - **Từ điển dữ liệu (`.agents/docs/DATABASE_DICTIONARY.md`) & Bản đồ mã nguồn (`.agents/docs/CODEBASE_ATLAS.md`):** Đồng bộ danh mục bảng, trường, index và ánh xạ Endpoint ↔ Controller ↔ Service ↔ Schema / Route ↔ Page ↔ Component.
 3. **Kiểm tra file đích:**
    - Chưa có `.agents/docs/SRS_SDD.md` hoặc thư mục `.agents/docs/srs_sdd/`: tạo mới theo cấu trúc Modular.
    - Đã có: KHÔNG ghi đè mù quáng. Đối chiếu với code, chỉ bổ sung mục thiếu và đánh dấu mục lệch so với code trong Open Questions. Nếu không chắc nên bổ sung hay thay thế, hỏi người dùng.
 4. **Làm rõ:** nếu mục đích hệ thống không suy ra được từ code/README, hỏi tối đa 3 câu; còn lại ghi vào Assumptions.
 
-### CẤU TRÚC FILE
+### CẤU TRÚC FILE PHÂN HỆ / TỔNG QUAN
 
 # TÀI LIỆU ĐẶC TẢ YÊU CẦU & THIẾT KẾ HỆ THỐNG (SRS & SDD)
 

@@ -5,7 +5,7 @@ Tài liệu này là nguồn quy ước chung cho mọi agent và workflow trong
 ## 1. Nguyên tắc cốt lõi & An toàn
 
 - **Dẫn chứng:** Mọi nhận định về code hiện có phải kèm `path:line`. Chưa xác minh được thì nêu rõ trong câu hỏi.
-- **Nguồn sự thật:** Code là hiện trạng; Plan là ý định thay đổi; `.agents/docs/SRS_SDD.md` phản ánh kiến trúc tổng thể và thư mục `.agents/docs/srs_sdd/` (`srs_sdd_backend.md`, `srs_sdd_fe_nextjs.md`, `srs_sdd_fe_internal.md`) phản ánh chi tiết từng phân hệ sau mỗi thay đổi hoàn tất.
+- **Nguồn sự thật:** Code là hiện trạng; Plan là ý định thay đổi; `.agents/docs/SRS_SDD.md` phản ánh kiến trúc tổng thể và thư mục `.agents/docs/srs_sdd/` (`srs_sdd_backend.md`, `srs_sdd_fe_nextjs.md`, `srs_sdd_fe_internal.md`), `.agents/docs/DATABASE_DICTIONARY.md`, `.agents/docs/CODEBASE_ATLAS.md` phản ánh chi tiết từng phân hệ sau mỗi thay đổi hoàn tất.
 - **An toàn:**
   - **Tự động commit và push lên nhánh `dev`:** Khi hoàn thành mỗi task/tính năng (sau khi đã chạy lint/typecheck/test/build pass), Agent tự động commit và push code lên nhánh `dev` của ứng dụng hoặc repository tương ứng.
   - **Quy chuẩn thông điệp commit:** Viết bằng tiếng Việt tự nhiên, giữ nguyên thuật ngữ kỹ thuật/chuyên ngành bằng tiếng Anh (ví dụ: `feat(handovers): thêm Service xử lý kiểm kê và đồng bộ DTO`, `fix(auth): sửa lỗi Guard kiểm tra audience JWT`).
@@ -31,15 +31,15 @@ Monorepo gồm 4 app, mỗi app chạy lệnh ở đúng thư mục của nó:
 ## 3. Quy trình làm việc & Tài liệu
 
 - **`/plan`:** Tính năng mới hoặc đổi thiết kế/API -> Tạo kế hoạch tại `.agents/docs/plans/plan<N>.md`.
-- **`/act`:** Thực thi plan đã duyệt -> Sửa code, verify test/build, tick checkbox trong plan, cập nhật phân hệ tương ứng tại `.agents/docs/srs_sdd/srs_sdd_<app>.md` (và `.agents/docs/SRS_SDD.md` nếu đổi kiến trúc tổng thể), ghi nhật ký chi tiết vào `.agents/docs/CHANGELOG.md`.
+- **`/act`:** Thực thi plan đã duyệt -> Sửa code, verify test/build, tick checkbox trong plan, cập nhật đồng bộ 5 trụ cột tài liệu (`srs_sdd_<app>.md`, `SRS_SDD.md`, `DATABASE_DICTIONARY.md`, `CODEBASE_ATLAS.md`, `CHANGELOG.md`), tự động commit & push lên nhánh `dev`.
 - **`/review`:** Đánh giá chất lượng sau `/act` hoặc `/fix` -> Ghi nhận tại `.agents/docs/reviews/review<N>.md`.
 - **`/fix`:** Lỗi nhỏ, rõ ràng, tối đa 3 file code, không đổi schema/API contract.
-- **`/docs-sync`:** Quét đồng bộ khi nghi ngờ tài liệu lệch code -> Cập nhật `.agents/docs/srs_sdd/srs_sdd_<app>.md` & `.agents/docs/SRS_SDD.md` & `CHANGELOG.md`.
+- **`/docs-sync`:** Quét đồng bộ khi nghi ngờ tài liệu lệch code -> Cập nhật `.agents/docs/srs_sdd/srs_sdd_<app>.md`, `SRS_SDD.md`, `DATABASE_DICTIONARY.md`, `CODEBASE_ATLAS.md` & `CHANGELOG.md`.
 
 *Quy tắc cập nhật tài liệu Modular SRS/SDD & Harness Data:*
-- `SRS_SDD.md`: Là Living Architecture Specification TỔNG QUAN (System Context, Topology, Master Index liên kết sang 3 file phân hệ, Document History giữ 3-5 dòng mới nhất của toàn hệ sinh thái).
+- `SRS_SDD.md`: Là Living Architecture Specification TỔNG QUAN (System Context, Topology, Master Index liên kết sang các file phân hệ, Document History giữ 3-5 dòng mới nhất của toàn hệ sinh thái).
 - `.agents/docs/srs_sdd/srs_sdd_<app>.md`: Đặc tả chi tiết từng phân hệ (`srs_sdd_backend.md`, `srs_sdd_fe_nextjs.md`, `srs_sdd_fe_internal.md`). Sửa app nào thì cập nhật file app đó.
-- `.agents/docs/DATABASE_DICTIONARY.md`: Từ điển dữ liệu toàn diện (3 databases, 34+ collections, chi tiết từng trường, kiểu dữ liệu, index, quan hệ và tác dụng nghiệp vụ).
+- `.agents/docs/DATABASE_DICTIONARY.md`: Từ điển dữ liệu toàn diện (các databases, 34+ collections, chi tiết từng trường, kiểu dữ liệu, index, quan hệ và tác dụng nghiệp vụ).
 - `.agents/docs/CODEBASE_ATLAS.md`: Bản đồ định vị nhanh toàn bộ mã nguồn (Endpoint ↔ Controller ↔ Service ↔ Repository ↔ Schema và Route ↔ Page ↔ Component ↔ Hook) giúp Agent định vị file lập tức không cần grep dò tìm.
 - `CHANGELOG.md`: Lưu trữ toàn bộ bài luận nhật ký chi tiết theo từng Plan/Fix.
 
@@ -61,66 +61,34 @@ Một thay đổi coi là xong khi:
 9. **Xóa bỏ triệt để file/alias tương thích ngược tạm thời:** Các file re-export hoặc alias tạo ra trong quá trình refactor/đổi tên (DTO, Schema, Type...) chỉ là giải pháp tạm thời để chống lỗi compile tức thời giữa các bước trung gian. Khi hoàn tất code, BẮT BUỘC xóa bỏ các file re-export này, cập nhật mọi nơi gọi trỏ trực tiếp vào file mới, rồi mới được chạy test/build để verify.
 10. **Tự động Commit & Push lên nhánh `dev`:** Sau khi hoàn thành và verify toàn bộ các tiêu chí trên, Agent tự động tạo commit với thông điệp tiếng Việt tự nhiên (giữ nguyên thuật ngữ kỹ thuật tiếng Anh) và push lên nhánh `dev` của ứng dụng/repo liên quan. Không tự ý merge hay push vào nhánh `master`.
 
-## 5. Quy tắc code bắt buộc
+## 5. Quy tắc code bắt buộc (Xem chi tiết tại `backend.md` & `frontend.md`)
 
-### 5.1. Chung (Cả 3 app)
-- **TypeScript Strict Mode:** Tuyệt đối không dùng `any`; dùng `unknown` rồi narrow, hoặc khai báo type/interface rõ ràng. Ưu tiên Generics, Discriminated Unions.
-- **Naming:** File kebab-case, class PascalCase, biến/hàm camelCase.
+### 5.1. Chung (Cả 4 app)
+- **TypeScript Strict Mode:** Tuyệt đối không dùng `any`; dùng `unknown` rồi narrow, hoặc khai báo type/interface rõ ràng.
+- **Naming:** File kebab-case (trừ React Component/Page/Modal PascalCase), class PascalCase, biến/hàm camelCase.
 - **Environment:** Không commit `.env`; thêm biến mới phải cập nhật `.env.example`.
-- **Form & Tracking:** Gửi kèm ngữ cảnh (`sourceUrl`, `category`, `slug`...).
 
-### 5.2. Backend (`be-nestjs-thanhxuan`)
-- **Kiến trúc phân tầng nghiêm ngặt:** Controller -> Service -> Repository -> Model. Mọi truy vấn DB phải nằm ở tầng Repository, không gọi Model trực tiếp từ Service/Controller. Tránh circular dependency.
-- **Hiệu năng đọc:** Query chỉ đọc bắt buộc dùng `.lean()` và `.select()`; field hay filter/sort phải đánh Index; list API phải phân trang và giới hạn `limit` tối đa.
-- **Multi-Database:** Kết nối đúng connection cho từng database (`laundry_express`, `moving_express`, `internal_express`).
-- **DTO & Validation:**
-  - Mọi `@Body()` bắt buộc dùng Class DTO (không dùng `interface` hay `Partial<T>`).
-  - Thuộc tính Nested Object bắt buộc đủ bộ 3 decorator: `@IsDefined()` + `@ValidateNested()` + `@Type(() => DtoClass)`.
-  - Global `ValidationPipe` với `whitelist: true`, `transform: true`.
-  - Map document Mongoose sang response DTO, tuyệt đối không trả field nhạy cảm (password, token, hash).
-  - Không nhận object filter thô từ client (tránh NoSQL injection).
-- **Defensive Programming:** Dùng Optional Chaining `?.` và fallback hợp lý. Ném Exception chuẩn của NestJS (`NotFoundException`, `BadRequestException`...), không ném `Error` thô.
-- **Timezone:** Chuẩn hóa toàn bộ ngày giờ (chấm công, báo cáo, tiền tố mã phiếu) theo múi giờ `Asia/Ho_Chi_Minh` qua helper `startOfDayVN`, `endOfDayVN`, `getDatePrefixVN`. Không dùng `setHours(0,0,0,0)` theo local của VPS.
-- **Auth:** Passport JWT Strategy cho phân hệ nội bộ bắt buộc xác thực `audience` (`aud: 'internal'`) để chặn dùng chéo token.
+### 5.2. Backend (`be-nestjs-thanhxuan` - Chi tiết tại `.agents/rules/backend.md`)
+- **Kiến trúc phân tầng nghiêm ngặt:** Controller -> Service -> Repository -> Model. Không gọi `@InjectModel` ngoài Repository.
+- **Hiệu năng & Multi-Database:** Query chỉ đọc bắt buộc dùng `.lean()` và `.select()`; list API phải phân trang; kết nối đúng connection (`laundry_express`, `moving_express`, `internal_express`, `core_express`).
+- **DTO & Validation:** Mọi `@Body()` dùng Class DTO; Nested Object đủ bộ 3 (`@IsDefined()` + `@ValidateNested()` + `@Type(() => DtoClass)`); không trả field nhạy cảm; không nhận filter thô.
+- **Timezone & Auth:** Chuẩn hóa ngày giờ theo `Asia/Ho_Chi_Minh` qua `src/common/utils/date.util.ts` (`startOfDayVN`, `endOfDayVN`, `getDatePrefixVN`), cấm dùng `setHours(0,0,0,0)`. Auth nội bộ kiểm tra `aud: 'internal'`.
 
-### 5.3. Web + CMS (`fe-nextjs-thanhxuan-laundry`)
-- **Server Components mặc định:** Đặc biệt các trang `(public)` để tối ưu SEO. Chỉ dùng `"use client"` khi cần DOM, state, event listener và đẩy xuống component lá.
-- **Feature-based Colocation:** `src/features/<feature>/` chứa components, actions, hooks. Component dùng chung ở `src/components/`, API fetcher ở `src/services/`.
-- **Tách logic và giao diện:** Tách logic xử lý và API call ra Custom Hook, Service hoặc Server Action, không để trong JSX/TSX.
-- **Business rule:** Trang nội dung/bài viết (dịch vụ, tin tức, giới thiệu) tự động có form liên hệ/CTA chuyển đổi ở cuối trang.
-- Đầy đủ metadata SEO cho trang public; có đủ trạng thái loading, empty, error cho màn hình dữ liệu.
-
-### 5.4. Internal (`fe-react-thanhxuan-internal`)
-- Tách logic và giao diện ra Custom Hook/Service, không viết trong JSX.
-- Tổ chức code theo nghiệp vụ (`handover`, `piecework`, `attendance`, `partners`), không dồn vào `App.tsx`.
-- Biến môi trường chỉ dùng tiền tố `VITE_`.
-- Giờ giấc hiển thị và gửi lên API chuẩn hóa theo múi giờ `Asia/Ho_Chi_Minh`.
-
-### 5.5. UI (Cả Web và Internal)
-- Dùng **shadcn/ui** (`npx shadcn@latest add <component>`), không tự code lại component đã có.
-- Style bằng **TailwindCSS** và `cn()`; dùng CSS variables tokens, không hardcode màu. Icon dùng **Lucide**.
-- Form dùng **react-hook-form** + **zod** kết hợp `Form` của shadcn.
-- Text hiển thị tiếng Việt tự nhiên, chú trọng accessibility (label, focus, keyboard).
-- **Quy chuẩn cấu trúc & đặt tên file Frontend (Áp dụng cả Next.js và React Internal):**
-  - File lớn nhất / màn hình chính cấp cao nhất: `[Tên]Page.tsx` (chỉ đóng vai trò điều phối layout, tabs, orchestration).
-  - Thư mục `modals/`: chứa các file `[Tên liên quan đến page]Modal.tsx` (mỗi modal một file độc lập).
-  - Thư mục `components/`: chứa các file `[Tên]Component.tsx` (chia tách sub-component: card item, table, toolbar, form section, canvas/preview, signature).
-  - Thư mục `hooks/`: chứa `use[Tên].ts` nếu logic state/query/mutation phức tạp.
-  - **Kỷ luật chia nhỏ file tối đa 250 - 300 dòng:** BẮT BUỘC luôn chủ động chia nhỏ file khi code bắt đầu dài (> 250 - 300 dòng). Tuyệt đối không để file tích tụ lên 500 - 1000 dòng nếu không cần thiết. Chia nhỏ các khối con (sub-component, modal, hook) giúp người đọc code và reviewer dễ dàng review code, kiểm soát diff khi merge và bảo trì dài hạn.
+### 5.3. Frontend & UI (`fe-nextjs-*` & `fe-react-*` - Chi tiết tại `.agents/rules/frontend.md`)
+- **Next.js (Web & CMS):** Server Components mặc định cho SEO; đẩy `"use client"` xuống component lá; trang bài viết/dịch vụ có CTA/form chuyển đổi kèm ngữ cảnh (`sourceUrl`, `category`, `slug`).
+- **React Internal (`fe-react-thanhxuan-internal`):** Mobile-First PWA, tách logic ra Custom Hook/Service, biến môi trường `VITE_*`, chuẩn hóa ngày giờ `Asia/Ho_Chi_Minh`.
+- **UI & Cấu trúc file (< 250-300 dòng):** Dùng `shadcn/ui`, TailwindCSS `cn()`, `lucide-react`, `react-hook-form` + `zod`. Chia tách rõ `[Tên]Page.tsx`, `modals/[Tên]Modal.tsx`, `components/[Tên]Component.tsx`, `hooks/use[Tên].ts`. Chủ động chia nhỏ file khi vượt 250-300 dòng. **Quy tắc Custom Hook:** Bắt buộc tách thành `use[Tên].ts` nếu logic (state, query, mutation, calculation) phức tạp hoặc nhiều dòng; nếu logic đơn giản, chỉ vài state cơ bản thì giữ nguyên tại component, không cần tách hook để tránh trừu tượng hóa thừa thãi (tuân thủ KISS).
 
 ## 6. Deployment & CI/CD
 
 - **Phân định vai trò các nhánh (Branch Strategy & CI/CD):**
-  - **Nhánh `dev`:** Nhánh phát triển hàng ngày của lập trình viên và Agent. Push code lên `dev` **không kích hoạt GitHub Actions workflow** (không build/push Docker image hay bundle) để tiết kiệm tối đa phút chạy của GitHub Actions. Việc verify test/build đã được Agent tự kiểm tra ở local trước khi commit.
-  - **Nhánh `build`:** Nhánh kiểm thử CI. Khi merge code vào `build`, GitHub Actions sẽ tự động kích hoạt build và push image lên GHCR / build bundle tĩnh để kiểm thử toàn diện.
-  - **Nhánh `master`/`main`:** Nhánh phát hành Production (CD). Khi merge code vào nhánh `master`/`main`, GitHub Actions tự động build image/static bundle -> Push GHCR/SCP -> SSH vào VPS pull image và `docker compose up -d` để triển khai Production.
-- **Build Docker Image chỉ thực hiện trên GitHub Actions.** Tuyệt đối không chạy `docker-compose build` trực tiếp trên VPS để tránh tràn tài nguyên.
-- **Quy trình deploy:** Code được merge vào nhánh `master` -> GitHub Actions build image/static bundle -> Push GHCR/SCP -> SSH vào VPS pull image và `docker compose up -d`.
-- **Biến môi trường:** Biến client (`NEXT_PUBLIC_*`, `VITE_*`) truyền qua GitHub Secrets dạng Build Arguments khi build image; biến bí mật Backend nằm trong file `.env` trên VPS.
+  - **Nhánh `dev`:** Nhánh phát triển hàng ngày của lập trình viên và Agent. Push code lên `dev` **không kích hoạt GitHub Actions workflow** để tiết kiệm phút chạy CI. Việc verify test/build được Agent tự kiểm tra ở local trước khi commit.
+  - **Nhánh `build`:** Nhánh kiểm thử CI. Khi merge vào `build`, GitHub Actions tự động kích hoạt build và push image lên GHCR / build bundle tĩnh.
+  - **Nhánh `master`/`main`:** Nhánh phát hành Production (CD). Khi merge vào `master`/`main`, GitHub Actions build image/static bundle -> Push GHCR/SCP -> SSH vào VPS pull image và `docker compose up -d`.
+- **Build Docker Image chỉ thực hiện trên GitHub Actions.** Tuyệt đối không chạy `docker-compose build` trực tiếp trên VPS.
+- **Biến môi trường:** Biến client (`NEXT_PUBLIC_*`, `VITE_*`) truyền qua GitHub Secrets dạng Build Arguments; biến bí mật Backend nằm trong `.env` trên VPS.
 
 ## 7. Bảng Nhận Diện Ý Định Tiếng Việt Tự Nhiên (Intent Classifier)
-
-Agent chủ động thấu hiểu khẩu ngữ và cách diễn đạt tự nhiên của lập trình viên bằng tiếng Việt để kích hoạt đúng bộ kỹ năng chuyên biệt:
 
 | Khẩu ngữ / Yêu cầu tiếng Việt | Bộ kỹ năng (Skill) kích hoạt | Trọng tâm thực thi |
 | :--- | :--- | :--- |
@@ -135,29 +103,14 @@ Agent chủ động thấu hiểu khẩu ngữ và cách diễn đạt tự nhi�
 
 ## 8. Kỷ luật hoàn thiện mã nguồn (Senior Engineering & Anti-AI Slop)
 
-1. **Anti-AI Slop & Full Output (Tuyệt đối không bỏ dở code):**
-   - Nghiêm cấm các đoạn mã viết tắt: `// TODO: tự code tiếp`, `// ... rest of code`, `/* các hàm khác giữ nguyên */`, `// implement later`.
-   - Mọi đoạn code xuất ra phải hoàn chỉnh, có thể chạy và tích hợp vào hệ thống ngay lập tức.
-2. **Root-Cause First:**
-   - Trước khi sửa bất kỳ bug nào: tìm chính xác nguyên nhân gốc (đọc log, kiểm tra trace, phân tích điều kiện biên), tuyệt đối không che giấu lỗi bằng `try/catch` rỗng hay ép kiểu `any`.
-3. **KISS & YAGNI:**
-   - Không tạo abstraction thừa thãi. Giải pháp tốt nhất là giải pháp ít dòng code nhất mà vẫn thỏa mãn 100% ràng buộc nghiệp vụ và kiến trúc của dự án.
-4. **Không để lại file tương thích ngược tạm thời (No Stale Bridge/Re-export Files):**
-   - Khi tái cấu trúc hoặc đổi tên (file, DTO, schema, interface, component), việc tạo file bridge/re-export tương thích ngược chỉ được xem là bước đệm tạm thời trong quá trình chuyển đổi để chống lỗi biên dịch tức thời.
-   - Sau khi hoàn thành việc cập nhật toàn bộ các file liên quan, **BẮT BUỘC phải xóa bỏ hoàn toàn các file re-export tạm thời này**, sửa lại import ở mọi nơi gọi đến nguồn chuẩn, rồi mới được chạy test/build để nghiệm thu.
-5. **Kỷ luật chia nhỏ file & Tối ưu khả năng Code Review (File Granularity & Anti-Bloat):**
-   - BẮT BUỘC luôn chủ động chia nhỏ file khi code bắt đầu dài (> 250 - 300 dòng) hoặc khi file gánh vác nhiều trách nhiệm hỗn tạp (modal, form inline, bảng danh sách, thẻ preview canvas, cụm chữ ký...).
-   - Tuyệt đối không để phát sinh những file "god-component" 500 - 1000 dòng. Mọi tính năng hay màn hình phải được module hóa thành các sub-components con, modals độc lập và custom hooks.
-   - Mục đích: Giúp lập trình viên và reviewer đọc hiểu luồng code nhanh chóng, diff ngắn gọn, dễ bảo trì, dễ kiểm thử và tránh conflict code.
+1. **Anti-AI Slop & Full Output:** Nghiêm cấm code viết tắt (`// TODO`, `// ... rest of code`, `// implement later`). Mọi đoạn code xuất ra phải hoàn chỉnh, tích hợp ngay lập tức.
+2. **Root-Cause First:** Tìm chính xác nguyên nhân gốc trước khi sửa bug, cấm che giấu lỗi bằng `try/catch` rỗng hay ép kiểu `any`.
+3. **KISS & YAGNI:** Không tạo abstraction thừa thãi.
+4. **Xóa file tương thích ngược tạm thời (No Stale Bridge/Re-export Files):** Sau khi refactor/đổi tên, bắt buộc xóa hoàn toàn các file bridge/re-export tạm thời và cập nhật import trỏ trực tiếp vào nguồn chuẩn trước khi chạy test/build.
+5. **Kỷ luật chia nhỏ file (< 250 - 300 dòng):** Chủ động chia nhỏ file thành sub-components (`components/`), modals (`modals/`) và custom hooks (`hooks/`), tuyệt đối không để phát sinh "god-component" 500 - 1000 dòng.
 
 ## 9. Giám Sát Ngữ Cảnh & Chống Ảo Giác (Context Health & /compact)
 
-- **Nguyên tắc:** Khi một phiên trao đổi kéo dài nhiều lượt hoặc chứa quá nhiều file log, ngữ cảnh tích lũy lớn sẽ làm tăng nguy cơ mô hình bị phân tán chú ý hoặc ảo giác.
-- **Dòng thông báo trạng thái ngữ cảnh (Context Monitor):** Ở cuối mỗi câu trả lời kỹ thuật hoặc kết thúc mỗi task/turn, Agent chủ động đính kèm 1 dòng thông tin ước lượng:
+- Ở cuối mỗi câu trả lời kỹ thuật hoặc kết thúc mỗi task/turn, Agent chủ động đính kèm 1 dòng thông tin ước lượng:
   > 🧭 *[Context Health: ~Xk tokens | Trạng thái: An toàn / Cần lưu ý / Quá tải | Gõ `/compact` khi cần cô đọng]*
-- **Mức cảnh báo:**
-  - *Dưới 50k tokens:* **An toàn (Xanh)** — Làm việc bình thường.
-  - *50k - 100k tokens:* **Cần lưu ý (Vàng)** — Nên hoàn thành nốt công việc hiện tại rồi gõ `/compact` trước khi chuyển sang tính năng mới.
-  - *Trên 100k tokens:* **Quá tải (Đỏ)** — Khuyến nghị gõ ngay `/compact` hoặc bắt đầu phiên mới để đảm bảo độ chính xác 100%.
-
-
+- **Mức cảnh báo:** Dưới 50k tokens: **An toàn (Xanh)** | 50k - 100k tokens: **Cần lưu ý (Vàng)** | Trên 100k tokens: **Quá tải (Đỏ)**.

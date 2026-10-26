@@ -1,6 +1,5 @@
 // Antigravity PreToolUse hook: chặn thao tác nguy hiểm và vi phạm rule kiểm tra được bằng regex.
 // Đặt tại: <root>/.agents/hooks/guard.js
-// Quyết định mặc định khi không có gì để chặn. Dùng 'ask' để không vô tình auto-approve (không dùng 'allow').
 const DEFAULT_DECISION = "allow";
 
 const readStdin = () =>
@@ -18,7 +17,7 @@ const respond = (decision, reason) => {
   process.exit(0);
 };
 
-// Lệnh bị chặn cứng (khớp AGENTS.md mục 1 và 9)
+// Lệnh bị chặn cứng (khớp AGENTS.md mục 1 và 6)
 const DENY_COMMANDS = [
   [
     /\brm\s+.*(-[a-zA-Z]*[rR][a-zA-Z]*|--recursive)\b/,
@@ -32,6 +31,10 @@ const DENY_COMMANDS = [
   [
     /\bgit\s+push\b.*(--force\b|--force-with-lease\b|\s-f\b)/,
     "Không force push.",
+  ],
+  [
+    /\bgit\s+push\s+(?:--\S+\s+)*(?:origin\s+)?(?:HEAD:)?(master|main)\b/,
+    "Không push trực tiếp lên nhánh master/main (bảo vệ môi trường Production). Chỉ push lên nhánh dev.",
   ],
   [
     /\bdocker[- ]compose\b.*\bbuild\b/,
@@ -60,6 +63,8 @@ const ENV_PATH = /(^|\/)\.env(\.(?!example$)[^/]*)?$/;
 const SENSITIVE_PATH =
   /(^|\/)(\.github\/workflows\/|docker-compose[^/]*\.ya?ml$|Dockerfile[^/]*$)/;
 const WRITE_TOOLS = new Set([
+  "write_file",
+  "edit_file",
   "write_to_file",
   "replace_file_content",
   "multi_replace_file_content",
@@ -67,6 +72,8 @@ const WRITE_TOOLS = new Set([
 
 const collectContent = (a = {}) =>
   [
+    a.Content,
+    a.Replacement,
     a.CodeContent,
     a.ReplacementContent,
     ...(a.ReplacementChunks || []).map((c) => c.ReplacementContent),
@@ -74,7 +81,7 @@ const collectContent = (a = {}) =>
     .filter((x) => typeof x === "string")
     .join("\n");
 
-// Rule code kiểm tra được bằng regex (khớp AGENTS.md mục 8)
+// Rule code kiểm tra được bằng regex (khớp AGENTS.md mục 5)
 const CODE_RULES = [
   {
     test: (p) => /\.(ts|tsx)$/.test(p),
@@ -116,10 +123,9 @@ const CODE_RULES = [
     return respond(DEFAULT_DECISION);
   }
 
-  const target = String(args.TargetFile || args.AbsolutePath || "").replace(
-    /\\/g,
-    "/",
-  );
+  const target = String(
+    args.Path || args.TargetFile || args.AbsolutePath || "",
+  ).replace(/\\/g, "/");
 
   if (target && ENV_PATH.test(target)) {
     return respond(

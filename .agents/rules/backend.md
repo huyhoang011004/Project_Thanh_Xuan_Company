@@ -9,7 +9,7 @@ description: Quy tắc phát triển Backend NestJS dự án Thanh Xuan Company
 - **Phân tầng nghiêm ngặt:** Controller $\rightarrow$ Service $\rightarrow$ Repository $\rightarrow$ Model.
 - **Controller:** Chỉ nhận request, validate qua DTO, gọi Service, trả response. Không viết logic hay query DB trong Controller.
 - **Service:** Chứa nghiệp vụ kinh doanh; truy cập cơ sở dữ liệu **bắt buộc thông qua Repository**. Service tuyệt đối không `@InjectModel()` trực tiếp.
-- **Tránh Circular Dependency:** Đăng ký Repository/Schema trực tiếp trong module qua `INTERNAL_CONNECTION` hoặc kết nối tương ứng khi cần dùng chéo bảng, không import chéo Service module.
+- **Tránh Circular Dependency:** Đăng ký Repository/Schema trực tiếp trong module qua `INTERNAL_CONNECTION`, `MOVING_CONNECTION`, `CORE_CONNECTION` hoặc kết nối tương ứng khi cần dùng chéo bảng, không import chéo Service module.
 - Config tập trung qua `ConfigModule`, không dùng `process.env` rải rác.
 - Auth dùng Passport JWT Guard (`aud: 'internal'`), logging/transform dùng Interceptor (`PayFieldFilterInterceptor`), xử lý lỗi qua Exception Filter.
 
@@ -37,7 +37,7 @@ description: Quy tắc phát triển Backend NestJS dự án Thanh Xuan Company
 
 # Chuẩn Hóa Múi Giờ Việt Nam (`Asia/Ho_Chi_Minh` - GMT+7)
 
-- Toàn bộ thời gian (chấm công, tính giờ công thợ, phân loại lịch giao nhận, tiền tố mã phiếu `GN-YYYYMMDD-NNN`, báo cáo thống kê) phải được xử lý qua helper `time.util.ts` (`startOfDayVN`, `endOfDayVN`, `getDatePrefixVN`).
+- Toàn bộ thời gian (chấm công, tính giờ công thợ, phân loại lịch giao nhận, tiền tố mã phiếu `GN-YYYYMMDD-NNN`, báo cáo thống kê) phải được xử lý qua helper `src/common/utils/date.util.ts` (`startOfDayVN`, `endOfDayVN`, `getDatePrefixVN`) và `src/common/utils/date-key.ts`.
 - **Tuyệt đối cấm** dùng `setHours(0,0,0,0)` theo local timezone của máy chủ VPS để tránh lệch ngày/giờ khi deploy.
 
 # Quản Lý Schema, Database Dictionary & Dọn Dẹp Database
@@ -51,4 +51,3 @@ description: Quy tắc phát triển Backend NestJS dự án Thanh Xuan Company
 
 - Dùng exception có sẵn của Nest (`NotFoundException`, `BadRequestException`, `ConflictException`...), không throw `Error` thô.
 - Viết unit test cho Service (mock Repository); e2e test cho endpoint quan trọng. Chạy `pnpm test` trước khi hoàn tất.
-
