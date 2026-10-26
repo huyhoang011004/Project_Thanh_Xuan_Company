@@ -1,4 +1,4 @@
-﻿# ĐẶC TẢ YÊU CẦU & THIẾT KẾ CỔNG VẬN HÀNH NỘI BỘ (SRS & SDD)
+# ĐẶC TẢ YÊU CẦU & THIẾT KẾ CỔNG VẬN HÀNH NỘI BỘ (SRS & SDD)
 
 ## PHÂN HỆ CỔNG VẬN HÀNH XƯỞNG & ĐIỀU PHỐI ĐỐI TÁC (fe-react-thanhxuan-internal)
 
@@ -84,13 +84,22 @@ Phân hệ `fe-react-thanhxuan-internal` là cổng điều hành số hóa toà
 - Tự động lọc danh sách phiếu cần đếm lại: các phiếu có `isRecount === true` hoặc phiếu có đồ bẩn chưa đếm số lượng mà Shipper đã ký nhận giao về.
 - **Thao tác rạch bao đếm lại:** Thợ xưởng nhập số lượng thực tế từng chiếc đồ (`actualQuantityReceived`), cập nhật trực tiếp vào hệ thống qua endpoint `PATCH /recount-actual`, hoàn tất quy trình kiểm đếm đối chứng.
 
-#### FE-INT-FR-04: Chấm Công Camera Selfie & Ghi Nhận Công Thợ Theo Giờ x Hệ Số (`features/attendance`, `features/piecework`)
+#### FE-INT-FR-04: Chấm Công Camera Selfie & Phiên Khâu Công Thợ Theo Thời Gian Thực (Plan 37)
 
-- **Chấm công camera selfie (`WorkerAttendancePage`):** Bắt buộc chụp ảnh trực tiếp từ camera trước của điện thoại, nén ảnh client trước khi tải lên. Chặn chấm ca trùng trong ngày.
-- **Ghi nhận thời gian công việc thợ (`PieceworkStationPage`):**
-  - Thợ chọn loại công việc (`WorkshopJobType`: Ủi đồ, Gấp đồ, Đóng gói, Giặt, Sấy, Khác) và nhập số phút làm việc (`minutesWorked`).
-  - Hệ thống tự động snapshot hệ số loại việc từ cấu hình và đơn giá giờ thợ để tính tiền công minh bạch.
-- **Chốt duyệt công thợ cuối ngày (`PieceworkConfirmPage`):** Quản lý xưởng rà soát tổng hợp thời gian làm việc của thợ và chốt duyệt trạng thái `CONFIRMED`.
+- **Chấm công camera selfie & Geofencing (`AttendancePage`, `useAttendance`, `useWorkshopGeo`):** Bắt buộc chụp ảnh selfie (`photoId`) và quét tọa độ GPS xưởng độ chính xác cao (`enableHighAccuracy: true`). Kiểm tra bán kính xưởng $\le 150m$, chống Fake GPS (chặn `accuracy <= 0`, sai số quá lớn, timestamp cũ). Sau khi check-in ca tự động kích hoạt mở phiên **khâu mặc định** (`defaultJobType`) cho thợ; khi check-out ca tự động đóng phiên khâu đang mở với thời điểm kết thúc bằng giờ check-out ca. Màn hình `AttendanceReviewPage` hiển thị khoảng cách GPS để Quản lý đối soát.
+- **Trạm công việc thợ theo phiên (`HourlyWorkStationPage`, `useHourlyWorkStation`):**
+  - Hiển thị khâu mặc định được phân công và thẻ phiên đang chạy kèm đồng hồ đếm thời gian thực cập nhật mỗi 30s (`CurrentSegmentCardComponent`).
+  - Nút **Checkout khâu**: Đóng phiên hiện tại, tính số phút và tiền công tạm tính. Nếu khâu vừa đóng là khâu phụ (khác khâu mặc định) và ca làm việc vẫn mở, hệ thống **tự động check-in lại khâu mặc định** (`AUTO_RESUME`).
+  - Lưới chọn khâu làm việc (`JobStagePickerComponent`): Cho phép nhận khâu phụ mới; tự động vô hiệu hóa khi đang có phiên mở kèm nhắc nhở checkout khâu hiện tại trước.
+  - Lịch sử phiên trong ngày (`HourlyWorkTaskListComponent`): Timeline chi tiết các phiên làm việc, thời gian vào/ra, số phút, tiền công và nhãn nguồn gốc (`Mặc định`, `Phụ`, `Tự quay lại`).
+- **Quản lý công thợ & đơn giá khâu (`HourlyWorkReviewPage`, chia 3 tab):**
+  - **Tab Cài đặt đơn giá khâu (`JobRatesSettingsComponent`, `useJobRates`):** Dành riêng cho `ADMIN` và `ACCOUNTANT` (`pay.rate.manage`). Quản lý danh mục khâu, cấu hình đơn giá VNĐ/giờ (`hourlyRate`) và bật/tắt khâu (`isActive`).
+  - **Tab Phân khâu mặc định (`WorkerDefaultJobComponent`, `useWorkerDefaultJobs`):** Dành cho `ADMIN` và `MANAGER`. Hiển thị danh sách WORKER và gán khâu làm việc mặc định (`defaultJobType`).
+  - **Tab Duyệt công theo ngày (`DailyWorkReviewComponent`, `useDailyWorkReview`):** Chọn ngày, hiển thị chi tiết các phiên làm việc của từng thợ trong ngày và nút xác nhận chốt duyệt (`CONFIRMED`).
+- **Phiếu lương & Tạm tính thu nhập cá nhân (`MyPayslipPage`, `useMyPayslip`):**
+  - Hỗ trợ chọn tháng (mặc định tháng hiện tại theo `Asia/Ho_Chi_Minh`).
+  - Bảng thu nhập theo ngày (`DailyEarningsTableComponent`): Thống kê từng ngày làm việc gồm chi tiết các khâu, số phút làm việc, tiền tạm tính và trạng thái duyệt (`Chờ duyệt`, `Đã duyệt`, `Đang chạy`).
+  - Thẻ phiếu lương chính thức (`OfficialPayslipCardComponent`): Hiển thị chi tiết bảng lương chính thức khi Kế toán đã chốt kỳ lương (`LOCKED`/`PAID`).
 
 #### FE-INT-FR-05: Quản Lý Chi Phí Xe Máy Của Shipper (`features/operations/fuel`, `features/management/fuel`)
 
@@ -177,14 +186,14 @@ fe-react-thanhxuan-internal/src/
 │   │   ├── fuel/                        # FuelReviewPage
 │   │   ├── partners/                    # PartnersManagementPage; modals/ (PartnerModal, BrandModal, CatalogModal...); components/ (*Component.tsx)
 │   │   ├── payroll/                     # PayrollManagementPage
-│   │   └── piecework/                   # HourlyWorkReviewPage
+│   │   └── piecework/                   # HourlyWorkReviewPage (components: JobRatesSettings, WorkerDefaultJob, DailyWorkReview; hooks: useJobRates, useWorkerDefaultJobs, useDailyWorkReview)
 │   │
 │   └── operations/                      # Module Vận hành hiện trường xưởng & di động
-│       ├── attendance/                  # AttendancePage
+│       ├── attendance/                  # AttendancePage; hooks: useAttendance
 │       ├── fuel/                        # ShipperFuelPage
 │       ├── handovers/                   # ShipperHandoverPage, WarehouseHandoverPage, PartnerHandoverPage, RecountStationPage; modals/ (*Modal.tsx); components/ (*Component.tsx); hooks/ (use*Flow.ts)
-│       ├── payroll/                     # MyPayslipPage
-│       ├── piecework/                   # HourlyWorkStationPage
+│       ├── payroll/                     # MyPayslipPage; components: DailyEarningsTable, OfficialPayslipCard; hooks: useMyPayslip
+│       ├── piecework/                   # HourlyWorkStationPage; components: CurrentSegmentCard, JobStagePicker, HourlyWorkTaskList; hooks: useHourlyWorkStation
 │       └── reports/                     # ReportsPage; components/ (*Component.tsx)
 │
 ├── lib/                                 # Tiện ích hạ tầng (api-client, permissions, offline-queue, utils)

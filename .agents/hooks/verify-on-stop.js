@@ -27,7 +27,9 @@ const respond = (obj) => {
   process.stdout.write(JSON.stringify(obj));
   process.exit(0);
 };
-const allowStop = () => respond({ decision: 'stop' });
+const allowStop = () => {
+  return respond({ decision: 'stop' });
+};
 
 (async () => {
   let input;
@@ -38,7 +40,24 @@ const allowStop = () => respond({ decision: 'stop' });
   }
 
   if (!STOP_REASONS.has(input.terminationReason) || input.fullyIdle === false) return allowStop();
-  if ((input.executionNum ?? 1) > MAX_EXECUTIONS) return allowStop();
+
+  const counterFile = path.join(__dirname, '.stop_counter');
+  let execCount = 1;
+  try {
+    if (fs.existsSync(counterFile)) {
+      const data = JSON.parse(fs.readFileSync(counterFile, 'utf8'));
+      if (Date.now() - (data.time || 0) < 5 * 60 * 1000) {
+        execCount = (data.count || 0) + 1;
+      }
+    }
+  } catch {}
+
+  if (execCount >= MAX_EXECUTIONS || (input.executionNum ?? 1) >= MAX_EXECUTIONS) {
+    try {
+      fs.writeFileSync(counterFile, JSON.stringify({ count: execCount, time: Date.now() }), 'utf8');
+    } catch {}
+    return allowStop();
+  }
 
   const root = (input.workspacePaths || [])[0];
   if (!root) return allowStop();
@@ -66,7 +85,12 @@ const allowStop = () => respond({ decision: 'stop' });
     }
   }
 
-  if (appsToVerify.length === 0) return allowStop();
+  if (appsToVerify.length === 0) {
+    try {
+      if (fs.existsSync(counterFile)) fs.unlinkSync(counterFile);
+    } catch {}
+    return allowStop();
+  }
 
   const failures = [];
   for (const app of appsToVerify) {
@@ -78,7 +102,17 @@ const allowStop = () => respond({ decision: 'stop' });
     }
   }
 
-  if (failures.length === 0) return allowStop();
+  if (failures.length === 0) {
+    try {
+      if (fs.existsSync(counterFile)) fs.unlinkSync(counterFile);
+    } catch {}
+    return allowStop();
+  }
+
+  try {
+    fs.writeFileSync(counterFile, JSON.stringify({ count: execCount, time: Date.now() }), 'utf8');
+  } catch {}
+
   respond({
     decision: 'continue',
     reason: `Typecheck chưa pass, hãy sửa trước khi kết thúc (nếu là lỗi baseline có sẵn thì báo cáo riêng, không sửa lan man):\n${failures.join('\n\n')}`,

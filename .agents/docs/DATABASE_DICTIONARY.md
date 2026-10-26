@@ -45,7 +45,7 @@ erDiagram
     partners ||--o{ accounts : "partnerId"
     partners ||--o{ handover_records : "partnerId"
     brands ||--o{ item_catalogs : "brand"
-    pay_settings ||--o{ hourly_work : "jobCoefficients"
+    pay_settings ||--o{ hourly_work : "jobRates"
     payroll_periods ||--o{ payslips : "periodId"
 ```
 
@@ -75,6 +75,7 @@ erDiagram
 | `lockedUntil`             | `Date`          |            Tùy chọn             |         -          | Thời điểm hết hạn tạm khóa 15 phút do nhập sai mật khẩu.                                                                                                                                                                   |
 | `lockedAt`                | `Date`          |            Tùy chọn             |         -          | Thời điểm bị Admin/Manager tạm khóa (nếu quá 60 ngày tự động xóa vĩnh viễn).                                                                                                                                               |
 | `avatarUrl`               | `String`        |            Tùy chọn             |         -          | Đường dẫn ảnh đại diện lưu trên Cloudinary (`internal/avatars`).                                                                                                                                                           |
+| `defaultJobType`          | `String`        |     Tùy chọn, uppercase, trim   |         -          | Khâu công việc mặc định phân cho thợ xưởng (role = WORKER) tự động kích hoạt khi check-in ca (ví dụ: FOLD, IRON).                                                                                                          |
 | `avatarPublicId`          | `String`        |            Tùy chọn             |         -          | Mã định danh Cloudinary public ID để tự xóa ảnh cũ khi upload ảnh mới.                                                                                                                                                     |
 | `signatureUrl`            | `String`        |            Tùy chọn             |         -          | Chuỗi Data URL Base64 PNG hoặc URL chữ ký điện tử mẫu đã lưu của nhân sự nội bộ/đối tác.                                                                                                                                   |     |
 | `pay_profile`             | `Object`        |            Tùy chọn             |         -          | Cấu hình lương thợ/tài xế (không sinh default rỗng cho quản lý/đối tác): `pay_type` (HOURLY, PIECEWORK, HYBRID, MONTHLY_FIXED), `hourly_rate`, `monthly_salary`, `baseSalary`, `hasPersonalVehicle`, `insuranceDeduction`. |
