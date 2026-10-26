@@ -355,7 +355,7 @@ sequenceDiagram
   - Đổi tên toàn diện sang "Phiếu Giao Nhận" và nút "Tạo Phiếu Giao Nhận".
   - Đổi nút "Nhập đồ sạch sẽ giao" thành "Sửa Phiếu Giao Nhận", tích hợp chung modal `PrepOrderModal` nhận prop `initialRecord` để tự động điền dữ liệu đã tạo trước đó.
   - **Cài đặt hiển thị 1 loại đồ kho (`WarehouseItemFilterSettingsModal`, `warehouseItemDisplayHelper`):**
-    - Cho phép cấu hình theo từng thương hiệu đối tác (ví dụ: Pizza 4P's chỉ hiện **Khăn xám**) hoặc chọn lọc toàn cục.
+    - Cho phép cấu hình theo từng thương hiệu đối tác (ví dụ: Pizza 4P's chỉ hiện **Khăn ăn xám**) hoặc chọn lọc toàn cục.
     - Lưu trạng thái vào `localStorage` (`warehouse_item_display_settings`).
     - Tại tab `CLEAN_PLAN`: Số lượng đồ sạch trong phiếu hiển thị theo loại đồ lọc (kèm phụ chú tổng các loại nếu có khác biệt).
     - Tại tab `SUMMARY`: Số lượng "Bẩn vào" và "Sạch ra" ở từng chi nhánh và các card KPI tổng hợp tính chính xác theo loại đồ đã chọn.
@@ -374,7 +374,6 @@ sequenceDiagram
   - Ràng buộc ca làm việc: Thợ phải có ca `OPEN` trong ngày mới được phép ghi nhận công việc; giao diện có cảnh báo và nút chuyển sang trang chấm công nếu chưa check-in.
 - **Menu điều hướng (`nav-config.ts`):**
   - Đổi tiêu đề menu từ "Khoán Việc" sang **"Công Thợ Theo Giờ"** (vận hành) và **"Duyệt Công Thợ Theo Giờ"** (quản lý).
-
 
 ### 2.10. Quản Lý Chữ Ký Điện Tử Đã Lưu & Trợ Thủ Ký Tên Thông Minh (Plan 35)
 

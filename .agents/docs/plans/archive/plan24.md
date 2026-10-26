@@ -211,7 +211,7 @@ Trong khung giờ cao điểm 21h00 - 23h59:
 // Sub-schema Dòng Đồ Sạch
 class CleanItemLine {
   itemCode: string; // Định danh chuẩn máy tính (ví dụ: '4PS_GRAY_TOWEL')
-  itemName: string; // Tên hiển thị người dùng (ví dụ: 'Khăn xám lau bàn')
+  itemName: string; // Tên hiển thị người dùng (ví dụ: 'Khăn ăn xám lau bàn')
   deliveryQuantity: number; // Số lượng giao sạch lần này
   undeliveredQuantity: number; // Số lượng còn thiếu/nợ lại
   quantityReturned: number; // Số lượng giao bù/trả nợ lần trước
@@ -412,7 +412,7 @@ pnpm build
 
 1. **Kiểm tra Concurrency (Chống ghi đè)**: Giả lập 2 client gửi đồng thời lúc 21:30: Client A nhập đồ bẩn onBlur, Client B gửi chữ ký Shipper $\rightarrow$ Document trong MongoDB cập nhật đầy đủ cả 2 trường, không trường nào bị mất.
 2. **Kiểm tra Mốc Giờ Ca Đêm (21h - 23h59)**: Chạy lúc 21:15 ngày 13/10 $\rightarrow$ Cả Partner và Shipper mở app đều tự động tải phiếu ngày 14/10 (`recordDate = 2026-10-14`).
-3. **Kế thừa số lượng đồ bẩn**: Phiếu ngày 13/10 có `actualQuantityReceived` = 120 cái khăn xám. Khi thủ kho mở soạn phiếu ngày 14/10 $\rightarrow$ `deliveryQuantity` tự động điền sẵn 120.
+3. **Kế thừa số lượng đồ bẩn**: Phiếu ngày 13/10 có `actualQuantityReceived` = 120 cái Khăn ăn xám. Khi thủ kho mở soạn phiếu ngày 14/10 $\rightarrow$ `deliveryQuantity` tự động điền sẵn 120.
 4. **Kiểm tra Công thức Lương Shipper**: Kiểm thử ca tối Thứ 7/CN và ca sáng CN/T2 $\rightarrow$ Mỗi ca được cộng chính xác 60.000đ bonus vào phiếu lương.
 
 ---

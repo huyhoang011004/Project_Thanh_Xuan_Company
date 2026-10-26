@@ -25,7 +25,7 @@
 ### 1.2. Hiện trạng Giao Diện Frontend
 
 - Trang [PieceworkStationPage.tsx:14-277](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/operations/piecework/PieceworkStationPage.tsx#L14-L277) (`http://localhost:3001/operations/worker/piecework`):
-  - Vẫn tải danh mục đồ vải `ItemCatalog` (Khăn xám, Tạp dề...) và hiển thị lưới bộ đếm sản lượng cộng dồn từng chiếc.
+  - Vẫn tải danh mục đồ vải `ItemCatalog` (Khăn ăn xám, Tạp dề...) và hiển thị lưới bộ đếm sản lượng cộng dồn từng chiếc.
   - Do `foldingRateWorker` đã bị xóa ở Plan 28, đơn giá hiện tại là 0đ, khiến tổng tiền công tích lũy luôn bằng 0.
   - Thợ xưởng không có cách nào ghi nhận thời gian thực tế đã làm các khâu (Ủi, Gấp, Rũ, Đóng gói...).
 

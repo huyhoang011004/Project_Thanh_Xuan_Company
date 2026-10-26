@@ -31,10 +31,10 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
   - Frontend Internal: `pnpm --prefix fe-react-thanhxuan-internal exec tsc --noEmit`: PASS 100% (0 errors).
   - Frontend Internal: `pnpm --prefix fe-react-thanhxuan-internal exec tsc -b`: PASS 100%.
 
-### Cài Đặt Hiển Thị Lọc Loại Đồ Kho (Pizza 4P's: Khăn Xám) Tại Phân Hệ Kho Sạch & Tổng Hợp Kho
+### Cài Đặt Hiển Thị Lọc Loại Đồ Kho (Pizza 4P's: Khăn ăn xám) Tại Phân Hệ Kho Sạch & Tổng Hợp Kho
 
 - **Mục tiêu & Động lực:**
-  - Đáp ứng yêu cầu nghiệp vụ thực tế của thủ kho xưởng giặt là: Khi theo dõi danh sách phiếu giao nhận xuất kho (`?tab=CLEAN_PLAN`) và bảng tổng hợp đồ kho hôm nay (`?tab=SUMMARY`), người dùng cần có thiết lập để chọn hiển thị 1 loại đồ cụ thể (ví dụ: với đối tác Pizza 4P's, chỉ cần theo dõi **Khăn xám**, không cần cộng gộp các loại đồ phụ khác).
+  - Đáp ứng yêu cầu nghiệp vụ thực tế của thủ kho xưởng giặt là: Khi theo dõi danh sách phiếu giao nhận xuất kho (`?tab=CLEAN_PLAN`) và bảng tổng hợp đồ kho hôm nay (`?tab=SUMMARY`), người dùng cần có thiết lập để chọn hiển thị 1 loại đồ cụ thể (ví dụ: với đối tác Pizza 4P's, chỉ cần theo dõi **Khăn ăn xám**, không cần cộng gộp các loại đồ phụ khác).
   - Tách bạch rõ ràng giữa số lượng của món chủ lực và tổng số lượng toàn bộ các mặt hàng để thủ kho không bị nhầm lẫn khi đối soát và kiểm đếm.
 - **Chi tiết thực thi:**
   - **Module & Helper (`warehouseItemDisplayHelper.ts`):**
@@ -44,7 +44,7 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
     - Helper `getAvailableItemsForBrand()`: Tự động trích xuất danh sách các loại đồ có sẵn của từng thương hiệu từ Catalog và từ các phiếu giao nhận thực tế.
   - **Modal Cài Đặt (`WarehouseItemFilterSettingsModal.tsx`):**
     - Cung cấp giao diện trực quan cho phép bật/tắt chế độ lọc loại đồ.
-    - Cung cấp nút 1-chạm: "✨ Mẫu phổ biến: Pizza 4P's chỉ hiện Khăn xám".
+    - Cung cấp nút 1-chạm: "✨ Mẫu phổ biến: Pizza 4P's chỉ hiện Khăn ăn xám".
     - Cho phép chọn loại đồ hiển thị từ dropdown đồ giặt của từng thương hiệu hoặc khôi phục mặc định xem tất cả.
   - **Giao diện Kho Sạch & Phiếu Giao Nhận (`WarehouseCleanPlanTabComponent.tsx`):**
     - Số lượng đồ sạch trong phiếu hiển thị theo loại đồ lọc: `{counts.filteredClean} chiếc ({counts.filterLabel})`.
@@ -91,7 +91,6 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
   - Cập nhật srs_sdd_fe_nextjs.md (v2.2, bổ sung PreFooterCtaComponent & Hero Diagonal Split).
   - Cập nhật SRS_SDD.md (Document History).
   - Cập nhật plan34.md (Checklist & Status: Done).
-
 
 ### Plan 32: Tái Cấu Trúc Toàn Diện Thư Mục & Chuẩn Hóa Kiến Trúc fe-nextjs-thanhxuan-laundry Theo Chuẩn fe-react-thanhxuan-internal
 

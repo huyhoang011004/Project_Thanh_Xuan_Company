@@ -61,7 +61,7 @@
 
 - [NEW] `src/modules/internal/internal.constants.ts` (`INTERNAL_CONNECTION`)
 - [NEW] `src/modules/internal/schemas/handover-record.schema.ts` (Biên bản giao nhận 2 chiều Pizza 4P's, Haidilao)
-- [NEW] `src/modules/internal/schemas/piecework-log.schema.ts` (Ghi nhận sản lượng thợ gấp khăn xám, tạp dề)
+- [NEW] `src/modules/internal/schemas/piecework-log.schema.ts` (Ghi nhận sản lượng thợ gấp Khăn ăn xám, tạp dề)
 - [NEW] `src/modules/internal/schemas/attendance-log.schema.ts` (Chấm công nhân sự xưởng)
 - [NEW] `src/modules/internal/schemas/partner.schema.ts` (Đối tác nhà hàng / chi nhánh)
 - [NEW] `src/modules/internal/repositories/handover-record.repository.ts`

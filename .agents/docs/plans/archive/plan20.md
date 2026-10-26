@@ -231,7 +231,7 @@ GET / handover / schedule - preview; // Xem trước danh sách đối tác đ�
 2. **Kiểm tra Soạn Đồ thủ công kèm Prefill**:
    - Mở `/operations/warehouse-manager/warehouse`, bấm nút "Soạn Đồ".
    - Chọn thương hiệu "Pizza 4P's" -> chọn chi nhánh "Pizza 4P's Tràng Tiền".
-   - Kiểm tra: Hệ thống tự động nạp danh mục và điền sẵn số lượng từ đợt đồ bẩn hôm trước (VD: 409 khăn ăn xám, 6 xanh lau bát...).
+   - Kiểm tra: Hệ thống tự động nạp danh mục và điền sẵn số lượng từ đợt đồ bẩn hôm trước (VD: 409 Khăn ăn xám, 6 xanh lau bát...).
    - Nhập thêm số lượng chưa giao (VD: 5), giao trả nợ (VD: 2) và ghi chú dòng (VD: _"giao bổ sung ca trưa"_).
    - Ký tên vào khung Canvas và kiểm tra ô họ tên người lập phiếu hiển thị đúng tên tài khoản.
    - Bấm "Lưu & Xem Phiếu": modal phiếu mẫu Ảnh 1 hiện lên đầy đủ thông tin; bấm "Tải ảnh về máy" kiểm tra file ảnh PNG sắc nét.

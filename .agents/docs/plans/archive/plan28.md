@@ -57,7 +57,7 @@
 | :---------------- | :----------- | :-------------------------: | :---------: | :---------------------------------------------------------------------------------------------------------------------- |
 | `itemCode`        | `String`     | Bắt buộc, Unique, uppercase |   Unique    | Mã chuẩn đồ giặt (ví dụ: `4PS_GRAY_TOWEL`, `4PS_APRON_DENIM`).                                                          |
 | `brand`           | `String`     |     Bắt buộc, uppercase     |    Index    | Thương hiệu sở hữu loại đồ giặt này (`PIZZA_4PS`, `HAIDILAO`...).                                                       |
-| `name`            | `String`     |          Bắt buộc           |      -      | Tên tiếng Việt của chiếc đồ (ví dụ: "Khăn xám lau bàn lớn").                                                            |
+| `name`            | `String`     |          Bắt buộc           |      -      | Tên tiếng Việt của chiếc đồ (ví dụ: "Khăn ăn xám lau bàn lớn").                                                         |
 | `unit`            | `String`     |      Mặc định: `PIECE`      |      -      | Đơn vị tính: `PIECE` (Cái), `SET` (Bộ), `KG` (Kg)...                                                                    |
 | `priceToCustomer` | `Number`     |        Mặc định: `0`        |      -      | **Đơn giá dịch vụ thu của đối tác (VND)** (phục vụ đối soát doanh thu, bảo mật qua interceptor chỉ Admin/Kế toán thấy). |
 | `sortOrder`       | `Number`     |        Mặc định: `0`        |    Index    | **Thứ tự sắp xếp hiển thị** trên bảng đếm đồ và phiếu in A4.                                                            |
