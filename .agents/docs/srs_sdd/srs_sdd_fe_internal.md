@@ -308,7 +308,10 @@ sequenceDiagram
 - **Kiểm Nhận Đồ Sạch Trực Quan Bằng Canvas 2 Chiều (Tab `RECEIPT` - `PartnerReceiptTabComponent.tsx`):**
   - Hiển thị trực tiếp phiếu giao nhận 2 chiều xuất nhập kho vẽ bằng HTML5 Canvas sắc nét để đối tác kiểm đếm đồ sạch đối soát với đồ bẩn.
   - Nút điều hướng ngày: **Sang trái (`ChevronLeft`)** lùi 1 ngày, **Sang phải (`ChevronRight`)** tiến 1 ngày để dễ dàng lật xem phiếu giao nhận theo ngày.
-  - Ô **họ tên người nhận** (mặc định nạp tự động từ tài khoản đăng nhập `user.fullName || user.name`) và ô **ký tên** (`SignatureCanvas`) ngay dưới phiếu để ký xác nhận kiểm nhận gửi API `/handover/:id/receipt-check`.
+  - **Kiểm đếm chi tiết từng món đồ sạch:** Cho phép ghi chú trực tiếp từng món đồ sạch: *Đủ hàng*, *Thiếu ? chiếc*, *Dư ? chiếc*, kèm nút bấm nhanh *✓ Tất Cả Đủ Hàng* và bộ điều chỉnh số lượng tăng/giảm chiếc thiếu/dư tiện lợi. Ghi chú này hiển thị trực tiếp vào ô Ghi chú của dòng tương ứng trên phiếu Canvas.
+  - **Ghi chú chung ở hàng Tổng cộng:** Ô ghi chú chung (nhận xét đợt giao nhận) được viết trực tiếp vào hàng **TỔNG CỘNG**, cột **GHI CHÚ** trên phiếu xuất nhập kho Canvas.
+  - **Live Canvas Preview:** Mỗi khi thay đổi ghi chú từng món, ghi chú chung hay chữ ký, phiếu Canvas 2 chiều tự động vẽ lại theo thời gian thực để người dùng xem trực quan trước khi xác nhận.
+  - Ô **họ tên người nhận** (mặc định nạp tự động từ tài khoản đăng nhập `user.fullName || user.name`) và ô **ký tên** (`SignatureCanvas`) ngay dưới phiếu để ký xác nhận kiểm nhận gửi API `PATCH /handover/:id/partner-check-signature`.
 - **Lịch Sử Giao Nhận Phân Trang & Tra Cứu Theo Ngày (Tab `HISTORY` - `PartnerHistoryTabComponent.tsx`):**
   - Danh sách phiếu giao nhận sắp xếp theo thứ tự **từ mới đến cũ** (mới nhất lên đầu) trong `ResponsiveCardGrid`.
   - **Phân trang (Pagination):** Tối đa **12 phiếu / trang** kèm thanh chuyển trang tiện lợi.
