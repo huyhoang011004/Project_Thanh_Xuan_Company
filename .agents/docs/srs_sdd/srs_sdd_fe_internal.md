@@ -126,43 +126,43 @@ Phân hệ `fe-react-thanhxuan-internal` là cổng điều hành số hóa toà
 fe-react-thanhxuan-internal/src/
 ├── app/
 │   ├── (auth)/                          # Đăng nhập, Đăng ký OTP, Quên mật khẩu
-│   │   ├── login/page.tsx               # /login
-│   │   ├── register/page.tsx            # /register
-│   │   └── forgot-password/page.tsx     # /forgot-password
+│   │   ├── login.tsx               # /login
+│   │   ├── register.tsx            # /register
+│   │   └── forgot-password.tsx     # /forgot-password
 │   │
 │   ├── (internal)/                      # Vùng vận hành yêu cầu JWT xác thực
 │   │   ├── layout.tsx                   # Layout khung: Topbar, Sidebar, Navigation
-│   │   ├── dashboard/page.tsx           # /dashboard - Thống kê KPI tổng quan
+│   │   ├── dashboard.tsx           # /dashboard - Thống kê KPI tổng quan
 │   │   │
 │   │   ├── operations/                  # Phân hệ Vận Hành theo đối tượng (/operations/* - 100% số ít)
-│   │   │   ├── attendance/page.tsx      # /operations/attendance - Thợ chấm công selfie
-│   │   │   ├── payslip/page.tsx         # /operations/payslip - Tra cứu phiếu lương cá nhân
-│   │   │   ├── report/page.tsx          # /operations/report - Trung tâm báo cáo & xuất Excel/PDF (số ít)
+│   │   │   ├── attendance.tsx      # /operations/attendance - Thợ chấm công selfie
+│   │   │   ├── payslip.tsx         # /operations/payslip - Tra cứu phiếu lương cá nhân
+│   │   │   ├── report.tsx          # /operations/report - Trung tâm báo cáo & xuất Excel/PDF (số ít)
 │   │   │   ├── warehouse-manager/
-│   │   │   │   └── warehouse/page.tsx   # /operations/warehouse-manager/warehouse - Thủ kho soạn đồ sạch
+│   │   │   │   └── warehouse.tsx   # /operations/warehouse-manager/warehouse - Thủ kho soạn đồ sạch
 │   │   │   ├── shipper/
-│   │   │   │   ├── handover/page.tsx    # /operations/shipper/handover - Giao nhận 2 chiều
+│   │   │   │   ├── handover.tsx    # /operations/shipper/handover - Giao nhận 2 chiều
 │   │   │   │   ├── handover/[recordCode]/page.tsx # Chi tiết phiếu & chữ ký Canvas
-│   │   │   │   └── fuel/page.tsx        # /operations/shipper/fuel - Nộp hóa đơn xăng xe
+│   │   │   │   └── fuel.tsx        # /operations/shipper/fuel - Nộp hóa đơn xăng xe
 │   │   │   ├── worker/
-│   │   │   │   ├── recount/page.tsx     # /operations/worker/recount - Trạm đếm gom bao xưởng
-│   │   │   │   └── piecework/page.tsx   # /operations/worker/piecework - Chấm sản lượng khoán
+│   │   │   │   ├── recount.tsx     # /operations/worker/recount - Trạm đếm gom bao xưởng
+│   │   │   │   └── piecework.tsx   # /operations/worker/piecework - Chấm sản lượng khoán
 │   │   │   ├── partner-manager/
-│   │   │   │   └── partner/page.tsx     # /operations/partner-manager/partner - Cổng đối tác (Quản lý)
+│   │   │   │   └── partner.tsx     # /operations/partner-manager/partner - Cổng đối tác (Quản lý)
 │   │   │   └── partner-staff/
-│   │   │       └── partner/page.tsx     # /operations/partner-staff/partner - Cổng đối tác (Nhân viên)
+│   │   │       └── partner.tsx     # /operations/partner-staff/partner - Cổng đối tác (Nhân viên)
 │   │   │
 │   │   └── management/                  # Phân hệ Quản Trị theo vai trò (/management/* - 100% số ít)
-│   │       ├── page.tsx                 # /management - Hub điều hành chung (thích ứng theo role)
+│   │       ├── management.tsx           # /management - Hub điều hành chung (thích ứng theo role)
 │   │       ├── manager/
-│   │       │   ├── approval/page.tsx    # /management/manager/approval - Phê duyệt tài khoản (số ít)
-│   │       │   ├── personnel/page.tsx   # /management/manager/personnel - Quản trị nhân sự & RBAC
-│   │       │   ├── partner/page.tsx     # /management/manager/partner - Quản trị chuỗi đối tác (số ít)
-│   │       │   ├── attendance/page.tsx  # /management/manager/attendance - Bảng công toàn xưởng
-│   │       │   └── piecework/page.tsx   # /management/manager/piecework - Chốt sản lượng khoán
+│   │       │   ├── approval.tsx    # /management/manager/approval - Phê duyệt tài khoản (số ít)
+│   │       │   ├── personnel.tsx   # /management/manager/personnel - Quản trị nhân sự & RBAC
+│   │       │   ├── partner.tsx     # /management/manager/partner - Quản trị chuỗi đối tác (số ít)
+│   │       │   ├── attendance.tsx  # /management/manager/attendance - Bảng công toàn xưởng
+│   │       │   └── piecework.tsx   # /management/manager/piecework - Chốt sản lượng khoán
 │   │       └── accountant/
-│   │           ├── fuel/page.tsx        # /management/accountant/fuel - Duyệt đề xuất xăng xe
-│   │           └── payroll/page.tsx     # /management/accountant/payroll - Bảng lương chu kỳ & chốt sổ
+│   │           ├── fuel.tsx        # /management/accountant/fuel - Duyệt đề xuất xăng xe
+│   │           └── payroll.tsx     # /management/accountant/payroll - Bảng lương chu kỳ & chốt sổ
 │   │
 │   ├── layout.tsx                       # Root Layout: AuthProvider, QueryClientProvider
 │   └── router.tsx                       # Centralized Router cấu hình Route Guards & Backward Redirects
