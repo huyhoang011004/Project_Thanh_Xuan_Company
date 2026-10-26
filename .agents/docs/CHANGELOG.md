@@ -4,6 +4,49 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
 
 ## 2026-10-26
 
+### Plan 40: Xây Dựng Lại Bảng Công /management/manager/attendance & Bảng Lương Chu Kỳ /management/accountant/payroll Chuẩn 4 Tầng Ergonomic
+
+- **Mục tiêu & Bối cảnh nghiệp vụ:**
+  - **Tái thiết kế toàn diện Màn hình Bảng Công & Giám Sát Ca Làm Việc (`/management/manager/attendance`):**
+    - Áp dụng cấu trúc 4 tầng công thái học hiện đại (`PageBanner` chọn ngày/khoảng ngày VN $\rightarrow$ `PageActionBar` tìm kiếm & duyệt nhanh $\rightarrow$ 4 thẻ KPI `StatCard` $\rightarrow$ Filter Bar & Bảng giám sát chi tiết).
+    - Khắc phục triệt để lỗi truy vấn ngày: Xóa bỏ lỗi chuyển đổi chuỗi `.replace(/-/g, '')` khiến bảng dữ liệu luôn trống do Backend Mongoose lưu `dateKey` theo chuẩn ISO `YYYY-MM-DD`.
+    - Modal kiểm tra & duyệt công ([`AttendanceReviewModal.tsx`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/management/attendance/modals/AttendanceReviewModal.tsx)) trực quan: Hiển thị song song ảnh selfie vào ca/ra ca, kiểm tra tọa độ GPS và sai lệch khoảng cách so với xưởng, cho phép Quản lý điều chỉnh thời gian, loại ngày công (`NORMAL`, `SUNDAY`, `HOLIDAY`), trạng thái duyệt và nhập ghi chú.
+    - Hỗ trợ duyệt hàng loạt (`Batch Approve`) nhanh chóng toàn bộ ca hoàn thành với 1 nút bấm.
+  - **Tái thiết kế toàn diện Màn hình Bảng Lương Chu Kỳ & Chốt Sổ Toàn Xưởng (`/management/accountant/payroll`):**
+    - Khôi phục liên kết API Contract bị đứt gãy giữa Frontend và Backend (`/payroll/periods`, `/payroll/calculate`, `/payroll/lock`, `/payroll/unlock`, `/payroll/mark-paid`, `/payroll/payslips/:id/adjust`).
+    - Nâng cấp `usePayrollManagement`: Quản lý linh hoạt chu kỳ lương theo tháng `YYYY-MM`, đồng bộ trạng thái mở/khóa kỳ lương, kiểm soát quyền hạn Kế toán (`ACCOUNTANT`) và Quản trị (`ADMIN`).
+    - Modal điều chỉnh chi tiết phiếu lương ([`PayslipDetailAdjustModal.tsx`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/management/payroll/modals/PayslipDetailAdjustModal.tsx)): Hiển thị trực quan cơ cấu tiền lương (với Thợ xưởng: phân bổ chi tiết tiền công theo từng khâu và từng ngày; với Shipper: công thức lương cơ bản chia 28 ngày, phụ cấp điện thoại, thưởng ca cuối tuần, thưởng chuyên cần, chi phí xăng xe và sửa xe được duyệt), cho phép Kế toán điều chỉnh thưởng/phạt và tự động tính lại `netPay`.
+    - Hỗ trợ tải báo cáo bảng lương Excel streaming trực tiếp.
+  - **Khắc phục lỗi logic Backend (`be-nestjs-thanhxuan`):**
+    - Sửa `PayrollService.calculatePayroll`: Mở rộng điều kiện quét điểm danh gồm cả `status: { $in: [CLOSED, APPROVED] }` và Shipper check-in qua `AUTO_HANDOVER_SIGN`, khắc phục lỗi ca làm việc hợp lệ đã kết thúc không được ghi nhận vào số ngày công tính lương.
+    - Sửa `PayrollService.adjustPayslip`: Giữ nguyên vẹn cấu trúc chi tiết của Shipper (`shipperDetails`) và cập nhật `workerDetails` khi Kế toán điều chỉnh phiếu lương, đồng thời mở rộng DTO [`adjust-payslip.dto.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/payroll/dto/adjust-payslip.dto.ts) nhận thêm các trường điều chỉnh giao hàng và khấu trừ bảo hiểm.
+    - Tối ưu `JobSegmentService.closeOpenSegmentAt`: Bổ sung tham số `customDateKey` truyền từ sự kiện kết ca điểm danh của ngày tương ứng, tránh nhầm lẫn dateKey khi ca làm việc kéo dài qua ranh giới ngày.
+  - **Dọn dẹp mã nguồn & Kỷ luật Clean Code:**
+    - Xóa bỏ triệt để các alias/re-export cũ (`AttendanceReviewView`, `PayrollManagementView`), cập nhật route trỏ trực tiếp vào các Page Component chuẩn.
+    - 100% các file mới đều tuân thủ nghiêm ngặt quy định kích thước `< 250 - 300 dòng`, phân tách rõ rệt giữa Custom Hooks, Sub-components, Modals và Page.
+
+- **Chi tiết thực thi kỹ thuật:**
+  - **Backend (`be-nestjs-thanhxuan`):**
+    - [`job-segment.service.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/piecework/services/job-segment.service.ts): Nâng cấp `closeOpenSegmentAt` hỗ trợ `customDateKey`.
+    - [`adjust-payslip.dto.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/payroll/dto/adjust-payslip.dto.ts): Bổ sung `extraDeliveryPay` và `insuranceDeduction`.
+    - [`payroll.service.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/payroll/payroll.service.ts): Sửa logic đếm ngày công và bảo toàn `shipperDetails` khi điều chỉnh.
+  - **Frontend Internal (`fe-react-thanhxuan-internal`):**
+    - [`types/index.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/types/index.ts): Định nghĩa kiểu dữ liệu chuẩn cho Attendance & Payroll.
+    - [`useAttendanceReview.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/management/attendance/hooks/useAttendanceReview.ts): Hook quản lý bộ lọc ngày/khoảng ngày, trạng thái, vai trò, đột biến duyệt đơn và duyệt hàng loạt.
+    - [`AttendanceFilterBarComponent.tsx`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/management/attendance/components/AttendanceFilterBarComponent.tsx) & [`AttendanceTableComponent.tsx`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/management/attendance/components/AttendanceTableComponent.tsx): Thanh công cụ lọc và bảng điểm danh hiển thị ảnh, GPS, loại ngày, thời lượng.
+    - [`AttendanceReviewModal.tsx`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/management/attendance/modals/AttendanceReviewModal.tsx): Modal duyệt công chi tiết.
+    - [`AttendanceReviewPage.tsx`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/management/attendance/AttendanceReviewPage.tsx): Màn hình chính 4 tầng, gỡ bỏ `AttendanceReviewView`.
+    - [`usePayrollManagement.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/management/payroll/hooks/usePayrollManagement.ts): Hook kết nối toàn diện chu kỳ lương, tính toán, khóa/mở khóa, thanh toán và điều chỉnh.
+    - [`PayrollActionToolbarComponent.tsx`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/management/payroll/components/PayrollActionToolbarComponent.tsx) & [`PayslipTableComponent.tsx`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/management/payroll/components/PayslipTableComponent.tsx): Toolbar thao tác kỳ lương và bảng phiếu lương chi tiết.
+    - [`PayslipDetailAdjustModal.tsx`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/management/payroll/modals/PayslipDetailAdjustModal.tsx): Modal xem bóc tách lương và điều chỉnh.
+    - [`PayrollManagementPage.tsx`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/management/payroll/PayrollManagementPage.tsx): Màn hình chính 4 tầng, gỡ bỏ `PayrollManagementView`.
+
+- **Kiểm thử & Xác thực:**
+  - TypeScript strict mode: Backend (0 errors) và Frontend Internal (0 errors).
+  - Unit tests: Backend `job-segment.service.spec.ts` (3/3 pass), `payroll.service.spec.ts` (7/7 pass).
+  - Build kiểm thử: `be-nestjs-thanhxuan` (`nest build`) và `fe-react-thanhxuan-internal` (`vite build`) $\rightarrow$ **PASS 100%**.
+
+
 ### Plan 39: Xóa Trang /management, Thiết Kế Lại /dashboard & Trung Tâm Báo Cáo /operations/report 8 Phân Hệ
 
 - **Mục tiêu & Bối cảnh nghiệp vụ:**

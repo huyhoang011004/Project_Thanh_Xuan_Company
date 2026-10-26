@@ -86,7 +86,13 @@ Phân hệ `fe-react-thanhxuan-internal` là cổng điều hành số hóa toà
 
 #### FE-INT-FR-04: Chấm Công Camera Selfie & Phiên Khâu Công Thợ Theo Thời Gian Thực (Plan 37)
 
-- **Chấm công camera selfie & Geofencing (`AttendancePage`, `useAttendance`, `useWorkshopGeo`):** Bắt buộc chụp ảnh selfie (`photoId`) và quét tọa độ GPS xưởng độ chính xác cao (`enableHighAccuracy: true`). Kiểm tra bán kính xưởng $\le 150m$, chống Fake GPS (chặn `accuracy <= 0`, sai số quá lớn, timestamp cũ). Sau khi check-in ca tự động kích hoạt mở phiên **khâu mặc định** (`defaultJobType`) cho thợ; khi check-out ca tự động đóng phiên khâu đang mở với thời điểm kết thúc bằng giờ check-out ca. Màn hình `AttendanceReviewPage` hiển thị khoảng cách GPS để Quản lý đối soát.
+- **Chấm công camera selfie & Geofencing (`AttendancePage`, `useAttendance`, `useWorkshopGeo`):** Bắt buộc chụp ảnh selfie (`photoId`) và quét tọa độ GPS xưởng độ chính xác cao (`enableHighAccuracy: true`). Kiểm tra bán kính xưởng $\le 150m$, chống Fake GPS (chặn `accuracy <= 0`, sai số quá lớn, timestamp cũ). Sau khi check-in ca tự động kích hoạt mở phiên **khâu mặc định** (`defaultJobType`) cho thợ; khi check-out ca tự động đóng phiên khâu đang mở với thời điểm kết thúc bằng giờ check-out ca.
+- **Bảng công toàn xưởng & Rà soát ca (`AttendanceReviewPage`, `useAttendanceReview`):**
+  - Thiết kế theo chuẩn công thái học 4 tầng (`PageBanner` $\rightarrow$ `PageActionBar` $\rightarrow$ 4 `StatCard` $\rightarrow$ Bộ lọc & Bảng ca làm việc).
+  - Khắc phục triệt để lỗi xóa dấu gạch ngang ở `dateKey`: Truy vấn chính xác theo `YYYY-MM-DD` theo múi giờ `Asia/Ho_Chi_Minh` (`getTodayVN()`).
+  - Hỗ trợ chuyển đổi linh hoạt giữa chế độ xem **Theo Ngày** và **Khoảng Ngày**, lọc theo trạng thái (`OPEN`, `NEEDS_REVIEW`, `CLOSED`, `APPROVED`), lọc vai trò và tìm kiếm nhân viên.
+  - Hiển thị trực quan ảnh chụp camera selfie vào/ra (hoặc nhãn tự động từ phiếu giao nhận của tài xế), khoảng cách GPS tới xưởng và loại ngày công (`NORMAL`, `OVERTIME`, `SUNDAY`, `HOLIDAY`).
+  - Nút **Duyệt nhanh toàn bộ ca hoàn tất** trong ngày sang `APPROVED` và modal **Rà soát ca (`AttendanceReviewModal`)** cho phép bổ sung giờ ra ca cho các ca quên check-out (`NEEDS_REVIEW`), điều chỉnh loại ngày công và trạng thái ca kèm lý do audit. Phân quyền cho `ADMIN`, `MANAGER` và `ACCOUNTANT`.
 - **Trạm công việc thợ theo phiên (`HourlyWorkStationPage`, `useHourlyWorkStation`):**
   - Hiển thị khâu mặc định được phân công và thẻ phiên đang chạy kèm đồng hồ đếm thời gian thực cập nhật mỗi 30s (`CurrentSegmentCardComponent`).
   - Nút **Checkout khâu**: Đóng phiên hiện tại, tính số phút và tiền công tạm tính. Nếu khâu vừa đóng là khâu phụ (khác khâu mặc định) và ca làm việc vẫn mở, hệ thống **tự động check-in lại khâu mặc định** (`AUTO_RESUME`).
@@ -111,7 +117,14 @@ Phân hệ `fe-react-thanhxuan-internal` là cổng điều hành số hóa toà
 
 #### FE-INT-FR-06: Quản Trị Bảng Lương & Tra Cứu Phiếu Lương (`features/operations/payroll`, `features/management/payroll`)
 
-- **Quản lý kỳ lương (`PayrollManagementPage`):** Kế toán và Admin cấu hình tham số, chạy tính toán bảng lương chu kỳ và đóng băng (`LOCKED`).
+- **Quản lý kỳ lương & chốt sổ toàn xưởng (`PayrollManagementPage`, `usePayrollManagement`):**
+  - Thiết kế chuẩn 4 tầng công thái học kết nối chuẩn xác với Backend NestJS (`GET /payroll/periods`, `GET /payroll/periods/:id/payslips`, `POST /payroll/calculate` với định dạng chuỗi `{ month: 'YYYY-MM' }`).
+  - 4 `StatCard` KPI tài chính: Tổng quân số trong kỳ, Tổng lương chính/khâu, Tổng phụ cấp & thưởng, Tổng thực lĩnh (`Net Pay`) toàn xưởng.
+  - Quản lý vòng đời chu kỳ lương:
+    - Trạng thái `DRAFT`: Cho phép Kế toán và Admin tính toán lại bảng lương, mở modal `PayslipDetailAdjustModal` để xem bóc tách chi tiết từng khâu đối với Thợ hoặc công thức tài xế, điều chỉnh các khoản thưởng thêm, phụ cấp, khấu trừ, tạm ứng và ghi chú.
+    - Trạng thái `LOCKED`: Admin thực hiện chốt sổ đóng băng dữ liệu hoặc mở khóa (`UNLOCK`) kèm lý do audit bắt buộc.
+    - Trạng thái `PAID`: Đánh dấu hoàn tất chi trả qua `POST /payroll/periods/:id/mark-paid`.
+  - Tích hợp nút xuất file Excel trực tiếp (`/reports/payroll/:month/export`).
 - **Tra cứu phiếu lương cá nhân (`MyPayslipPage`):**
   - Nhân viên tự tra cứu chi tiết phiếu lương cá nhân khi kỳ lương đã `LOCKED` hoặc `PAID`.
   - **Minh bạch theo chức danh:**

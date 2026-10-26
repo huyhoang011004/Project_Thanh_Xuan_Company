@@ -90,7 +90,9 @@ Backend API tập trung phục vụ toàn bộ các kênh tương tác của Cô
 - **Cấu hình lương (`pay_settings`):** Thiết lập bảng hệ số công việc thợ (`jobCoefficients`) và định mức Shipper (chuẩn 28 ngày công, bonus ca cuối tuần 60k/ca tối T7/CN và sáng CN/T2, chuyên cần 7k/ngày, phụ cấp điện thoại 200k, khấu trừ BHXH 400k).
 - **Tính toán bảng lương chu kỳ:**
   - *Shipper:* `baseSalary = (monthlyBaseSalary / 28) * actualWorkedDays`, cộng bonus ca cuối tuần, cộng chuyên cần, cộng phụ cấp điện thoại, cộng chi phí xăng & sửa xe đã duyệt, trừ khấu trừ BHXH 400k.
-  - *Thợ xưởng:* Tổng hợp tiền công các phiên làm việc theo giờ $\times$ hệ số đã chốt.
+  - *Thợ xưởng:* Tổng hợp tiền công các phiên làm việc theo giờ $\times$ hệ số đã chốt (`workerDetails.byStage` và `byDay`). Khi điều chỉnh phiếu lương, đồng bộ cập nhật trường tiền công thợ và thưởng/phạt.
+  - *Bộ lọc chấm công hợp lệ:* Quét toàn bộ bản ghi điểm danh có trạng thái `CLOSED` hoặc `APPROVED` (và Shipper check-in qua `AUTO_HANDOVER_SIGN`) trong dải ngày của tháng, tránh bỏ sót ca làm việc đã hoàn thành nhưng chưa bấm duyệt thủ công.
+  - *Bảo toàn Shipper khi điều chỉnh:* Khi Kế toán điều chỉnh phiếu lương (`adjustPayslip`), cấu trúc `shipperDetails` (xăng xe, phụ cấp, thưởng chuyên cần/ca) được giữ nguyên vẹn và tính lại `netPay` chính xác.
 - **Vòng đời kỳ lương:** `OPEN` $\rightarrow$ `CALCULATING` $\rightarrow$ `LOCKED` (đóng băng dữ liệu nguồn chấm công, công việc, chi phí xe) $\rightarrow$ `PAID`. Chỉ `ADMIN` mới có quyền mở khóa kỳ lương kèm lý do audit log.
 - **Bảo mật phiếu lương cá nhân (`payslips`):** Nhân viên chỉ được xem phiếu lương của chính mình và chỉ khi kỳ lương đã ở trạng thái `LOCKED` hoặc `PAID`. Phiếu lương hiển thị chi tiết minh bạch `shipperDetails` hoặc `workerDetails`.
 
