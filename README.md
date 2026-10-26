@@ -1,5 +1,13 @@
 # Hệ Sinh Thái Công Nghệ Công Ty Thanh Xuân (Thanh Xuan Ecosystem)
 
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?logo=typescript)](https://www.typescriptlang.org/)
+[![NestJS](https://img.shields.io/badge/NestJS-10.x-ea2845?logo=nestjs)](https://nestjs.com/)
+[![Next.js](https://img.shields.io/badge/Next.js-15%2F16-black?logo=nextdotjs)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-18%2F19-61dafb?logo=react)](https://react.dev/)
+[![pnpm](https://img.shields.io/badge/pnpm-9.x%2F10.x-orange?logo=pnpm)](https://pnpm.io/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-7.0-green?logo=mongodb)](https://www.mongodb.com/)
+[![Docker](https://img.shields.io/badge/Docker-GHCR-2496ed?logo=docker)](#)
+
 Hệ thống công nghệ đa ngành kết hợp giữa tiếp thị trực tuyến và điều hành chuỗi cung ứng sản xuất thực tế của **Công ty Thanh Xuân (Thanh Xuan Company)**: bao gồm dịch vụ giặt là công nghiệp cao cấp cho chuỗi nhà hàng B2B, cổng điều hành xưởng & quản vận logistics, và dịch vụ chuyển nhà trọn gói.
 
 ---
@@ -29,7 +37,7 @@ Website_Thanh_Xuan_Company/
 | :---: | :--- | :--- | :---: | :---: | :--- | :--- |
 | **01** | **Backend API Server** | [`be-nestjs-thanhxuan/`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/README.md) | `5001` | `5001` | `api.thanhxuanlaundry.com` | API Gateway, 3 MongoDB độc lập, RBAC 8 vai trò, Streaming Excel/PDF |
 | **02** | **Web Giặt Là & CMS** | [`fe-nextjs-thanhxuan-laundry/`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-nextjs-thanhxuan-laundry/README.md) | `3000` | `3000` | `thanhxuanlaundry.com` | Tiếp thị B2B SEO Google, Lead Capture CRM, CMS bài viết AI & Zalo OA |
-| **03** | **Cổng Vận Hành Xưởng** | [`fe-react-thanhxuan-internal/`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/README.md) | `3001` | `3001` | `noibo.thanhxuanlaundry.com` | PWA Mobile-First, Phiếu giao nhận kép, Ký số Canvas, Công thợ HourlyWork |
+| **03** | **Cổng Vận Hành Xưởng** | [`fe-react-thanhxuan-internal/`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/README.md) | `3001` | `3001` | `noibo.thanhxuanlaundry.com` | PWA Mobile-First, Phiếu giao nhận kép, Ký số Canvas, Công thợ HourlyWork, Bảng công & Lương 4 tầng |
 | **04** | **Web Chuyển Nhà** | [`fe-nextjs-chuyennhatietkiem/`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-nextjs-chuyennhatietkiem/README.md) | `3002` | `3002` | `chuyennhatietkiem.vn` | Tính cước taxi tải tự động theo Km, đặt lịch khảo sát chuyển nhà 24/7 |
 
 ---
@@ -39,8 +47,8 @@ Website_Thanh_Xuan_Company/
 - **Ngôn ngữ chuẩn hóa**: 100% [TypeScript](https://www.typescriptlang.org/) (Strict Mode toàn bộ dự án).
 - **Backend Core**: [NestJS 10.x](https://nestjs.com/), Multi-Database Architecture với 3 CSDL MongoDB độc lập (`laundry_express`, `moving_express`, `internal_express`), Repository Pattern nghiêm ngặt.
 - **Frontend Stack**:
-  * Next.js App Router (RSC mặc định tối ưu SEO Google).
-  * React Vite SPA (PWA Offline IndexedDB, Mobile-first touch target $\ge$ 44px).
+  * Next.js App Router (RSC mặc định tối ưu SEO Google cho Web Khách hàng & CMS).
+  * React Vite SPA (PWA Offline IndexedDB, Mobile-first touch target $\ge$ 44px, kiến trúc UI 4 tầng công thái học).
   * TailwindCSS (v3 & v4), shadcn/ui components, Lucide Icons.
 - **Quản lý Package**: Sử dụng duy nhất `pnpm` trong toàn bộ Monorepo.
 - **Chuẩn hóa thời gian**: Toàn bộ nghiệp vụ (chấm công, giờ công thợ, mã phiếu, báo cáo) bắt buộc theo múi giờ Việt Nam `Asia/Ho_Chi_Minh` (GMT+7) qua helper `time.util.ts`.
@@ -89,7 +97,7 @@ Hệ thống áp dụng kiến trúc phát hành tự động qua **GitHub Actio
    - GitHub Actions runner tự động build Docker Image / Bundle tĩnh.
    - Đẩy Docker Image lên **GitHub Container Registry (GHCR)**.
    - SSH vào máy chủ VPS Ubuntu, chạy `docker compose pull && docker compose up -d`.
-   - VPS không bao giờ chạy lệnh build trực tiếp để bảo vệ 100% tài nguyên CPU/RAM.
+   - VPS không bao giờ chạy lệnh build trực tiếp để bảo vệ 100% tài nguyên CPU/RAM (< 512MB RAM).
 
 ---
 
@@ -102,7 +110,7 @@ Hệ thống tài liệu kỹ thuật được duy trì và đồng bộ liên t
 | **Kiến Trúc Tổng Thể** | [.agents/docs/SRS_SDD.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/SRS_SDD.md) | Topology kết nối, System Context, Quy chuẩn dùng chung toàn hệ thống |
 | **Phân Hệ Backend API** | [.agents/docs/srs_sdd/srs_sdd_backend.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_backend.md) | 3 CSDL, API Contracts, RBAC Guards, Streaming Service |
 | **Phân Hệ Web & CMS** | [.agents/docs/srs_sdd/srs_sdd_fe_nextjs.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_nextjs.md) | RSC SEO, Leads Capture, Quản trị CMS Marketing |
-| **Phân Hệ Vận Hành Xưởng** | [.agents/docs/srs_sdd/srs_sdd_fe_internal.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_internal.md) | PWA Mobile-First, Phiếu giao nhận 2 chiều, HourlyWork |
+| **Phân Hệ Vận Hành Xưởng** | [.agents/docs/srs_sdd/srs_sdd_fe_internal.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_internal.md) | PWA Mobile-First, Phiếu giao nhận 2 chiều, HourlyWork, Bảng công & Lương 4 tầng |
 | **Từ Điển Dữ Liệu (34+ Bảng)** | [.agents/docs/DATABASE_DICTIONARY.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/DATABASE_DICTIONARY.md) | Chi tiết từng trường dữ liệu, kiểu, index và quan hệ CSDL |
 | **Bản Đồ Định Vị Mã Nguồn** | [.agents/docs/CODEBASE_ATLAS.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/CODEBASE_ATLAS.md) | Tra cứu tức thì: Endpoint $\leftrightarrow$ Controller $\leftrightarrow$ Service $\leftrightarrow$ Schema $\leftrightarrow$ Page |
 | **Nhật Ký Tiến Hóa Kỹ Thuật** | [.agents/docs/CHANGELOG.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/CHANGELOG.md) | Lưu trữ chi tiết bài luận kỹ thuật theo từng Plan và Bugfix |
