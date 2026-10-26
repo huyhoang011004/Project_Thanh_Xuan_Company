@@ -232,7 +232,27 @@ erDiagram
 
 ---
 
-### 1.10. Bảng `hourly_work` (HourlyWork)
+---
+
+### 1.10. Bảng `workshop_settings` (WorkshopSettings)
+
+- **Mã nguồn:** [`workshop-settings.schema.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/attendance/schemas/workshop-settings.schema.ts)
+- **Mục đích nghiệp vụ:** Lưu trữ cấu hình tọa độ xưởng (Latitude, Longitude), bán kính Geofencing và danh sách địa chỉ IP Public của modem Wi-Fi xưởng nhằm phục vụ công tác chống gian lận chấm công.
+
+| Tên Trường          | Kiểu Dữ Liệu       |  Ràng Buộc / Mặc Định   | Index / Ref | Ý Nghĩa & Tác Dụng Nghiệp Vụ                                                      |
+| :------------------ | :----------------- | :---------------------: | :---------: | :-------------------------------------------------------------------------------- |
+| `workshopName`      | `String`           | Mặc định:'Xưởng Giặt..' |      -      | Tên cơ sở / xưởng giặt là.                                                        |
+| `address`           | `String`           |        Tùy chọn         |      -      | Địa chỉ thực tế của xưởng.                                                        |
+| `latitude`          | `Number`           |   Mặc định: 20.99824    |      -      | Tọa độ vĩ độ gốc của xưởng (chuẩn WGS84).                                         |
+| `longitude`         | `Number`           |   Mặc định: 105.80153   |      -      | Tọa độ kinh độ gốc của xưởng (chuẩn WGS84).                                       |
+| `radiusMeters`      | `Number`           |     Mặc định: 150m      |      -      | Bán kính Geofencing cho phép điểm danh xung quanh xưởng.                          |
+| `maxAccuracyMeters` | `Number`           |     Mặc định: 150m      |      -      | Ngưỡng sai số GPS tối đa chấp nhận (chặn sóng yếu hoặc tháp di động).             |
+| `wifiIps`           | `Array of String`  |     Mặc định: `[]`      |      -      | Danh sách địa chỉ IP Public của router Wi-Fi xưởng (VD: 113.190.234.12).         |
+| `isGpsRequired`     | `Boolean`          |     Mặc định: true      |      -      | Công tắc bắt buộc phải có GPS khi điểm danh.                                      |
+| `isWifiRequired`    | `Boolean`          |     Mặc định: false     |      -      | Bắt buộc kết nối Wi-Fi xưởng (chặn tuyệt đối nếu lệch IP).                        |
+| `ipStrictCheck`     | `Boolean`          |     Mặc định: false     |      -      | Chặn điểm danh nếu phát hiện IP lạ.                                               |
+
+### 1.11. Bảng `hourly_work` (HourlyWork)
 
 - **Mã nguồn:** [`piecework-log.schema.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/piecework/schemas/piecework-log.schema.ts)
 - **Mục đích nghiệp vụ:** Ghi nhận công việc và thời gian làm việc của thợ xưởng theo giờ nhân hệ số công việc (`WorkshopJobType`), thay thế mô hình khoán sản lượng đơn chiếc cũ. Tự động tính toán thu nhập dựa trên số phút làm việc, đơn giá giờ cơ bản snapshot từ tài khoản thợ và hệ số công việc lấy từ cấu hình công ty.

@@ -2,6 +2,40 @@
 
 Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâng cấp, bugfix và triển khai tính năng của Hệ sinh thái Công ty Thanh Xuân qua từng Plan.
 
+## 2026-10-27
+
+### Plan 41: Tích Hợp Xác Thực IP Wi-Fi Router Xưởng & Màn Hình Admin Cấu Hình Xưởng (/management/admin/workshop)
+
+- **Mục tiêu & Bối cảnh nghiệp vụ:**
+  - **Chống gian lận chấm công đa tầng (Kép GPS + Wi-Fi IP):**
+    - Giải quyết rủi ro nhân viên ở nhà hoặc bên ngoài dùng Fake GPS để chấm công từ xa bằng cơ chế xác thực kép: Geofencing GPS (công thức Haversine) kết hợp đối soát địa chỉ IP Public của modem Wi-Fi xưởng giặt.
+    - Hỗ trợ linh hoạt 2 chế độ vận hành: Chặn nghiêm ngặt (`isWifiRequired: true` - từ chối check-in/out nếu không kết nối Wi-Fi xưởng) hoặc Cảnh báo mềm (`isWifiRequired: false` - vẫn cho phép qua nhưng gắn cờ `isSuspiciousIp: true` để Quản lý đối soát trên bảng công).
+  - **Màn hình Quản trị Cấu hình Xưởng & Wi-Fi dành riêng cho Admin (`/management/admin/workshop`):**
+    - Thiết kế theo chuẩn 4 tầng công thái học hiện đại (`PageBanner` giới thiệu và switch cấu hình $\rightarrow$ `PageActionBar` lưu cài đặt $\rightarrow$ 4 thẻ KPI `StatCard` $\rightarrow$ 3 khối cấu hình Geofencing, Danh sách IP Wi-Fi và Cơ chế kiểm tra).
+    - Tiện ích 1 chạm thông minh: "Lấy tọa độ hiện tại" qua Geolocation API và "Thêm IP mạng hiện tại" qua endpoint `/attendance/my-ip`.
+    - Phân quyền nghiêm ngặt: Chỉ vai trò `StaffRole.ADMIN` mới có thể truy cập màn hình và gọi API cập nhật cấu hình xưởng.
+  - **Trải nghiệm Trạm thợ (/attendance) và Bảng công (/management/manager/attendance):**
+    - Trạm thợ hiển thị trực quan huy hiệu kết nối mạng: Xanh lá ("Wi-Fi Xưởng") khi trùng IP, Vàng cam ("Mạng ngoài / 4G") khi khác IP, kèm cảnh báo rõ ràng nếu xưởng bật chế độ bắt buộc Wi-Fi.
+    - Bảng công giám sát hiển thị huy hiệu Wi-Fi/4G và IP của từng ca vào/ra, giúp Quản lý dễ dàng phát hiện ca bất thường.
+
+- **Chi tiết thực thi kỹ thuật:**
+  - **Backend (`be-nestjs-thanhxuan`):**
+    - [`workshop-settings.schema.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/attendance/schemas/workshop-settings.schema.ts): Định nghĩa bảng `workshop_settings` trong `internal_express` (tọa độ GPS, bán kính m, danh sách IP Wi-Fi, cờ `isGpsRequired`, `isWifiRequired`, `ipStrictCheck`).
+    - [`workshop-settings.repository.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/attendance/repositories/workshop-settings.repository.ts): Thao tác dữ liệu bảng cấu hình xưởng theo chuẩn Repository Pattern.
+    - [`update-workshop-settings.dto.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/attendance/dto/update-workshop-settings.dto.ts): DTO kiểm định dữ liệu cấu hình xưởng với class-validator.
+    - [`attendance-record.schema.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/attendance/schemas/attendance-record.schema.ts): Mở rộng `CheckInInfo` và `CheckOutInfo` với `clientIp`, `isWorkshopWifi`, `isSuspiciousIp`.
+    - [`attendance.service.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/attendance/attendance.service.ts): Tích hợp hàm `getWorkshopConfig`, `updateWorkshopConfig` kèm ghi Audit Log, và `verifyAttendancePresence` kiểm tra chéo Geofencing + Wi-Fi IP (bóc tách IPv4-mapped IPv6, bypass localhost dev).
+    - [`attendance.controller.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/attendance/attendance.controller.ts): Thêm endpoint `GET /attendance/workshop-config`, `PUT /attendance/workshop-config` (bảo vệ bởi `ACCOUNT_ADMIN`), `GET /attendance/my-ip` trích xuất IP qua header `x-forwarded-for` / `x-real-ip`.
+    - Unit Tests: [`attendance-wifi.spec.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/attendance/specs/attendance-wifi.spec.ts) (4/4 PASS), [`attendance-geo.spec.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/attendance/specs/attendance-geo.spec.ts) (5/5 PASS), [`attendance.service.spec.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/attendance/specs/attendance.service.spec.ts) (8/8 PASS).
+  - **Frontend Internal (`fe-react-thanhxuan-internal`):**
+    - [`types/index.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/types/index.ts): Định nghĩa kiểu `WorkshopSettings`, `MyIpResponse`, cập nhật `AttendanceCheckInfo`.
+    - [`useWorkshopSettings.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/management/workshop/hooks/useWorkshopSettings.ts): Custom Hook quản lý query và mutation cấu hình xưởng.
+    - [`WorkshopSettingsPage.tsx`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/management/workshop/WorkshopSettingsPage.tsx): Màn hình Admin cấu hình xưởng chuẩn 4 tầng (< 250 dòng).
+    - [`admin/workshop.tsx`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/app/(internal)/management/admin/workshop.tsx) & [`router.tsx`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/app/router.tsx): Đăng ký route `/management/admin/workshop`.
+    - [`nav-config.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/components/layout/nav-config.ts): Bổ sung menu "Cấu Hình Xưởng & Wi-Fi" dành riêng cho `StaffRole.ADMIN`.
+    - [`useWorkshopGeo.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/operations/attendance/hooks/useWorkshopGeo.ts), [`AttendancePage.tsx`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/operations/attendance/AttendancePage.tsx), [`AttendanceTableComponent.tsx`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/management/attendance/components/AttendanceTableComponent.tsx): Tích hợp hiển thị nhãn Wi-Fi xưởng / 4G.
+  - **Hệ thống tài liệu:** Đồng bộ trọn vẹn `DATABASE_DICTIONARY.md`, `CODEBASE_ATLAS.md`, `SRS_SDD.md`, `srs_sdd_backend.md`, `srs_sdd_fe_internal.md`, `CHANGELOG.md`.
+
 ## 2026-10-26
 
 ### Plan 40: Xây Dựng Lại Bảng Công /management/manager/attendance & Bảng Lương Chu Kỳ /management/accountant/payroll Chuẩn 4 Tầng Ergonomic
