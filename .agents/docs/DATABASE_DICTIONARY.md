@@ -247,7 +247,7 @@ erDiagram
 | `latitude`          | `Number`           |   Mặc định: 20.99824    |      -      | Tọa độ vĩ độ gốc của xưởng (chuẩn WGS84).                                         |
 | `longitude`         | `Number`           |   Mặc định: 105.80153   |      -      | Tọa độ kinh độ gốc của xưởng (chuẩn WGS84).                                       |
 | `radiusMeters`      | `Number`           |     Mặc định: 150m      |      -      | Bán kính Geofencing cho phép điểm danh xung quanh xưởng.                          |
-| `maxAccuracyMeters` | `Number`           |     Mặc định: 150m      |      -      | Ngưỡng sai số GPS tối đa chấp nhận (chặn sóng yếu hoặc tháp di động).             |
+| `maxAccuracyMeters` | `Number`           |     Mặc định: 350m      |      -      | Ngưỡng sai số GPS tối đa chấp nhận (±350m cho phép bù trừ sai số thiết bị di động). |
 | `wifiIps`           | `Array of String`  |     Mặc định: `[]`      |      -      | Danh sách địa chỉ IP Public của router Wi-Fi xưởng (VD: 113.190.234.12).         |
 | `isGpsRequired`     | `Boolean`          |     Mặc định: true      |      -      | Công tắc bắt buộc phải có GPS khi điểm danh.                                      |
 | `isWifiRequired`    | `Boolean`          |     Mặc định: false     |      -      | Bắt buộc kết nối Wi-Fi xưởng (chặn tuyệt đối nếu lệch IP).                        |

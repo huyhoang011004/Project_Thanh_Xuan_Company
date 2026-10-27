@@ -138,6 +138,13 @@ Phân hệ `fe-react-thanhxuan-internal` là cổng điều hành số hóa toà
 - Xuất file tải về trực tiếp: Xuất file Excel XLSX và PDF streaming tốc độ cao.
 - Tự động bóc tách trường tiền lương khi Quản lý xưởng (`MANAGER`) truy cập.
 
+#### FE-INT-FR-09: Cấu Hình Vị Trí Xưởng, Geofencing & Wi-Fi Router (`features/management/workshop`)
+
+- Dành riêng cho Quản trị viên (`ADMIN`).
+- **Tra cứu tọa độ GPS từ địa chỉ nhập tay (Geocoding):** Tích hợp tìm kiếm tọa độ từ chuỗi địa chỉ thực tế của xưởng qua máy chủ OpenStreetMap Nominatim, tự động điền Latitude & Longitude kèm hiển thị tên địa điểm chuẩn hóa.
+- **Tùy chỉnh Geofencing & Sai số GPS (±350m):** Hỗ trợ cấu hình bán kính xưởng (`radiusMeters`) và mở rộng ngưỡng sai số tối đa (`maxAccuracyMeters: ±350m`) để thích ứng với tín hiệu GPS yếu trong xưởng có trần tôn hoặc nhà kho khép kín.
+- **Quản lý dải IP Wi-Fi Router:** Nhận diện IP Public hiện tại của mạng quản trị, thêm/xóa danh sách IP modem Wi-Fi hợp lệ và công tắc ép buộc kết nối Wi-Fi khi chấm công.
+
 ---
 
 ## 2. THIẾT KẾ KIẾN TRÚC & HỆ THỐNG (SDD)

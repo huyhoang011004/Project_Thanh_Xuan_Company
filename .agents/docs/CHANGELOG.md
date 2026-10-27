@@ -4,6 +4,31 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
 
 ## 2026-10-27
 
+### Nâng Cấp Cấu Hình Xưởng: Tra Cứu Tọa Độ GPS Tự Động Từ Địa Chỉ Nhập Tay & Tăng Sai Số GPS Cho Phép Lên ±350m
+
+- **Bối cảnh & Mục tiêu:**
+  - **Tra cứu tọa độ GPS tự động (Geocoding):** Cho phép Quản trị viên chỉ cần nhập địa chỉ thực tế của xưởng (ví dụ: "85 Vũ Trọng Phụng, Thanh Xuân, Hà Nội") và bấm "Tra cứu GPS" để tự động tìm kiếm và điền chính xác kinh độ, vĩ độ thông qua máy chủ bản đồ OpenStreetMap Nominatim. Hỗ trợ hiển thị tên địa điểm chuẩn hóa khớp từ bản đồ.
+  - **Tăng sai số GPS tối đa (±350m):** Nâng ngưỡng sai số tối đa (`maxAccuracyMeters`) từ 150m lên ±350m trong cấu hình xưởng và thuật toán thẩm định vị trí chấm công (`validateGpsSignal`). Giúp công nhân và thợ xưởng không bị từ chối chấm công do sóng GPS yếu bên dưới trần tôn xưởng giặt là hoặc trong không gian kín của nhà kho.
+  - **Tái cấu trúc UI & Anti-Slop (< 250 dòng):** Chia tách `WorkshopSettingsPage.tsx` thành các sub-components độc lập: `WorkshopGeofencingCard.tsx`, `WorkshopWifiCard.tsx` và `WorkshopSecurityPolicyCard.tsx`, tuân thủ kỷ luật kiến trúc sạch của dự án.
+
+- **Chi tiết thay đổi:**
+  - **Backend (`be-nestjs-thanhxuan`):**
+    - [`workshop-settings.schema.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/attendance/schemas/workshop-settings.schema.ts): Nâng giá trị mặc định của `maxAccuracyMeters` lên 350m.
+    - [`workshop-settings.repository.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/attendance/repositories/workshop-settings.repository.ts): Cập nhật default initialization `maxAccuracyMeters: 350`.
+    - [`geo.util.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/common/utils/geo.util.ts) & [`attendance.service.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/attendance/attendance.service.ts): Đổi fallback sai số tối đa lên 350m.
+    - [`attendance.service.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/attendance/attendance.service.ts) & [`attendance.controller.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/attendance/attendance.controller.ts): Thêm endpoint `GET /attendance/geocode?address=...` tra cứu tọa độ từ OpenStreetMap Nominatim kèm User-Agent chuẩn.
+    - [`.env.example`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/.env.example): Cập nhật `WORKSHOP_MAX_ACCURACY=350`.
+    - [`attendance.service.spec.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/attendance/specs/attendance.service.spec.ts): Bổ sung 3 test case kiểm thử dịch vụ tra cứu Geocoding.
+  - **Frontend (`fe-react-thanhxuan-internal`):**
+    - [`workshop.types.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/management/workshop/workshop.types.ts): Bổ sung interface `GeocodeResult`.
+    - [`useWorkshopSettings.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/management/workshop/hooks/useWorkshopSettings.ts): Bổ sung hàm `geocodeAddress` hỗ trợ gọi API Backend kèm cơ chế Fallback trực tiếp phía Client.
+    - [`WorkshopGeofencingCard.tsx`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/management/workshop/components/WorkshopGeofencingCard.tsx): Bổ sung ô nhập Tên xưởng, Địa chỉ thực tế kèm nút "Tra cứu GPS", ô nhập Sai số GPS tối đa (±350m), Latitude, Longitude và link xem trên Google Maps.
+    - [`WorkshopWifiCard.tsx`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/management/workshop/components/WorkshopWifiCard.tsx): Quản lý dải IP Wi-Fi Router, nhận diện IP hiện tại.
+    - [`WorkshopSecurityPolicyCard.tsx`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/management/workshop/components/WorkshopSecurityPolicyCard.tsx): Cấu hình chính sách bắt buộc GPS và Wi-Fi.
+    - [`WorkshopSettingsPage.tsx`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/management/workshop/WorkshopSettingsPage.tsx): Tái cấu trúc tinh gọn form lưu trữ toàn diện (< 160 dòng).
+  - **Tài liệu & Đặc tả:**
+    - Cập nhật [`DATABASE_DICTIONARY.md`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/DATABASE_DICTIONARY.md), [`srs_sdd_backend.md`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_backend.md), [`srs_sdd_fe_internal.md`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_internal.md).
+
 ### Plan 42: Kiến Trúc Lưu Trữ Kép (Cloudinary + VPS), Tự Động Nén ZIP Gửi Mail Đối Tác & Quản Lý Google Drive 5GB Qua Rclone
 
 - **Mục tiêu & Bối cảnh nghiệp vụ:**
@@ -38,6 +63,31 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
     - Unit Tests: [`archive.service.spec.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/archive/specs/archive.service.spec.ts) (PASS 4/4 tests). Toàn bộ 16 test suites của `internal` (126/126 tests) PASS 100%. `pnpm build` PASS.
 
 ## 2026-10-27
+
+### Nâng Cấp Cấu Hình Xưởng: Tra Cứu Tọa Độ GPS Tự Động Từ Địa Chỉ Nhập Tay & Tăng Sai Số GPS Cho Phép Lên ±350m
+
+- **Bối cảnh & Mục tiêu:**
+  - **Tra cứu tọa độ GPS tự động (Geocoding):** Cho phép Quản trị viên chỉ cần nhập địa chỉ thực tế của xưởng (ví dụ: "85 Vũ Trọng Phụng, Thanh Xuân, Hà Nội") và bấm "Tra cứu GPS" để tự động tìm kiếm và điền chính xác kinh độ, vĩ độ thông qua máy chủ bản đồ OpenStreetMap Nominatim. Hỗ trợ hiển thị tên địa điểm chuẩn hóa khớp từ bản đồ.
+  - **Tăng sai số GPS tối đa (±350m):** Nâng ngưỡng sai số tối đa (`maxAccuracyMeters`) từ 150m lên ±350m trong cấu hình xưởng và thuật toán thẩm định vị trí chấm công (`validateGpsSignal`). Giúp công nhân và thợ xưởng không bị từ chối chấm công do sóng GPS yếu bên dưới trần tôn xưởng giặt là hoặc trong không gian kín của nhà kho.
+  - **Tái cấu trúc UI & Anti-Slop (< 250 dòng):** Chia tách `WorkshopSettingsPage.tsx` thành các sub-components độc lập: `WorkshopGeofencingCard.tsx`, `WorkshopWifiCard.tsx` và `WorkshopSecurityPolicyCard.tsx`, tuân thủ kỷ luật kiến trúc sạch của dự án.
+
+- **Chi tiết thay đổi:**
+  - **Backend (`be-nestjs-thanhxuan`):**
+    - [`workshop-settings.schema.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/attendance/schemas/workshop-settings.schema.ts): Nâng giá trị mặc định của `maxAccuracyMeters` lên 350m.
+    - [`workshop-settings.repository.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/attendance/repositories/workshop-settings.repository.ts): Cập nhật default initialization `maxAccuracyMeters: 350`.
+    - [`geo.util.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/common/utils/geo.util.ts) & [`attendance.service.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/attendance/attendance.service.ts): Đổi fallback sai số tối đa lên 350m.
+    - [`attendance.service.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/attendance/attendance.service.ts) & [`attendance.controller.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/attendance/attendance.controller.ts): Thêm endpoint `GET /attendance/geocode?address=...` tra cứu tọa độ từ OpenStreetMap Nominatim kèm User-Agent chuẩn.
+    - [`.env.example`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/.env.example): Cập nhật `WORKSHOP_MAX_ACCURACY=350`.
+    - [`attendance.service.spec.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/attendance/specs/attendance.service.spec.ts): Bổ sung 3 test case kiểm thử dịch vụ tra cứu Geocoding.
+  - **Frontend (`fe-react-thanhxuan-internal`):**
+    - [`workshop.types.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/management/workshop/workshop.types.ts): Bổ sung interface `GeocodeResult`.
+    - [`useWorkshopSettings.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/management/workshop/hooks/useWorkshopSettings.ts): Bổ sung hàm `geocodeAddress` hỗ trợ gọi API Backend kèm cơ chế Fallback trực tiếp phía Client.
+    - [`WorkshopGeofencingCard.tsx`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/management/workshop/components/WorkshopGeofencingCard.tsx): Bổ sung ô nhập Tên xưởng, Địa chỉ thực tế kèm nút "Tra cứu GPS", ô nhập Sai số GPS tối đa (±350m), Latitude, Longitude và link xem trên Google Maps.
+    - [`WorkshopWifiCard.tsx`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/management/workshop/components/WorkshopWifiCard.tsx): Quản lý dải IP Wi-Fi Router, nhận diện IP hiện tại.
+    - [`WorkshopSecurityPolicyCard.tsx`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/management/workshop/components/WorkshopSecurityPolicyCard.tsx): Cấu hình chính sách bắt buộc GPS và Wi-Fi.
+    - [`WorkshopSettingsPage.tsx`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/management/workshop/WorkshopSettingsPage.tsx): Tái cấu trúc tinh gọn form lưu trữ toàn diện (< 160 dòng).
+  - **Tài liệu & Đặc tả:**
+    - Cập nhật [`DATABASE_DICTIONARY.md`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/DATABASE_DICTIONARY.md), [`srs_sdd_backend.md`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_backend.md), [`srs_sdd_fe_internal.md`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_internal.md).
 
 ### Plan 41: Tích Hợp Xác Thực IP Wi-Fi Router Xưởng & Màn Hình Admin Cấu Hình Xưởng (/management/admin/workshop)
 

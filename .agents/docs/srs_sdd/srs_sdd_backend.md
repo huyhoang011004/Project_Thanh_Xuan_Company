@@ -292,6 +292,8 @@ export class HandoverRecordRepository extends BaseRepository<HandoverRecordDocum
 | `/api/v1/internal/attendance/check-in` | `POST` | `InternalJwtGuard` (Worker/Shipper) | Bắt buộc ảnh selfie camera, chặn trùng 1 ca/người (409 Conflict). |
 | `/api/v1/internal/attendance/check-out` | `POST` | `InternalJwtGuard` | Chốt ca kèm ảnh selfie, tính `workedMinutes`. |
 | `/api/v1/internal/attendance/today` | `GET` | `InternalJwtGuard` | Lấy trạng thái ca làm việc hiện tại của nhân sự. |
+| `/api/v1/internal/attendance/workshop-config` | `GET` / `PUT` | `InternalJwtGuard` / ADMIN | Xem và cập nhật cấu hình xưởng (Tên, địa chỉ, Geofencing, sai số GPS ±350m, Wi-Fi IP). |
+| `/api/v1/internal/attendance/geocode` | `GET` | ADMIN | Tra cứu tọa độ GPS từ địa chỉ thực tế (Nominatim OpenStreetMap) phục vụ cấu hình xưởng. |
 | `/api/v1/internal/piecework/job-types` | `GET` | `InternalJwtGuard` | Lấy danh mục 7 công việc chuẩn, hệ số thù lao snapshot từ PaySettings và đơn giá giờ cơ bản. |
 | `/api/v1/internal/piecework/me/tasks` | `POST` | `InternalJwtGuard` (Worker) | Ghi nhận công việc thợ xưởng theo giờ (`jobType`, `minutesWorked`, tính theo hệ số và đơn giá giờ, ràng buộc ca OPEN). |
 | `/api/v1/internal/piecework/me/tasks/:taskIndex` | `DELETE` | `InternalJwtGuard` (Worker) | Thợ xóa một dòng công việc đã ghi nhầm trong ngày khi bản ghi chưa bị CONFIRMED. |
