@@ -476,6 +476,21 @@ erDiagram
 - **Mã nguồn:** [`user.schema.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/laundry/users/schemas/user.schema.ts)
 - **Mục đích nghiệp vụ:** Quản lý tài khoản quản trị nội dung bài viết và marketing trên giao diện CMS Next.js (`/admin`).
 
+| Tên trường | Kiểu dữ liệu | Ràng buộc | Chỉ mục | Ý nghĩa nghiệp vụ |
+| :--- | :--- | :---: | :---: | :--- |
+| `_id` | `ObjectId` | Bắt buộc | Primary | Khóa chính bản ghi. |
+| `username` | `String` | Bắt buộc | Unique | Tên đăng nhập tài khoản CMS. |
+| `passwordHash` | `String` | Bắt buộc (`select: false`) | - | Mật khẩu băm an toàn bcrypt, ẩn mặc định khỏi truy vấn. |
+| `role` | `String` | Mặc định: `staff` | - | Quyền hạn: `admin` (toàn quyền quản trị), `staff` (nhân sự biên tập). |
+| `fullName` | `String` | Tùy chọn | - | Họ và tên hiển thị. |
+| `email` | `String` | Bắt buộc | - | Email nhận thông báo liên hệ/đơn hàng mới. |
+| `receiveEmailNotifications` | `Boolean` | Mặc định: `true` | - | Trạng thái nhận thông báo qua email. |
+| `refreshToken` | `String` | Tùy chọn (`select: false`) | - | Token refresh phiên đăng nhập băm bảo mật, ẩn mặc định. |
+| `lastReadArticleAt` | `Date` | Tùy chọn | - | Thời điểm đọc bài viết gần nhất. |
+| `lastReadContactAt` | `Date` | Tùy chọn | - | Thời điểm xem danh sách liên hệ gần nhất. |
+| `createdAt` | `Date` | Tự động | - | Thời điểm khởi tạo tài khoản. |
+| `updatedAt` | `Date` | Tự động | - | Thời điểm cập nhật hồ sơ gần nhất. |
+
 ---
 
 # PHẦN 3: CƠ SỞ DỮ LIỆU `moving_express` (DỊCH VỤ CHUYỂN NHÀ & XE TẢI)

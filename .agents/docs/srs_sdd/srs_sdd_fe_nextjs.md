@@ -36,7 +36,7 @@ Phân hệ đảm nhiệm 2 vai trò cốt lõi trong hệ sinh thái Thanh Xuâ
 - **Lead Capture & Context Tracking:** Mọi form gửi thông tin liên hệ đều tự động đính kèm ngữ cảnh (`sourceUrl`, `category`, `slug`) để đo lường hiệu quả từng bài viết marketing.
 
 #### FE-NEXT-FR-02: Phân Hệ Quản Trị Nội Dung CMS (`(admin)/admin`)
-- **Xác thực Quản trị viên (`/admin/login`):** Đăng nhập bảo mật bằng tài khoản Admin Backend, lưu JWT token an toàn trong httpOnly Cookie và quản lý phiên qua Next.js Middleware.
+- **Xác thực Quản trị viên (`/admin/login`):** Đăng nhập bảo mật bằng tài khoản Admin Backend, lưu JWT token an toàn trong httpOnly Cookie (`admin_access_token`, `admin_refresh_token`, cờ `secure: true` trên production, `sameSite: 'lax'`) và quản lý phiên tự động qua Next.js Middleware. Route Handler `/api/upload` được bảo vệ nghiêm ngặt bằng cookie xác thực trước khi cho phép tải hoặc xóa file.
 - **Tổng quan Bảng điều khiển (`/admin/dashboard`):** Thống kê số lượng leads mới, đơn hàng chờ xử lý, số bài viết đã xuất bản và biểu đồ tương tác khách hàng.
 - **Quản lý Bài viết & Danh mục (`/admin/articles`, `/admin/categories`):**
   - Thêm, sửa, xóa, xuất bản bài viết chuẩn SEO.

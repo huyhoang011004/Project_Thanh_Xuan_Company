@@ -2,6 +2,30 @@
 
 Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâng cấp, bugfix và triển khai tính năng của Hệ sinh thái Công ty Thanh Xuân qua từng Plan.
 
+## 2026-10-28
+
+### Plan 46: Vá Toàn Bộ 8 Lỗ Hổng Bảo Mật & Tối Ưu Hiệu Năng Phân Hệ Laundry (Frontend & Backend)
+
+- **Mục tiêu & Bối cảnh kỹ thuật:**
+  - Khắc phục triệt để toàn bộ 8 phát hiện bảo mật và các điểm nghẽn hiệu năng cốt lõi phát hiện trong kiểm toán Laundry.
+  - Chặn đứng nguy cơ leo thang đặc quyền từ tài khoản nhân sự thường (`staff`), bảo vệ quyền sở hữu dữ liệu tài khoản chống IDOR.
+  - Bảo vệ dữ liệu nhạy cảm Mongoose Schema (`passwordHash`, `refreshToken`), bảo mật Route Handler upload proxy phía Next.js.
+  - Chuẩn hóa múi giờ Việt Nam (`Asia/Ho_Chi_Minh`) cho mã đơn hàng và escape ký tự Regex chống ReDoS.
+
+- **Chi tiết thực thi mã nguồn:**
+  - **Backend API Laundry (`be-nestjs-thanhxuan`):**
+    - **Áp dụng RBAC RolesGuard:** Tích hợp `RolesGuard` kết hợp decorator `@Roles('admin')` cho `UsersController` (`POST /users`, `PUT /users/:id`, `DELETE /users/:id`), `SettingsController` (`PUT /settings`), `ArticlesController` (`DELETE /articles/bulk-delete`), `EmailMarketingController` và `ZaloMarketingController` (chạy chiến dịch).
+    - **Chống IDOR & Bảo vệ mật khẩu:** Trong `UsersController.updateProfile`, bổ sung kiểm tra quyền sở hữu `req.user.userId === id` hoặc quyền Admin, loại bỏ khả năng tài khoản thường sửa hồ sơ của người khác.
+    - **Ẩn trường nhạy cảm trong Schema:** Khai báo `{ select: false }` cho `passwordHash` và `refreshToken` trong `User` Schema; bổ sung các phương thức `findByUsernameWithPassword` và `findByIdWithRefreshToken` trong `UsersRepository` và cập nhật `AuthService.login()` và `AuthService.refreshTokens()`.
+    - **Bảo vệ Logout:** Thêm `@UseGuards(JwtAuthGuard)` cho `POST /auth/logout` và trích xuất `userId` trực tiếp từ token xác thực thay vì tin tưởng body từ client.
+    - **Bảo vệ Zalo Webhook:** Thêm cơ chế kiểm tra token/secret header cho `POST /zalo/webhook`.
+    - **Chuẩn hóa mã đơn hàng & Chống ReDoS:** Sửa `OrdersRepository.generateNextOrderCode` sử dụng `getDatePrefixVN(new Date())` đảm bảo múi giờ `Asia/Ho_Chi_Minh` không bị lệch ngày vào sáng sớm; bổ sung hàm `escapeRegex` và `.lean()` cho truy vấn danh sách trong `OrdersRepository`, `CrmRepository`, `ContactsRepository`.
+  - **Frontend Web & CMS (`fe-nextjs-thanhxuan-laundry`):**
+    - **Bảo vệ Route Handler Upload & Xóa File:** Bổ sung hàm kiểm tra token/cookie `admin_access_token` cho `POST /api/upload` và `DELETE /api/upload`, trả về `401 Unauthorized` nếu chưa đăng nhập, đồng thời chuyển tiếp header `Authorization` sang Backend NestJS.
+    - **Sửa lỗi Cookie `secure` & `sameSite`:** Khắc phục lỗi `(production && false)` trong `middleware.ts` và `admin-auth.action.ts`, đổi thành `secure: process.env.NODE_ENV === 'production'` và gắn cờ `sameSite: 'lax'`.
+    - **Ẩn rò rỉ lỗi JWT:** Trong `middleware.ts`, loại bỏ việc nhúng thông điệp lỗi chi tiết `error.message` vào URL query parameter khi redirect về trang login.
+
+
 ## 2026-10-27
 
 ### Plan 45: Khắc Phục Toàn Diện Các Phát Hiện Trong Review 43 & 44, Vá NoSQL Injection, Tối Ưu Bảo Mật AI & Wi-Fi, Triệt Tiêu Zero Any/Aliases và Chuẩn Hóa Toàn Diện Kích Thước Codebase (< 280 Dòng)
