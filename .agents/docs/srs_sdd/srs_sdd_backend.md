@@ -1,7 +1,7 @@
-# ĐẶC TẢ YÊU CẦU & THIẾT KẾ HỆ THỐNG BACKEND (SRS & SDD)
+﻿# ĐẶC TẢ YÊU CẦU & THIẾT KẾ HỆ THỐNG BACKEND (SRS & SDD)
 ## PHÂN HỆ BACKEND API TẬP TRUNG (be-nestjs-thanhxuan)
 
-> **Tài liệu tham chiếu cấp cao:** [SRS_SDD.md (Kiến Trúc Tổng Quan)](file:///d:/PROJECT/Website_Thanh_Xuan_Co> **Phiên bản:** 2.3 | **Synced:** 2026-10-13 | **Môi trường:** NestJS 10, Node.js v20+, MongoDB Multi-Database  
+> **Phiên bản:** 2.4 | **Synced:** 2026-10-27 | **Môi trường:** NestJS 10, Node.js v20+, MongoDB Multi-Database  
 > **Phạm vi mã nguồn:** `be-nestjs-thanhxuan/src/**`  
 > **Quy chuẩn kỹ thuật:** Clean Architecture, Repository Pattern, Multi-Database Isolation, SOLID, Defensive Programming
 

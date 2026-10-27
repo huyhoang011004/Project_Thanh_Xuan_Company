@@ -4,6 +4,66 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
 
 ## 2026-10-27
 
+### Plan 44: Tối Ưu Hóa Kích Thước Toàn Bộ File Mã Nguồn (< 250-300 Dòng), Tách Custom Hooks, Chuẩn Hóa TypeScript Strict (Zero 'any') & Xóa Bỏ Triệt Để 17 Re-export Aliases
+
+- **Mục tiêu & Bối cảnh kỹ thuật (Giai đoạn P2):**
+  - **Kỷ luật kiến trúc sạch & Anti-Slop (< 250-300 dòng/file):** Toàn bộ 38 file lớn (10 file Backend và 28 file Frontend) vượt ngưỡng 300 dòng được phân rã thành các sub-services, query helpers, custom hooks và sub-components chuyên biệt tuân thủ Single Responsibility Principle (SRP) và Feature-Based Colocation.
+  - **Tách Logic Phức Tạp Ra Custom Hooks:** Toàn bộ queries TanStack Query, mutations, quản lý form state, xử lý lưu ảnh offline và debounce vẽ Canvas A4 được tách sang các hooks chuyên biệt (useShipperFuel, useStaffManagement, usePrepOrderForm, useShipperCountForm, useShipperSlipPreview...).
+  - **TypeScript Strict Mode (Zero `any`):** Loại bỏ triệt để 100% kiểu dữ liệu `any` trong phạm vi thực thi, thay thế bằng các interfaces và types rõ ràng (`AuthenticatedStaffUser`, `AuditLogItem`, `ApprovalRequest`, `StaffUser`...).
+  - **Xóa Bỏ Triệt Để 17 Re-export Aliases:** Dọn dẹp sạch sẽ toàn bộ các file/dòng re-export alias tạm thời (`*View`, `*Dialog`), cập nhật mọi nơi gọi trỏ trực tiếp vào nguồn chuẩn, triệt tiêu hoàn toàn nợ kỹ thuật.
+
+- **Chi tiết thực thi mã nguồn:**
+  - **Backend (`be-nestjs-thanhxuan`):**
+    - Phân hệ Lương (`payroll`):
+      - `payroll.service.ts` (rút từ 745 dòng xuống 293 dòng), tách logic nạp dữ liệu thợ và giờ công sang `payroll-data-fetcher.helper.ts` (293 dòng).
+      - `payroll-assembler.helper.ts` (rút xuống 156 dòng), tách phần điều chỉnh thủ công sang `payroll-adjustment.helper.ts` (203 dòng).
+      - `payroll-calculator.helper.ts` (rút xuống 276 dòng), tách tính toán số giờ làm việc sang `payroll-hours-calc.helper.ts` (72 dòng).
+    - Phân hệ Giao nhận (`handovers`):
+      - `handover-record.service.ts` (rút từ 1268 dòng xuống 275 dòng), tách các truy vấn và kiểm đếm sang `handover-item-query.helper.ts` (145 dòng).
+      - `handover.controller.ts` (rút từ 404 dòng xuống 256 dòng), tách aggregations xuất báo cáo sang `handover-report.helper.ts` (168 dòng).
+      - `handover-state.ts` (rút từ 362 dòng xuống 186 dòng), tách quy trình flow 5 bước sang `handover-flow.service.ts` (260 dòng).
+    - Phân hệ Chấm công, Thợ, Báo cáo & Tài khoản:
+      - `partner-report.service.ts` (rút xuống 262 dòng) + `partner-report-query.helper.ts` (140 dòng).
+      - `job-segment.service.ts` (rút xuống 243 dòng) + `job-segment-query.helper.ts` (170 dòng).
+      - `attendance.service.ts` (rút từ 637 dòng xuống 282 dòng) + `attendance-query.helper.ts` (246 dòng).
+      - `account-management.service.ts` (rút từ 403 dòng xuống 233 dòng) + `account-query.helper.ts` (182 dòng).
+      - `account-auth.service.ts` (rút từ 615 dòng xuống 278 dòng).
+    - Kết quả quét kiểm tra: **0 file code Backend vượt quá 300 dòng** trong toàn bộ `src/modules/core` và `src/modules/internal`.
+  - **Frontend (`fe-react-thanhxuan-internal`):**
+    - Phân hệ Phiếu Giao nhận (`handovers`):
+      - Bộ xuất phiếu Canvas: Tách `handoverSlipCanvasRenderer.ts` (rút từ 648 dòng xuống 185 dòng) thành `handoverCanvasTableDrawer.ts` (182 dòng) và `handoverCanvasSignatureDrawer.ts` (145 dòng).
+      - Custom Hooks: Tách `usePrepOrderForm.ts` (rút từ 361 dòng xuống 299 dòng) + `prepOrderSlipHelper.ts` (112 dòng); tách `useShipperCountForm.ts` (rút từ 340 dòng xuống 292 dòng) + `shipperCountSlipHelper.ts` (88 dòng); tách `useShipperSlipPreview.ts` (rút từ 345 dòng xuống 288 dòng) + `shipperSlipPreviewHelper.ts` (78 dòng).
+    - Phân hệ Nhiên liệu, Chấm công, Quản lý Nhân sự & Báo cáo:
+      - `ShipperFuelPage.tsx` (rút từ 438 dòng xuống 257 dòng) + tách `hooks/useShipperFuel.ts` (185 dòng).
+      - `AttendancePage.tsx` (rút từ 369 dòng xuống 232 dòng) + tách `AttendanceGpsWidgetComponent.tsx` (80 dòng) và `AttendanceHistoryCardComponent.tsx` (76 dòng).
+      - `StaffManagementPage.tsx` (rút từ 366 dòng xuống 199 dòng) + tách `hooks/useStaffManagement.ts` (190 dòng).
+      - `WorkforceReportSectionComponent.tsx` (rút từ 455 dòng xuống 58 dòng) + tách `WorkforceAttendanceStageViewComponent.tsx` (174 dòng) và `WorkforceShipperPayrollViewComponent.tsx` (174 dòng).
+      - `QualityFuelReportSectionComponent.tsx` (rút từ 389 dòng xuống 138 dòng) + tách `QualityVarianceReportViewComponent.tsx` (242 dòng).
+      - `ReportsFilterBarComponent.tsx` (rút từ 358 dòng xuống 231 dòng) + tách `ReportsTabNavigationComponent.tsx` (124 dòng).
+      - `ProfileEditModal.tsx` (rút từ 403 dòng xuống 296 dòng) + tách `ProfileSignatureSectionComponent.tsx` (95 dòng).
+      - `StaffFormModal.tsx` (rút từ 380 dòng xuống 271 dòng) + tách `StaffPartnerBranchSelectComponent.tsx` (60 dòng) và `StaffBasicInfoFieldsComponent.tsx` (75 dòng).
+      - `PartnerModal.tsx` (rút từ 346 dòng xuống 239 dòng) + tách `PartnerContactScheduleFieldsComponent.tsx` (110 dòng).
+      - `LoginPage.tsx` (rút từ 367 dòng xuống 255 dòng) + tách `LoginDemoAccountsComponent.tsx` (95 dòng).
+      - `RegisterFormComponent.tsx` (rút từ 341 dòng xuống 220 dòng) + tách `RegisterRoleSelectorComponent.tsx` (135 dòng).
+      - `nav-config.ts` (rút từ 493 dòng xuống 277 dòng) + tách `nav-mobile-config.ts` (228 dòng).
+      - `router.tsx` (rút từ 382 dòng xuống 169 dòng) + tách `legacy-redirect-routes.tsx (138 dòng).
+      - `ApprovalManagementPage.tsx` (144 dòng) + `approval.types.ts` (xóa bỏ 100% `as any`).
+      - `AuditLogPage.tsx` (81 dòng) + `AuditLogItem` (xóa bỏ 100% `log: any`).
+    - Xóa sạch 17 Re-export Aliases: Triệt tiêu các alias `StaffManagementView`, `ApprovalManagementView`, `AuditLogView`, `FuelReviewView`, `BrandDialog`, `DeleteConfirmDialog`, `PartnerDialog` và toàn bộ component aliases trong `partners/components/`.
+    - Kết quả quét kiểm tra: **0 file code Frontend vượt quá 300 dòng** trong toàn bộ `fe-react-thanhxuan-internal/src`.
+
+- **Kết quả kiểm thử & Nghiệm thu toàn diện:**
+  - Backend (`be-nestjs-thanhxuan`):
+    - Lint: Pass 100% (0 lỗi).
+    - Typecheck: Pass 100% (`tsc --noEmit` không có lỗi).
+    - Unit Tests: 49/49 test suites pass, 226/226 tests passed.
+    - Build: Pass 100% (NestJS bundle tạo thành công).
+  - Frontend (`fe-react-thanhxuan-internal`):
+    - Typecheck: Pass 100% (`tsc -b` không có lỗi).
+    - Build: Pass 100% (Vite production bundle + PWA service worker generated).
+
+
+
 ### Nâng Cấp Cấu Hình Xưởng: Tra Cứu Tọa Độ GPS Tự Động Từ Địa Chỉ Nhập Tay & Tăng Sai Số GPS Cho Phép Lên ±350m
 
 - **Bối cảnh & Mục tiêu:**
@@ -63,6 +123,66 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
     - Unit Tests: [`archive.service.spec.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/archive/specs/archive.service.spec.ts) (PASS 4/4 tests). Toàn bộ 16 test suites của `internal` (126/126 tests) PASS 100%. `pnpm build` PASS.
 
 ## 2026-10-27
+
+### Plan 44: Tối Ưu Hóa Kích Thước Toàn Bộ File Mã Nguồn (< 250-300 Dòng), Tách Custom Hooks, Chuẩn Hóa TypeScript Strict (Zero 'any') & Xóa Bỏ Triệt Để 17 Re-export Aliases
+
+- **Mục tiêu & Bối cảnh kỹ thuật (Giai đoạn P2):**
+  - **Kỷ luật kiến trúc sạch & Anti-Slop (< 250-300 dòng/file):** Toàn bộ 38 file lớn (10 file Backend và 28 file Frontend) vượt ngưỡng 300 dòng được phân rã thành các sub-services, query helpers, custom hooks và sub-components chuyên biệt tuân thủ Single Responsibility Principle (SRP) và Feature-Based Colocation.
+  - **Tách Logic Phức Tạp Ra Custom Hooks:** Toàn bộ queries TanStack Query, mutations, quản lý form state, xử lý lưu ảnh offline và debounce vẽ Canvas A4 được tách sang các hooks chuyên biệt (useShipperFuel, useStaffManagement, usePrepOrderForm, useShipperCountForm, useShipperSlipPreview...).
+  - **TypeScript Strict Mode (Zero `any`):** Loại bỏ triệt để 100% kiểu dữ liệu `any` trong phạm vi thực thi, thay thế bằng các interfaces và types rõ ràng (`AuthenticatedStaffUser`, `AuditLogItem`, `ApprovalRequest`, `StaffUser`...).
+  - **Xóa Bỏ Triệt Để 17 Re-export Aliases:** Dọn dẹp sạch sẽ toàn bộ các file/dòng re-export alias tạm thời (`*View`, `*Dialog`), cập nhật mọi nơi gọi trỏ trực tiếp vào nguồn chuẩn, triệt tiêu hoàn toàn nợ kỹ thuật.
+
+- **Chi tiết thực thi mã nguồn:**
+  - **Backend (`be-nestjs-thanhxuan`):**
+    - Phân hệ Lương (`payroll`):
+      - `payroll.service.ts` (rút từ 745 dòng xuống 293 dòng), tách logic nạp dữ liệu thợ và giờ công sang `payroll-data-fetcher.helper.ts` (293 dòng).
+      - `payroll-assembler.helper.ts` (rút xuống 156 dòng), tách phần điều chỉnh thủ công sang `payroll-adjustment.helper.ts` (203 dòng).
+      - `payroll-calculator.helper.ts` (rút xuống 276 dòng), tách tính toán số giờ làm việc sang `payroll-hours-calc.helper.ts` (72 dòng).
+    - Phân hệ Giao nhận (`handovers`):
+      - `handover-record.service.ts` (rút từ 1268 dòng xuống 275 dòng), tách các truy vấn và kiểm đếm sang `handover-item-query.helper.ts` (145 dòng).
+      - `handover.controller.ts` (rút từ 404 dòng xuống 256 dòng), tách aggregations xuất báo cáo sang `handover-report.helper.ts` (168 dòng).
+      - `handover-state.ts` (rút từ 362 dòng xuống 186 dòng), tách quy trình flow 5 bước sang `handover-flow.service.ts` (260 dòng).
+    - Phân hệ Chấm công, Thợ, Báo cáo & Tài khoản:
+      - `partner-report.service.ts` (rút xuống 262 dòng) + `partner-report-query.helper.ts` (140 dòng).
+      - `job-segment.service.ts` (rút xuống 243 dòng) + `job-segment-query.helper.ts` (170 dòng).
+      - `attendance.service.ts` (rút từ 637 dòng xuống 282 dòng) + `attendance-query.helper.ts` (246 dòng).
+      - `account-management.service.ts` (rút từ 403 dòng xuống 233 dòng) + `account-query.helper.ts` (182 dòng).
+      - `account-auth.service.ts` (rút từ 615 dòng xuống 278 dòng).
+    - Kết quả quét kiểm tra: **0 file code Backend vượt quá 300 dòng** trong toàn bộ `src/modules/core` và `src/modules/internal`.
+  - **Frontend (`fe-react-thanhxuan-internal`):**
+    - Phân hệ Phiếu Giao nhận (`handovers`):
+      - Bộ xuất phiếu Canvas: Tách `handoverSlipCanvasRenderer.ts` (rút từ 648 dòng xuống 185 dòng) thành `handoverCanvasTableDrawer.ts` (182 dòng) và `handoverCanvasSignatureDrawer.ts` (145 dòng).
+      - Custom Hooks: Tách `usePrepOrderForm.ts` (rút từ 361 dòng xuống 299 dòng) + `prepOrderSlipHelper.ts` (112 dòng); tách `useShipperCountForm.ts` (rút từ 340 dòng xuống 292 dòng) + `shipperCountSlipHelper.ts` (88 dòng); tách `useShipperSlipPreview.ts` (rút từ 345 dòng xuống 288 dòng) + `shipperSlipPreviewHelper.ts` (78 dòng).
+    - Phân hệ Nhiên liệu, Chấm công, Quản lý Nhân sự & Báo cáo:
+      - `ShipperFuelPage.tsx` (rút từ 438 dòng xuống 257 dòng) + tách `hooks/useShipperFuel.ts` (185 dòng).
+      - `AttendancePage.tsx` (rút từ 369 dòng xuống 232 dòng) + tách `AttendanceGpsWidgetComponent.tsx` (80 dòng) và `AttendanceHistoryCardComponent.tsx` (76 dòng).
+      - `StaffManagementPage.tsx` (rút từ 366 dòng xuống 199 dòng) + tách `hooks/useStaffManagement.ts` (190 dòng).
+      - `WorkforceReportSectionComponent.tsx` (rút từ 455 dòng xuống 58 dòng) + tách `WorkforceAttendanceStageViewComponent.tsx` (174 dòng) và `WorkforceShipperPayrollViewComponent.tsx` (174 dòng).
+      - `QualityFuelReportSectionComponent.tsx` (rút từ 389 dòng xuống 138 dòng) + tách `QualityVarianceReportViewComponent.tsx` (242 dòng).
+      - `ReportsFilterBarComponent.tsx` (rút từ 358 dòng xuống 231 dòng) + tách `ReportsTabNavigationComponent.tsx` (124 dòng).
+      - `ProfileEditModal.tsx` (rút từ 403 dòng xuống 296 dòng) + tách `ProfileSignatureSectionComponent.tsx` (95 dòng).
+      - `StaffFormModal.tsx` (rút từ 380 dòng xuống 271 dòng) + tách `StaffPartnerBranchSelectComponent.tsx` (60 dòng) và `StaffBasicInfoFieldsComponent.tsx` (75 dòng).
+      - `PartnerModal.tsx` (rút từ 346 dòng xuống 239 dòng) + tách `PartnerContactScheduleFieldsComponent.tsx` (110 dòng).
+      - `LoginPage.tsx` (rút từ 367 dòng xuống 255 dòng) + tách `LoginDemoAccountsComponent.tsx` (95 dòng).
+      - `RegisterFormComponent.tsx` (rút từ 341 dòng xuống 220 dòng) + tách `RegisterRoleSelectorComponent.tsx` (135 dòng).
+      - `nav-config.ts` (rút từ 493 dòng xuống 277 dòng) + tách `nav-mobile-config.ts` (228 dòng).
+      - `router.tsx` (rút từ 382 dòng xuống 169 dòng) + tách `legacy-redirect-routes.tsx (138 dòng).
+      - `ApprovalManagementPage.tsx` (144 dòng) + `approval.types.ts` (xóa bỏ 100% `as any`).
+      - `AuditLogPage.tsx` (81 dòng) + `AuditLogItem` (xóa bỏ 100% `log: any`).
+    - Xóa sạch 17 Re-export Aliases: Triệt tiêu các alias `StaffManagementView`, `ApprovalManagementView`, `AuditLogView`, `FuelReviewView`, `BrandDialog`, `DeleteConfirmDialog`, `PartnerDialog` và toàn bộ component aliases trong `partners/components/`.
+    - Kết quả quét kiểm tra: **0 file code Frontend vượt quá 300 dòng** trong toàn bộ `fe-react-thanhxuan-internal/src`.
+
+- **Kết quả kiểm thử & Nghiệm thu toàn diện:**
+  - Backend (`be-nestjs-thanhxuan`):
+    - Lint: Pass 100% (0 lỗi).
+    - Typecheck: Pass 100% (`tsc --noEmit` không có lỗi).
+    - Unit Tests: 49/49 test suites pass, 226/226 tests passed.
+    - Build: Pass 100% (NestJS bundle tạo thành công).
+  - Frontend (`fe-react-thanhxuan-internal`):
+    - Typecheck: Pass 100% (`tsc -b` không có lỗi).
+    - Build: Pass 100% (Vite production bundle + PWA service worker generated).
+
+
 
 ### Nâng Cấp Cấu Hình Xưởng: Tra Cứu Tọa Độ GPS Tự Động Từ Địa Chỉ Nhập Tay & Tăng Sai Số GPS Cho Phép Lên ±350m
 

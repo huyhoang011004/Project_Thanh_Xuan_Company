@@ -1,6 +1,6 @@
 # Plan 44: Chuẩn Hóa Clean Code (Giai Đoạn P2) — Chia Nhỏ Toàn Bộ File Vượt Ngưỡng (< 250-300 Dòng), Tách Custom Hooks & Loại Bỏ Triệt Để Kiểu `any` (`core`, `internal`, `fe-react-thanhxuan-internal`)
 
-> Status: In progress | Created: 2026-10-27 | Depends on: Plan 43 | Target: `be-nestjs-thanhxuan` (`src/modules/core`, `src/modules/internal`) & `fe-react-thanhxuan-internal` (`src/`)
+> Status: Complete | Created: 2026-10-27 | Depends on: Plan 43 | Target: `be-nestjs-thanhxuan` (`src/modules/core`, `src/modules/internal`) & `fe-react-thanhxuan-internal` (`src/`)
 
 ## 1. Overview & Affected Files
 
@@ -144,12 +144,12 @@ export interface PopulatedPartnerRef {
 ## 3. Implementation Tasks (Checklist)
 
 - [x] **T1: Chuẩn hóa TypeScript Strict Mode (Zero `any`) & Dọn dẹp Backend `core` + `internal/common`** - Tạo `AuthenticatedStaffUser`, thay thế toàn bộ `user: any` / `req: any` trong các Controller của `internal` và `core`, dọn dẹp `schedule-task.service.ts` - Depends on: Plan 43
-- [ ] **T2: Chia nhỏ các Service lớn trong `be-nestjs-thanhxuan/src/modules/internal/handovers`** - Tách `handover-record.service.ts` (`1268 dòng`), `handover-flow.service.ts` (`382 dòng`), `handover-state.ts` (`362 dòng`) và `handover.controller.ts` (`404 dòng`) thành các sub-services và helpers `< 280 dòng/file`, đăng ký providers vào `HandoverModule` - Depends on: T1
-- [ ] **T3: Chia nhỏ các Service lớn trong `auth`, `payroll`, `attendance`, `piecework`, `reports` (`src/modules/internal`)** - Tách `payroll.service.ts` (`745 dòng`), `attendance.service.ts` (`637 dòng`), `account-auth.service.ts` (`615 dòng`), `account-management.service.ts` (`403 dòng`), `job-segment.service.ts` (`400 dòng`), `partner-report.service.ts` (`386 dòng`) xuống `< 280 dòng/file` - Depends on: T1
-- [ ] **T4: Chia nhỏ `HandoverExportHelper.ts` (`1022 dòng`) & các Pages/Components phân hệ Giao nhận (`fe-react-thanhxuan-internal/src/features/operations/handovers`)** - Tách bộ `export/`, tách các Custom Hooks (`usePartnerReceiptTab`, `useShipperSlipPreview` có debounce 300ms, `useHandoverSlipGallery`, `usePrepOrderForm`, `useShipperHandoverPage`, `useRecountStation`, `usePartnerHandoverPage`, `useWarehouseHandover`) và rút gọn toàn bộ 14 file giao nhận xuống `< 260 dòng/file`, xóa sạch `any` - Depends on: T1
-- [ ] **T5: Chia nhỏ các Pages/Components/Modals còn lại ở Frontend (`fuel`, `attendance`, `piecework`, `reports`, `management`, `auth`, `layout`, `router`) & Xóa 17 Re-export Aliases** - Tách `useShipperFuel` (hỗ trợ lưu ảnh offline khi mất mạng), `useStaffManagement`, chia nhỏ các section báo cáo/modals, xóa sạch 17 re-export aliases (`*View`, `*Dialog`) và xóa toàn bộ các vị trí `any` còn lại - Depends on: T4
-- [ ] **T6: Kiểm thử Toàn Diện (Lint, Typecheck, Unit Test, Build & Kiểm tra số dòng file)** - Chạy script kiểm tra không còn file nào vượt ngưỡng cho phép và không còn `any` trong phạm vi 3 thư mục; chạy `pnpm lint`, `pnpm exec tsc --noEmit`, `pnpm test`, `pnpm build` cho cả `be-nestjs-thanhxuan` và `fe-react-thanhxuan-internal` - Depends on: T2, T3, T4, T5
-- [ ] **T7: Đồng bộ 5 Trụ cột Tài liệu & Tự động Commit/Push nhánh `dev`** - Cập nhật `.agents/docs/CODEBASE_ATLAS.md`, `.agents/docs/srs_sdd/srs_sdd_backend.md`, `.agents/docs/srs_sdd/srs_sdd_fe_internal.md`, `.agents/docs/SRS_SDD.md`, `.agents/docs/CHANGELOG.md` và commit/push lên nhánh `dev` - Depends on: T6
+- [x] **T2: Chia nhỏ các Service lớn trong `be-nestjs-thanhxuan/src/modules/internal/handovers`** - Tách `handover-record.service.ts` (`1268 dòng`), `handover-flow.service.ts` (`382 dòng`), `handover-state.ts` (`362 dòng`) và `handover.controller.ts` (`404 dòng`) thành các sub-services và helpers `< 280 dòng/file`, đăng ký providers vào `HandoverModule` - Depends on: T1
+- [x] **T3: Chia nhỏ các Service lớn trong `auth`, `payroll`, `attendance`, `piecework`, `reports` (`src/modules/internal`)** - Tách `payroll.service.ts` (`745 dòng`), `attendance.service.ts` (`637 dòng`), `account-auth.service.ts` (`615 dòng`), `account-management.service.ts` (`403 dòng`), `job-segment.service.ts` (`400 dòng`), `partner-report.service.ts` (`386 dòng`) xuống `< 280 dòng/file` - Depends on: T1
+- [x] **T4: Chia nhỏ `HandoverExportHelper.ts` (`1022 dòng`) & các Pages/Components phân hệ Giao nhận (`fe-react-thanhxuan-internal/src/features/operations/handovers`)** - Tách bộ `export/`, tách các Custom Hooks (`usePartnerReceiptTab`, `useShipperSlipPreview` có debounce 300ms, `useHandoverSlipGallery`, `usePrepOrderForm`, `useShipperHandoverPage`, `useRecountStation`, `usePartnerHandoverPage`, `useWarehouseHandover`) và rút gọn toàn bộ 14 file giao nhận xuống `< 260 dòng/file`, xóa sạch `any` - Depends on: T1
+- [x] **T5: Chia nhỏ các Pages/Components/Modals còn lại ở Frontend (`fuel`, `attendance`, `piecework`, `reports`, `management`, `auth`, `layout`, `router`) & Xóa 17 Re-export Aliases** - Tách `useShipperFuel` (hỗ trợ lưu ảnh offline khi mất mạng), `useStaffManagement`, chia nhỏ các section báo cáo/modals, xóa sạch 17 re-export aliases (`*View`, `*Dialog`) và xóa toàn bộ các vị trí `any` còn lại - Depends on: T4
+- [x] **T6: Kiểm thử Toàn Diện (Lint, Typecheck, Unit Test, Build & Kiểm tra số dòng file)** - Chạy script kiểm tra không còn file nào vượt ngưỡng cho phép và không còn `any` trong phạm vi 3 thư mục; chạy `pnpm lint`, `pnpm exec tsc --noEmit`, `pnpm test`, `pnpm build` cho cả `be-nestjs-thanhxuan` và `fe-react-thanhxuan-internal` - Depends on: T2, T3, T4, T5
+- [x] **T7: Đồng bộ 5 Trụ cột Tài liệu & Tự động Commit/Push nhánh `dev`** - Cập nhật `.agents/docs/CODEBASE_ATLAS.md`, `.agents/docs/srs_sdd/srs_sdd_backend.md`, `.agents/docs/srs_sdd/srs_sdd_fe_internal.md`, `.agents/docs/SRS_SDD.md`, `.agents/docs/CHANGELOG.md` và commit/push lên nhánh `dev` - Depends on: T6
 
 ---
 
@@ -189,4 +189,5 @@ export interface PopulatedPartnerRef {
 ## Changelog
 
 - 2026-10-27: Khởi tạo Plan 44 cho Giai đoạn P2 (Chia nhỏ toàn bộ 38 file vượt ngưỡng 300 dòng, tách Custom Hooks, xóa re-export tạm thời và loại bỏ triệt để kiểu `any`).
+- 2026-10-27: Hoàn thành 100% Tasks T1 đến T7. Verification lint/typecheck/test/build pass 100%. Đồng bộ đầy đủ 5 trụ cột tài liệu và commit push nhánh `dev`.
 
