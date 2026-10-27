@@ -2,7 +2,7 @@
 ## PHÂN HỆ WEB KHÁCH HÀNG & QUẢN TRỊ CMS (fe-nextjs-thanhxuan-laundry)
 
 > **Tài liệu tham chiếu cấp cao:** [SRS_SDD.md (Kiến Trúc Tổng Quan)](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/SRS_SDD.md)  
-> **Phiên bản:** 2.2 | **Môi trường:** Next.js 14+ (App Router), React 18/19, TailwindCSS, shadcn/ui  
+> **Phiên bản:** 2.3 | **Synced:** 2026-10-28 | **Môi trường:** Next.js 14+ (App Router), React 18/19, TailwindCSS, shadcn/ui  
 > **Phạm vi mã nguồn:** `fe-nextjs-thanhxuan-laundry/src/**`  
 > **Quy chuẩn kỹ thuật:** Server Components mặc định, Feature-based Colocation, Metadata SEO & JSON-LD, React Hook Form + Zod
 

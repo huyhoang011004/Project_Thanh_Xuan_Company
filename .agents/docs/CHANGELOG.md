@@ -4,6 +4,49 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
 
 ## 2026-10-28
 
+### Plan 47: Chuẩn Hóa Clean Code, Phân Rã 14 Tệp Vượt Ngưỡng (< 300 Dòng), Xóa Triệt Để Kiểu `any` & Dọn 293 Cảnh Báo ESLint Phân Hệ Laundry
+
+- **Mục tiêu & Bối cảnh kỹ thuật:**
+  - Giải quyết triệt để vấn đề tệp tin quá khổ và vi phạm quy chuẩn thiết kế đơn nhiệm (Single Responsibility Principle) trong phân hệ Laundry: phân rã 14 tệp tin vượt ngưỡng 300 dòng (có file lên tới 728 dòng) về dưới `< 250-300 dòng/tệp`.
+  - Loại bỏ hoàn toàn kiểu `any`, xây dựng các Class DTO chuẩn có decorator của `class-validator`, xóa sạch 293 lỗi và cảnh báo ESLint type-safety trong `be-nestjs-thanhxuan/src/modules/laundry`.
+  - Tuân thủ quy tắc Repository Pattern: loại bỏ triệt để việc inject `@InjectModel` trực tiếp vào Service trong `email-marketing` và `zalo-marketing`, tạo mới 4 Repository kế thừa `BaseRepository`.
+  - Dọn sạch dead code, gỡ bỏ `localStorage.getItem("access_token")` trong `api.service.ts`, chuẩn hóa xác thực HTTP-only cookies và verify build/test thành công 100%.
+
+- **Chi tiết thực thi mã nguồn:**
+  - **Backend Laundry (`be-nestjs-thanhxuan/src/modules/laundry`):**
+    - **Tách Helper Articles Sanitizer:** Tách `articles-sanitize.helper.ts` (70 dòng) chứa `sanitizeOptions`, `fixQuillVideoBug`, `extractCloudinaryUrlsFromHtml` ra khỏi `articles.service.ts`, giảm từ 329 dòng xuống còn 285 dòng.
+    - **Tạo DTO & Validation cho Marketing & Auth:**
+      - `CreateCampaignDto`, `UpdateCampaignDto`, `CreateSequenceDto`, `UpdateSequenceDto` trong `email-marketing/dto/`.
+      - `CreateZaloCampaignDto`, `CreateZaloSequenceDto` trong `zalo-marketing/dto/`.
+      - `CreateUserDto`, `UpdateUserDto`, `UpdateProfileDto` trong `users/dto/`.
+      - `RefreshTokenDto` trong `auth/dto/`.
+    - **Tạo Repository Pattern Chuẩn:** Tạo `EmailCampaignRepository`, `EmailSequenceRepository`, `ZaloCampaignRepository`, `ZaloSequenceRepository` kế thừa `BaseRepository` có `.lean()`, đăng ký vào Modules và inject Repository vào Service thay vì Model.
+    - **Xóa Sạch 293 Lỗi ESLint:** Cập nhật Controller và Service Laundry sang strict typing, narrow types qua `unknown`, xử lý sạch toàn bộ cảnh báo unsafe-assignment, unsafe-member-access. Kết quả kiểm tra ESLint: **0 errors, 0 warnings**; 14/14 test suites passed.
+  - **Frontend Laundry (`fe-nextjs-thanhxuan-laundry/src`):**
+    - **Phân rã Rich Text Editor (728 dòng $\rightarrow$ Modular Sub-components):**
+      - Thư mục `components/ui/rich-text-editor/`: `RichTextEditorComponent.tsx` (101 dòng), `RichTextToolbarComponent.tsx` (144 dòng), `RichTextFormattingButtons.tsx` (198 dòng), `RichTextAlignHeadingsButtons.tsx` (153 dòng), `rich-text-extensions.ts` (98 dòng), `MediaInsertModal.tsx` (140 dòng).
+      - Xóa bỏ hoàn toàn tệp cũ `rich-text-editor.tsx`.
+    - **Phân rã Admin Settings (useAdminSettings 505 dòng + 4 SettingEditors 480-492 dòng):**
+      - Tách hook: `useAdminSettingsState.ts`, `useAdminSettingsHomepageHandlers.ts`, `useAdminSettingsServiceAboutHandlers.ts`, đưa `useAdminSettings.ts` về 122 dòng.
+      - Tách sections: `AboutBannerFormSection.tsx`, `AboutWorkProcessFormSection.tsx`, `AboutPromoBannerFormSection.tsx`, `ServiceBannerFormSection.tsx`, `ServiceWorkProcessFormSection.tsx`, `ServicePromoBannerFormSection.tsx`, `FooterCompanyInfoFormSection.tsx`, `FooterLinksFormSection.tsx`, `FooterBottomBarFormSection.tsx`, `HomeHeroFormSection.tsx`, `HomeWhyChooseUsFormSection.tsx`, `HomeFaqFormSection.tsx`.
+      - Thu nhỏ toàn bộ 4 components editor về < 95 dòng/file.
+    - **Phân rã Admin Header & Operations:**
+      - Tách `AdminHeaderComponent.tsx` (381 dòng $\rightarrow$ 82 dòng) kết hợp `AdminNotificationDropdownComponent.tsx` (254 dòng) và `AdminPageTitleComponent.tsx` (95 dòng).
+      - Tách `ZaloMarketingPage.tsx` (360 dòng $\rightarrow$ 190 dòng) kết hợp `ZaloCampaignModal.tsx` (95 dòng) và `ZaloSequenceModal.tsx` (110 dòng).
+      - Tách `useAdminContacts.ts` (352 dòng $\rightarrow$ 220 dòng) kết hợp `contacts-export.util.ts` (140 dòng).
+    - **Phân rã Public Service & Dynamic Slugs:**
+      - Tách `ServiceDetailPage.tsx` (521 dòng $\rightarrow$ 25 dòng re-export facade) thành `PromoBanner.tsx`, `ServiceBanner.tsx`, `ServiceCategoryDetail.tsx`, `ServiceList.tsx`, `WorkProcess.tsx`.
+      - Tách `dich-vu/[...slug]/page.tsx` (368 dòng $\rightarrow$ 172 dòng) kết hợp `ServiceArticleDetailView.tsx` và `ServiceCategoryListView.tsx`.
+      - Tách `gioi-thieu/[...slug]/page.tsx` (358 dòng $\rightarrow$ 172 dòng) kết hợp `AboutArticleDetailView.tsx` và `AboutCategoryListView.tsx`.
+      - Tách `tin-tuc/[...slug]/page.tsx` (305 dòng $\rightarrow$ 150 dòng) kết hợp `NewsArticleDetailView.tsx` và `NewsCategoryListView.tsx`.
+    - **Làm sạch API Client & Dead Code:** Xóa `localStorage.getItem("access_token")` trong `api.service.ts`, chuẩn hóa `credentials: 'include'` cho toàn bộ authenticated requests.
+  - **Kết quả Kiểm Chứng (Verification):**
+    - 100% tệp tin trong `fe-nextjs-thanhxuan-laundry/src` và `be-nestjs-thanhxuan/src/modules/laundry` đều **< 300 dòng**.
+    - Backend ESLint: 0 errors, 0 warnings.
+    - Backend Unit Tests: 14/14 test suites pass, 36/36 tests pass.
+    - Backend Build: Pass 100%.
+    - Frontend Next.js: TypeScript pass 100%, Production Build pass 100%.
+
 ### Plan 46: Vá Toàn Bộ 8 Lỗ Hổng Bảo Mật & Tối Ưu Hiệu Năng Phân Hệ Laundry (Frontend & Backend)
 
 - **Mục tiêu & Bối cảnh kỹ thuật:**

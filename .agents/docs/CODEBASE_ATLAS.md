@@ -2,7 +2,7 @@
 
 > **Mục đích:** Cung cấp bản đồ chỉ mục trực tiếp (Direct Navigation Map) cho AI Agent và Kỹ sư phát triển.  
 > **Nguyên tắc hoạt động:** Agent đọc file này trước tiên để xác định chính xác các file mã nguồn (Controller, Service, Repository, DTO, Page, Modal, Hook) cần can thiệp cho từng tác vụ, **loại bỏ hoàn toàn việc phải dò tìm (grep/list_dir) lặp đi lặp lại**.  
-> **Phiên bản:** 1.2 | **Ngày cập nhật:** 2026-10-27  
+> **Phiên bản:** 1.3 | **Ngày cập nhật:** 2026-10-28  
 > **Quy chuẩn duy trì:** Tuân thủ Definition of Done trong [AGENTS.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/rules/AGENTS.md).
 
 ---
@@ -42,11 +42,13 @@ Cổng Backend API tập trung chia thành 3 phân vùng Database và 1 lớp Co
 
 | Nghiệp Vụ | Tuyến API | Controller & File | Service & File | Repository & Schema |
 | :--- | :--- | :--- | :--- | :--- |
-| **Bài viết & Dịch vụ Giặt** | `/api/v1/articles` | `ArticlesController` | `ArticlesService` | `ArticlesRepository` (`articles/repositories/articles.repository.ts`)<br>[articles.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/laundry/articles/schemas/articles.schema.ts) |
+| **Bài viết & Dịch vụ Giặt** | `/api/v1/articles` | `ArticlesController` | `ArticlesService`<br>Helper: `articles-sanitize.helper.ts` | `ArticlesRepository` (`articles/repositories/articles.repository.ts`)<br>[articles.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/laundry/articles/schemas/articles.schema.ts) |
 | **Chuyên mục Giặt** | `/api/v1/categories` | `CategoriesController` | `CategoriesService` | `CategoriesRepository` (`categories/repositories/categories.repository.ts`)<br>[categories.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/laundry/categories/schemas/categories.schema.ts) |
 | **Đơn đặt lịch Web** | `/api/v1/orders` | `OrdersController` | `OrdersService` | `OrdersRepository` (`orders/repositories/orders.repository.ts`)<br>[orders.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/laundry/orders/schemas/orders.schema.ts) |
 | **Form liên hệ B2B (Leads)** | `/api/v1/contacts` | `ContactsController` | `ContactsService` | `ContactsRepository` (`contacts/repositories/contacts.repository.ts`)<br>[contacts.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/laundry/contacts/schemas/contacts.schema.ts) |
 | **CRM Khách hàng** | `/api/v1/crm` | `CrmController` | `CrmService` | `CrmRepository` (`crm/repositories/crm.repository.ts`)<br>[customer.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/laundry/crm/schemas/customer.schema.ts) |
+| **Email Marketing** | `/api/v1/email-marketing` | `EmailMarketingController` | `EmailMarketingService` | `EmailCampaignRepository`<br>`EmailSequenceRepository` |
+| **Zalo Marketing** | `/api/v1/zalo-marketing` | `ZaloMarketingController` | `ZaloMarketingService` | `ZaloCampaignRepository`<br>`ZaloSequenceRepository` |
 | **Cấu hình & Metadata Web** | `/api/v1/settings` | `SettingsController` | `SettingsService` | `SettingsRepository` (`settings/repositories/settings.repository.ts`)<br>[setting.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/laundry/settings/schemas/setting.schema.ts) |
 | **Tài khoản Quản trị CMS** | `/api/v1/users` | `UsersController` | `UsersService` | `UsersRepository` (`users/repositories/users.repository.ts`)<br>[user.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/laundry/users/schemas/user.schema.ts) |
 | **Khảo sát Báo giá Chuyển nhà** | `/api/v1/moving/quotes` | `MovingQuotesController` | `MovingQuotesService` | [moving-quote.schema.ts](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/moving/quotes/schemas/moving-quote.schema.ts) |
@@ -67,20 +69,22 @@ Kiến trúc: Next.js App Router, Server Components mặc định cho SEO (`src/
 | Tuyến URL | Loại | File Trang (Page Entry) | Màn Hình / Modals / Subcomponents | Service / Hooks |
 | :--- | :---: | :--- | :--- | :--- |
 | `/` (Trang chủ) | RSC | `src/app/(public)/page.tsx` | `HomePage.tsx`<br>`src/features/public/home/` | `HeroSectionComponent`, `IntroSectionComponent`, `ServicesGridComponent`, `WhyChooseUsSectionComponent`, `FaqSectionComponent` |
-| `/dich-vu/[...slug]` | RSC (SEO) | `src/app/(public)/dich-vu/[...slug]/page.tsx` | `ServiceDetailPage.tsx`<br>`src/features/public/services/` | `public-services.service.ts` |
+| `/dich-vu/[...slug]` | RSC (SEO) | `src/app/(public)/dich-vu/[...slug]/page.tsx` | `ServiceDetailPage.tsx`<br>`src/features/public/services/components/`: `ServiceArticleDetailView`, `ServiceCategoryListView`, `PromoBanner`, `ServiceBanner`, `ServiceCategoryDetail`, `ServiceList`, `WorkProcess` | `public-services.service.ts` |
+| `/gioi-thieu/[...slug]` | RSC (SEO) | `src/app/(public)/gioi-thieu/[...slug]/page.tsx` | `src/features/public/about/components/`: `AboutArticleDetailView`, `AboutCategoryListView` | `public-services.service.ts` |
+| `/tin-tuc/[...slug]` | RSC (SEO) | `src/app/(public)/tin-tuc/[...slug]/page.tsx` | `src/features/public/articles/components/`: `NewsArticleDetailView`, `NewsCategoryListView` | `public-articles.service.ts` |
 | `/tin-tuc` | RSC | `src/app/(public)/tin-tuc/page.tsx` | `ArticleListPage.tsx`<br>`src/features/public/articles/` | `ArticleListComponent`, `ArticleSortFilterComponent` |
 | `/lien-he` | Client Form | `src/app/(public)/lien-he/page.tsx` | `ContactPage.tsx`<br>`src/features/public/contacts/` | `public-contacts.service.ts`<br>`public-contacts.action.ts` |
 | `/admin/login` | Client / Auth | `src/app/(admin)/admin/login/page.tsx` | `LoginFormComponent.tsx`<br>`src/features/admin/auth/` | `admin-auth.service.ts` |
 | `/admin/dashboard` | Client / CMS | `src/app/(admin)/admin/dashboard/page.tsx` | `DashboardPage.tsx`<br>`src/features/admin/dashboard/` | `admin-dashboard.service.ts` |
-| `/admin/articles` | Client / CMS | `src/app/(admin)/admin/articles/page.tsx` | `ArticleManagerPage.tsx`<br>`src/features/admin/articles/` | Modals: `ArticleEditorModal`, `ArticleTrashModal`<br>Components: `ArticleManagerTableComponent`, `ArticleManagerToolbarComponent`, `ArticleEditor*Component`<br>Hooks: `useAdminArticles` |
+| `/admin/articles` | Client / CMS | `src/app/(admin)/admin/articles/page.tsx` | `ArticleManagerPage.tsx`<br>`src/features/admin/articles/` | Modals: `ArticleEditorModal`, `ArticleTrashModal`<br>Components: `ArticleManagerTableComponent`, `ArticleManagerToolbarComponent`, `ArticleEditor*Component`<br>Editor: `src/components/ui/rich-text-editor/` (`RichTextEditorComponent`, `RichTextToolbarComponent`, `MediaInsertModal`)<br>Hooks: `useAdminArticles` |
 | `/admin/categories` | Client / CMS | `src/app/(admin)/admin/categories/page.tsx` | `CategoryManagerPage.tsx`<br>`src/features/admin/categories/` | Modals: `CategoryEditorModal`<br>Hooks: `useAdminCategories` |
-| `/admin/contacts` | Client / CRM | `src/app/(admin)/admin/contacts/page.tsx` | `ContactManagerPage.tsx`<br>`src/features/admin/contacts/` | Modals: `ContactTrashModal`<br>Components: `ContactManagerTableComponent`, `ContactManagerToolbarComponent`, `ContactManagerBulkActionsComponent`<br>Hooks: `useAdminContacts` |
+| `/admin/contacts` | Client / CRM | `src/app/(admin)/admin/contacts/page.tsx` | `ContactManagerPage.tsx`<br>`src/features/admin/contacts/` | Modals: `ContactTrashModal`<br>Components: `ContactManagerTableComponent`, `ContactManagerToolbarComponent`, `ContactManagerBulkActionsComponent`<br>Utils: `contacts-export.util.ts`<br>Hooks: `useAdminContacts` |
 | `/admin/crm` | Client / CRM | `src/app/(admin)/admin/crm/page.tsx` | `CrmManagerPage.tsx`<br>`src/features/admin/crm/` | Components: `CrmManagerTableComponent`, `CrmManagerToolbarComponent`<br>Hooks: `useAdminCrm` |
 | `/admin/orders` | Client / CMS | `src/app/(admin)/admin/orders/page.tsx` | `OrdersManagerPage.tsx`<br>`src/features/admin/orders/` | Modals: `OrdersManagerModal`<br>Components: `OrdersManagerTableComponent`, `OrdersManagerToolbarComponent`<br>Hooks: `useAdminOrders` |
 | `/admin/email-marketing` | Client / CMS | `src/app/(admin)/admin/email-marketing/page.tsx` | `EmailMarketingPage.tsx`<br>`src/features/admin/email-marketing/` | Modals: `EmailCampaignModal`, `EmailTemplateModal`<br>Components: `EmailCampaignsTableComponent`, `EmailTemplatesTableComponent`<br>Hooks: `useAdminEmailMarketing` |
 | `/admin/accounts` | Client / CMS | `src/app/(admin)/admin/accounts/page.tsx` | `AccountManagerPage.tsx`<br>`src/features/admin/users/` | Modals: `AccountEditorModal`<br>Hooks: `useAdminUsers` |
-| `/admin/settings/**` | Client / CMS | `src/app/(admin)/admin/settings/**/page.tsx` | `SettingsPage.tsx`<br>`src/features/admin/settings/` | Components: `SettingEditorAboutComponent`, `SettingEditorContactComponent`, `SettingEditorFooterComponent`, `SettingEditorHeaderComponent`, `SettingEditorHomeComponent`, `SettingEditorServiceComponent`, `SettingEditorZaloComponent` |
-| `/admin/zalo-marketing` | Client / CMS | `src/app/(admin)/admin/zalo-marketing/page.tsx` | `ZaloMarketingPage.tsx`<br>`src/features/admin/zalo/` | `admin-zalo.service.ts` |
+| `/admin/settings/**` | Client / CMS | `src/app/(admin)/admin/settings/**/page.tsx` | `SettingsPage.tsx`<br>`src/features/admin/settings/` | Components: `SettingEditorAboutComponent` (+ sections), `SettingEditorContactComponent`, `SettingEditorFooterComponent` (+ sections), `SettingEditorHeaderComponent`, `SettingEditorHomeComponent` (+ sections), `SettingEditorServiceComponent` (+ sections), `SettingEditorZaloComponent`<br>Hooks: `useAdminSettings`, `useAdminSettingsState`, `useAdminSettingsHomepageHandlers`, `useAdminSettingsServiceAboutHandlers` |
+| `/admin/zalo-marketing` | Client / CMS | `src/app/(admin)/admin/zalo-marketing/page.tsx` | `ZaloMarketingPage.tsx`<br>`src/features/admin/zalo/` | Modals: `ZaloCampaignModal`, `ZaloSequenceModal`<br>`admin-zalo.service.ts` |
 
 ---
 
