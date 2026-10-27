@@ -1,4 +1,4 @@
-﻿# TÀI LIỆU PHÂN TÍCH & THIẾT KẾ HỆ THỐNG TỔNG THỂ (MASTER SRS & SDD)
+# TÀI LIỆU PHÂN TÍCH & THIẾT KẾ HỆ THỐNG TỔNG THỂ (MASTER SRS & SDD)
 
 ## HỆ SINH THÁI CÔNG NGHỆ CÔNG TY THANH XUÂN (THANH XUAN COMPANY)
 
@@ -153,6 +153,8 @@ Website_Thanh_Xuan_Company/
 ## 4. DOCUMENT HISTORY
 
 > 📌 **Chi tiết toàn bộ nhật ký các Plan và Bugfix:** Xem đầy đủ tại [CHANGELOG.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/CHANGELOG.md).
+
+- **2026-10-27 - Plan 45 - Khắc Phục Toàn Diện Review 43 & 44, Vá NoSQL Injection, Bảo Mật AI & Wi-Fi, Zero 'any' & Chuẩn Hóa Kích Thước Codebase (< 280 Dòng):** Vá triệt để lỗ hổng NoSQL Operator Injection trên HandoverRecordRepository ($set, $inc whitelist); chuyển đổi AiService sang Stateless hoàn toàn, gắn RolesGuard (Admin) cho AiController và bỏ query param apiKey; ẩn thông tin wifiIps trên endpoint GET /attendance/workshop-config với non-admin/manager; cô lập Offline Queue theo userId và thêm mutex isSyncing; loại bỏ 100% any ở Frontend (AuthContext, StaffTableComponent); xóa bỏ alias WarehouseScheduleSettingsDialog; tái cấu trúc tỉa gọn toàn diện 21 file mã nguồn Backend và Frontend vượt ngưỡng 300 dòng xuống <= 280 dòng tuân thủ kỷ luật kiến trúc sạch.
 
 - **2026-10-27 - Plan 44 - Tối Ưu Hóa Kích Thước Mã Nguồn (< 250-300 Dòng/File), Tách Custom Hooks, Zero 'any' & Triệt Tiêu 17 Re-export Aliases:** Hoàn tất Giai đoạn P2 tái cấu trúc toàn diện 38 file lớn ở Backend (be-nestjs-thanhxuan) và Frontend (fe-react-thanhxuan-internal) xuống dưới ngưỡng 300 dòng; phân rã HandoverRecordService, PayrollService, AccountService, ReportsService thành các sub-services và query helpers độc lập tuân thủ SRP; tách bộ export phiếu (handoverSlipCanvasRenderer.ts, handoverExcelExporter.ts, handoverZipDownloader.ts), chuyển toàn bộ logic phức tạp sang Custom Hooks (useShipperFuel, useStaffManagement, usePrepOrderForm, useShipperCountForm, useShipperSlipPreview...); xóa bỏ triệt để 17 re-export aliases cũ (*View, *Dialog) và đạt 100% TypeScript Strict Mode (zero any).
 

@@ -1,8 +1,56 @@
-﻿# NHẬT KÝ THAY ĐỔI HỆ THỐNG (CHANGELOG)
+# NHẬT KÝ THAY ĐỔI HỆ THỐNG (CHANGELOG)
 
 Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâng cấp, bugfix và triển khai tính năng của Hệ sinh thái Công ty Thanh Xuân qua từng Plan.
 
 ## 2026-10-27
+
+### Plan 45: Khắc Phục Toàn Diện Các Phát Hiện Trong Review 43 & 44, Vá NoSQL Injection, Tối Ưu Bảo Mật AI & Wi-Fi, Triệt Tiêu Zero Any/Aliases và Chuẩn Hóa Toàn Diện Kích Thước Codebase (< 280 Dòng)
+
+- **Mục tiêu & Bối cảnh kỹ thuật:**
+  - Khắc phục toàn bộ các lỗ hổng bảo mật và điểm yếu kiến trúc phát hiện trong Review 43 và Review 44.
+  - Tỉa gọn toàn bộ các file còn vượt ngưỡng 300 dòng (14 file Backend, 7 file Frontend) xuống < 250-280 dòng/file, tuân thủ kỷ luật kiến trúc sạch SRP và Feature-Based Colocation.
+  - Chuẩn hóa TypeScript Strict Mode tuyệt đối (0 `any`), xóa bỏ hoàn toàn alias tương thích ngược tạm thời còn sót lại (`WarehouseScheduleSettingsDialog`).
+
+- **Chi tiết thực thi mã nguồn:**
+  - **Bảo Mật & Kiến Trúc Backend (`be-nestjs-thanhxuan`):**
+    - **Vá NoSQL Operator Injection:** Trong `HandoverRecordRepository.findWithOptimisticLock`, bọc an toàn `$set` và `$inc` qua whitelist sanitization; `HandoverRecordService.patchFields` bổ sung chặn các key patterns nguy hiểm (`$`, `.`, `prototype`, `__proto__`).
+    - **Khử mutable state trong `AiService`:** Chuyển đổi `AiService` sang Stateless hoàn toàn (truyền provider qua method options thay vì thuộc tính instance `this.currentProvider`).
+    - **Kiểm soát truy cập AI Controller:** Gắn `RolesGuard` với `@Roles(UserRole.ADMIN)` cho `AiController`, loại bỏ query param `apiKey` (thay bằng header `x-ai-api-key`).
+    - **Bảo mật Wi-Fi Xưởng:** Ẩn trường `wifiIps` trên endpoint `GET /attendance/workshop-config` đối với các vai trò không phải Quản lý/Admin, ngăn rò rỉ cấu hình IP mạng xưởng cho công nhân và tài xế.
+  - **Bảo Mật & Ổn Định Frontend (`fe-react-thanhxuan-internal`):**
+    - **Cô lập Offline Queue:** Bổ sung `userId` vào `OfflineMutation`, lọc theo `userId` khi đồng bộ và thiết lập mutex lock `isSyncing` chống race condition khi đồng bộ dữ liệu ngoại tuyến.
+    - **TypeScript Strict (Zero `any`):** Định nghĩa bộ interfaces chuẩn `RawStaffDto`, `MeApiResponse`, `LoginApiResponse`, `AuthContextType`, xóa sạch 100% các vị trí `any` trong `AuthContext.tsx` và `StaffTableComponent.tsx`.
+    - **Xóa bỏ triệt để alias tạm thời:** Loại bỏ `WarehouseScheduleSettingsDialog`, cập nhật các nơi gọi trỏ trực tiếp vào `WarehouseScheduleSettingsModal`.
+  - **Tái cấu trúc & Chia nhỏ file (< 280 dòng/file):**
+    - **14 file Backend:**
+      - `handover-record.service.ts` (262 dòng): tách `handover-record-builder.helper.ts` và `handover-partner-count.helper.ts`.
+      - `handover.service.ts` (178 dòng): tinh gọn Facade.
+      - `handover.controller.ts` (271 dòng): tách `handover-dirty-operations.controller.ts`.
+      - `handover-clean-prep.service.ts` (275 dòng): tách `handover-clean-prep.helper.ts`.
+      - `handover-dirty-signature.service.ts` (276 dòng): tách `handover-dirty-signature.helper.ts`.
+      - `account-auth.service.ts` (268 dòng): tách `account-auth.helper.ts` và `account-password.service.ts`.
+      - `account-management.service.ts` (280 dòng): tách `account-management.helper.ts`.
+      - `job-segment.service.ts` (267 dòng): tách `job-segment.listener.ts`.
+      - `attendance.service.ts` (278 dòng): tách `attendance-record.helper.ts`.
+      - `upload.service.ts` (274 dòng): tách `upload-path.helper.ts`.
+      - `payroll-calculator.helper.ts` (206 dòng): tách `payroll-shipper-calculator.helper.ts`.
+      - `payroll.service.ts` (277 dòng): tách `payroll-period-lifecycle.helper.ts` và `payroll-payslip-adjustment.helper.ts`.
+      - `partners.service.ts` (202 dòng): tách `partner-catalog.helper.ts`.
+      - `reports.controller.ts` (217 dòng): tách `reports-response.helper.ts`.
+    - **7 file Frontend:**
+      - `ProfileEditModal.tsx` (224 dòng): tách hook `useProfileEdit.ts`.
+      - `usePrepOrderForm.ts` (258 dòng): mở rộng `prepOrderSlipHelper.ts`.
+      - `useShipperCountForm.ts` (273 dòng): mở rộng `shipperCountSlipHelper.ts`.
+      - `useShipperSlipPreview.ts` (269 dòng): mở rộng `shipperSlipPreviewHelper.ts`.
+      - `CatalogModal.tsx` (249 dòng): tách `CatalogImageUploadComponent.tsx`.
+      - `WarehouseReportSectionComponent.tsx` (40 dòng): tách `WarehouseSummaryViewComponent.tsx` và `PartnerReconciliationViewComponent.tsx`.
+      - `AuthContext.tsx` (252 dòng): tách `auth.types.ts`.
+      - `HandoverSlipGalleryComponent.tsx` (281 dòng) & `handoverSlipCanvasRenderer.ts` (219 dòng): tách `handoverCanvasTextHelper.ts`.
+
+- **Kết quả nghiệm thu:**
+  - Backend: 49/49 test suites pass (226/226 tests passed), `tsc --noEmit` pass, `pnpm build` pass.
+  - Frontend: `tsc --noEmit` pass, `pnpm build` pass (PWA SW generated), 0 `any` trong toàn bộ `src/`.
+  - 100% file code mục tiêu đạt chuẩn kích thước <= 280 dòng.
 
 ### Plan 44: Tối Ưu Hóa Kích Thước Toàn Bộ File Mã Nguồn (< 250-300 Dòng), Tách Custom Hooks, Chuẩn Hóa TypeScript Strict (Zero 'any') & Xóa Bỏ Triệt Để 17 Re-export Aliases
 
@@ -123,6 +171,54 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
     - Unit Tests: [`archive.service.spec.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/archive/specs/archive.service.spec.ts) (PASS 4/4 tests). Toàn bộ 16 test suites của `internal` (126/126 tests) PASS 100%. `pnpm build` PASS.
 
 ## 2026-10-27
+
+### Plan 45: Khắc Phục Toàn Diện Các Phát Hiện Trong Review 43 & 44, Vá NoSQL Injection, Tối Ưu Bảo Mật AI & Wi-Fi, Triệt Tiêu Zero Any/Aliases và Chuẩn Hóa Toàn Diện Kích Thước Codebase (< 280 Dòng)
+
+- **Mục tiêu & Bối cảnh kỹ thuật:**
+  - Khắc phục toàn bộ các lỗ hổng bảo mật và điểm yếu kiến trúc phát hiện trong Review 43 và Review 44.
+  - Tỉa gọn toàn bộ các file còn vượt ngưỡng 300 dòng (14 file Backend, 7 file Frontend) xuống < 250-280 dòng/file, tuân thủ kỷ luật kiến trúc sạch SRP và Feature-Based Colocation.
+  - Chuẩn hóa TypeScript Strict Mode tuyệt đối (0 `any`), xóa bỏ hoàn toàn alias tương thích ngược tạm thời còn sót lại (`WarehouseScheduleSettingsDialog`).
+
+- **Chi tiết thực thi mã nguồn:**
+  - **Bảo Mật & Kiến Trúc Backend (`be-nestjs-thanhxuan`):**
+    - **Vá NoSQL Operator Injection:** Trong `HandoverRecordRepository.findWithOptimisticLock`, bọc an toàn `$set` và `$inc` qua whitelist sanitization; `HandoverRecordService.patchFields` bổ sung chặn các key patterns nguy hiểm (`$`, `.`, `prototype`, `__proto__`).
+    - **Khử mutable state trong `AiService`:** Chuyển đổi `AiService` sang Stateless hoàn toàn (truyền provider qua method options thay vì thuộc tính instance `this.currentProvider`).
+    - **Kiểm soát truy cập AI Controller:** Gắn `RolesGuard` với `@Roles(UserRole.ADMIN)` cho `AiController`, loại bỏ query param `apiKey` (thay bằng header `x-ai-api-key`).
+    - **Bảo mật Wi-Fi Xưởng:** Ẩn trường `wifiIps` trên endpoint `GET /attendance/workshop-config` đối với các vai trò không phải Quản lý/Admin, ngăn rò rỉ cấu hình IP mạng xưởng cho công nhân và tài xế.
+  - **Bảo Mật & Ổn Định Frontend (`fe-react-thanhxuan-internal`):**
+    - **Cô lập Offline Queue:** Bổ sung `userId` vào `OfflineMutation`, lọc theo `userId` khi đồng bộ và thiết lập mutex lock `isSyncing` chống race condition khi đồng bộ dữ liệu ngoại tuyến.
+    - **TypeScript Strict (Zero `any`):** Định nghĩa bộ interfaces chuẩn `RawStaffDto`, `MeApiResponse`, `LoginApiResponse`, `AuthContextType`, xóa sạch 100% các vị trí `any` trong `AuthContext.tsx` và `StaffTableComponent.tsx`.
+    - **Xóa bỏ triệt để alias tạm thời:** Loại bỏ `WarehouseScheduleSettingsDialog`, cập nhật các nơi gọi trỏ trực tiếp vào `WarehouseScheduleSettingsModal`.
+  - **Tái cấu trúc & Chia nhỏ file (< 280 dòng/file):**
+    - **14 file Backend:**
+      - `handover-record.service.ts` (262 dòng): tách `handover-record-builder.helper.ts` và `handover-partner-count.helper.ts`.
+      - `handover.service.ts` (178 dòng): tinh gọn Facade.
+      - `handover.controller.ts` (271 dòng): tách `handover-dirty-operations.controller.ts`.
+      - `handover-clean-prep.service.ts` (275 dòng): tách `handover-clean-prep.helper.ts`.
+      - `handover-dirty-signature.service.ts` (276 dòng): tách `handover-dirty-signature.helper.ts`.
+      - `account-auth.service.ts` (268 dòng): tách `account-auth.helper.ts` và `account-password.service.ts`.
+      - `account-management.service.ts` (280 dòng): tách `account-management.helper.ts`.
+      - `job-segment.service.ts` (267 dòng): tách `job-segment.listener.ts`.
+      - `attendance.service.ts` (278 dòng): tách `attendance-record.helper.ts`.
+      - `upload.service.ts` (274 dòng): tách `upload-path.helper.ts`.
+      - `payroll-calculator.helper.ts` (206 dòng): tách `payroll-shipper-calculator.helper.ts`.
+      - `payroll.service.ts` (277 dòng): tách `payroll-period-lifecycle.helper.ts` và `payroll-payslip-adjustment.helper.ts`.
+      - `partners.service.ts` (202 dòng): tách `partner-catalog.helper.ts`.
+      - `reports.controller.ts` (217 dòng): tách `reports-response.helper.ts`.
+    - **7 file Frontend:**
+      - `ProfileEditModal.tsx` (224 dòng): tách hook `useProfileEdit.ts`.
+      - `usePrepOrderForm.ts` (258 dòng): mở rộng `prepOrderSlipHelper.ts`.
+      - `useShipperCountForm.ts` (273 dòng): mở rộng `shipperCountSlipHelper.ts`.
+      - `useShipperSlipPreview.ts` (269 dòng): mở rộng `shipperSlipPreviewHelper.ts`.
+      - `CatalogModal.tsx` (249 dòng): tách `CatalogImageUploadComponent.tsx`.
+      - `WarehouseReportSectionComponent.tsx` (40 dòng): tách `WarehouseSummaryViewComponent.tsx` và `PartnerReconciliationViewComponent.tsx`.
+      - `AuthContext.tsx` (252 dòng): tách `auth.types.ts`.
+      - `HandoverSlipGalleryComponent.tsx` (281 dòng) & `handoverSlipCanvasRenderer.ts` (219 dòng): tách `handoverCanvasTextHelper.ts`.
+
+- **Kết quả nghiệm thu:**
+  - Backend: 49/49 test suites pass (226/226 tests passed), `tsc --noEmit` pass, `pnpm build` pass.
+  - Frontend: `tsc --noEmit` pass, `pnpm build` pass (PWA SW generated), 0 `any` trong toàn bộ `src/`.
+  - 100% file code mục tiêu đạt chuẩn kích thước <= 280 dòng.
 
 ### Plan 44: Tối Ưu Hóa Kích Thước Toàn Bộ File Mã Nguồn (< 250-300 Dòng), Tách Custom Hooks, Chuẩn Hóa TypeScript Strict (Zero 'any') & Xóa Bỏ Triệt Để 17 Re-export Aliases
 
