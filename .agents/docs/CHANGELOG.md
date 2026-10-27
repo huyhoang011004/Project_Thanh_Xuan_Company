@@ -1,4 +1,4 @@
-# NHẬT KÝ THAY ĐỔI HỆ THỐNG (CHANGELOG)
+﻿# NHẬT KÝ THAY ĐỔI HỆ THỐNG (CHANGELOG)
 
 Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâng cấp, bugfix và triển khai tính năng của Hệ sinh thái Công ty Thanh Xuân qua từng Plan.
 
