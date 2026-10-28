@@ -2,6 +2,37 @@
 
 Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâng cấp, bugfix và triển khai tính năng của Hệ sinh thái Công ty Thanh Xuân qua từng Plan.
 
+## 2026-10-29
+
+### Plan 51: Bổ Sung Tự Nhập Món Đồ Ngoài Setting, Fix Lỗi Recount-Flag, Tối Ưu UI & Fullscreen Mobile Form Đếm Đồ
+
+- **Bối cảnh & Vấn đề giải quyết:**
+  - **Khắc phục lỗi HTTP 404 Recount-Flag:** Khi tài xế Shipper tick chọn hoặc hủy chọn checkbox *"Yêu cầu trạm rạch bao đếm lại tại xưởng"* trên màn hình xem trước phiếu, hệ thống gọi `PATCH /api/v1/internal/handover/:id/recount-flag` nhưng Backend thiếu endpoint này dẫn đến thông báo toast đỏ `Cannot PATCH ...`.
+  - **Khắc phục lỗi UI cắt viền & tràn lề:** Nút *"Xác Nhận Shipper Đã Giao Hàng & Nhận Đồ Bẩn"* trên mobile hẹp bị co cụm và cắt cụt văn bản (`ác Nhận Shipper...`); cụm nút chọn số bao gom niêm phong (`1 bao`, `2 bao`... `Khác..`) bị tràn ra khỏi mép phải màn hình.
+  - **Bổ sung tự nhập món đồ ngoài setting:** Khi chi nhánh đối tác có các món đồ vải phát sinh mới chưa có sẵn trong danh mục bảng giá (`item_catalogs`), tài xế shipper và đối tác không thể ghi nhận số lượng chính xác vào phiếu giao nhận.
+  - **Tối ưu Mobile-First & Fullscreen Form đếm đồ Shipper:** Modal đếm đồ trên di động trước đây bị giới hạn kích thước với khoảng cách lề thừa bao quanh khiến không gian đếm đồ bị thu hẹp.
+
+- **Các thay đổi kiến trúc & kỹ thuật chi tiết:**
+  - **Backend (`be-nestjs-thanhxuan`):**
+    - Tạo mới `RecountFlagDto` (`src/modules/internal/handovers/dto/recount-flag.dto.ts`) validate strict `@IsBoolean()` và `@IsOptional() @IsString() recountReason`.
+    - Bổ sung endpoint `@Patch(':id/recount-flag')` tại `HandoverDirtyOperationsController` với phân quyền an toàn `PERMISSIONS.HANDOVER_DELIVER, PERMISSIONS.HANDOVER_RECOUNT_REQUEST`.
+    - Cập nhật `HandoverDirtySignatureService` và `HandoverService` xử lý cập nhật trạng thái `recount.isRecount`, `recount.status` (`PENDING` hoặc `NONE`) và lưu ID người yêu cầu (`requestedBy`).
+    - Nâng cấp `updateDirtyItemOnBlur` nhận thêm `customItemName?: string` để lưu trực tiếp tên món đồ phát sinh người dùng tự nhập.
+  - **Frontend (`fe-react-thanhxuan-internal`):**
+    - Nâng cấp `Dialog` (`src/components/ui/dialog.tsx`) hỗ trợ prop `fullScreenOnMobile?: boolean`, tự động gỡ bỏ viền lề ngoài và bo góc trên mobile để modal chiếm trọn 100% diện tích màn hình điện thoại.
+    - Xây dựng `CustomHandoverItemModal.tsx` (`src/features/operations/handovers/modals/`) cho phép nhập Tên món đồ, Đơn vị tính (chọn nhanh hoặc tự gõ), Số lượng và Ghi chú; tự động sinh mã `CUSTOM_<timestamp>`.
+    - Nâng cấp `useShipperCountForm.ts` và `ShipperCountPartnerModal.tsx`: bật `fullScreenOnMobile={true}`, thêm nút `+ Tự nhập món`, quản lý state `customItems`, hiển thị badge `Ngoài setting` và nút Thùng rác xóa món tự nhập nếu nhập nhầm trong `ShipperCountItemsComponent.tsx`.
+    - Thiết kế lại bộ chọn số bao cho Shipper (`ShipperCountSignSectionComponent.tsx` & `ShipperHandoverInlineCountComponent.tsx`): chỉ để sẵn các số `1`, `2`, `3`, `4`, kết hợp stepper `[-] [+]` và ô nhập tùy ý số lượng bao nhiêu bao, bố cục flex-wrap chống tràn màn hình.
+    - Sửa nút giao hàng trong `ShipperHandoverSignatureSectionComponent.tsx`: chuyển sang `min-h-[46px] h-auto whitespace-normal leading-snug break-words` chống cắt chữ.
+    - Cổng đối tác (`PartnerCountTabComponent.tsx` & `PartnerCountItemsViewComponent.tsx`): tích hợp nút `+ Tự nhập món đồ` ngoài setting, hiển thị badge và nút xóa món custom; giữ nguyên không có trường số bao (số bao chỉ dành riêng cho Shipper).
+
+- **Kết quả Kiểm Chứng (Verification):**
+  - Backend Typecheck & Lint: Pass 100% (0 errors, 0 warnings).
+  - Backend Jest Tests: Pass 3/3 test suites matching handover (`create-handover.dto.spec.ts`, `handover.service.spec.ts`, `handover-state.spec.ts` - 42/42 tests pass).
+  - Frontend Internal Typecheck: Pass 100% (`tsc --noEmit` pass không lỗi).
+  - Frontend Internal Production Build: Pass 100% (`tsc -b && vite build` tạo bundle dist/ và service worker PWA sạch sẽ).
+- **Đồng bộ tài liệu:** Cập nhật `plan51.md` (Completed), `CODEBASE_ATLAS.md` (Bảng 1.1 Backend & Bảng 3 Frontend), `srs_sdd_backend.md`, `srs_sdd_fe_internal.md`, `SRS_SDD.md` (Document History) và `CHANGELOG.md`.
+
 ## 2026-10-28
 
 ### Plan 50: Nâng Cấp Toàn Diện Thương Hiệu, Bảng Màu Light/Dark Mode, Thư Viện Thực Tế, Tối Ưu Mobile & Trang Quản Trị Admin Tinh Gọn Cho Website Chuyển Nhà (fe-nextjs-chuyennhatietkiem)
