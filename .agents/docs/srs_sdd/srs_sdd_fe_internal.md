@@ -1,4 +1,4 @@
-﻿# ĐẶC TẢ YÊU CẦU & THIẾT KẾ CỔNG VẬN HÀNH NỘI BỘ (SRS & SDD)
+# ĐẶC TẢ YÊU CẦU & THIẾT KẾ CỔNG VẬN HÀNH NỘI BỘ (SRS & SDD)
 
 ## PHÂN HỆ CỔNG VẬN HÀNH XƯỞNG & ĐIỀU PHỐI ĐỐI TÁC (fe-react-thanhxuan-internal)
 
@@ -150,6 +150,10 @@ Phân hệ `fe-react-thanhxuan-internal` là cổng điều hành số hóa toà
 ## 2. THIẾT KẾ KIẾN TRÚC & HỆ THỐNG (SDD)
 
 ### 2.1. Cấu Trúc Thư Mục & Tổ Chức Mã Nguồn
+
+> **Quy chuẩn Spacing Mobile toàn diện (Plan 48):**  
+> - Toàn bộ các trang (*Page.tsx) sử dụng wrapper container chuẩn `space-y-3 pb-24 max-w-7xl mx-auto transition-all` đảm bảo mọi component trên mobile cách nhau đều đặn ~12px (khoảng 1 đơn vị công thái học), xóa bỏ hoàn toàn khoảng cách 0px do `sm:space-y-3` gây ra.
+> - Các bộ lọc ngày (`AttendanceDateHeaderComponent`) và kỳ lương (`PayrollMonthHeaderComponent`) được thiết kế độc lập ngoài `PageBanner` để hiển thị 100% trên thiết bị di động, kèm thanh Tab Bar trượt ngang không thanh cuộn và 4 StatCards xếp 2 cột linh hoạt (`grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4`).
 
 ```Markdown
 fe-react-thanhxuan-internal/src/

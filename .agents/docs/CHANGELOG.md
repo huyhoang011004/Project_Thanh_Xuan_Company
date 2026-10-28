@@ -4,6 +4,49 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
 
 ## 2026-10-28
 
+### Plan 48: Chuẩn Hóa Khoảng Cách Spacing Mobile Toàn Diện & Tối Ưu Giao Diện Phân Hệ Điều Hành, Kinh Doanh, Bảng Công và Bảng Lương (fe-react-thanhxuan-internal)
+
+- **Mục tiêu & Bối cảnh kỹ thuật:**
+  - Giải quyết triệt để lỗi hiển thị trên thiết bị di động (viewport `< 640px`): Hầu hết các màn hình dùng `sm:space-y-3` khiến trên mobile quy tắc này không được áp dụng, khoảng cách giữa các khối tầng 1 (Banner), tầng 2 (Action Bar), tầng 3 (Filter), tầng 4 (Content) bị co về `0px` dính chặt vào nhau, hoặc ngược lại một số màn hình dùng `space-y-6` quá thưa và cồng kềnh.
+  - Khắc phục lỗi nghiêm trọng: `PageBanner` có cấu hình mặc định `hideOnMobile = true`, trong khi bộ lọc ngày ở **Bảng Chấm Công** và bộ chọn kỳ lương ở **Bảng Lương** lại đặt trong `children` của `PageBanner`, dẫn đến việc người quản lý/kế toán dùng điện thoại không thể chọn ngày khác hoặc chọn kỳ lương khác trên mobile.
+  - Chuẩn hóa khoảng cách toàn diện trên mobile: Mọi màn hình đều dùng container `space-y-3 pb-24 max-w-7xl mx-auto transition-all` (~12px, đúng 1 đơn vị công thái học di động PWA), tối ưu lưới StatCards KPI 2 cột, tab bar cuộn ngang không thanh cuộn và touch target thân thiện.
+
+- **Chi tiết thực thi mã nguồn (`fe-react-thanhxuan-internal`):**
+  - **Tách độc lập bộ chọn ngày và kỳ lương ngoài PageBanner:**
+    - Tạo `AttendanceDateHeaderComponent.tsx` (src/features/management/attendance/components/): Thanh chọn ngày di động độc lập hiển thị 100% trên cả mobile và desktop, đầy đủ nút lùi ngày (`ChevronLeft`), ô input date `font-mono`, nút tiến ngày (`ChevronRight`), nút "Hôm Nay" và nút "Làm mới".
+    - Tạo `PayrollMonthHeaderComponent.tsx` (src/features/management/payroll/components/): Thanh chọn kỳ lương di động độc lập, hỗ trợ lùi/tiến tháng bằng 1 chạm, ô input `type="month"` kèm icon lịch, nút "Tháng Này" và "Làm mới".
+  - **Tối ưu Bảng Chấm Công (`AttendanceReviewPage.tsx`):**
+    - Đưa `AttendanceDateHeaderComponent` ra ngoài `PageBanner`, đổi container thành `space-y-3`.
+    - Tab bar trạng thái (Tất cả, Đang làm, Cần rà soát, Chờ duyệt, Đã duyệt) cuộn ngang mượt mà `overflow-x-auto scrollbar-none`.
+    - 4 StatCards KPI hiển thị lưới 2 cột mobile (`grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4`).
+  - **Tối ưu Bảng Lương Chu Kỳ (`PayrollManagementPage.tsx` & `PayrollActionToolbarComponent.tsx`):**
+    - Đưa `PayrollMonthHeaderComponent` ra ngoài `PageBanner`, đổi container thành `space-y-3`.
+    - Lưới 4 StatCard KPI tài chính xếp 2 cột gọn gàng trên mobile.
+    - Hàng nút thao tác (Khởi tạo lương, Khóa kỳ, Mở khóa, Chi trả, Xuất Excel) co giãn linh hoạt, touch target `h-8.5 rounded-xl`.
+    - Bộ lọc vai trò (Thợ xưởng, Tài xế, Điều hành) cuộn ngang không vỡ khung.
+  - **Tối ưu Bảng Công Thợ Theo Khâu (`HourlyWorkReviewPage.tsx` & `DailyWorkReviewComponent.tsx`):**
+    - Thay thế header thô bằng `PageBanner`, chuyển container thành `space-y-3`.
+    - Tab bar chuyển đổi (Duyệt công, Phân khâu mặc định, Cài đặt đơn giá) bo góc mềm mại `rounded-xl p-1`.
+    - Cụm chọn ngày và nút "Chốt Ngày" trong `DailyWorkReviewComponent` co giãn thông minh trên mobile.
+  - **Tối ưu Quản Trị Đối Tác & Bảng Giá (`PartnersManagementPage.tsx`):**
+    - Đổi container thành `space-y-3`.
+    - Tinh chỉnh `PartnersActionBarComponent` và `PartnersPartnerFilterComponent`: Buttons thêm đối tác/thêm đồ giặt/QR Zalo và dropdown lọc thương hiệu bo góc `rounded-xl`, chiều cao chuẩn `h-8.5`.
+  - **Tối ưu Duyệt Xăng Xe (`FuelReviewPage.tsx`):**
+    - Bọc trong layout chuẩn `space-y-3`, bổ sung `PageBanner`.
+    - Thẻ phiếu đề xuất hiển thị ảnh hóa đơn và ảnh đồng hồ ODO to rõ, 2 nút Từ Chối và Duyệt Chi dạng lưới 2 cột dễ thao tác.
+  - **Tối ưu Cấu Hình Xưởng Wi-Fi (`WorkshopSettingsPage.tsx`):**
+    - Đổi container thành `space-y-3`, tích hợp `PageBanner`.
+  - **Tối ưu Quản Lý Nhân Sự & Phê Duyệt (`StaffManagementPage.tsx`, `ApprovalManagementPage.tsx`, `AuditLogPage.tsx`):**
+    - Đổi container thành `space-y-3`, tab bar trượt ngang, danh sách tài khoản chờ kích hoạt có 2 nút Duyệt/Từ chối dễ bấm.
+  - **Tối ưu Dashboard (`DashboardPage.tsx`):**
+    - Đổi `space-y-6` thành `space-y-3 sm:space-y-4`.
+  - **Chuẩn hóa Spacing 9 Page phân hệ Vận Hành Xưởng:**
+    - `WarehouseHandoverPage`, `RecountStationPage`, `ShipperHandoverPage`, `PartnerHandoverPage`, `HourlyWorkStationPage`, `AttendancePage`, `ShipperFuelPage`, `MyPayslipPage`, `ReportsPage`: Chuyển toàn bộ container từ `sm:space-y-3` sang `space-y-3`.
+  - **Kết quả Kiểm Chứng (Verification):**
+    - Typecheck (`pnpm exec tsc --noEmit`): Pass 100% (0 errors).
+    - Production Build (`pnpm build`): Pass 100%, PWA bundle sinh đầy đủ.
+    - 100% tệp tin tuân thủ giới hạn kích thước `< 250-300 dòng/file`.
+
 ### Plan 47: Chuẩn Hóa Clean Code, Phân Rã 14 Tệp Vượt Ngưỡng (< 300 Dòng), Xóa Triệt Để Kiểu `any` & Dọn 293 Cảnh Báo ESLint Phân Hệ Laundry
 
 - **Mục tiêu & Bối cảnh kỹ thuật:**
