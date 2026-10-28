@@ -12,6 +12,7 @@
 2. [Ma Trận Web Khách Hàng & CMS (fe-nextjs-thanhxuan-laundry)](#2-ma-trận-web-khách-hàng--cms-fe-nextjs-thanhxuan-laundry)
 3. [Ma Trận Cổng Vận Hành Nội Bộ & Đối Tác (fe-react-thanhxuan-internal)](#3-ma-trận-cổng-vận-hành-nội-bộ--đối-tác-fe-react-thanhxuan-internal)
 4. [Bản Đồ Hạ Tầng Dùng Chung (Common, Guards, Utilities)](#4-bản-đồ-hạ-tầng-dùng-chung-common-guards-utilities)
+5. [Ma Trận Web Chuyển Nhà Tiết Kiệm (fe-nextjs-chuyennhatietkiem)](#5-ma-trận-web-chuyển-nhà-tiết-kiệm-fe-nextjs-chuyennhatietkiem)
 
 ---
 
@@ -143,3 +144,21 @@ Kiến trúc: React Router v7, Vite SPA, TailwindCSS, Mobile-First PWA, Flat Col
 
 ### 4.3. Tiện Ích & Component Dùng Chung Frontend Internal (fe-react-thanhxuan-internal/src/components/common)
 - **Chữ ký điện tử thông minh:** [SignatureInputComponent.tsx](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/components/common/SignatureInputComponent.tsx) (Tự động nhận diện chữ ký mẫu từ tài khoản `StaffAccount.signatureUrl`, hỗ trợ toggle dùng chữ ký đã lưu / ký tay mới, và checkbox lưu làm chữ ký mặc định).
+
+---
+
+# 5. MA TRẬN WEB CHUYỂN NHÀ TIẾT KIỆM (`fe-nextjs-chuyennhatietkiem`)
+
+Thư mục: `fe-nextjs-chuyennhatietkiem/src/`  
+Kiến trúc: Next.js App Router (Port 3002), React 19, TailwindCSS, Modern Tech-Logistics Aesthetic.  
+Định vị: **Mô hình Asset-Light Logistics** — Đội ngũ thợ cơ hữu lành nghề (bốc xếp, tháo lắp đồ gỗ, điện lạnh) kết hợp mạng lưới xe tải đối tác vệ tinh điều xe giá gốc (tiết kiệm đến 30% chi phí).
+
+| Tuyến URL | Loại | File Trang (Page Entry) | Components Tương Tác & Sub-components | API / Services |
+| :--- | :---: | :--- | :--- | :--- |
+| `/` (Trang chủ) | RSC | `src/app/page.tsx` | `HeroEstimatorComponent.tsx` (Dự toán nhanh Km & Tab nhu cầu)<br>`WhySaveBentoComponent.tsx` (Bento Grid 4 lý do tiết kiệm 30%)<br>`SmartCargoVisualizerComponent.tsx` (Mô phỏng chọn đồ ra xe & thợ)<br>`CostComparisonComponent.tsx` (So sánh tự dọn vs Thanh Xuân)<br>`PackingProtectionComponent.tsx` (Tiêu chuẩn bọc lót 4 lớp)<br>`InteractiveChecklistComponent.tsx` (Checklist 10 bước lưu LocalStorage) | `fetchMovingServices`<br>`fetchMovingArticles` |
+| `/dat-lich` | Client Form | `src/app/dat-lich/page.tsx` | `QuoteWizardForm.tsx` (State Orchestrator)<br>`src/features/quote-form/components/`:<br>- `Step1LocationComponent.tsx` (Địa điểm, tầng, thang máy)<br>- `Step2ItemsComponent.tsx` (Loại dịch vụ & Đồ cồng kềnh)<br>- `Step3ScheduleComponent.tsx` (Ngày dọn, ảnh & ghi chú)<br>- `Step4ReviewComponent.tsx` (Bảng dự toán & Gửi đơn) | `calculateQuoteEstimate`<br>`submitMovingQuote` |
+| `/bang-gia` | RSC | `src/app/bang-gia/page.tsx` | Thẻ bảng cước 5 gói dịch vụ (kèm gói thuê thợ bốc xếp)<br>Bảng đơn giá nhân công bốc xếp theo giờ và phụ phí tháo lắp | `fetchMovingServices` |
+| `/dich-vu` | RSC | `src/app/dich-vu/page.tsx` | Danh sách 5 gói dịch vụ vận chuyển & nhân công bốc xếp | `getServices` |
+| `/dich-vu/[slug]` | RSC (SSG) | `src/app/dich-vu/[slug]/page.tsx` | Chi tiết dịch vụ, quy trình 4 bước, cam kết bảo hiểm 100% | `getServiceBySlug` |
+| `/tin-tuc` & `/[slug]` | RSC (SSG) | `src/app/tin-tuc/page.tsx`<br>`src/app/tin-tuc/[slug]/page.tsx` | Danh sách & Chi tiết bài viết SEO cẩm nang dọn nhà | `fetchMovingArticles` |
+| `/lien-he` | RSC | `src/app/lien-he/page.tsx` | Hotline 24/7, mạng lưới điều phối xe & đội thợ túc trực | - |

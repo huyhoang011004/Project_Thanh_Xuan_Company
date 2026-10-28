@@ -170,3 +170,29 @@ sequenceDiagram
    - Shared components: Phân tách rõ ràng `components/layout/` (`admin/`, `public/`), `components/common/`, `components/ui/`.
    - Giới hạn kích thước file 250 - 300 dòng; bóc tách modal và subcomponents kịp thời, không dồn hàng nghìn dòng vào 1 file.
 
+---
+
+## 3. PHÂN HỆ WEB DỊCH VỤ CHUYỂN NHÀ TIẾT KIỆM (`fe-nextjs-chuyennhatietkiem`)
+
+> **Môi trường:** Next.js 16 (App Router), React 19, TailwindCSS, Port 3002  
+> **Phạm vi mã nguồn:** `fe-nextjs-chuyennhatietkiem/src/**`  
+> **Định vị kinh doanh:** Mô hình Logistics Tinh Gọn (Asset-Light) — Thế mạnh là **Đội thợ bốc xếp, thợ mộc, thợ điện lạnh cơ hữu** kết hợp **Mạng lưới đối tác xe tải vệ tinh điều xe giá gốc**, giúp tiết kiệm 30% chi phí.
+
+### 3.1. Các Trang & Components Tương Tác Cốt Lõi
+1. **Trang Chủ (`src/app/page.tsx`):**
+   - `HeroEstimatorComponent`: Bảng dự toán tức thì với thanh trượt cự ly Km, tab chọn gói (Trọn gói / Chỉ thuê thợ / Tháo lắp kỹ thuật), bộ đếm nhảy số giá cước trong 5 giây.
+   - `WhySaveBentoComponent`: Thẻ Bento Grid 4 lý do tiết kiệm (Mô hình tinh gọn không phí nuôi xe, Thợ kiêm mộc & điện lạnh, Tặng vật tư carton/PE, Bảo hiểm 100%).
+   - `SmartCargoVisualizerComponent`: Khảo sát tải trọng thông minh bằng cách click chọn đồ đạc trực quan -> Đề xuất kích cỡ xe và số thợ tối ưu.
+   - `CostComparisonComponent`: Bảng so sánh đa chiều chi phí ẩn giữa tự dọn bằng xe ba gác vs Dịch vụ trọn gói Thanh Xuân.
+   - `PackingProtectionComponent`: Trực quan hóa quy chuẩn đóng gói bọc lót 4 lớp chống trầy xước.
+   - `InteractiveChecklistComponent`: Checklist 10 bước dọn nhà lưu tự động LocalStorage.
+2. **Khảo Sát Báo Giá (`src/app/dat-lich/page.tsx` - `QuoteWizardForm.tsx`):**
+   - Kiến trúc module hóa 4 sub-components (`< 200 dòng/file`):
+     - `Step1LocationComponent`: Điểm bốc, điểm dỡ, số tầng, thang máy, cự ly Km.
+     - `Step2ItemsComponent`: Gói dịch vụ (`STUDENT_ROOM`, `APARTMENT`, `OFFICE`, `TRUCK_RENTAL`, `LABOR_ONLY`) và bộ tăng giảm đồ cồng kềnh.
+     - `Step3ScheduleComponent`: Ngày giờ dọn, link ảnh hiện trường và ghi chú.
+     - `Step4ReviewComponent`: Thông tin liên hệ, bảng bóc tách dự toán tự động và gửi lead về MongoDB `moving_quotes`.
+3. **Bảng Giá Niêm Yết (`src/app/bang-gia/page.tsx`):**
+   - Công khai giá mở cửa xe tải đối tác và đơn giá thuê nhân công bốc xếp theo giờ/theo người (150.000đ/giờ) kèm bảng tháo lắp điều hòa/giường tủ.
+
+

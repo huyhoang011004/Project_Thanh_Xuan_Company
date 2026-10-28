@@ -519,6 +519,7 @@ Phạm vi: Cổng tiếp nhận dịch vụ chuyển nhà trọn gói `chuyennha
 | `bulkyItems`      | `Array<String>` |     Mặc định`[]`     |      -      | Danh sách đồ cồng kềnh (Tủ lạnh Side-by-side, Đàn Piano, Giường gỗ...).                         |
 | `photos`          | `Array<String>` |     Mặc định`[]`     |      -      | Ảnh chụp đồ đạc khách tải lên để xưởng ước lượng nhân công.                                     |
 | `estimatedPrice`  | `Number`        |     Mặc định:`0`     |      -      | Cước vận chuyển sơ bộ thuật toán tự động tính toán.                                             |
+| `serviceType`      | `String (Enum)` | Mặc định: `APARTMENT` | - | Loại hình dịch vụ: `STUDENT_ROOM` (trọ sinh viên), `APARTMENT` (chung cư/nhà phố), `OFFICE` (văn phòng), `TRUCK_RENTAL` (thuê xe), `LABOR_ONLY` (chỉ thuê thợ bốc xếp/tháo lắp). |
 | `status`          | `String (Enum)` |  Mặc định:`PENDING`  |    Index    | Trạng thái:`PENDING` (chờ khảo sát), `QUOTED` (đã báo giá), `CONFIRMED` (đã chốt), `CANCELLED`. |
 
 ---

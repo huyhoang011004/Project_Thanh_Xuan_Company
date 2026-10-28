@@ -4,6 +4,31 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
 
 ## 2026-10-28
 
+### Plan 49: Nâng Cấp Toàn Diện Website Chuyển Nhà Tiết Kiệm (Modern Tech-Logistics, Trải Nghiệm WOW & Tối Ưu Mô Hình Nhân Lực Bốc Xếp Chuyên Nghiệp)
+
+- **Mục tiêu & Bối cảnh kỹ thuật:**
+  - **Tái định vị chuẩn xác mô hình kinh doanh (Asset-Light Logistics):** Chuyển dịch toàn diện nội dung từ các tuyên bố cũ nhận vơ "sở hữu hơn 50 xe tải" sang thế mạnh cốt lõi thật sự của Thanh Xuân: **Đội ngũ thợ cơ hữu lành nghề** (bốc xếp, tháo lắp đồ gỗ, điện lạnh, bọc lót chống trầy xước) kết hợp **Mạng lưới đối tác xe tải vệ tinh điều xe giá gốc**. Đây chính là lý do thực tế và thuyết phục giải thích vì sao dịch vụ tiết kiệm đến 30% chi phí cước xe (không gánh chi phí khấu hao bến bãi duy trì dàn xe).
+  - **Tạo hiệu ứng WOW & Tương tác giữ chân người dùng (Xu hướng 2026):**
+    - `HeroEstimatorComponent`: Widget dự toán cước tức thì ngay trên Hero với Slider Km, 3 tab nhu cầu (Trọn gói / Thuê thợ / Tháo lắp kỹ thuật), bộ đếm giá nhảy số trong 5 giây mà không cần chuyển trang.
+    - `WhySaveBentoComponent`: Bố cục Bento Grid 4 thẻ thời thượng giải thích 4 lý do tiết kiệm 30% (Mô hình tinh gọn, Thợ đa năng 2-trong-1, Miễn phí vật tư carton/PE, Bảo hiểm 100%).
+    - `SmartCargoVisualizerComponent`: Công cụ trực quan hóa đồ đạc (Giường, tủ, tủ lạnh, máy giặt, sofa, thùng đồ) $\rightarrow$ Hệ thống tự động đề xuất tải trọng xe đối tác và số lượng thợ tối ưu (chống thuê xe quá to lãng phí).
+    - `CostComparisonComponent`: Bảng so sánh đa chiều chi phí ẩn giữa "Tự dọn bằng xe ba gác" vs "Dịch vụ Thanh Xuân".
+    - `PackingProtectionComponent`: Trực quan hóa quy chuẩn đóng gói bọc lót 4 lớp chống trầy xước của đội thợ.
+    - `InteractiveChecklistComponent`: Checklist 10 bước chuẩn bị dọn nhà lưu tự động LocalStorage.
+  - **Mở rộng các gói dịch vụ linh hoạt:**
+    - Bổ sung enum `LABOR_ONLY` vào Backend NestJS (`MovingServiceType`) và Frontend (`types/index.ts`).
+    - Bổ sung gói "Thuê nhân công bốc xếp & tháo lắp theo giờ" (150.000đ/giờ/thợ) và bảng giá tháo lắp điều hòa/giường tủ tại `/bang-gia`.
+  - **Kỷ luật mã nguồn & Phân rã God-Component (< 250 - 300 dòng):**
+    - Phân rã tệp `QuoteWizardForm.tsx` (778 dòng) thành 4 sub-components chuyên trách (`Step1LocationComponent`, `Step2ItemsComponent`, `Step3ScheduleComponent`, `Step4ReviewComponent`) đều `< 190 dòng/tệp`.
+    - Tinh gọn `QuoteWizardForm.tsx` thành orchestrator quản lý state form và gọi API (187 dòng).
+    - Trang chủ `src/app/page.tsx` tinh gọn còn 217 dòng.
+- **Kết quả Kiểm Chứng (Verification):**
+  - Backend Typecheck (`pnpm exec tsc --noEmit`): Pass 100% (0 errors).
+  - Backend Unit Tests (`pnpm test`): Pass 100% (49 test suites, 226 tests passed).
+  - Frontend Moving Typecheck (`pnpm exec tsc --noEmit`): Pass 100% (0 errors).
+  - Frontend Moving Production Build (`pnpm build`): Pass 100% (18 static pages generated in 621ms).
+- **Đồng bộ tài liệu:** Cập nhật `CODEBASE_ATLAS.md` (Thêm mục 5 Ma trận Web Chuyển Nhà), `DATABASE_DICTIONARY.md` (Cập nhật enum `MovingServiceType` thêm `LABOR_ONLY`), `srs_sdd_fe_nextjs.md` (Thêm phân hệ Web Chuyển Nhà), và `SRS_SDD.md` (Document History).
+
 ### Plan 48: Chuẩn Hóa Khoảng Cách Spacing Mobile Toàn Diện & Tối Ưu Giao Diện Phân Hệ Điều Hành, Kinh Doanh, Bảng Công và Bảng Lương (fe-react-thanhxuan-internal)
 
 - **Mục tiêu & Bối cảnh kỹ thuật:**
