@@ -155,10 +155,16 @@ Kiến trúc: Next.js App Router (Port 3002), React 19, TailwindCSS, Modern Tech
 
 | Tuyến URL | Loại | File Trang (Page Entry) | Components Tương Tác & Sub-components | API / Services |
 | :--- | :---: | :--- | :--- | :--- |
-| `/` (Trang chủ) | RSC | `src/app/page.tsx` | `HeroEstimatorComponent.tsx` (Dự toán nhanh Km & Tab nhu cầu)<br>`WhySaveBentoComponent.tsx` (Bento Grid 4 lý do tiết kiệm 30%)<br>`SmartCargoVisualizerComponent.tsx` (Mô phỏng chọn đồ ra xe & thợ)<br>`CostComparisonComponent.tsx` (So sánh tự dọn vs Thanh Xuân)<br>`PackingProtectionComponent.tsx` (Tiêu chuẩn bọc lót 4 lớp)<br>`InteractiveChecklistComponent.tsx` (Checklist 10 bước lưu LocalStorage) | `fetchMovingServices`<br>`fetchMovingArticles` |
+| `/` (Trang chủ) | RSC | `src/app/page.tsx` | `HeroEstimatorComponent.tsx` (Dự toán nhanh Km & Tab nhu cầu)<br>`RecentProjectsShowcaseComponent.tsx` (Showcase đơn chuyển gần đây)<br>`WhySaveBentoComponent.tsx` (Bento Grid 4 lý do tiết kiệm 30%)<br>`SmartCargoVisualizerComponent.tsx` (Mô phỏng chọn đồ ra xe & thợ)<br>`CostComparisonComponent.tsx` (So sánh tự dọn vs Thanh Xuân)<br>`PackingProtectionComponent.tsx` (Tiêu chuẩn bọc lót 4 lớp)<br>`CustomerReviewsComponent.tsx` (Đánh giá 5 sao từ khách hàng)<br>`InteractiveChecklistComponent.tsx` (Checklist 10 bước lưu LocalStorage) | `fetchMovingServices`<br>`fetchMovingArticles` |
 | `/dat-lich` | Client Form | `src/app/dat-lich/page.tsx` | `QuoteWizardForm.tsx` (State Orchestrator)<br>`src/features/quote-form/components/`:<br>- `Step1LocationComponent.tsx` (Địa điểm, tầng, thang máy)<br>- `Step2ItemsComponent.tsx` (Loại dịch vụ & Đồ cồng kềnh)<br>- `Step3ScheduleComponent.tsx` (Ngày dọn, ảnh & ghi chú)<br>- `Step4ReviewComponent.tsx` (Bảng dự toán & Gửi đơn) | `calculateQuoteEstimate`<br>`submitMovingQuote` |
 | `/bang-gia` | RSC | `src/app/bang-gia/page.tsx` | Thẻ bảng cước 5 gói dịch vụ (kèm gói thuê thợ bốc xếp)<br>Bảng đơn giá nhân công bốc xếp theo giờ và phụ phí tháo lắp | `fetchMovingServices` |
 | `/dich-vu` | RSC | `src/app/dich-vu/page.tsx` | Danh sách 5 gói dịch vụ vận chuyển & nhân công bốc xếp | `getServices` |
 | `/dich-vu/[slug]` | RSC (SSG) | `src/app/dich-vu/[slug]/page.tsx` | Chi tiết dịch vụ, quy trình 4 bước, cam kết bảo hiểm 100% | `getServiceBySlug` |
 | `/tin-tuc` & `/[slug]` | RSC (SSG) | `src/app/tin-tuc/page.tsx`<br>`src/app/tin-tuc/[slug]/page.tsx` | Danh sách & Chi tiết bài viết SEO cẩm nang dọn nhà | `fetchMovingArticles` |
-| `/lien-he` | RSC | `src/app/lien-he/page.tsx` | Hotline 24/7, mạng lưới điều phối xe & đội thợ túc trực | - |
+| `/lien-he` | RSC | `src/app/lien-he/page.tsx` | Thông tin công ty pháp lý (Số 16 ngõ 81 Vạn Phúc Hà Đông, MST 0108942736, Hotline 0769 270 676) | - |
+| `/admin/layout` | Client Shell | `src/app/admin/layout.tsx` | Shell Admin tinh gọn, Sidebar điều hướng mobile drawer, Header Admin | - |
+| `/admin/login` | Client | `src/app/admin/login/page.tsx` | Đăng nhập tài khoản quản trị Admin | - |
+| `/admin/dashboard` | Client | `src/app/admin/dashboard/page.tsx` | Thống kê KPI đơn khảo sát, tỷ lệ chốt đơn, doanh thu dự toán | `fetchAdminDashboardStats`<br>`fetchAdminQuotes` |
+| `/admin/quotes` | Client | `src/app/admin/quotes/page.tsx` | Quản lý đơn khảo sát, bộ lọc trạng thái, cập nhật giá chốt | `fetchAdminQuotes`<br>`updateQuoteStatus` |
+| `/admin/articles` | Client | `src/app/admin/articles/page.tsx` | Quản lý bài viết cẩm nang kinh nghiệm dọn nhà | `fetchMovingArticles` |
+| `/admin/settings` | Client | `src/app/admin/settings/page.tsx` | Quản lý thông tin doanh nghiệp, MST, hotline, địa chỉ pháp lý | - |

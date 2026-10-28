@@ -4,6 +4,39 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
 
 ## 2026-10-28
 
+### Plan 50: Nâng Cấp Toàn Diện Thương Hiệu, Bảng Màu Light/Dark Mode, Thư Viện Thực Tế, Tối Ưu Mobile & Trang Quản Trị Admin Tinh Gọn Cho Website Chuyển Nhà (fe-nextjs-chuyennhatietkiem)
+
+- **Mục tiêu & Bối cảnh kỹ thuật:**
+  - **Chuẩn hóa thông tin pháp lý doanh nghiệp:**
+    - Tên công ty: `Công ty TNHH Kinh doanh Thương mại và Dịch vụ Thanh Xuân`
+    - Mã số thuế (MST): `0108942736` (Sở Kế hoạch & Đầu tư TP. Hà Nội cấp)
+    - Hotline / Zalo: `0769 270 676` (0769.270.676)
+    - Trụ sở tiếp nhận chính: `Số 16 ngõ 81 Vạn Phúc, phường Hà Đông, thành phố Hà Nội`
+    - Đồng bộ 100% trên Header, Footer, Mobile Action Bar, Contact Page và SEO Metadata.
+  - **Hệ thống Design Tokens màu sắc mới & Chế độ Sáng / Tối (Light / Dark Mode):**
+    - Bảng màu chủ đạo công nghệ & vận chuyển: **Xanh dương nhạt (Sky Blue / `#0284c7`, `#38bdf8`)**, **Xanh lá nhạt (Mint / Soft Emerald / `#059669`, `#34d399`)**, **Trắng tinh tế (#FFFFFF)** và **Đen hiện đại (#020617 / #0f172a)**.
+    - Xây dựng `ThemeContext.tsx` và `ThemeToggleComponent.tsx` quản lý state theme, lưu `localStorage` không cần cài thêm thư viện ngoài (Zero-dependency).
+    - Tích hợp hệ thống keyframes animation `animate-fade-in-up`, `animate-scale-in` và lớp chuyển động mượt mà `transition-all duration-300`.
+  - **Social Proof & Minh chứng năng lực thực tế:**
+    - `RecentProjectsShowcaseComponent.tsx`: Trưng bày ảnh thực tế 6 đơn chuyển nhà gần đây (Căn hộ chung cư cao cấp Vinhomes Smart City, phòng trọ sinh viên ngõ nhỏ Cầu Giấy, nhà phố 3 tầng tháo dỡ sập gụ Đồng Kỵ, văn phòng công ty công nghệ Duy Tân) kèm thông số xe tải và số thợ bốc xếp.
+    - `CustomerReviewsComponent.tsx`: Khối đánh giá khách hàng 5 sao chân thực (Chị Mai Lan Hà Đông, Anh Hoàng Long Cầu Giấy, Chị Thu Thảo Thanh Xuân, Bác Trần Văn Hải Hoàng Mai) kèm rating trung bình 4.9/5 dựa trên 1,280+ lượt dọn nhà tại Hà Nội.
+  - **Tối ưu hiển thị Mobile toàn diện:**
+    - Kích thước touch-target tối thiểu 44-48px cho toàn bộ nút bấm, thanh trượt Km, bộ chọn đồ đạc.
+    - Mobile Menu Drawer trên Header và Mobile Action Bar dưới chân màn hình gọi điện & chat Zalo 1-chạm.
+    - Spacing responsive `space-y-12 sm:space-y-20`, `px-3 sm:px-6`, kiểm soát chặt chẽ `overflow-x-hidden`.
+  - **Xây dựng Phân Hệ Quản Trị Admin Tinh Gọn (`/admin`):**
+    - `src/app/admin/layout.tsx`: Layout Admin với Sidebar điều hướng, drawer mobile, Theme toggle và Header Admin (< 200 dòng).
+    - `src/app/admin/login/page.tsx`: Màn hình đăng nhập tài khoản quản trị Admin (< 150 dòng).
+    - `src/app/admin/dashboard/page.tsx`: Thống kê KPI đơn khảo sát, tỷ lệ chốt và doanh thu dự toán (< 200 dòng).
+    - `src/app/admin/quotes/page.tsx`: Quản lý danh sách đơn khảo sát báo giá (`moving_quotes`), bộ lọc trạng thái, xem chi tiết lộ trình, thang máy và cập nhật giá chốt (< 250 dòng).
+    - `src/app/admin/articles/page.tsx`: Quản lý danh sách bài viết cẩm nang (< 150 dòng).
+    - `src/app/admin/settings/page.tsx`: Quản lý thông tin doanh nghiệp, MST, hotline, địa chỉ pháp lý (< 180 dòng).
+    - Mở rộng `api-client.ts` bổ sung các API Admin (`fetchAdminQuotes`, `updateQuoteStatus`, `fetchAdminDashboardStats`) kèm dữ liệu fallback an toàn.
+- **Kết quả Kiểm Chứng (Verification):**
+  - TypeScript Typecheck (`pnpm exec tsc --noEmit`): Pass 100% (0 errors).
+  - Next.js Production Build (`pnpm build`): Pass 100% (23/23 routes tĩnh và SSG biên dịch thành công trong 2.7s).
+- **Đồng bộ tài liệu:** Cập nhật `plan50.md` (Completed), `CODEBASE_ATLAS.md` (Mục 5 bổ sung các component và phân hệ Admin), `SRS_SDD.md` (Document History) và `CHANGELOG.md`.
+
 ### Plan 49: Nâng Cấp Toàn Diện Website Chuyển Nhà Tiết Kiệm (Modern Tech-Logistics, Trải Nghiệm WOW & Tối Ưu Mô Hình Nhân Lực Bốc Xếp Chuyên Nghiệp)
 
 - **Mục tiêu & Bối cảnh kỹ thuật:**
