@@ -162,3 +162,4 @@ sequenceDiagram
 2. **Kỷ Luật Chia Nhỏ File:** Mỗi bước trong wizard khảo sát báo giá hoặc từng section trên trang chủ được tách thành component riêng biệt (`< 200 - 250 dòng`).
 3. **TypeScript Strict Mode:** Sử dụng đầy đủ kiểu dữ liệu cho đồ đạc, tải trọng xe và các bước wizard, cấm dùng `any`.
 4. **Cô Lập Dữ Liệu:** Toàn bộ API và DTO chuyển nhà giao tiếp qua endpoint tiền tố `/api/v1/moving/*`, kết nối riêng biệt vào MongoDB `moving_express`, không trộn lẫn dữ liệu với mảng giặt là.
+

@@ -1,10 +1,11 @@
 # ĐẶC TẢ YÊU CẦU & THIẾT KẾ HỆ THỐNG WEB GIẶT LÀ & CMS (SRS & SDD)
+
 ## PHÂN HỆ WEB KHÁCH HÀNG & QUẢN TRỊ MARKETING (fe-nextjs-thanhxuan-laundry)
 
-> **Tài liệu tham chiếu cấp cao:** [SRS_SDD.md (Kiến Trúc Tổng Quan)](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/SRS_SDD.md)  
-> **Phiên bản:** 2.4 | **Môi trường:** Next.js 14+ (App Router), React 18/19, TailwindCSS, shadcn/ui, Port 3000  
-> **Phạm vi mã nguồn:** `fe-nextjs-thanhxuan-laundry/src/**`  
-> **Quy chuẩn kỹ thuật:** Server Components mặc định, Feature-based Colocation, Metadata SEO & JSON-LD, React Hook Form + Zod  
+> **Tài liệu tham chiếu cấp cao:** [SRS_SDD.md (Kiến Trúc Tổng Quan)](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/SRS_SDD.md)
+> **Phiên bản:** 2.4 | **Môi trường:** Next.js 14+ (App Router), React 18/19, TailwindCSS, shadcn/ui, Port 3000
+> **Phạm vi mã nguồn:** `fe-nextjs-thanhxuan-laundry/src/**`
+> **Quy chuẩn kỹ thuật:** Server Components mặc định, Feature-based Colocation, Metadata SEO & JSON-LD, React Hook Form + Zod
 > **Database Backend kết nối:** MongoDB `laundry_express` qua Backend NestJS (Port 5001)
 
 ---
@@ -12,7 +13,9 @@
 ## 1. YÊU CẦU NGHIỆP VỤ (SRS)
 
 ### 1.1. Mục Tiêu & Đối Tượng Sử Dụng
+
 Phân hệ đảm nhiệm 2 vai trò cốt lõi trong mảng dịch vụ giặt là của Thanh Xuân Company:
+
 1. **Cổng Thông Tin Tiếp Thị & Dịch Vụ Khách Hàng (Public Facing - `thanhxuanlaundry.com`)**:
    - Đối tượng: Khách hàng doanh nghiệp B2B (Nhà hàng, khách sạn, spa) và khách hàng cá nhân có nhu cầu giặt sấy cao cấp.
    - Mục tiêu: Tiếp thị thương hiệu, tối ưu hóa công cụ tìm kiếm (SEO Top Google), cung cấp thông tin bảng giá minh bạch, thu thập leads liên hệ và yêu cầu báo giá chuyển đổi.
@@ -25,6 +28,7 @@ Phân hệ đảm nhiệm 2 vai trò cốt lõi trong mảng dịch vụ giặt 
 ### 1.2. Danh Sách Tính Năng Theo Nhóm (Functional Requirements)
 
 #### FE-LAUNDRY-FR-01: Phân Hệ Web Khách Hàng Công Khai (`(public)`)
+
 - **Trang chủ (`/`):** Hero Section chia chéo (Diagonal Split) video reel xưởng giặt công nghiệp + ảnh thành phẩm cao cấp & floating badges, giới thiệu năng lực xưởng giặt là công nghiệp, quy trình giặt sấy tiêu chuẩn, danh sách đối tác lớn, bảng giá tóm tắt và Pre-Footer CTA (cam kết tặng 01 tuần giặt mẫu, giao nhận 24/7, bồi thường 100% kèm form thu thập lead chuyển đổi).
 - **Giới thiệu (`/gioi-thieu`):** Lịch sử phát triển công ty, quy mô máy móc công nghệ, cam kết chất lượng dịch vụ.
 - **Dịch vụ giặt là (`/dich-vu`, `/dich-vu/[slug]`):**
@@ -37,6 +41,7 @@ Phân hệ đảm nhiệm 2 vai trò cốt lõi trong mảng dịch vụ giặt 
 - **Lead Capture & Context Tracking:** Mọi form gửi thông tin liên hệ đều tự động đính kèm ngữ cảnh (`sourceUrl`, `category`, `slug`) để đo lường hiệu quả từng bài viết marketing.
 
 #### FE-LAUNDRY-FR-02: Phân Hệ Quản Trị Nội Dung CMS (`(admin)/admin`)
+
 - **Xác thực Quản trị viên (`/admin/login`):** Đăng nhập bảo mật bằng tài khoản Admin Backend, lưu JWT token an toàn trong httpOnly Cookie (`admin_access_token`, `admin_refresh_token`, cờ `secure: true` trên production, `sameSite: 'lax'`) và quản lý phiên tự động qua Next.js Middleware. Route Handler `/api/upload` được bảo vệ nghiêm ngặt bằng cookie xác thực trước khi cho phép tải hoặc xóa file.
 - **Tổng quan Bảng điều khiển (`/admin/dashboard`):** Thống kê số lượng leads mới, đơn hàng chờ xử lý, số bài viết đã xuất bản và biểu đồ tương tác khách hàng.
 - **Quản lý Bài viết & Danh mục (`/admin/articles`, `/admin/categories`):**
@@ -51,6 +56,7 @@ Phân hệ đảm nhiệm 2 vai trò cốt lõi trong mảng dịch vụ giặt 
 ---
 
 ### 1.3. Yêu Cầu Phi Chức Năng & SEO
+
 - **Tối ưu hóa SEO 100%:**
   - 100% các trang `(public)` sử dụng **React Server Components (RSC)** để HTML được render hoàn toàn tại server (SSR/SSG), tối đa hóa điểm Google Core Web Vitals.
   - Cung cấp Metadata động (`generateMetadata`) cho từng bài viết và dịch vụ (Title, Description, Canonical URL, OpenGraph, Twitter Card).
@@ -161,6 +167,7 @@ sequenceDiagram
 ---
 
 ### 2.3. Quy Chuẩn Kỹ Thuật Bắt Buộc
+
 1. **Server Components:** Mọi trang đọc dữ liệu hiển thị trong thư mục `(public)` bắt buộc là Server Component. Chỉ thêm `"use client"` cho các component tương tác ở lá (Leaf Components) như form, slider, dynamic UI.
 2. **Form Validation:** Sử dụng `react-hook-form` kết hợp `zod` schema để validate dữ liệu form phía client trước khi gửi lên API Backend.
 3. **Quản lý Media:** Hình ảnh tải lên bài viết được gửi qua Backend để lưu trữ trực tiếp trên Cloudinary, không lưu trữ file tĩnh trên server Next.js.
