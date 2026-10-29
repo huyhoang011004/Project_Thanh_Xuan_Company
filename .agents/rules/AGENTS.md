@@ -5,7 +5,7 @@ Tài liệu này là nguồn quy ước chung cho mọi agent và workflow trong
 ## 1. Nguyên tắc cốt lõi & An toàn
 
 - **Dẫn chứng:** Mọi nhận định về code hiện có phải kèm `path:line`. Chưa xác minh được thì nêu rõ trong câu hỏi.
-- **Nguồn sự thật:** Code là hiện trạng; Plan là ý định thay đổi; `.agents/docs/SRS_SDD.md` phản ánh kiến trúc tổng thể và thư mục `.agents/docs/srs_sdd/` (`srs_sdd_backend.md`, `srs_sdd_fe_nextjs.md`, `srs_sdd_fe_internal.md`), `.agents/docs/DATABASE_DICTIONARY.md`, `.agents/docs/CODEBASE_ATLAS.md` phản ánh chi tiết từng phân hệ sau mỗi thay đổi hoàn tất.
+- **Nguồn sự thật:** Code là hiện trạng; Plan là ý định thay đổi; `.agents/docs/SRS_SDD.md` phản ánh kiến trúc tổng thể và thư mục `.agents/docs/srs_sdd/` (`srs_sdd_backend.md`, `srs_sdd_fe_laundry.md`, `srs_sdd_fe_internal.md`, `srs_sdd_fe_moving.md`), `.agents/docs/DATABASE_DICTIONARY.md`, `.agents/docs/CODEBASE_ATLAS.md` phản ánh chi tiết từng phân hệ sau mỗi thay đổi hoàn tất.
 - **An toàn:**
   - **Tự động commit và push lên nhánh `dev`:** Khi hoàn thành mỗi task/tính năng (sau khi đã chạy lint/typecheck/test/build pass), Agent tự động commit và push code lên nhánh `dev` của ứng dụng hoặc repository tương ứng.
   - **Quy chuẩn thông điệp commit:** Viết bằng tiếng Việt tự nhiên, giữ nguyên thuật ngữ kỹ thuật/chuyên ngành bằng tiếng Anh (ví dụ: `feat(handovers): thêm Service xử lý kiểm kê và đồng bộ DTO`, `fix(auth): sửa lỗi Guard kiểm tra audience JWT`).
@@ -37,8 +37,12 @@ Monorepo gồm 4 app, mỗi app chạy lệnh ở đúng thư mục của nó:
 - **`/docs-sync`:** Quét đồng bộ khi nghi ngờ tài liệu lệch code -> Cập nhật `.agents/docs/srs_sdd/srs_sdd_<app>.md`, `SRS_SDD.md`, `DATABASE_DICTIONARY.md`, `CODEBASE_ATLAS.md` & `CHANGELOG.md`.
 
 *Quy tắc cập nhật tài liệu Modular SRS/SDD & Harness Data:*
-- `SRS_SDD.md`: Là Living Architecture Specification TỔNG QUAN (System Context, Topology, Master Index liên kết sang các file phân hệ, Document History giữ 3-5 dòng mới nhất của toàn hệ sinh thái).
-- `.agents/docs/srs_sdd/srs_sdd_<app>.md`: Đặc tả chi tiết từng phân hệ (`srs_sdd_backend.md`, `srs_sdd_fe_nextjs.md`, `srs_sdd_fe_internal.md`). Sửa app nào thì cập nhật file app đó.
+- `SRS_SDD.md`: Là Living Architecture Specification TỔNG QUAN (System Context, Topology, Master Index liên kết sang 4 file phân hệ, Document History giữ 3-5 dòng mới nhất của toàn hệ sinh thái).
+- `.agents/docs/srs_sdd/srs_sdd_<app>.md`: Đặc tả chi tiết từng phân hệ trong Monorepo. **Quy tắc bắt buộc: Sửa app nào thì cập nhật đúng file phân hệ của app đó, tuyệt đối không viết chéo hay viết nhầm file:**
+  - `be-nestjs-thanhxuan/` $\rightarrow$ [srs_sdd_backend.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_backend.md)
+  - `fe-nextjs-thanhxuan-laundry/` $\rightarrow$ [srs_sdd_fe_laundry.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_laundry.md)
+  - `fe-react-thanhxuan-internal/` $\rightarrow$ [srs_sdd_fe_internal.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_internal.md)
+  - `fe-nextjs-chuyennhatietkiem/` $\rightarrow$ [srs_sdd_fe_moving.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_moving.md)
 - `.agents/docs/DATABASE_DICTIONARY.md`: Từ điển dữ liệu toàn diện (các databases, 34+ collections, chi tiết từng trường, kiểu dữ liệu, index, quan hệ và tác dụng nghiệp vụ).
 - `.agents/docs/CODEBASE_ATLAS.md`: Bản đồ định vị nhanh toàn bộ mã nguồn (Endpoint ↔ Controller ↔ Service ↔ Repository ↔ Schema và Route ↔ Page ↔ Component ↔ Hook) giúp Agent định vị file lập tức không cần grep dò tìm.
 - `CHANGELOG.md`: Lưu trữ toàn bộ bài luận nhật ký chi tiết theo từng Plan/Fix.

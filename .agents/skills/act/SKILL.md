@@ -50,7 +50,7 @@ Bạn là Technical Execution / Coding Agent. Nhiệm vụ: thực thi chính x�
 
 - **Từ điển dữ liệu (`DATABASE_DICTIONARY.md`):** Nếu plan có thêm/sửa/xóa Schema/Field/Index/Collection, bắt buộc cập nhật `.agents/docs/DATABASE_DICTIONARY.md` (đánh số STT liền mạch, xóa triệt để tên bảng đã xóa và chạy `pnpm run db:drop-legacy` nếu có xóa/đổi tên bảng).
 - **Bản đồ mã nguồn (`CODEBASE_ATLAS.md`):** Nếu plan có thêm/sửa/xóa module, endpoint, controller, service, route, page, modal hoặc component chính, cập nhật đồng bộ vào `.agents/docs/CODEBASE_ATLAS.md`.
-- **Phân hệ chi tiết (`srs_sdd_<app>.md`):** Cập nhật trực tiếp vào file phân hệ tương ứng tại `.agents/docs/srs_sdd/` (`srs_sdd_backend.md`, `srs_sdd_fe_nextjs.md`, `srs_sdd_fe_internal.md`).
+- **Phân hệ chi tiết (`srs_sdd_<app>.md`):** Cập nhật trực tiếp vào file phân hệ tương ứng tại `.agents/docs/srs_sdd/` (`srs_sdd_backend.md`, `srs_sdd_fe_laundry.md, srs_sdd_fe_moving.md`, `srs_sdd_fe_internal.md`).
 - **Tài liệu tổng thể (`SRS_SDD.md`):** Cập nhật kiến trúc tổng thể nếu có thay đổi System Context/Topology/Deploy, và luôn ghi DUY NHẤT 1 dòng tóm tắt ngắn vào Document History: `<YYYY-MM-DD> - Plan <N> - <tóm tắt 1 câu>` (giữ 3-5 dòng mới nhất).
 - **Nhật ký tiến hóa (`CHANGELOG.md`):** Ghi toàn bộ chi tiết thay đổi kỹ thuật vào `.agents/docs/CHANGELOG.md` theo ngày và số Plan.
 - Nếu dừng giữa chừng (blocked/partial): KHÔNG cập nhật SRS/SDD cho phần chưa hoàn thành.

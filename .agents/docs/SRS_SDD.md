@@ -30,15 +30,16 @@ Công ty Thanh Xuân vận hành một hệ sinh thái dịch vụ đa ngành, k
 
 ### 1.2. Danh Mục Tài Liệu Chi Tiết Theo Phân Hệ (Modular SRS & SDD)
 
-Hệ thống tài liệu kỹ thuật được module hóa thành 3 phân hệ chuyên sâu, tương ứng với 3 ứng dụng trong Monorepo:
+Hệ thống tài liệu kỹ thuật được module hóa thành 4 phân hệ chuyên sâu, tương ứng với 4 ứng dụng trong Monorepo:
 
 |  STT   | Phân Hệ                               | Ứng Dụng                       | Đường Dẫn Tài Liệu Chi Tiết                                                                                         | Trọng Tâm Đặc Tả                                                                                                                                                  |
 | :----: | :------------------------------------ | :----------------------------- | :------------------------------------------------------------------------------------------------------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **01** | **Backend API Tập Trung**             | `be-nestjs-thanhxuan/`         | [srs_sdd_backend.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_backend.md)         | Kiến trúc 3 MongoDB độc lập, Repository Pattern, toàn bộ bảng API Contracts, DTO Validation, State Machine, RBAC Guards, Cron Jobs, Streaming Reports.            |
-| **02** | **Web Khách Hàng & CMS**              | `fe-nextjs-thanhxuan-laundry/` | [srs_sdd_fe_nextjs.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_nextjs.md)     | Next.js App Router, Server Components SEO (RSC), Metadata động, Lead Capture CTA, CMS Quản trị bài viết, chiến dịch Zalo OA/Email.                                |
-| **03** | **Cổng Vận Hành Xưởng & Đối Tác**     | `fe-react-thanhxuan-internal/` | [srs_sdd_fe_internal.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_internal.md) | React Router v7, Centralized Routes (`van-hanh/` & `quan-ly/`), Mobile-First PWA, Canvas Signature, Offline Queue IndexedDB, phân quyền giao diện 8 vai trò RBAC. |
-| **04** | **Từ Điển Dữ Liệu (Data Dictionary)** | `be-nestjs-thanhxuan/`         | [DATABASE_DICTIONARY.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/DATABASE_DICTIONARY.md)         | Từ điển 34+ collections thuộc 3 MongoDB độc lập, chi tiết từng thuộc tính, kiểu dữ liệu, index, quan hệ và ý nghĩa nghiệp vụ.                                     |
-| **05** | **Bản Đồ Mã Nguồn (Codebase Atlas)**  | Monorepo (3 apps)              | [CODEBASE_ATLAS.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/CODEBASE_ATLAS.md)                   | Chỉ mục truy xuất tức thì: Endpoint ↔ Controller ↔ Service ↔ Repository ↔ Schema và Route ↔ Page ↔ Modal ↔ Hooks ↔ Service.                                       |
+| **02** | **Web Giặt Là & CMS**                 | `fe-nextjs-thanhxuan-laundry/` | [srs_sdd_fe_laundry.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_laundry.md)     | Next.js App Router, Server Components SEO (RSC), Metadata động, Lead Capture CTA, CMS Quản trị bài viết, chiến dịch Zalo OA/Email.                                |
+| **03** | **Web Chuyển Nhà Tiết Kiệm**          | `fe-nextjs-chuyennhatietkiem/` | [srs_sdd_fe_moving.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_moving.md)       | Next.js 16 App Router, React 19, Estimator Cước Xe Tải tức thì, Wizard Báo Giá Đa Bước (/dat-lich), Bảng Giá Niêm Yết, Mô hình Asset-Light Thợ Kiêm Mộc/Điện Lạnh. |
+| **04** | **Cổng Vận Hành Xưởng & Đối Tác**     | `fe-react-thanhxuan-internal/` | [srs_sdd_fe_internal.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_internal.md) | React Router v7, Centralized Routes (`van-hanh/` & `quan-ly/`), Mobile-First PWA, Canvas Signature, Offline Queue IndexedDB, phân quyền giao diện 8 vai trò RBAC. |
+| **05** | **Từ Điển Dữ Liệu (Data Dictionary)** | `be-nestjs-thanhxuan/`         | [DATABASE_DICTIONARY.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/DATABASE_DICTIONARY.md)         | Từ điển 34+ collections thuộc 3 MongoDB độc lập, chi tiết từng thuộc tính, kiểu dữ liệu, index, quan hệ và ý nghĩa nghiệp vụ.                                     |
+| **06** | **Bản Đồ Mã Nguồn (Codebase Atlas)**  | Monorepo (4 apps)              | [CODEBASE_ATLAS.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/CODEBASE_ATLAS.md)                   | Chỉ mục truy xuất tức thì: Endpoint ↔ Controller ↔ Service ↔ Repository ↔ Schema và Route ↔ Page ↔ Modal ↔ Hooks ↔ Service.                                       |
 
 ---
 
@@ -122,7 +123,8 @@ Website_Thanh_Xuan_Company/
     │   ├── CHANGELOG.md                 # Nhật ký chi tiết toàn bộ các Plan & Fix
     │   ├── srs_sdd/                     # 3 tài liệu phân hệ chi tiết
     │   │   ├── srs_sdd_backend.md       # Đặc tả chi tiết Backend API
-    │   │   ├── srs_sdd_fe_nextjs.md     # Đặc tả chi tiết Web Khách Hàng & CMS
+    │   │   ├── srs_sdd_fe_laundry.md    # Đặc tả chi tiết Web Giặt Là & CMS
+│   │   ├── srs_sdd_fe_moving.md     # Đặc tả chi tiết Web Chuyển Nhà Tiết Kiệm
     │   │   └── srs_sdd_fe_internal.md   # Đặc tả chi tiết Cổng Vận Hành Xưởng
     │   ├── plans/                       # Các kế hoạch kỹ thuật plan1.md -> planN.md
     │   └── reviews/                     # Các biên bản kiểm định mã nguồn reviewN.md
@@ -151,6 +153,8 @@ Website_Thanh_Xuan_Company/
 ---
 
 ## 4. DOCUMENT HISTORY
+
+- **2026-10-29 - Tách Modular SRS/SDD Phân Hệ Frontend:** Phân tách tài liệu Web Next.js thành 2 tài liệu chuyên biệt: srs_sdd_fe_laundry.md (fe-nextjs-thanhxuan-laundry) và srs_sdd_fe_moving.md (fe-nextjs-chuyennhatietkiem); cập nhật toàn diện AGENTS.md, GEMINI.md và các skills (act, docs-sync, srs-sdd) với quy tắc bắt buộc Agent viết đúng tài liệu phân hệ tương ứng.
 
 > 📌 **Chi tiết toàn bộ nhật ký các Plan và Bugfix:** Xem đầy đủ tại [CHANGELOG.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/CHANGELOG.md).
 

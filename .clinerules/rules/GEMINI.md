@@ -21,7 +21,7 @@ Website và hệ thống quản trị của Công ty Giặt Sấy Thanh Xuân g�
 
 - Tài liệu tổng thể: `.agents/docs/SRS_SDD.md` (System Context, Topology, Master Index, Conventions).
 - Phân hệ Backend: `.agents/docs/srs_sdd/srs_sdd_backend.md` (3 DB, Repository Pattern, API Contracts, Guards).
-- Phân hệ Web & CMS: `.agents/docs/srs_sdd/srs_sdd_fe_nextjs.md` (RSC SEO, Leads CRM, CMS Articles/Orders).
+- Phân hệ Web & CMS: `.agents/docs/srs_sdd/srs_sdd_fe_laundry.md, srs_sdd_fe_moving.md` (RSC SEO, Leads CRM, CMS Articles/Orders).
 - Phân hệ Vận hành: `.agents/docs/srs_sdd/srs_sdd_fe_internal.md` (Vận hành & Quản lý, Mobile PWA, Canvas, Offline Queue).
 - Nhật ký thay đổi: `.agents/docs/CHANGELOG.md` (Lưu vết chi tiết theo từng Plan/Fix).
 
