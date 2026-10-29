@@ -2,7 +2,7 @@
 
 ## DỰ ÁN: HỆ SINH THÁI CÔNG NGHỆ ĐIỀU HÀNH XƯỞNG GIẶT LÀ & LOGISTICS B2B
 
-> **Kính gửi:** Ban Giám Đốc / Chủ Doanh Nghiệp - Công Ty Giặt Sấy Thanh Xuân
+> **Kính gửi:** Ban Giám Đốc / Chủ Doanh Nghiệp - Công ty TNHH Kinh doanh Thương mại và Dịch vụ Thanh Xuân
 > **Đơn vị lập hồ sơ:** Đội Ngũ Kỹ Thuật & Tư Vấn Chuyển Đổi Số
 > **Mục tiêu:** Cung cấp tài liệu trình bày trực quan, thuyết phục về giá trị và chi phí đầu tư của Phân hệ Cổng Vận Hành Nội Bộ (`fe-react-thanhxuan-internal` + Backend Internal); kèm theo kịch bản đàm phán thương mại, xử lý từ chối và phương án thanh toán linh hoạt giúp chốt hợp đồng thành công.
 > **Ngày phát hành:** 2026-10-29
@@ -229,4 +229,4 @@ flowchart LR
 
 ### 5.3. Kết Luận
 
-Phân hệ Cổng Vận Hành Nội Bộ trị giá **25.000.000 VNĐ** là khoản đầu tư chiến lược mang tính sống còn giúp Công ty Giặt Sấy Thanh Xuân chuyển mình từ một xưởng giặt thủ công trở thành một **doanh nghiệp F&B Logistics công nghệ cao**, sẵn sàng tiếp nhận các hợp đồng giặt là hàng chục nghìn sản phẩm/ngày từ các tập đoàn lớn.
+Phân hệ Cổng Vận Hành Nội Bộ trị giá **25.000.000 VNĐ** là khoản đầu tư chiến lược mang tính sống còn giúp Công ty TNHH Kinh doanh Thương mại và Dịch vụ Thanh Xuân chuyển mình từ một xưởng giặt thủ công trở thành một **doanh nghiệp F&B Logistics công nghệ cao**, sẵn sàng tiếp nhận các hợp đồng giặt là hàng chục nghìn sản phẩm/ngày từ các tập đoàn lớn.

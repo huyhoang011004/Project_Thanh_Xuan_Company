@@ -3,7 +3,7 @@
 
 > **Mục đích tài liệu:** Cung cấp luận cứ kinh tế, kỹ thuật và giá trị thực tế nhằm giải thích rõ ràng, thuyết phục thắc mắc của Ban Giám đốc:  
 > *"Tại sao Phân hệ Web Giặt Là & CMS nhìn ít chức năng hơn Phân hệ Cổng Vận Hành Nội Bộ mà lại có chi phí 15.000.000 VNĐ?"*  
-> **Áp dụng cho:** Hệ sinh thái Công ty Giặt Sấy Thanh Xuân (Thanh Xuan Laundry & Moving Company).
+> **Áp dụng cho:** Hệ sinh thái Công ty TNHH Kinh doanh Thương mại và Dịch vụ Thanh Xuân.
 
 ---
 
