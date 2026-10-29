@@ -455,20 +455,26 @@ sequenceDiagram
 
 ---
 
-### 2.11. Chức Năng Shipper Xin Nghỉ Giao Nhận & Phân Tuyến Kèm Tiền Công (Plan 55)
+### 2.11. Chức Năng Shipper Xin Nghỉ Giao Nhận & Phân Tuyến Kèm Tiền Công (Plan 55 & Cổng Riêng Shipper)
 
-- **Màn hình Shipper Giao Nhận (`ShipperHandoverPage.tsx`):**
-  - Tích hợp 2 nút bấm thao tác nhanh: **"Xin nghỉ giao nhận"** (`ShipperLeaveRequestModal.tsx`) và **"Lịch sử nghỉ"** (`ShipperLeaveHistoryModal.tsx`).
-  - Shipper chọn 1 hoặc nhiều ngày nghỉ (`leaveDates`), nhập lý do xin nghỉ. Hệ thống tự động tính toán số điểm giao cần phân công thay thế.
-  - Hiển thị badge chỉ báo nổi bật `Nhận giao thay: [Tên Shipper nghỉ]` kèm thông tin mức tiền công giao thay trong danh sách điểm giao nhận ngày hôm đó nếu Shipper là người được phân công làm thay.
+- **Trang Cổng Shipper Xin Nghỉ Riêng Biệt (`ShipperLeavePage.tsx` tại `/operations/shipper/leave`):**
+  - Tab điều hướng độc lập trên Mobile Bottom Bar (`nav-mobile-config.ts`) và Desktop Sidebar (`nav-config.ts`) dành cho `SHIPPER`.
+  - Bộ 3 thẻ chỉ số nhanh: Tổng số đơn, Đang chờ duyệt, Đã duyệt nghỉ.
+  - Phân chia 2 Tabs giao diện chuyên biệt:
+    + **"Tạo Đơn Xin Nghỉ" (`ShipperLeaveFormComponent.tsx`)**: Chọn nhanh ngày mai, 2 ngày, 3 ngày liên tiếp; date picker; chip hiển thị thứ trong tuần (Thứ Hai, Thứ Ba...); danh mục gợi ý lý do nghỉ phổ biến 1 chạm; ô ghi chú chi tiết; cảnh báo quy trình 2 bước.
+    + **"Lịch Sử & Tiến Độ" (`ShipperLeaveHistoryComponent.tsx`)**: Lọc theo Tất cả / Chờ duyệt / Đã duyệt / Từ chối hoặc Đã hủy. Thẻ đơn (`ShipperLeaveCardComponent.tsx`) hiển thị trực quan các ngày nghỉ, stepper tiến độ duyệt, thông tin tài xế nhận giao thay, số tiền công bù, lý do từ chối nếu có, và nút hủy đơn an toàn có modal xác nhận.
+- **Nâng Cấp Toàn Diện Bộ 2 Modals Giao Nhận:**
+  - `ShipperLeaveRequestModal.tsx` và `ShipperLeaveHistoryModal.tsx` tại màn hình `ShipperHandoverPage.tsx` được đồng bộ sang thiết kế cao cấp mới, tái sử dụng các sub-component chuyên biệt.
 - **Trang Quản Trị & Xét Duyệt Đơn (`ShipperLeaveReviewPage.tsx` tại `/management/shipper-leaves`):**
   - Dành cho các vai trò `ADMIN`, `MANAGER` và `ACCOUNTANT`.
   - Bộ lọc tabs theo trạng thái: Tất cả, Chờ Quản lý duyệt, Chờ Kế toán set công, Đã duyệt, Đã từ chối.
   - Thẻ đơn xin nghỉ (`ShipperLeaveCardComponent.tsx`) hiển thị minh bạch thông tin shipper xin nghỉ, danh sách ngày nghỉ, lý do, số điểm cần bàn giao, người duyệt và tiền công giao thay.
-- **Bộ 3 Modals Nghiệp Vụ:**
+- **Bộ 3 Modals Nghiệp Vụ Quản Trị:**
   - `ApproveShipperLeaveModal.tsx`: Quản lý / Admin duyệt đơn, chọn tài khoản Shipper thay thế (từ danh sách shipper active). Nếu là `ADMIN`, hỗ trợ checkbox 1 chạm thiết lập tiền công luôn để hoàn tất phê duyệt ngay lập tức.
   - `SetLeaveCompensationModal.tsx`: Kế toán / Admin thiết lập số tiền công giao thay (hỗ trợ các nút chọn nhanh 100k, 150k, 200k, 250k, 300k và nhập số tiền tùy chọn), ghi chú kế toán và hoàn tất duyệt đơn.
   - `RejectShipperLeaveModal.tsx`: Quản lý / Admin từ chối đơn xin nghỉ kèm lý do phản hồi cho Shipper.
-- **Menu điều hướng (`nav-config.ts`):**
+- **Menu điều hướng (`nav-config.ts` & `nav-mobile-config.ts`):**
+  - Bổ sung mục **"Xin Nghỉ Giao Nhận"** vào nhóm CÁ NHÂN & CHẤM CÔNG cho Shipper.
+  - Bổ sung tab **"Xin Nghỉ"** vào thanh Bottom Nav trên Mobile cho Shipper.
   - Bổ sung mục **"Duyệt Nghỉ Giao Nhận"** vào nhóm ĐIỀU HÀNH & KINH DOANH cho Admin, Manager và Accountant.
 

@@ -4,6 +4,34 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
 
 ## 2026-10-30
 
+### Tính năng: Tách Tab Riêng Xin Nghỉ Cho Shipper & Nâng Cấp Toàn Diện Giao Diện Form Xin Nghỉ Và Lịch Sử Nghỉ (fe-react-thanhxuan-internal)
+
+- **Bối cảnh & Yêu cầu:**
+  - Trước đây, tài xế xe tải (`SHIPPER`) chỉ có thể gửi đơn xin nghỉ và xem lịch sử thông qua 2 nút bấm nhỏ trong thanh header của trang lộ trình giao nhận (`ShipperHandoverPage.tsx`), gây bất tiện và khó thao tác trên di động khi đang làm việc ngoài đường.
+  - Giao diện 2 modal xin nghỉ và lịch sử nghỉ còn đơn điệu, thiếu tính năng chọn nhanh ngày nghỉ liên tiếp, thiếu chip gợi ý lý do nhanh 1 chạm, và chưa có giao diện tiến độ duyệt trực quan.
+- **Giải pháp & Thay đổi kỹ thuật:**
+  1. **Tạo Cổng Riêng Biệt Cho Shipper Xin Nghỉ (`/operations/shipper/leave`):**
+     - Tạo trang `ShipperLeavePage.tsx` tại `src/features/operations/shipper-leave/` với `PageBanner` hiện đại và 3 thẻ chỉ số nhanh: Tổng số đơn, Đang chờ duyệt, Đã duyệt nghỉ.
+     - Thanh chuyển đổi phân đoạn 2 tab trực quan: **Tạo Đơn Xin Nghỉ** (`ShipperLeaveFormComponent.tsx`) và **Lịch Sử Nghỉ** (`ShipperLeaveHistoryComponent.tsx`) kèm badge số lượng đơn chờ duyệt.
+  2. **Nâng Cấp Form Xin Nghỉ Tối Ưu Mobile-First:**
+     - Bộ nút chọn nhanh ngày nghỉ: "Ngày mai", "2 ngày liên tiếp", "3 ngày liên tiếp" từ ngày mai.
+     - Date picker và danh sách badge ngày nghỉ kèm thứ trong tuần (`getWeekdayVN`: Thứ Hai, Thứ Ba...) giúp tài xế không nhầm lẫn lịch trình.
+     - Danh mục lý do xin nghỉ gợi ý 1 chạm (Việc gia đình, Về quê, Khám bệnh / Sốt mệt, Xe hỏng, Việc riêng...) kèm textarea nhập chi tiết.
+     - Khung thông tin quy trình 2 bước giải thích cơ chế phân tuyến và thiết lập tiền công hỗ trợ giao thay.
+  3. **Nâng Cấp Giao Diện Lịch Sử & Thẻ Đơn Nghỉ (`ShipperLeaveCardComponent.tsx`):**
+     - Thanh bộ lọc trạng thái nhanh: Tất cả, Chờ duyệt, Đã duyệt, Đã hủy / Từ chối kèm số lượng đếm thực tế.
+     - Thẻ đơn hiển thị các ngày nghỉ dạng badge lịch sang trọng, stepper tiến độ duyệt, thông tin tài xế nhận giao thay, số tiền công hỗ trợ (VND), lý do từ chối nổi bật (nếu có).
+     - Nút hủy đơn an toàn tích hợp modal xác nhận trước khi hủy.
+  4. **Tái Sử Dụng Đồng Bộ Cho Bộ 2 Modals Giao Nhận:**
+     - Cập nhật `ShipperLeaveRequestModal.tsx` và `ShipperLeaveHistoryModal.tsx` tái sử dụng hoàn toàn các sub-component mới, bổ sung callback `onRequestNewLeave` chuyển tiếp mượt mà.
+  5. **Tích Hợp Điều Hướng (Navigation):**
+     - `nav-mobile-config.ts`: Thêm tab **"Xin Nghỉ"** (icon `CalendarOff`) vào Mobile Bottom Bar cho `StaffRole.SHIPPER` (Giao Nhận | Xăng Xe | Xin Nghỉ | Lương).
+     - `nav-config.ts`: Bổ sung mục **"Xin Nghỉ Giao Nhận"** vào nhóm CÁ NHÂN & CHẤM CÔNG cho Shipper.
+     - `router.tsx`: Khai báo tuyến đường `/operations/shipper/leave` (và redirect `/operations/shipper/leaves`).
+- **Kết quả kiểm thử:**
+  - TypeScript typecheck (`tsc -b`) pass 100%.
+  - Vite production build pass 100% (tất cả bundle và PWA Service Worker tạo thành công).
+
 ### Plan 56: Hoàn Thiện Toàn Diện Cấu Hình & Trải Nghiệm PWA Cho Cổng Vận Hành Nội Bộ (fe-react-thanhxuan-internal)
 
 - **Bối cảnh & Vấn đề:**
