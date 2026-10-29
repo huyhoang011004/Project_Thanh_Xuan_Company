@@ -1,6 +1,6 @@
 # Plan 57: Cơ Chế Duy Trì Phiên Đăng Nhập Lâu Dài Như Mobile App Cho PWA (Long-Lived Session & Persistent Token Refresh)
 
-> Status: In progress | Created: 2026-10-30
+> Status: Done | Created: 2026-10-30
 
 ## 1. Overview & Affected Files
 
@@ -50,9 +50,19 @@
 
 ## 2. Kế hoạch triển khai (Task Checklist)
 
-- [ ] **T1: Nâng cấp Backend (`be-nestjs-thanhxuan`): Cấu hình thời hạn Access Token (1d) và Refresh Token 60 ngày (Sliding Expiration)**
-- [ ] **T2: Xây dựng module `auth-storage.ts` trong `fe-react-thanhxuan-internal` (Dual-Storage: LocalStorage + IndexedDB)**
-- [ ] **T3: Cập nhật `api-client.ts`: Đồng bộ token với `auth-storage`, phát sự kiện `auth:token-refreshed` và bảo vệ phiên khi offline**
-- [ ] **T4: Nâng cấp `AuthContext.tsx`: Khôi phục phiên từ IndexedDB khi mở PWA, lắng nghe cập nhật token và Proactive Refresh khi quay lại app**
-- [ ] **T5: Kiểm thử tự động (Verification & Build) cho cả Backend và Frontend Internal**
-- [ ] **T6: Đồng bộ tài liệu kỹ thuật SRS/SDD & Changelog**
+- [x] **T1: Nâng cấp Backend (`be-nestjs-thanhxuan`): Cấu hình thời hạn Access Token (1d) và Refresh Token 60 ngày (Sliding Expiration)**
+- [x] **T2: Xây dựng module `auth-storage.ts` trong `fe-react-thanhxuan-internal` (Dual-Storage: LocalStorage + IndexedDB)**
+- [x] **T3: Cập nhật `api-client.ts`: Đồng bộ token với `auth-storage`, phát sự kiện `auth:token-refreshed` và bảo vệ phiên khi offline**
+- [x] **T4: Nâng cấp `AuthContext.tsx`: Khôi phục phiên từ IndexedDB khi mở PWA, lắng nghe cập nhật token và Proactive Refresh khi quay lại app**
+- [x] **T5: Kiểm thử tự động (Verification & Build) cho cả Backend và Frontend Internal**
+- [x] **T6: Đồng bộ tài liệu kỹ thuật SRS/SDD & Changelog**
+
+## 3. Execution Log
+
+- **2026-10-30:**
+  - Hoàn tất T1: Tăng thời hạn Refresh Token lên 60 ngày trong `account-auth.helper.ts`, cấu hình thời hạn Access Token `1d` trong `auth.module.ts` và `account-auth.service.ts`.
+  - Hoàn tất T2: Tạo `src/lib/auth-storage.ts` quản lý lưu trữ đồng thời `localStorage` và `IndexedDB`, kèm bộ giải mã kiểm tra hạn JWT (`isJwtExpired`).
+  - Hoàn tất T3: Tích hợp `auth-storage` vào `api-client.ts`, phát CustomEvent `auth:token-refreshed`, bảo toàn session khi offline.
+  - Hoàn tất T4: Nâng cấp `AuthContext.tsx` tự động khôi phục từ IndexedDB khi khởi động, silent refresh trước khi token hết hạn, lắng nghe sự kiện `visibilitychange` và `window.focus` khi mở app từ màn hình khóa.
+  - Hoàn tất T5: `tsc --noEmit` và `pnpm build` pass 100% cho cả Backend và Frontend Internal.
+  - Hoàn tất T6: Đồng bộ `srs_sdd_backend.md`, `srs_sdd_fe_internal.md`, `SRS_SDD.md`, `CODEBASE_ATLAS.md` và `CHANGELOG.md`.

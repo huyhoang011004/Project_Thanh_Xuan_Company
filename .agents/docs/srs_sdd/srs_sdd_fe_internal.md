@@ -296,6 +296,12 @@ sequenceDiagram
   - **Lối Tắt Ứng Dụng (Web App Shortcuts):** Tích hợp 4 shortcut truy cập 1 chạm ngoài màn hình điện thoại: Giao Nhận Shipper (`/operations/shipper/handover`), Chấm Công Selfie (`/operations/attendance`), Trạm Công Thợ (`/operations/worker/piecework`), và Soạn Đồ Xuất Xưởng (`/operations/warehouse-manager/warehouse`).
   - **Bộ Nhớ Đệm CDN Thông Minh (Workbox Runtime Caching):** Precache toàn bộ bundle tĩnh HTML/CSS/JS, áp dụng chiến lược `CacheFirst` cho Google Fonts và `StaleWhileRevalidate` cho Cloudinary CDN (`res.cloudinary.com` - chữ ký số, ảnh phiếu bàn giao, hóa đơn xăng với thời gian lưu 30 ngày, tối đa 120 mục).
   - **Thông Báo Bản Cập Nhật Mới (`PwaReloadPrompt`):** Lắng nghe sự kiện `waiting` và `updatefound` từ Native Service Worker, tự động kiểm tra mỗi 30 phút và hiển thị Toast nổi kèm nút "Cập nhật ngay" (`skipWaiting` + `reload`).
+- **Cơ Chế Duy Trì Phiên Lâu Dài Như Mobile App (Plan 57 - Long-Lived Session & Silent Refresh):**
+  - **Lưu Trữ Kép Bền Vững (`auth-storage.ts`):** Ghi đồng thời `staff_token`, `staff_refresh_token` và `staff_user` vào cả `localStorage` và `IndexedDB` (`thanhxuan_internal_auth_db`). Khi iOS Safari ITP hoặc Android Webview tự động dọn dẹp `localStorage`, PWA tự động khôi phục phiên từ `IndexedDB` dự phòng.
+  - **Refresh Token 60 Ngày & Sliding Expiration:** Backend duy trì Refresh Token lên tới 60 ngày. Mỗi lần xoay vòng, thời hạn mới lại được gia hạn thêm 60 ngày, giúp người dùng không bao giờ bị đăng xuất khi sử dụng ứng dụng định kỳ.
+  - **Proactive / Silent Refresh:** Khi mở lại PWA hoặc quay lại từ màn hình khóa (`visibilitychange`), ứng dụng kiểm tra `exp` của JWT; nếu Access Token còn dưới 5-10 phút sẽ tự động refresh ngầm trước khi các trang con gọi API.
+  - **Đồng Bộ Sự Kiện Token (`auth:token-refreshed`):** `apiClient` Interceptor phát CustomEvent khi xoay vòng token thành công, giúp React `AuthContext` cập nhật tức thì state `token` đồng bộ với storage.
+  - **Bảo Vệ Khi Offline:** Mất kết nối Internet (mã lỗi mạng / status 0) tuyệt đối không xóa session, bảo đảm an toàn dữ liệu và quyền truy cập ngoại tuyến cho thợ xưởng và tài xế.
 
 ---
 

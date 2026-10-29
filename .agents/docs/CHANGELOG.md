@@ -4,6 +4,32 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
 
 ## 2026-10-30
 
+### Plan 57: Cơ Chế Duy Trì Phiên Đăng Nhập Lâu Dài Như Mobile App Cho PWA (fe-react-thanhxuan-internal & be-nestjs-thanhxuan)
+
+- **Bối cảnh & Vấn đề:**
+  - Cổng vận hành nội bộ (`fe-react-thanhxuan-internal`) được cài đặt dưới dạng PWA trên điện thoại của tài xế xe tải, thợ xưởng và quản lý đối tác.
+  - Người dùng phản ánh việc thường xuyên bị đá về màn hình đăng nhập mỗi khi mở lại ứng dụng sau vài giờ hoặc vài ngày, không đạt được trải nghiệm "mở là dùng ngay" như các ứng dụng di động bản địa (Native Mobile App).
+  - Điều tra nguyên nhân gốc rễ (Root Cause):
+    1. Backend `be-nestjs-thanhxuan` hardcode thời hạn Access Token là 15 phút và Refresh Token là 7 ngày; quá 7 ngày không vào là phiên bị hủy.
+    2. Frontend lưu token trong `localStorage`, dễ bị cơ chế dọn dẹp bộ nhớ (ITP của iOS Safari / Android Webview) xóa sạch.
+    3. Khi Interceptor của `apiClient` tự động làm mới token thành công, state `token` trong React `AuthContext` không được cập nhật, gây lệch pha và gửi token cũ dẫn đến bị logout oan.
+    4. Ứng dụng chỉ có cơ chế refresh phản ứng (Reactive) khi gặp lỗi 401, dễ phát sinh xung đột (race condition) khi nhiều API cùng gọi đồng thời lúc mở app.
+- **Giải pháp & Thay đổi kỹ thuật:**
+  1. **Nâng cấp Backend (`be-nestjs-thanhxuan`):**
+     - Chuyển thời hạn Access Token sang cấu hình `jwt.staffExpiresIn` (mặc định `1d` / `12h`) thay vì cố định 15 phút, giảm tải tần suất refresh và ổn định kết nối.
+     - Nâng thời hạn Refresh Token lên **60 ngày** trong `account-auth.helper.ts` với cơ chế **Sliding Expiration**: Mỗi khi người dùng mở app và refresh token được xoay vòng, thời hạn mới lại được gia hạn thêm 60 ngày tiếp theo.
+  2. **Xây dựng Module Lưu Trữ Kép Bền Vững (`auth-storage.ts`):**
+     - Quản lý đồng bộ `staff_token`, `staff_refresh_token` và `staff_user` trên cả `localStorage` và `IndexedDB` (`thanhxuan_internal_auth_db`).
+     - Tự động khôi phục phiên từ `IndexedDB` dự phòng nếu `localStorage` bị hệ điều hành dọn dẹp.
+  3. **Cơ Chế Proactive / Silent Refresh & Đồng Bộ Sự Kiện:**
+     - Tích hợp kiểm tra hạn token JWT (`isJwtExpired`); khi mở lại PWA hoặc quay lại từ màn hình khóa (`visibilitychange` / `window.focus`), nếu Access Token còn dưới 5-10 phút sẽ tự động refresh ngầm trước khi các trang con gọi API.
+     - `apiClient` Interceptor phát CustomEvent `auth:token-refreshed` khi refresh thành công, giúp `AuthContext` cập nhật tức thì state `token`.
+  4. **Bảo Vệ Phiên Ngoại Tuyến (Offline Safety):**
+     - Khi mở app ở vùng mất sóng (hầm gửi xe, lỗi mạng / status 0), hệ thống tuyệt đối không xóa session hoặc redirect đăng nhập, cho phép nhân sự thao tác ngoại tuyến bình thường.
+- **Kết quả kiểm thử:**
+  - `be-nestjs-thanhxuan`: `tsc --noEmit` và `pnpm build` pass 100%.
+  - `fe-react-thanhxuan-internal`: `tsc --noEmit` và `pnpm build` pass 100%.
+
 ### Tính năng: Tách Tab Riêng Xin Nghỉ Cho Shipper & Nâng Cấp Toàn Diện Giao Diện Form Xin Nghỉ Và Lịch Sử Nghỉ (fe-react-thanhxuan-internal)
 
 - **Bối cảnh & Yêu cầu:**
