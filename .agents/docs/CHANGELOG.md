@@ -4,6 +4,38 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
 
 ## 2026-10-29
 
+### Plan 52: Phân Shipper Cố Định Cho Chi Nhánh Đối Tác, Tab Nhận Chuyến Tự Do & Cài Đặt Tiền Công Job Lẻ / Cụm Tuyến
+
+- **Bối cảnh & Vấn đề giải quyết:**
+  - **Phân công Shipper cố định cho chi nhánh đối tác:** Trước đây hệ thống chưa có cơ chế chỉ định một tài xế xe tải (Shipper) cố định phụ trách từng chi nhánh đối tác. Trong mô hình vận hành của công ty Thanh Xuân, các tuyến cố định này được tính theo chế độ lương cố định + phụ cấp theo tháng (không tính tiền chuyến riêng).
+  - **Tuyến tự do & Chợ Nhận Chuyến (Job Pool):** Các đối tác chưa được gán cố định cho shipper nào (hoặc các job phát sinh) cần hiển thị tại một tab riêng để các tài xế Shipper có thể chủ động bấm "Nhận chuyến" đi giao nhận. Cần đảm bảo cơ chế nhận chuyến nguyên tử (Atomic Claim) chống xung đột khi 2 tài xế bấm nhận cùng lúc.
+  - **Cài đặt tiền công chuyến (Trip Compensation):** Admin và Kế toán (`ACCOUNTANT`) cần công cụ thiết lập tiền công riêng cho các job tự do/phát sinh: 1 job đi 1 đối tác lẻ = `x` VNĐ; 1 job đi nhiều cụm đối tác cùng tuyến = `xx` VNĐ (chia đều số tiền cho từng phiếu thuộc cụm). Toàn bộ tiền công chuyến hoàn thành trong tháng phải được tự động tích hợp cộng vào bảng lương của Shipper (`extraDeliveryPay` và `netPay`).
+
+- **Các thay đổi kiến trúc & kỹ thuật chi tiết:**
+  - **Backend (`be-nestjs-thanhxuan`):**
+    - Mở rộng Schema `Partner` (`partner.schema.ts`): Thêm trường `defaultShipperId?: Types.ObjectId` tham chiếu tới `StaffAccount` (index `{ defaultShipperId: 1 }`), hỗ trợ DTO `CreatePartnerDto` & `UpdatePartnerDto`.
+    - Mở rộng Schema `HandoverRecord` (`handover-record.schema.ts`): Thêm sub-schema `TripCompensation` (`amount`, `clusterId`, `note`, `configuredBy`, `configuredAt`), các trường `tripCompensation`, `claimedAt`, `claimedBy`.
+    - Tạo DTOs xác thực nghiêm ngặt: `ClaimHandoverDto` (`src/modules/internal/handovers/dto/claim-handover.dto.ts`), `SetTripCompensationDto` và `ClusterCompensationDto` (`src/modules/internal/handovers/dto/trip-compensation.dto.ts`).
+    - Endpoint lấy danh sách tài xế active: Thêm `GET /api/v1/internal/accounts/shippers-list` tại `AccountsController` / `AccountsService` / `StaffAccountRepository` trả về danh sách `_id, fullName, phone, username` của tài xế đang hoạt động.
+    - Xử lý nhận chuyến nguyên tử (Atomic Claim): Thêm `claimRecordAtomic` tại `HandoverRecordRepository` dùng MongoDB `findOneAndUpdate({ _id: id, shipperId: null }, { $set: { shipperId: user.sub, claimedAt, claimedBy } }, { new: true })`. Trả về HTTP `409 Conflict` nếu chuyến đã có tài xế khác nhận trước.
+    - Xây dựng `HandoverPoolCompensationService`: Quản lý logic lấy danh sách chợ chuyến (`getPoolHandovers`), nhận chuyến (`claimHandover`), cài đặt tiền chuyến lẻ (`setTripCompensation`) và gom cụm nhiều đối tác (`clusterCompensation` sinh mã `CLUSTER-YYYYMMDD-XXXX` chia đều `perRecordAmount = Math.round(totalAmount / N)`).
+    - Tích hợp tự động vào bảng lương Shipper: Nâng cấp `payroll-shipper-calculator.helper.ts` tự động lọc các phiếu giao nhận hoàn thành trong tháng có `tripCompensation.amount > 0` đưa vào `ShipperPayDetails.extraDeliveryPay` và cộng trực tiếp vào thu nhập thực nhận `netPay`.
+    - Viết bộ unit test toàn diện: `handover-pool-compensation.service.spec.ts` kiểm thử 7 kịch bản nghiệp vụ (Pool filtering, Atomic claim, Race condition handling, Set tiền lẻ, Gom cụm chia đều, Payroll integration). Test chạy PASS 7/7.
+  - **Frontend Cổng Nội Bộ (`fe-react-thanhxuan-internal`):**
+    - Phân công Shipper trong `PartnerModal.tsx`: Tích hợp dropdown tải danh sách tài xế từ `/accounts/shippers-list`, cho phép chọn Shipper cố định (hưởng lương cứng + phụ cấp) hoặc chọn "Tuyến tự do (Chờ nhận theo chuyến)".
+    - Hiển thị trên thẻ đối tác `PartnerCardComponent.tsx`: Badge màu tím hiển thị họ tên và SĐT tài xế cố định phụ trách chi nhánh hoặc nhãn Tuyến tự do.
+    - Thêm Tab "Nhận Chuyến" (`POOL`) trên `ShipperHandoverPage.tsx`: Mở rộng `useShipperHandoverPage.ts` hỗ trợ 3 tabs (`ROUTE`, `POOL`, `HISTORY`), query `poolJobs`, mutation `claimJobMutation`.
+    - Xây dựng component `ShipperJobPoolTabComponent.tsx`: Hiển thị danh sách chuyến tự do khả dụng kèm badge số lượng, thông tin điểm giao nhận, số món sạch/bao bẩn, tiền công dự kiến và nút "Nhận Chuyến Này".
+    - Xây dựng Modal cài đặt tiền công `TripCompensationModal.tsx`: Hỗ trợ 2 chế độ: Chuyến lẻ (`x` VNĐ) và Gom cụm nhiều đối tác cùng tuyến (`xx` VNĐ chia đều), hiển thị trực quan thông tin chi nhánh và tiền chia đều mỗi phiếu.
+    - Gắn nút cài đặt tiền công trên phiếu kho: Tích hợp vào `WarehouseCleanPlanTabComponent.tsx` và `WarehouseHandoverPage.tsx` cho phép Thủ kho, Quản lý và Kế toán xem và cập nhật tiền công chuyến ngay trên phiếu xuất kho.
+
+- **Kết quả Kiểm Chứng (Verification):**
+  - Backend Unit Tests: 50/50 suites passed, 233/233 tests passed (0 failures).
+  - Backend NestJS Build: `pnpm build` thành công (exit code 0).
+  - Frontend Internal Typecheck: `pnpm exec tsc --noEmit` pass 100% (0 errors).
+  - Frontend Internal Production Build: `pnpm build` thành công, sinh dist bundle và PWA Service Worker (exit code 0).
+- **Đồng bộ tài liệu:** Cập nhật đồng bộ `DATABASE_DICTIONARY.md` (1.6 bảng `partners` & 1.8 bảng `handover_records`), `CODEBASE_ATLAS.md` (Endpoints, Services, Components, Modals), `srs_sdd_backend.md`, `srs_sdd_fe_internal.md`, `SRS_SDD.md` (Document History) và `plan52.md`.
+
 ### Plan 51: Bổ Sung Tự Nhập Món Đồ Ngoài Setting, Fix Lỗi Recount-Flag, Tối Ưu UI & Fullscreen Mobile Form Đếm Đồ
 
 - **Bối cảnh & Vấn đề giải quyết:**

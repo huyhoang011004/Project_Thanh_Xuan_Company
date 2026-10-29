@@ -32,6 +32,7 @@ Backend API tập trung phục vụ toàn bộ các kênh tương tác của Cô
   - Cập nhật thông tin cá nhân (`PATCH /accounts/me/profile`).
   - Upload avatar (`POST /accounts/me/avatar`) lưu trữ Cloudinary thư mục `internal/avatars`, tự động xóa avatar cũ khi thay mới.
   - Endpoint `GET /auth/me` trả về `avatarUrl` và `lockedAt`.
+  - Endpoint `GET /accounts/shippers-list` (Admin/Manager): Danh sách tài xế xe tải (Shipper) đang hoạt động (`status = ACTIVE`) phục vụ gán tuyến cố định.
 - **Tự động Seed 8 tài khoản mẫu (`onModuleInit`):**
   - Khởi tạo sẵn các tài khoản: `admin`, `manager`, `warehouse_manager`, `accountant`, `shipper`, `worker`, `partner_manager`, `partner_staff` với mật khẩu chung `ThanhXuan@2026`.
 - **Xác thực OTP & Trạng thái tài khoản:** Sinh mã OTP 6 chữ số gửi qua email SMTP/Resend, cooldown 60s, giới hạn 5 lần/giờ (`OtpCodeRepository`). Sau khi xác thực OTP, tài khoản chuyển sang `PENDING_APPROVAL`.
@@ -48,6 +49,7 @@ Backend API tập trung phục vụ toàn bộ các kênh tương tác của Cô
 
 #### BE-FR-02: Quản Lý Đối Tác & Danh Mục Bảng Giá (`/api/v1/internal/partners`)
 - **Thông tin đối tác:** Quản lý danh sách các chuỗi đối tác (Pizza 4P's, Haidilao Hotpot, Golden Gate...), địa chỉ chi nhánh, người liên hệ, tần suất giao nhận (`DAILY`, `ALTERNATE_DAYS`), ca giao nhận mặc định (`deliveryShift`: `MORNING` / `EVENING`).
+- **Phân công tài xế cố định (`defaultShipperId`):** Cho phép Admin và Manager chỉ định một tài xế xe tải (Shipper) cố định phụ trách tuyến giao nhận cho chi nhánh đối tác. Chi nhánh có tài xế cố định sẽ tính theo chế độ lương cố định + phụ cấp theo tháng (không tính tiền chuyến riêng). Nếu để trống (`null`), chi nhánh được xếp vào diện Tuyến Tự Do và phiếu giao nhận sẽ xuất hiện tại Chợ Chuyến (Job Pool) cho các tài xế tự bấm nhận theo chuyến.
 - **Mã viết tắt đối tác (`shortCode`):** Bắt buộc thiết lập khi tạo và sửa chi nhánh đối tác (ví dụ: `TT` cho Tràng Tiền, `TDH` cho Trần Duy Hưng). Lưu trữ uppercase, index unique để làm tiền tố sinh mã phiếu giao nhận.
 - **Lịch giao nhận trong ngày (`/schedule`):** Tự động tính toán các chi nhánh cần giao trong ngày theo múi giờ `Asia/Ho_Chi_Minh` (đối với lịch cách ngày, tính theo chẵn/lẻ số ngày trong năm).
 - **Danh mục đồ giặt & Đơn giá dịch vụ (`item_catalogs`):**
@@ -67,6 +69,13 @@ Backend API tập trung phục vụ toàn bộ các kênh tương tác của Cô
   4. *Bước 4 (Trạm rạch bao đếm lại xưởng):* Lọc các phiếu có `recount.isRecount === true` hoặc đồ bẩn trống số, thợ xưởng cập nhật số thực tế qua `PATCH /handover/:id/recount-actual`.
   5. *Bước 5 (Đối tác kiểm nhận đồ sạch):* Đối tác kiểm nhận số lượng đồ sạch đã nhận, ký xác nhận qua `PATCH /handover/:id/partner-check-signature`, chuyển trạng thái phiếu sang hoàn thành dựa trên chữ ký thực tế.
 - **Thư viện ảnh phiếu (`GET /handover/slip-gallery`):** Cho phép xem ảnh phiếu giao nhận theo ngày, thương hiệu, chi nhánh và khoảng thời gian.
+- **Chợ Chuyến (Job Pool) & Nhận Chuyến Nguyên Tử (Atomic Claim):**
+  - Danh sách chuyến tự do (`GET /handover/pool`): Liệt kê các phiếu giao nhận chưa có tài xế phụ trách (`shipperId = null`) hoặc thuộc chi nhánh tuyến tự do (`partner.defaultShipperId = null`).
+  - Nhận chuyến nguyên tử (`POST /handover/:id/claim`): Áp dụng truy vấn atomic `findOneAndUpdate({ _id: id, shipperId: null }, { $set: { shipperId: user.sub, claimedAt, claimedBy } })` của MongoDB để loại bỏ hoàn toàn Race Condition khi 2 tài xế bấm nhận cùng thời điểm (tài xế chậm hơn nhận HTTP `409 Conflict`).
+- **Cài Đặt Tiền Công Chuyến Lẻ & Cụm Tuyến (Trip Compensation):**
+  - Cài đặt chuyến lẻ (`PATCH /handover/:id/compensation`): Admin và Kế toán (`ACCOUNTANT`) thiết lập tiền công `amount` (`x` VNĐ) và ghi chú tuyến.
+  - Gom cụm đối tác cùng tuyến (`POST /handover/cluster-compensation`): Cho phép gom `N` phiếu giao nhận thành một cụm chuyến với tổng tiền `totalAmount` (`xx` VNĐ). Hệ thống sinh mã cụm `CLUSTER-YYYYMMDD-XXXX` và chia đều `perRecordAmount = Math.round(totalAmount / N)` vào từng phiếu.
+  - Tích hợp Bảng lương Shipper: Khi tài xế hoàn thành phiếu giao nhận trong tháng, tổng tiền các chuyến tự do được helper `payroll-shipper-calculator.helper.ts` tự động tổng hợp vào trường `extraDeliveryPay` và cộng trực tiếp vào thu nhập thực nhận `netPay` của tháng đó.
 
 #### BE-FR-04: Chấm Công Camera Selfie & Công Thợ Theo Thời Gian x Hệ Số (`/api/v1/internal/attendance`, `/piecework`)
 - **Chấm công camera selfie:**
