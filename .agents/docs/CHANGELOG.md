@@ -4,6 +4,44 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
 
 ## 2026-10-29
 
+### Plan 55: Chức Năng Shipper Xin Nghỉ Giao Nhận & Phân Tuyến Kèm Tiền Công (Shipper Leave & Route Reassignment Workflow)
+
+- **Bối cảnh & Vấn đề nghiệp vụ:**
+  - Đội ngũ tài xế xe tải (Shipper) phụ trách tuyến giao nhận 2 chiều giữa xưởng giặt và các nhà hàng đối tác cố định hàng ngày. Khi một Shipper cần xin nghỉ phép một hoặc nhiều ngày, các cơ sở đối tác không thể bị bỏ sót tuyến mà phải được phân công bàn giao cho một tài khoản Shipper khác giao thay, kèm theo mức tiền công giao thay xứng đáng (do Kế toán hoặc Admin xác lập).
+- **Yêu cầu & Quyết định thiết kế:**
+  1. **Nộp đơn xin nghỉ linh hoạt:** Cho phép Shipper chọn 1 hoặc nhiều ngày nghỉ (`YYYY-MM-DD`), nhập lý do xin nghỉ. Hệ thống tự động tính toán tổng số lượt giao và các chi nhánh đối tác có lịch giao vào các ngày đó dựa trên `isPartnerScheduledOnDate`.
+  2. **Quy trình phê duyệt linh hoạt 2 bước hoặc 1 chạm:**
+     - **Luồng chuẩn 2 bước (Manager + Accountant):** Manager xem đơn, chọn tài khoản Shipper thay thế và chuyển đơn sang trạng thái `APPROVED_PENDING_COMPENSATION` $\rightarrow$ Kế toán tiếp nhận đơn đã chỉ định người, nhập số tiền công giao thay (`compensationAmount` VNĐ) và chuyển đơn sang `APPROVED` (chính thức có hiệu lực).
+     - **Luồng 1 chạm (Đặc quyền Admin):** Admin có thể chỉ định Shipper thay thế và nhập luôn số tiền công giao thay trong cùng một lần để duyệt hoàn tất ngay lập tức.
+  3. **Hệ thống Email thông báo tự động (Nodemailer qua EventEmitter):**
+     - Khi Shipper tạo đơn: Bắn sự kiện gửi email thông báo cho tất cả `ADMIN` và `MANAGER` đang active.
+     - Khi Manager duyệt bước 1: Bắn sự kiện gửi email thông báo cho tất cả `ACCOUNTANT` (và Admin) để vào set tiền công.
+     - Khi đơn hoàn tất (`APPROVED`): Gửi email thông báo cho cả Shipper xin nghỉ (được duyệt nghỉ), Shipper thay thế (thông báo nhận tuyến kèm tiền công).
+     - Khi bị từ chối (`REJECTED`): Gửi email phản hồi lý do cho Shipper xin nghỉ.
+  4. **Tự động hóa tuyến xe trong ngày nghỉ (`PartnersService.getSchedule`):**
+     - Vào các ngày nghỉ đã duyệt, các điểm giao của Shipper nghỉ sẽ tạm thời được loại bỏ khỏi lộ trình của Shipper đó, đồng thời tự động bổ sung vào danh sách lộ trình của Shipper nhận thay kèm badge chỉ báo "Nhận giao thay: [Tên Shipper]".
+  5. **Giao diện người dùng Mobile-First:**
+     - Shipper: Thêm 2 modal `ShipperLeaveRequestModal.tsx` và `ShipperLeaveHistoryModal.tsx` vào trang Giao nhận (`ShipperHandoverPage.tsx`).
+     - Quản trị: Xây dựng trang `/management/shipper-leaves` (`ShipperLeaveReviewPage.tsx`) với đầy đủ bộ lọc tabs trạng thái, danh sách thẻ `ShipperLeaveCardComponent.tsx` và bộ 3 modal duyệt/set công/từ chối.
+- **Các thay đổi kỹ thuật chi tiết:**
+  - **Backend (`be-nestjs-thanhxuan`):**
+    - Thêm Schema & Collection `shipper_leave_requests` (Connection `internal_express`): `shipper-leave.schema.ts`.
+    - Tạo `ShipperLeaveRepository` kế thừa `BaseRepository`.
+    - Tạo bộ DTOs: `CreateShipperLeaveDto`, `ApproveShipperLeaveDto`, `SetCompensationDto`, `RejectShipperLeaveDto`, `QueryShipperLeaveDto`.
+    - Xây dựng `ShipperLeavesService`, `ShipperLeavesController`, `ShipperLeavesModule` và đăng ký vào `InternalModule`.
+    - Cập nhật `MailService` lắng nghe các sự kiện `shipper_leave.*` và gửi email HTML tự động.
+    - Cập nhật `PartnersService.getSchedule` tự động đổi tuyến khi có đơn `APPROVED`.
+    - Bổ sung các mã quyền `SHIPPER_LEAVE_*` vào `permissions.map.ts`.
+  - **Frontend (`fe-react-thanhxuan-internal`):**
+    - Tạo types `shipper-leave.types.ts` và API service `shipperLeaveService.ts`.
+    - Tạo custom hook `useShipperLeaveManagement.ts`.
+    - Xây dựng các modals: `ShipperLeaveRequestModal.tsx`, `ShipperLeaveHistoryModal.tsx`, `ApproveShipperLeaveModal.tsx`, `SetLeaveCompensationModal.tsx`, `RejectShipperLeaveModal.tsx`.
+    - Xây dựng `ShipperLeaveCardComponent.tsx` và trang `ShipperLeaveReviewPage.tsx`.
+    - Tích hợp 2 nút "Xin nghỉ" và "Lịch sử nghỉ" vào `ShipperHandoverPage.tsx`.
+    - Bổ sung tuyến đường `/management/shipper-leaves` vào `router.tsx` và menu "Duyệt Nghỉ Giao Nhận" vào `nav-config.ts`.
+  - **Tài liệu kỹ thuật đồng bộ:** Cập nhật `DATABASE_DICTIONARY.md` (33 collections), `CODEBASE_ATLAS.md`, `srs_sdd_backend.md`, `srs_sdd_fe_internal.md`, `SRS_SDD.md`.
+  - **Verification:** Backend 50/50 test suites pass 100%, `tsc --noEmit` pass 100%, `nest build` pass 100%; Frontend `tsc --noEmit` pass 100%, `tsc -b && vite build` tạo PWA bundle thành công.
+
 ### Bugfix: Giới Hạn Quyền Set Giá Phiếu Chỉ Cho Admin & Accountant và Cấp Menu Soạn Đồ Cho Accountant
 
 - **Vấn đề phát hiện:**

@@ -432,3 +432,22 @@ sequenceDiagram
   - `PartnerReceiptTabComponent.tsx`: Đối tác xác nhận nhận đồ sạch.
   - `PartnerCountTabComponent.tsx`: Đối tác kiểm đếm và giao đồ bẩn.
 
+---
+
+### 2.11. Chức Năng Shipper Xin Nghỉ Giao Nhận & Phân Tuyến Kèm Tiền Công (Plan 55)
+
+- **Màn hình Shipper Giao Nhận (`ShipperHandoverPage.tsx`):**
+  - Tích hợp 2 nút bấm thao tác nhanh: **"Xin nghỉ giao nhận"** (`ShipperLeaveRequestModal.tsx`) và **"Lịch sử nghỉ"** (`ShipperLeaveHistoryModal.tsx`).
+  - Shipper chọn 1 hoặc nhiều ngày nghỉ (`leaveDates`), nhập lý do xin nghỉ. Hệ thống tự động tính toán số điểm giao cần phân công thay thế.
+  - Hiển thị badge chỉ báo nổi bật `Nhận giao thay: [Tên Shipper nghỉ]` kèm thông tin mức tiền công giao thay trong danh sách điểm giao nhận ngày hôm đó nếu Shipper là người được phân công làm thay.
+- **Trang Quản Trị & Xét Duyệt Đơn (`ShipperLeaveReviewPage.tsx` tại `/management/shipper-leaves`):**
+  - Dành cho các vai trò `ADMIN`, `MANAGER` và `ACCOUNTANT`.
+  - Bộ lọc tabs theo trạng thái: Tất cả, Chờ Quản lý duyệt, Chờ Kế toán set công, Đã duyệt, Đã từ chối.
+  - Thẻ đơn xin nghỉ (`ShipperLeaveCardComponent.tsx`) hiển thị minh bạch thông tin shipper xin nghỉ, danh sách ngày nghỉ, lý do, số điểm cần bàn giao, người duyệt và tiền công giao thay.
+- **Bộ 3 Modals Nghiệp Vụ:**
+  - `ApproveShipperLeaveModal.tsx`: Quản lý / Admin duyệt đơn, chọn tài khoản Shipper thay thế (từ danh sách shipper active). Nếu là `ADMIN`, hỗ trợ checkbox 1 chạm thiết lập tiền công luôn để hoàn tất phê duyệt ngay lập tức.
+  - `SetLeaveCompensationModal.tsx`: Kế toán / Admin thiết lập số tiền công giao thay (hỗ trợ các nút chọn nhanh 100k, 150k, 200k, 250k, 300k và nhập số tiền tùy chọn), ghi chú kế toán và hoàn tất duyệt đơn.
+  - `RejectShipperLeaveModal.tsx`: Quản lý / Admin từ chối đơn xin nghỉ kèm lý do phản hồi cho Shipper.
+- **Menu điều hướng (`nav-config.ts`):**
+  - Bổ sung mục **"Duyệt Nghỉ Giao Nhận"** vào nhóm ĐIỀU HÀNH & KINH DOANH cho Admin, Manager và Accountant.
+

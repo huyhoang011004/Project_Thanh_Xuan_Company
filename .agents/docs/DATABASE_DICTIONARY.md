@@ -1,9 +1,9 @@
 # TỪ ĐIỂN CƠ SỞ DỮ LIỆU TOÀN HỆ THỐNG (DATABASE DATA DICTIONARY)
 
 > **Hệ sinh thái:** Công ty Giặt Sấy Thanh Xuân (Thanh Xuan Laundry & Moving Company)
-> **Phiên bản:** 2.2 | **Ngày cập nhật:** 2026-10-13
+> **Phiên bản:** 2.3 | **Ngày cập nhật:** 2026-10-29
 > **Kiến trúc dữ liệu:** Multi-Database Isolation trên MongoDB (4 Databases độc lập)
-> **Tổng số bảng (Collections):** 32 Collections
+> **Tổng số bảng (Collections):** 33 Collections
 > **Quy chuẩn duy trì:** Mọi thay đổi Schema trong Backend NestJS bắt buộc cập nhật đồng bộ file này theo Definition of Done trong [AGENTS.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/rules/AGENTS.md). Xóa bỏ hoàn toàn bảng đã xóa khỏi tài liệu và chạy script dọn dẹp DB thực tế.
 
 ---
@@ -13,7 +13,7 @@
 ```mermaid
 graph TD
     subgraph Multi_Database_Topology ["Hạ Tầng 4 MongoDB Độc Lập"]
-        DB_Internal[("1. internal_express<br/>14 Collections - Vận hành, Đối tác, Lương")]
+        DB_Internal[("1. internal_express<br/>15 Collections - Vận hành, Đối tác, Lương")]
         DB_Laundry[("2. laundry_express<br/>11 Collections - Website B2B, SEO, CRM")]
         DB_Moving[("3. moving_express<br/>3 Collections - Khảo sát chuyển nhà")]
         DB_Core[("4. core_express<br/>4 Collections - Audit, Media, Idempotency, Notifications")]
@@ -22,7 +22,7 @@ graph TD
 
 | Phân Vùng CSDL  | Tên Database MongoDB | Số Collections | Trọng Tâm Nghiệp Vụ                                                                                                                                            |
 | :-------------- | :------------------- | :------------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Phân Vùng 1** | `internal_express`   |     **14**     | Tài khoản nội bộ, thương hiệu & đối tác, danh mục đồ, phiếu giao nhận kép, chấm công selfie, công thợ theo giờ (`hourly_work`), chi phí xe, bảng lương chu kỳ. |
+| **Phân Vùng 1** | `internal_express`   |     **15**     | Tài khoản nội bộ, thương hiệu & đối tác, danh mục đồ, phiếu giao nhận kép, chấm công selfie, công thợ theo giờ (`hourly_work`), chi phí xe, bảng lương chu kỳ, đơn xin nghỉ giao nhận & phân tuyến (`shipper_leave_requests`). |
 | **Phân Vùng 2** | `laundry_express`    |     **11**     | Website khách hàng`thanhxuanlaundry.com`, CMS bài viết chuẩn SEO, đơn hàng giặt ủi, CRM khách hàng, chiến dịch Email & Zalo OA Marketing.                      |
 | **Phân Vùng 3** | `moving_express`     |     **3**      | Website dịch vụ chuyển nhà`chuyennhatietkiem.vn`, khảo sát báo giá cước vận tải xe tải, danh mục xe tải & cẩm nang chuyển nhà.                                 |
 | **Phân Vùng 4** | `core_express`       |     **4**      | Kết nối qua`CORE_CONNECTION`: Nhật ký kiểm toán bảo mật (Audit Log), file media Cloudinary, khóa chống trùng lặp (Idempotency), thông báo in-app.              |
@@ -354,6 +354,38 @@ erDiagram
 | `shipperDetails` | `Object`        |       Tùy chọn       |             -              | Minh bạch chi tiết lương Shipper: ngày chuẩn, ngày thực tế, bonus ca cuối tuần, chuyên cần, phụ cấp, xăng/sửa xe, BHXH. |
 | `workerDetails`  | `Object`        |       Tùy chọn       |             -              | Minh bạch chi tiết lương Thợ xưởng: tổng phút làm việc, bảng tổng hợp thời gian và tiền công theo từng nhóm việc.       |
 | `status`         | `String (Enum)` |   Mặc định:`DRAFT`   |             -              | Trạng thái:`DRAFT` (nháp), `FINALIZED` (chốt), `PAID` (đã trả qua ngân hàng).                                           |
+
+---
+
+### 1.15. Bảng `shipper_leave_requests` (ShipperLeaveRequest)
+
+- **Mã nguồn:** [`shipper-leave.schema.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/shipper-leaves/schemas/shipper-leave.schema.ts)
+- **Mục đích nghiệp vụ:** Quản lý vòng đời đơn xin nghỉ phép giao nhận của Shipper, quy trình phê duyệt 2 bước hoặc 1 chạm của Admin, chỉ định tài khoản Shipper nhận giao thay các điểm đối tác và thiết lập mức tiền công giao thay. Tự động liên kết chuyển tuyến xe trong ngày nghỉ.
+
+| Tên Trường               | Kiểu Dữ Liệu         |           Ràng Buộc / Mặc Định            |        Index / Ref         | Ý Nghĩa & Tác Dụng Nghiệp Vụ                                                                                   |
+| :----------------------- | :------------------- | :---------------------------------------: | :------------------------: | :------------------------------------------------------------------------------------------------------------- |
+| `shipperId`              | `ObjectId`           |                 Bắt buộc                  | Ref:`StaffAccount`, Index  | Tài khoản Shipper nộp đơn xin nghỉ giao nhận.                                                                  |
+| `shipperName`            | `String`             |                 Tùy chọn                  |             -              | Snapshot họ tên Shipper xin nghỉ.                                                                              |
+| `leaveDates`             | `Array of String`    |           Bắt buộc, `YYYY-MM-DD`          |           Index            | Danh sách các ngày xin nghỉ (Asia/Ho_Chi_Minh).                                                                 |
+| `reason`                 | `String`             |                 Bắt buộc                  |             -              | Lý do xin nghỉ phép.                                                                                           |
+| `status`                 | `String (Enum)`      |       Mặc định:`PENDING_APPROVAL`         |           Index            | Trạng thái:`PENDING_APPROVAL`, `APPROVED_PENDING_COMPENSATION`, `APPROVED`, `REJECTED`, `CANCELLED`.           |
+| `substituteShipperId`    | `ObjectId`           |                 Tùy chọn                  | Ref:`StaffAccount`, Index  | Tài khoản Shipper được chỉ định nhận giao thay toàn bộ điểm trong ngày nghỉ.                                   |
+| `substituteShipperName`  | `String`             |                 Tùy chọn                  |             -              | Snapshot họ tên Shipper giao thay.                                                                             |
+| `reassignedPartnerIds`   | `Array of ObjectId`  |              Mặc định: `[]`               |       Ref:`Partner`        | Danh sách chi nhánh đối tác cần giao trong các ngày nghỉ đó.                                                   |
+| `reassignedPointsCount`  | `Number`             |               Mặc định: `0`               |             -              | Tổng số lượt giao nhận cần bàn giao trong các ngày nghỉ.                                                       |
+| `compensationAmount`     | `Number`             |                 min: `0`                  |             -              | Số tiền công giao thay (VNĐ) do Kế toán hoặc Admin thiết lập cho Shipper nhận việc.                            |
+| `compensationNote`       | `String`             |                 Tùy chọn                  |             -              | Ghi chú định mức tiền công của Kế toán/Admin.                                                                  |
+| `approvedByManagerId`    | `ObjectId`           |                 Tùy chọn                  |     Ref:`StaffAccount`     | Quản lý hoặc Admin duyệt đơn bước 1 và chỉ định người thay thế.                                                |
+| `approvedByManagerName`  | `String`             |                 Tùy chọn                  |             -              | Snapshot họ tên người duyệt bước 1.                                                                            |
+| `approvedByManagerAt`    | `Date`               |                 Tùy chọn                  |             -              | Thời điểm Quản lý phê duyệt bước 1.                                                                            |
+| `managerNote`            | `String`             |                 Tùy chọn                  |             -              | Ghi chú điều phối của Quản lý.                                                                                 |
+| `compensatedByAccountId` | `ObjectId`           |                 Tùy chọn                  |     Ref:`StaffAccount`     | Kế toán hoặc Admin thiết lập tiền công giao thay.                                                              |
+| `compensatedByAccountName` | `String`           |                 Tùy chọn                  |             -              | Snapshot họ tên Kế toán viên.                                                                                  |
+| `compensatedAt`          | `Date`               |                 Tùy chọn                  |             -              | Thời điểm thiết lập tiền công hoàn tất.                                                                        |
+| `rejectedById`           | `ObjectId`           |                 Tùy chọn                  |     Ref:`StaffAccount`     | Người từ chối đơn xin nghỉ.                                                                                    |
+| `rejectedByName`         | `String`             |                 Tùy chọn                  |             -              | Snapshot họ tên người từ chối.                                                                                 |
+| `rejectedAt`             | `Date`               |                 Tùy chọn                  |             -              | Thời điểm từ chối đơn.                                                                                         |
+| `rejectionReason`        | `String`             |                 Tùy chọn                  |             -              | Lý do từ chối đơn xin nghỉ.                                                                                    |
 
 ---
 

@@ -238,6 +238,7 @@ export class HandoverRecordRepository extends BaseRepository<HandoverRecordDocum
 13. `PayslipRepository`
 14. `AuditLogRepository`
 15. `NotificationRepository`
+16. `ShipperLeaveRepository`
 *(Lưu ý: `CounterRepository` và `RecountTaskRepository` đã được xóa bỏ hoàn toàn từ Plan 24).*
 
 ---
@@ -317,6 +318,12 @@ export class HandoverRecordRepository extends BaseRepository<HandoverRecordDocum
 | `/api/v1/internal/reports/*` | `GET` | AC, MG, AD, WM | 6 Báo cáo Aggregation tổng hợp (≤ 31 ngày). Bóc tách trường tiền đối với MG. |
 | `/api/v1/internal/reports/export/excel` | `GET` | AC, MG, AD, WM | Streaming file XLSX bằng `exceljs`, hàng đợi concurrency = 1. |
 | `/api/v1/internal/reports/export/pdf` | `GET` | AC, MG, AD, WM | Streaming file PDF bằng `pdfmake`, hàng đợi concurrency = 1. |
+| `/api/v1/internal/shipper-leaves` | `POST` | `InternalJwtGuard` (Shipper/Manager/Admin) | Nộp đơn xin nghỉ giao nhận (danh sách ngày, lý do, tự động tính số điểm cần giao). Bắn event gửi mail Admin & Manager. |
+| `/api/v1/internal/shipper-leaves` | `GET` | `InternalJwtGuard` | Xem danh sách đơn xin nghỉ (Shipper chỉ xem đơn của mình; Manager/Accountant/Admin xem toàn bộ kèm bộ lọc). |
+| `/api/v1/internal/shipper-leaves/:id/approve` | `PATCH` | MANAGER, ADMIN | Manager duyệt bước 1 & chọn Shipper thay thế (chuyển `APPROVED_PENDING_COMPENSATION`, mail Kế toán). Admin có thể duyệt 1 chạm hoàn tất cả 2 bước. |
+| `/api/v1/internal/shipper-leaves/:id/set-compensation` | `PATCH` | ACCOUNTANT, ADMIN | Kế toán/Admin thiết lập tiền công giao thay, chuyển `APPROVED` (chính thức có hiệu lực nghỉ, gửi mail hoàn tất). |
+| `/api/v1/internal/shipper-leaves/:id/reject` | `PATCH` | MANAGER, ADMIN | Từ chối đơn xin nghỉ kèm lý do, gửi mail thông báo cho Shipper. |
+| `/api/v1/internal/shipper-leaves/:id/cancel` | `PATCH` | `InternalJwtGuard` | Shipper tự hủy đơn xin nghỉ của mình trước ngày nghỉ. |
 
 ---
 
@@ -339,6 +346,25 @@ stateDiagram-v2
     
     COMPLETED --> DISPUTED: Phát sinh khiếu nại chênh lệch sau hoàn tất
     DISPUTED --> COMPLETED: Ghi nhận điều chỉnh (Adjustments) & giải quyết khiếu nại
+```
+
+### 3.2. Vòng Đời Đơn Xin Nghỉ Giao Nhận & Phân Tuyến (`ShipperLeaveRequest`)
+
+```mermaid
+stateDiagram-v2
+    [*] --> PENDING_APPROVAL: Shipper nộp đơn (Gửi mail Admin & Manager)
+    
+    PENDING_APPROVAL --> APPROVED_PENDING_COMPENSATION: Manager duyệt & chỉ định Shipper thay thế (Gửi mail Accountant)
+    PENDING_APPROVAL --> APPROVED: Admin duyệt & chỉ định Shipper thay thế + Set tiền công luôn (1 lần)
+    PENDING_APPROVAL --> REJECTED: Manager/Admin từ chối đơn
+    PENDING_APPROVAL --> CANCELLED: Shipper tự hủy trước ngày nghỉ
+
+    APPROVED_PENDING_COMPENSATION --> APPROVED: Accountant set tiền công giao thay (Gửi mail hoàn tất)
+    APPROVED_PENDING_COMPENSATION --> REJECTED: Accountant/Manager/Admin từ chối đơn
+
+    APPROVED --> [*]: Có hiệu lực (Tự động chuyển tuyến giao thay trong ngày nghỉ)
+    REJECTED --> [*]
+    CANCELLED --> [*]
 ```
 
 ---
