@@ -42,7 +42,21 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
   - **Tài liệu kỹ thuật đồng bộ:** Cập nhật `DATABASE_DICTIONARY.md` (33 collections), `CODEBASE_ATLAS.md`, `srs_sdd_backend.md`, `srs_sdd_fe_internal.md`, `SRS_SDD.md`.
   - **Verification:** Backend 50/50 test suites pass 100%, `tsc --noEmit` pass 100%, `nest build` pass 100%; Frontend `tsc --noEmit` pass 100%, `tsc -b && vite build` tạo PWA bundle thành công.
 
-### Bugfix: Giới Hạn Quyền Set Giá Phiếu Chỉ Cho Admin & Accountant và Cấp Menu Soạn Đồ Cho Accountant
+### Bugfix: Phân Quyền Kho Sạch Cho Kế Toán, Sửa Form Nhập Giá Bị Kẹt 50k & Hiển Thị Tên Chi Nhánh Đối Tác
+
+- **Vấn đề phát sinh:**
+  1. Kế toán (`ACCOUNTANT`) dù đã được cấu hình menu nhưng khi bấm vào trang Kho Sạch (`/operations/warehouse-manager/warehouse`) vẫn bị chặn và chuyển hướng về Dashboard do thiếu role trong `<ProtectedRoute>`.
+  2. Khi mở modal "Set Giá" (`TripCompensationModal.tsx`), ô nhập tiền công bị reset liên tục về mức mặc định 50.000 đ khiến Admin/Accountant không thể gõ số tiền tùy chỉnh khác.
+  3. Thẻ phiếu giao nhận trên tab Kho Sạch hiển thị tiêu đề "Chi nhánh đối tác" thay vì tên cơ sở thật (do chỉ đọc `partnerObj?.name` mà không fallback sang `record.partnerName`).
+  4. Thẻ phiếu chưa có tài xế hiển thị nhãn "Lương cố định", gây nhầm lẫn với các chuyến tự do chờ set giá.
+- **Giải pháp xử lý:**
+  1. **`warehouse.tsx`:** Bổ sung `StaffRole.ACCOUNTANT` vào mảng `allowedRoles` của `<ProtectedRoute>`.
+  2. **`TripCompensationModal.tsx`:** Sử dụng `prevOpenRef` để chỉ khởi tạo lại state khi modal chuyển từ đóng sang mở (`open && !prevOpenRef.current`), không re-trigger khi component re-render. Đổi state `amount` sang kiểu `number | string` và không ép kiểu ngay trong `onChange` để người dùng có thể xóa rỗng gõ tự do.
+  3. **`WarehouseCleanPlanTabComponent.tsx` & `WarehouseSummaryTabComponent.tsx`:** Chuẩn hóa fallback `record.partnerName || partnerObj?.name || 'Chi nhánh đối tác'`.
+  4. **Phân biệt tuyến cố định vs chuyến tự do:** Nếu chưa có tài xế và đối tác chưa có tài xế mặc định (`!record.shipperName && !partnerObj?.defaultShipperId`), hiển thị nhãn `Chuyến tự do` (màu amber) thay vì `Lương cố định`.
+- **Verification:**
+  - `fe-react-thanhxuan-internal`: `tsc --noEmit` PASS (0 errors), `pnpm build` PASS (PWA service worker + bundle hoàn tất).
+  - Đã commit và push trực tiếp lên nhánh `dev` của repository `fe-react-thanhxuan-internal` để Vercel tự động deploy.
 
 - **Vấn đề phát hiện:**
   1. Nút "Set Giá" / "Sửa Giá" trên thẻ phiếu giao nhận xưởng (`WarehouseCleanPlanTabComponent`) trước đây hiển thị cho mọi vai trò xem được trang (bao gồm cả Thủ kho `WAREHOUSE_MANAGER` và Quản lý xưởng `MANAGER`), vi phạm nguyên tắc bảo mật tài chính của công ty (chỉ Ban Quản Trị và Kế toán mới có quyền can thiệp vào định mức tiền công giao nhận).
