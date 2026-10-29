@@ -2,7 +2,7 @@
 
 > **Mục đích:** Cung cấp bản đồ chỉ mục trực tiếp (Direct Navigation Map) cho AI Agent và Kỹ sư phát triển.  
 > **Nguyên tắc hoạt động:** Agent đọc file này trước tiên để xác định chính xác các file mã nguồn (Controller, Service, Repository, DTO, Page, Modal, Hook) cần can thiệp cho từng tác vụ, **loại bỏ hoàn toàn việc phải dò tìm (grep/list_dir) lặp đi lặp lại**.  
-> **Phiên bản:** 2.1 | **Ngày cập nhật:** 2026-10-29  
+> **Phiên bản:** 2.2 | **Ngày cập nhật:** 2026-10-29  
 > **Quy chuẩn duy trì:** Tuân thủ Definition of Done trong [AGENTS.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/rules/AGENTS.md).
 
 ---
@@ -18,7 +18,7 @@
   - [2.1. Phân Hệ Cổng Vận Hành Xưởng & Quản Vận PWA (fe-react-thanhxuan-internal)](#21-phân-hệ-cổng-vận-hành-xưởng--quản-vận-pwa-fe-react-thanhxuan-internal)
   - [2.2. Phân Hệ Web Giặt Là & CMS (fe-nextjs-thanhxuan-laundry)](#22-phân-hệ-web-giặt-là--cms-fe-nextjs-thanhxuan-laundry)
   - [2.3. Phân Hệ Web Chuyển Nhà Tiết Kiệm (fe-nextjs-chuyennhatietkiem)](#23-phân-hệ-web-chuyển-nhà-tiết-kiệm-fe-nextjs-chuyennhatietkiem)
-  - [2.4. Hạ Tầng & Thành Phần Dùng Chung Frontend (Common Layouts, PWA, Tokens & Config)](#24-hạ-tầng--thành-phần-dùng-chung-frontend-common-layouts-pwa-tokens--config)
+  - [2.4. Quy Chuẩn & Hạ Tầng Dùng Chung Của Toàn Bộ Frontend (Cả 3 Apps)](#24-quy-chuẩn--hạ-tầng-dùng-chung-của-toàn-bộ-frontend-cả-3-apps)
 
 ---
 
@@ -109,27 +109,29 @@ Kết nối database hạ tầng: `core_express` (`CORE_CONNECTION`) và các mo
 
 # 2. MA TRẬN FRONTEND (CLIENT APPLICATIONS)
 
-Hệ thống Frontend gồm 3 ứng dụng client độc lập và 1 lớp tiện ích dùng chung:
+Hệ thống Frontend gồm 3 ứng dụng client độc lập (mỗi app có thư mục mã nguồn `src/` riêng biệt) và 1 bộ quy chuẩn dùng chung:
 
 ```
 Website_Thanh_Xuan_Company/
 ├── fe-react-thanhxuan-internal/    # 2.1: Cổng Vận Hành Xưởng & Quản Vận PWA (Port 3001)
 ├── fe-nextjs-thanhxuan-laundry/   # 2.2: Web Giặt Là & CMS Quản Trị (Port 3000)
 ├── fe-nextjs-chuyennhatietkiem/    # 2.3: Web Chuyển Nhà Tiết Kiệm & Estimator Xe Tải (Port 3002)
-└── [Shared Conventions]            # 2.4: Tiện ích, Tokens, Layout Shells & Config dùng chung
+└── [Shared Conventions]            # 2.4: Quy chuẩn Design Tokens, Múi giờ, HTTP & Kỷ luật chung cho cả 3 apps
 ```
 
 ---
 
 ### 2.1. Phân Hệ Cổng Vận Hành Xưởng & Quản Vận PWA (`fe-react-thanhxuan-internal`)
 
-Thư mục: `fe-react-thanhxuan-internal/src/` | Port: `3001` | Chi tiết tại [srs_sdd_fe_internal.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_internal.md)  
+Thư mục mã nguồn: `fe-react-thanhxuan-internal/src/` | Port dev: `3001` | Chi tiết tại [srs_sdd_fe_internal.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_internal.md)  
 Kiến trúc: React Router v7, Vite SPA, TailwindCSS, Mobile-First PWA, Flat Colocation (`operations/` & `management/`).
+
+#### 2.1.1. Ma Trận Màn Hình & Tuyến URL Vận Hành
 
 | Menu / Tuyến Đường URL | Màn Hình Chính (`Page.tsx`) | Thư Mục Modals (`/modals`) | Thư Mục Components (`/components`) | Custom Hooks & Service |
 | :--- | :--- | :--- | :--- | :--- |
 | `/dashboard`<br>(Điều hành xưởng thời gian thực) | `DashboardPage.tsx`<br>`src/features/dashboard/` | - | `DashboardHandoverPanelComponent.tsx`<br>`DashboardWorkforcePanelComponent.tsx` | `useDashboardData.ts`<br>`apiClient` |
-| `/operations/shipper/handover`<br>(Phiếu giao nhận xe tải, Đếm hộ, Nhận chuyến & Nghỉ phép) | `ShipperHandoverPage.tsx`<br>`HandoverDetailPage.tsx`<br>`src/features/operations/handovers/` | `PrepOrderModal.tsx`<br>`ShipperCountPartnerModal.tsx`<br>`CustomHandoverItemModal.tsx`<br>`SlipFullscreenViewerModal.tsx`<br>`DisputeModal.tsx`<br>`ShipperLeaveRequestModal.tsx`<br>`ShipperLeaveHistoryModal.tsx` | `ShipperHandoverItemCardComponent.tsx`<br>`ShipperJobPoolTabComponent.tsx`<br>`HandoverSlipGalleryComponent.tsx`<br>`HandoverHeaderComponent.tsx`<br>`ShipperPendingPointCardComponent.tsx` | `useShipperHandoverPage.ts`<br>`useShipperCountForm.ts`<br>`useShipperSlipPreview.ts`<br>`export/` (`handoverSlipCanvasRenderer.ts`, `handoverExcelExporter.ts`, `handoverZipDownloader.ts`) |
+| `/operations/shipper/handover`<br>(Phiếu giao nhận xe tải, Đếm hộ, Nhận chuyến & Nghỉ phép) | `ShipperHandoverPage.tsx`<br>`HandoverDetailPage.tsx`<br>`src/features/operations/handovers/` | `PrepOrderModal.tsx`<br>`ShipperCountPartnerModal.tsx`<br>`CustomHandoverItemModal.tsx`<br>`SlipFullscreenViewerModal.tsx`<br>`DisputeModal.tsx`<br>`ShipperLeaveRequestModal.tsx`<br>`ShipperLeaveHistoryModal.tsx` | `ShipperHandoverItemCardComponent.tsx`<br>`ShipperJobPoolTabComponent.tsx`<br>`HandoverSlipGalleryComponent.tsx`<br>`HandoverHeaderComponent.tsx`<br>`ShipperPendingPointCardComponent.tsx` | `useShipperHandoverPage.ts`<br>`useShipperCountForm.ts`<br>`useShipperSlipPreview.ts`<br>`export/` |
 | `/management/shipper-leaves`<br>(Duyệt nghỉ giao nhận, phân tuyến & định mức tiền công) | `ShipperLeaveReviewPage.tsx`<br>`src/features/management/shipper-leaves/` | `ApproveShipperLeaveModal.tsx`<br>`SetLeaveCompensationModal.tsx`<br>`RejectShipperLeaveModal.tsx` | `ShipperLeaveCardComponent.tsx` | `useShipperLeaveManagement.ts`<br>`shipperLeaveService.ts` |
 | `/operations/warehouse-manager/warehouse`<br>(Lập phiếu xuất kho, Thư viện ảnh & Cài đặt chuyến) | `WarehouseHandoverPage.tsx`<br>`src/features/operations/handovers/` | `PrepOrderModal.tsx`<br>`HandoverDeliverySlipModal.tsx`<br>`TripCompensationModal.tsx`<br>`WarehouseScheduleSettingsModal.tsx`<br>`WarehouseItemFilterSettingsModal.tsx` | `HandoverSlipGalleryComponent.tsx`<br>`WarehouseCleanPlanTabComponent.tsx`<br>`WarehouseSummaryTabComponent.tsx`<br>`AdvanceDeliveryPopoverComponent.tsx` | `useWarehouseHandover.ts`<br>`usePrepOrderForm.ts`<br>`prepOrderSlipHelper.ts`<br>`prepOrderAdvanceDeliveryHelper.ts`<br>`export/` |
 | `/operations/worker/recount`<br>(Trạm kiểm đếm lại gom bao xưởng) | `RecountStationPage.tsx`<br>`src/features/operations/handovers/` | - | `PrepOrderSlipPreviewComponent.tsx` | `useRecountStation.ts`<br>`export/` |
@@ -147,12 +149,24 @@ Kiến trúc: React Router v7, Vite SPA, TailwindCSS, Mobile-First PWA, Flat Col
 | `/management/accountant/fuel`<br>(Duyệt chi phí xe tài xế) | `FuelReviewPage.tsx`<br>`src/features/management/fuel/` | - | - | `apiClient` |
 | `/operations/report`<br>(Trung tâm báo cáo streaming 8 phân hệ) | `ReportsPage.tsx`<br>`src/features/operations/reports/` | - | `ReportsFilterBarComponent.tsx`<br>`ReportsTabNavigationComponent.tsx`<br>`WarehouseReportSectionComponent.tsx`<br>`WorkforceReportSectionComponent.tsx`<br>`QualityFuelReportSectionComponent.tsx` | `useReports.ts`<br>`reports.service.ts` |
 
+#### 2.1.2. Thành Phần Hạ Tầng & Tiện Ích Dùng Chung Của Phân Hệ Nội Bộ (`fe-react-thanhxuan-internal/src/`)
+
+| Tiện Ích Phân Hệ Nội Bộ | Vị Trí File | Chi Tiết Kỹ Thuật |
+| :--- | :--- | :--- |
+| **Mobile Layout Shell & Navigation** | [`src/components/layout/MobileBottomBar.tsx`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/components/layout/MobileBottomBar.tsx)<br>[`src/components/layout/MobileNavDrawer.tsx`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/components/layout/MobileNavDrawer.tsx)<br>[`src/components/layout/nav-config.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/components/layout/nav-config.ts) | Thanh điều hướng 4 tab đáy và Menu trượt phân quyền 8 vai trò RBAC cho thợ xưởng & tài xế xe tải. |
+| **Chữ Ký Điện Tử Đa Dụng** | [`src/components/common/SignatureInputComponent.tsx`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/components/common/SignatureInputComponent.tsx) | Nhận diện chữ ký đã lưu (`StaffAccount.signatureUrl`), toggle ký mới / dùng mẫu có sẵn và lưu làm mặc định. |
+| **Offline-First Queue (PWA)** | `src/lib/offline-queue.ts` (`idb`) | Lưu tạm các hành động đếm đồ bẩn, điểm danh vào IndexedDB khi mất kết nối mạng và tự động đồng bộ khi online. |
+| **Bộ Xuất Phiếu & Canvas Exporter** | `src/features/operations/handovers/export/`<br>- `handoverSlipCanvasRenderer.ts`<br>- `handoverExcelExporter.ts`<br>- `handoverZipDownloader.ts` | Vẽ phiếu giao nhận trực tiếp trên HTML5 Canvas để tải ảnh PNG, nén file ZIP gửi email đối tác hoặc xuất file Excel. |
+| **Phân Quyền Client-side RBAC** | `src/lib/permissions.ts` | Hàm kiểm tra quyền `hasPermission(user, 'handover.edit')` đồng bộ với 8 vai trò Backend. |
+
 ---
 
 ### 2.2. Phân Hệ Web Giặt Là & CMS (`fe-nextjs-thanhxuan-laundry`)
 
-Thư mục: `fe-nextjs-thanhxuan-laundry/src/` | Port: `3000` | Chi tiết tại [srs_sdd_fe_laundry.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_laundry.md)  
+Thư mục mã nguồn: `fe-nextjs-thanhxuan-laundry/src/` | Port dev: `3000` | Chi tiết tại [srs_sdd_fe_laundry.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_laundry.md)  
 Kiến trúc: Next.js App Router, Server Components mặc định cho SEO (`(public)`), Quản trị CMS (`(admin)/admin`), Feature-based Flat Colocation.
+
+#### 2.2.1. Ma Trận Tuyến Đường URL & Màn Hình
 
 | Tuyến URL | Loại Render | File Trang (Page Entry) | Màn Hình / Modals / Subcomponents | Service / Hooks / Actions |
 | :--- | :---: | :--- | :--- | :--- |
@@ -174,12 +188,23 @@ Kiến trúc: Next.js App Router, Server Components mặc định cho SEO (`(pub
 | `/admin/accounts` | Client / CMS | `src/app/(admin)/admin/accounts/page.tsx` | `AccountManagerPage.tsx`<br>`src/features/admin/users/` | Modals: `AccountEditorModal`<br>Hooks: `useAdminUsers` |
 | `/admin/settings/**` | Client / CMS | `src/app/(admin)/admin/settings/**/page.tsx` | `SettingsPage.tsx`<br>`src/features/admin/settings/` | Components: `SettingEditorAboutComponent`, `SettingEditorContactComponent`, `SettingEditorFooterComponent`, `SettingEditorHomeComponent`, `SettingEditorServiceComponent`<br>Hooks: `useAdminSettings` |
 
+#### 2.2.2. Thành Phần Hạ Tầng & Tiện Ích Dùng Chung Của Phân Hệ Giặt Là (`fe-nextjs-thanhxuan-laundry/src/`)
+
+| Tiện Ích Phân Hệ Giặt Là | Vị Trí File | Chi Tiết Kỹ Thuật |
+| :--- | :--- | :--- |
+| **Admin Layout Shell** | `src/components/layout/admin/` | `AdminShellComponent.tsx`, `AdminSidebarComponent.tsx`, `AdminHeaderComponent.tsx` (Bố cục CMS quản trị có responsive sidebar). |
+| **Public Layout Shell** | `src/components/layout/public/` | `PublicHeaderComponent.tsx`, `PublicFooterComponent.tsx`, `DraggableFloatingContactComponent.tsx` (Zalo/Hotline widget nổi kéo thả). |
+| **Soạn Thảo WYSIWYG & Media** | `src/components/ui/rich-text-editor/` | `RichTextEditorComponent.tsx`, `RichTextToolbarComponent.tsx`, `MediaInsertModal.tsx` (Soạn thảo bài viết chuẩn SEO, chèn ảnh Cloudinary). |
+| **Bảo Vệ Phiên & Proxy Upload** | `src/middleware.ts`<br>`src/app/api/upload/route.ts` | Next.js Middleware kiểm tra httpOnly cookie `admin_access_token`; Route handler proxy tải lên Cloudinary có xác thực token. |
+
 ---
 
 ### 2.3. Phân Hệ Web Chuyển Nhà Tiết Kiệm (`fe-nextjs-chuyennhatietkiem`)
 
-Thư mục: `fe-nextjs-chuyennhatietkiem/src/` | Port: `3002` | Chi tiết tại [srs_sdd_fe_moving.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_moving.md)  
+Thư mục mã nguồn: `fe-nextjs-chuyennhatietkiem/src/` | Port dev: `3002` | Chi tiết tại [srs_sdd_fe_moving.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_moving.md)  
 Kiến trúc: Next.js 16 App Router, React 19, TailwindCSS. Mô hình Asset-Light: Đội thợ cơ hữu kiêm mộc, điện lạnh kết hợp điều xe đối tác vệ tinh giá gốc.
+
+#### 2.3.1. Ma Trận Tuyến Đường URL & Màn Hình
 
 | Tuyến URL | Loại Render | File Trang (Page Entry) | Components Tương Tác & Sub-components | API / Services / Helpers |
 | :--- | :---: | :--- | :--- | :--- |
@@ -196,15 +221,25 @@ Kiến trúc: Next.js 16 App Router, React 19, TailwindCSS. Mô hình Asset-Ligh
 | `/admin/articles` | Client | `src/app/admin/articles/page.tsx` | Quản lý bài viết cẩm nang kinh nghiệm dọn nhà | `fetchMovingArticles` |
 | `/admin/settings` | Client | `src/app/admin/settings/page.tsx` | Quản lý thông tin doanh nghiệp, MST, hotline, địa chỉ pháp lý | - |
 
+#### 2.3.2. Thành Phần Hạ Tầng & Tiện Ích Dùng Chung Của Phân Hệ Chuyển Nhà (`fe-nextjs-chuyennhatietkiem/src/`)
+
+| Tiện Ích Phân Hệ Chuyển Nhà | Vị Trí File | Chi Tiết Kỹ Thuật |
+| :--- | :--- | :--- |
+| **Báo Giá State Engine (Wizard Context)** | `src/features/quote-form/QuoteWizardForm.tsx`<br>`src/context/` | Quản lý state tập trung cho toàn bộ 4 bước khảo sát, tự động tính toán tổng m³ đồ đạc và chi phí theo thời gian thực. |
+| **Layout Shells (Public & Admin)** | `src/components/layout/` (`Header.tsx`, `Footer.tsx`)<br>`src/app/admin/layout.tsx` | Header điều hướng có drawer mobile, Footer thông tin pháp lý chuẩn và Admin Shell tinh gọn 5 chức năng. |
+| **API Client & Pricing Helpers** | `src/lib/api-client.ts`<br>`src/lib/utils.ts` | Wrapper gọi API NestJS `/api/v1/moving/*`, bộ định dạng tiền tệ Việt Nam `Intl.NumberFormat('vi-VN')`. |
+
 ---
 
-### 2.4. Hạ Tầng & Thành Phần Dùng Chung Frontend (Common Layouts, PWA, Tokens & Config)
+### 2.4. Quy Chuẩn & Hạ Tầng Dùng Chung Của Toàn Bộ Frontend (Cả 3 Apps)
 
-| Nhóm Tiện Ích | Vị Trí Mã Nguồn | Tệp Cốt Lõi | Mô Tả Chức Năng Kỹ Thuật |
-| :--- | :--- | :--- | :--- |
-| **Mobile Layout Shell & Navigation** | `fe-react-thanhxuan-internal/src/components/layout` | [`MobileBottomBar.tsx`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/components/layout/MobileBottomBar.tsx)<br>[`MobileNavDrawer.tsx`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/components/layout/MobileNavDrawer.tsx)<br>[`nav-config.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/components/layout/nav-config.ts) | Thanh điều hướng 4 tab đáy và Menu trượt phân quyền 8 vai trò RBAC cho thợ xưởng & tài xế xe tải. |
-| **Chữ Ký Điện Tử Đa Dụng** | `fe-react-thanhxuan-internal/src/components/common` | [`SignatureInputComponent.tsx`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/components/common/SignatureInputComponent.tsx) | Nhận diện chữ ký đã lưu (`StaffAccount.signatureUrl`), toggle ký mới / dùng mẫu có sẵn và lưu làm mặc định. |
-| **Offline-First Queue (PWA)** | `fe-react-thanhxuan-internal/src/lib` | `offline-queue.ts`<br>`idb` | Lưu tạm các hành động đếm đồ bẩn, điểm danh vào IndexedDB khi mất kết nối mạng và tự động đồng bộ khi online. |
-| **Xuất Phiếu & Canvas Exporter** | `fe-react-thanhxuan-internal/src/features/operations/handovers/export` | `handoverSlipCanvasRenderer.ts`<br>`handoverExcelExporter.ts`<br>`handoverZipDownloader.ts` | Vẽ phiếu giao nhận trực tiếp trên HTML5 Canvas để tải ảnh PNG, nén file ZIP gửi email đối tác hoặc xuất file Excel. |
-| **Theme & UI Tokens** | Tất cả 3 Frontend Apps | `globals.css`<br>`tailwind.config.ts`<br>`ThemeContext.tsx` | Hệ thống Design Tokens màu sắc (Light/Dark mode), phông chữ, khoảng cách spacing di động (`touch-target` $\ge 44\text{px}$). |
-| **HTTP Client Tập Trung** | Tất cả 3 Frontend Apps | `api-client.ts` / `api.service.ts` | Gắn tự động Bearer Token, header `Idempotency-Key` (UUIDv4) và xử lý làm mới phiên tự động khi token hết hạn. |
+Chỉ bao gồm các quy chuẩn kiến trúc, design tokens và giao thức kỹ thuật bắt buộc áp dụng **đồng nhất trên cả 3 ứng dụng client**:
+
+| Quy Chuẩn Dùng Chung | Phạm Vi Cả 3 Apps | Mô Tả Quy Chuẩn Kỹ Thuật Bắt Buộc |
+| :--- | :--- | :--- |
+| **Hệ Thống Design Tokens & TailwindCSS** | Cả 3 Apps (`tailwind.config.ts`, `globals.css`) | Thống nhất quy tắc biến màu CSS (`--background`, `--foreground`, `--primary`, `--secondary`, `--destructive`, `--accent`), hỗ trợ đầy đủ Dark/Light Mode. |
+| **Chuẩn Công Thái Học Di Động (Mobile-First)** | Cả 3 Apps | Kích thước vùng bấm cảm ứng (touch-target) tối thiểu $\ge 44\text{px}$ đến $48\text{px}$ cho toàn bộ nút bấm, ô nhập liệu và tab trên điện thoại. |
+| **Chuẩn Hóa Múi Giờ Hiển Thị (`Asia/Ho_Chi_Minh`)** | Cả 3 Apps | 100% thời gian hiển thị format theo GMT+7 (`DD/MM/YYYY`, `HH:mm DD/MM/YYYY`), không sử dụng timezone local của trình duyệt khi parse ngày giao nhận, chấm công. |
+| **Quy Chuẩn Form & Data Validation** | Cả 3 Apps | Bắt buộc sử dụng bộ đôi `react-hook-form` + `zod` để validate ràng buộc dữ liệu tại Client trước khi gửi request lên Backend API. |
+| **Quy Ước Giao Tiếp HTTP API & Idempotency** | Cả 3 Apps | Tự động đính kèm Bearer Token JWT, header `Idempotency-Key` (UUIDv4) cho các mutation tài chính/giao nhận, xử lý thống nhất mã lỗi 401 (refresh token / redirect login). |
+| **Kỷ Luật Kiến Trúc Sạch (< 250 - 300 Dòng/File)** | Cả 3 Apps | Màn hình chính `[Tên]Page.tsx`, modal `modals/[Tên]Modal.tsx`, component con `components/[Tên]Component.tsx`, tách hook `hooks/use[Tên].ts`, TypeScript strict mode 100% (zero `any`). |
