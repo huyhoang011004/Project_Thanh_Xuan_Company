@@ -62,7 +62,7 @@ Tuy nhiên, chi phí 15 triệu được cấu thành từ những công việc 
 
 ### 2.4. Là Nền Móng Kỹ Thuật Giúp Web Nội Bộ Được Giảm Giá Xuống 25 Triệu!
 - Đây là điểm mấu chốt: **Nếu không có phân hệ Web Giặt Là làm nền tảng hạ tầng ban đầu, Web Nội Bộ không bao giờ có mức giá 25 triệu!**
-- Toàn bộ khung Backend NestJS Core (`be-nestjs-thanhxuan`), hệ thống máy chủ Docker VPS, Nginx, chứng chỉ SSL, Module gửi Email Nodemailer, Module lưu trữ Cloudinary CDN và bộ thư viện UI TailwindCSS/shadcn đã được xây dựng và tính chi phí vào gói Web Giặt Là. Web Nội Bộ chỉ việc "kế thừa miễn phí" toàn bộ hạ tầng này nên mới có thể tối ưu từ 48 triệu xuống 25 triệu.
+- Toàn bộ khung Backend NestJS Core (`be-nestjs-thanhxuan`), hệ thống máy chủ Docker VPS, Nginx, chứng chỉ SSL, Module gửi Email Nodemailer, Module lưu trữ Cloudinary CDN và bộ thư viện UI TailwindCSS/shadcn đã được xây dựng và tính chi phí vào gói Web Giặt Là. Web Nội Bộ chỉ việc "kế thừa miễn phí" toàn bộ hạ tầng này nên mới có thể tối ưu từ 36 triệu xuống 25 triệu (tiết kiệm ngay 11 triệu đồng cho doanh nghiệp).
 
 ---
 
@@ -121,3 +121,4 @@ Tùy theo thái độ và khả năng ngân sách thực tế của khách hàng
 2. **Chiến lược đàm phán:** 
    - Ưu tiên bảo vệ mức **40 triệu (15tr + 25tr)** với đầy đủ lý lẽ về SEO và hạ tầng đã nêu ở Phần 1 & 2.
    - Chỉ đưa ra phương án **35 triệu (10tr + 25tr)** như một "đặc quyền chiết khấu combo" ở bước cuối cùng để chốt hợp đồng dứt điểm.
+

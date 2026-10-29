@@ -45,23 +45,23 @@ Tổng ngân sách chuẩn: **15.000.000 VNĐ** (Tương đương 100% tỷ tr�
 ## PHẦN 2: CƠ SỞ TỐI ƯU CHI PHÍ PHÂN HỆ NỘI BỘ XUỐNG MỐC NGÂN SÁCH 25.000.000 VNĐ
 
 ### 2.1. Đề Xuất Ngân Sách Của Khách Hàng & Nguyên Tắc Tối Ưu
-- Định mức kỹ thuật độc lập nếu xây dựng từ con số 0 (from scratch) của một hệ thống ERP/WMS/TMS 8 vai trò RBAC có giá trị công sức ước tính tương đương **48.000.000 VNĐ** (do độ phức tạp gấp 3.2 lần so với web CMS thông thường).
+- Định mức kỹ thuật độc lập nếu xây dựng từ con số 0 (from scratch) của một hệ thống ERP/WMS/TMS 8 vai trò RBAC có giá trị công sức ước tính tương đương **36.000.000 VNĐ** (do độ phức tạp gấp 2.4 lần so với web CMS thông thường).
 - Tuy nhiên, theo nguyện vọng ngân sách của Ban Giám đốc Công ty Thanh Xuân là **khoảng 25.000.000 VNĐ**, chúng tôi đã áp dụng chính sách **"Tái Sử Dụng Nền Tảng Monorepo & Chiết Khấu Đồng Hành Hệ Sinh Thái"** để tối ưu hóa chi phí mà vẫn **giữ nguyên 100% toàn bộ tính năng và chất lượng kỹ thuật cao cấp nhất**:
 
 ```mermaid
 flowchart TD
-    A["Định mức kỹ thuật độc lập: 48.000.000 VNĐ"] --> B["Trừ Tiết kiệm Hạ tầng Core NestJS & VPS: -11.000.000 VNĐ"]
-    B --> C["Trừ Tái sử dụng Design System & Shared Components: -7.000.000 VNĐ"]
-    C --> D["Trừ Chiết khấu Gói Chuyển Đổi Số Monorepo: -5.000.000 VNĐ"]
+    A["Định mức kỹ thuật độc lập: 36.000.000 VNĐ"] --> B["Trừ Tiết kiệm Hạ tầng Core NestJS & VPS: -5.000.000 VNĐ"]
+    B --> C["Trừ Tái sử dụng Design System & Shared Components: -3.500.000 VNĐ"]
+    C --> D["Trừ Chiết khấu Gói Chuyển Đổi Số Monorepo: -2.500.000 VNĐ"]
     D --> E["NGÂN SÁCH CHỐT HOÀN TOÀN: 25.000.000 VNĐ"]
 ```
 
-### 2.2. Ba Trụ Cột Giúp Tiết Kiệm 23.000.000 VNĐ Cho Khách Hàng:
-1. **Tái sử dụng 100% Hạ tầng Backend Core (`-11.000.000 VNĐ`):**
+### 2.2. Ba Trụ Cột Giúp Tiết Kiệm 11.000.000 VNĐ Cho Khách Hàng:
+1. **Tái sử dụng 100% Hạ tầng Backend Core (`-5.000.000 VNĐ`):**
    - Hệ thống Backend NestJS tập trung (`be-nestjs-thanhxuan`) đã được dựng sẵn khung kết nối Multi-Database (`core_express`), cấu hình Docker, Nginx Reverse Proxy, SSL, Module Mail Nodemailer, Module Upload Cloudinary và kiến trúc Base Repository Pattern. Phân hệ Internal chỉ cần kế thừa trực tiếp mà không phải tốn chi phí setup hạ tầng từ đầu.
-2. **Kế thừa Design System & Bộ Thư Viện UI Chuẩn (`-7.000.000 VNĐ`):**
+2. **Kế thừa Design System & Bộ Thư Viện UI Chuẩn (`-3.500.000 VNĐ`):**
    - Bộ tokens TailwindCSS, `shadcn/ui`, bộ icons Lucide, thư viện form `react-hook-form` + `zod` đã được cấu hình chuẩn mực từ trước. Giúp giảm thiểu tối đa thời gian dàn trang (CSS Layout) để tập trung thẳng vào logic nghiệp vụ sàn xưởng.
-3. **Chính sách ưu đãi Khách hàng thân thiết Monorepo (`-5.000.000 VNĐ`):**
+3. **Chính sách ưu đãi Khách hàng thân thiết Monorepo (`-2.500.000 VNĐ`):**
    - Chiết khấu đồng hành dài hạn cùng Công ty Thanh Xuân trong toàn bộ chiến dịch số hóa doanh nghiệp (gồm cả Web Giặt Là, Web Chuyển Nhà và Cổng Nội Bộ).
 
 > 💎 **TỶ LỆ VÀNG ĐẦU TƯ DOANH NGHIỆP:**  
