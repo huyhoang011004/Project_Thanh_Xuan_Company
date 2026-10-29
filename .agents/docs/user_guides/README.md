@@ -5,7 +5,8 @@
 > **Địa chỉ truy cập nội bộ:** `noibo.thanhxuanlaundry.com`  
 > **Mật khẩu khởi tạo chung:** `ThanhXuan@2026`  
 > **Ngày cập nhật & Kiểm chuẩn:** 2026-10-29  
-> **Định dạng:** Bộ cẩm nang tác nghiệp chuẩn hóa cho 8 nhóm đối tượng người dùng (RBAC 8 vai trò)
+> **Định dạng:** Bộ cẩm nang tác nghiệp chuẩn hóa cho 8 nhóm đối tượng người dùng (Bao gồm định dạng Markdown `.md` cho lập trình viên và định dạng PDF `.pdf` chuẩn in ấn cho người dùng phổ thông)  
+> 📥 **Tải về cẩm nang tổng quan dạng PDF:** [README.pdf](./README.pdf) (Hoặc xem từng file PDF chi tiết bên dưới)
 
 ---
 
@@ -23,16 +24,17 @@ Bộ tài liệu này được biên soạn độc lập thành **8 cuốn cẩm
 
 ## 2. MA TRẬN 8 VAI TRÒ & MỤC LỤC TRA CỨU NHANH
 
-| STT | Mã Vai Trò | Tên Chức Danh Nghiệp Vụ | Đối Tượng Sử Dụng & Môi Trường | Liên Kết Tài Liệu Hướng Dẫn |
-| :---: | :--- | :--- | :--- | :--- |
-| **1** | **`ADMIN`** | **Quản Trị Viên Hệ Thống** | Ban Giám đốc & Kỹ thuật hệ thống (Desktop & Mobile) | 📘 [user_guide_admin.md](./user_guide_admin.md) |
-| **2** | **`MANAGER`** | **Quản Lý Xưởng Điều Hành** | Giám đốc xưởng, Quản đốc sản xuất (Ẩn 100% dữ liệu tiền lương) | 📙 [user_guide_manager.md](./user_guide_manager.md) |
-| **3** | **`WAREHOUSE_MANAGER`** | **Quản Lý Kho / Thủ Kho** | Thủ kho sạch xuất xưởng & Trạm đếm gom bao xưởng | 📦 [user_guide_warehouse_manager.md](./user_guide_warehouse_manager.md) |
-| **4** | **`ACCOUNTANT`** | **Kế Toán / Kế Toán Trưởng** | Kế toán tiền lương, chi phí xe, thù lao chuyến & doanh thu | 💵 [user_guide_accountant.md](./user_guide_accountant.md) |
-| **5** | **`SHIPPER`** | **Tài Xế Giao Nhận Xe Tải** | Đội ngũ tài xế xe tải (100% Mobile PWA trên đường chạy) | 🚚 [user_guide_shipper.md](./user_guide_shipper.md) |
-| **6** | **`WORKER`** | **Thợ Xưởng / Công Nhân** | Thợ giặt, sấy, rũ, ủi, gấp, đóng gói tại sàn sản xuất | ⏱️ [user_guide_worker.md](./user_guide_worker.md) |
-| **7** | **`PARTNER_MANAGER`** | **Quản Lý Đối Tác B2B** | Quản lý chi nhánh nhà hàng, khách sạn (Pizza 4P's, Haidilao...) | 🏢 [user_guide_partner_manager.md](./user_guide_partner_manager.md) |
-| **8** | **`PARTNER_STAFF`** | **Nhân Viên Đối Tác** | Nhân viên phục vụ, phụ bếp, thủ kho của đối tác | 📱 [user_guide_partner_staff.md](./user_guide_partner_staff.md) |
+| STT | Mã Vai Trò | Tên Chức Danh Nghiệp Vụ | Đối Tượng Sử Dụng & Môi Trường | Bản Markdown (.md) | Bản PDF In Ấn / Tải Về (.pdf) |
+| :---: | :--- | :--- | :--- | :--- | :--- |
+| **0** | **`OVERVIEW`** | **Tổng Quan Toàn Bộ Hệ Thống** | Ban Giám đốc & Toàn bộ cán bộ công nhân viên | 📋 [README.md](./README.md) | 📕 [README.pdf](./README.pdf) |
+| **1** | **`ADMIN`** | **Quản Trị Viên Hệ Thống** | Ban Giám đốc & Kỹ thuật hệ thống (Desktop & Mobile) | 📘 [user_guide_admin.md](./user_guide_admin.md) | 📕 [user_guide_admin.pdf](./user_guide_admin.pdf) |
+| **2** | **`MANAGER`** | **Quản Lý Xưởng Điều Hành** | Giám đốc xưởng, Quản đốc sản xuất (Ẩn 100% dữ liệu tiền lương) | 📙 [user_guide_manager.md](./user_guide_manager.md) | 📕 [user_guide_manager.pdf](./user_guide_manager.pdf) |
+| **3** | **`WAREHOUSE_MANAGER`** | **Quản Lý Kho / Thủ Kho** | Thủ kho sạch xuất xưởng & Trạm đếm gom bao xưởng | 📦 [user_guide_warehouse_manager.md](./user_guide_warehouse_manager.md) | 📕 [user_guide_warehouse_manager.pdf](./user_guide_warehouse_manager.pdf) |
+| **4** | **`ACCOUNTANT`** | **Kế Toán / Kế Toán Trưởng** | Kế toán tiền lương, chi phí xe, thù lao chuyến & doanh thu | 💵 [user_guide_accountant.md](./user_guide_accountant.md) | 📕 [user_guide_accountant.pdf](./user_guide_accountant.pdf) |
+| **5** | **`SHIPPER`** | **Tài Xế Giao Nhận Xe Tải** | Đội ngũ tài xế xe tải (100% Mobile PWA trên đường chạy) | 🚚 [user_guide_shipper.md](./user_guide_shipper.md) | 📕 [user_guide_shipper.pdf](./user_guide_shipper.pdf) |
+| **6** | **`WORKER`** | **Thợ Xưởng / Công Nhân** | Thợ giặt, sấy, rũ, ủi, gấp, đóng gói tại sàn sản xuất | ⏱️ [user_guide_worker.md](./user_guide_worker.md) | 📕 [user_guide_worker.pdf](./user_guide_worker.pdf) |
+| **7** | **`PARTNER_MANAGER`** | **Quản Lý Đối Tác B2B** | Quản lý chi nhánh nhà hàng, khách sạn (Pizza 4P's, Haidilao...) | 🏢 [user_guide_partner_manager.md](./user_guide_partner_manager.md) | 📕 [user_guide_partner_manager.pdf](./user_guide_partner_manager.pdf) |
+| **8** | **`PARTNER_STAFF`** | **Nhân Viên Đối Tác** | Nhân viên phục vụ, phụ bếp, thủ kho của đối tác | 📱 [user_guide_partner_staff.md](./user_guide_partner_staff.md) | 📕 [user_guide_partner_staff.pdf](./user_guide_partner_staff.pdf) |
 
 ---
 
@@ -102,3 +104,22 @@ Trên màn hình đăng nhập (`/login`), hệ thống cung cấp lưới 8 nú
 - [Bản đồ mã nguồn toàn hệ thống (CODEBASE_ATLAS.md)](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/CODEBASE_ATLAS.md)
 - [Từ điển cơ sở dữ liệu toàn diện (DATABASE_DICTIONARY.md)](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/DATABASE_DICTIONARY.md)
 - [Kiến trúc tổng quan hệ sinh thái (SRS_SDD.md)](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/SRS_SDD.md)
+
+---
+
+## 6. HƯỚNG DẪN TÁI TẠO BỘ TÀI LIỆU PDF
+
+Khi có cập nhật nội dung trong các file Markdown, lập trình viên có thể tái kết xuất toàn bộ 9 bản PDF bằng một lệnh duy nhất:
+
+```bash
+# Chạy từ thư mục gốc của dự án
+pnpm run docs:pdf
+```
+
+Script sẽ tự động:
+1. Duyệt qua toàn bộ tài liệu Markdown trong thư mục `.agents/docs/user_guides/`.
+2. Áp dụng bảng màu đặc trưng (Role Theme) và nhận diện thương hiệu Thanh Xuân Laundry.
+3. Render trực tiếp các sơ đồ Mermaid thành đồ họa vector SVG sắc nét và công thức toán học KaTeX.
+4. Đóng gói thành các file PDF khổ A4 chuẩn in ấn có phân trang và header/footer chuyên nghiệp.
+
+
