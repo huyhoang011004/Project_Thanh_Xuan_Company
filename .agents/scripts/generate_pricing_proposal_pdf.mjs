@@ -423,7 +423,7 @@ async function generateAllProposalPdfs() {
         `,
         footerTemplate: `
           <div style="font-family: 'Inter', sans-serif; font-size: 7.75pt; color: #64748b; width: 100%; padding: 0 14mm; display: flex; justify-content: space-between; border-top: 1px solid #cbd5e1; padding-top: 4px;">
-            <span>Hồ sơ đề xuất thương mại • Hotline Kỹ Thuật: 098.243.2288</span>
+            <span>Hồ sơ đề xuất thương mại • Hotline Kỹ Thuật: 0888.765.650</span>
             <span>Trang <span class="pageNumber"></span> / <span class="totalPages"></span></span>
           </div>
         `
