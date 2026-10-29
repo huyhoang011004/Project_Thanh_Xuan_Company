@@ -4,6 +4,28 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
 
 ## 2026-10-29
 
+### Plan 53: Bổ Sung Ca Giao Nhận Buổi Chiều (AFTERNOON) Toàn Hệ Thống
+
+- **Bối cảnh & Yêu cầu:** Trước đây hệ thống giao nhận xưởng và logistics chỉ định nghĩa 2 ca giao nhận mặc định: **Ca Sáng (`MORNING`)** và **Ca Tối (`EVENING`)**. Thực tế phát sinh nhu cầu giao nhận bổ sung **Buổi Chiều (`AFTERNOON`)** (khoảng 14h00 - 17h00) đối với các chuỗi đối tác tiệc chiều hoặc chuyến trung chuyển khẩn cấp trước giờ cao điểm tối.
+- **Các thay đổi kiến trúc & kỹ thuật chi tiết:**
+  - **Backend (`be-nestjs-thanhxuan`):**
+    - Mở rộng enum `deliveryShift` trong Schema `Partner` (`partner.schema.ts`) và `HandoverRecord` (`handover-record.schema.ts`): `['MORNING', 'AFTERNOON', 'EVENING']`.
+    - Cập nhật validation DTOs: `CreatePartnerDto`, `UpdatePartnerDto`, `CleanClothesDto` (PrepOrderDto), `CreateHandoverDto` xác thực nghiêm ngặt giá trị `'AFTERNOON'`.
+    - Nâng cấp Controller & Service Pool Compensation: Hỗ trợ query parameter `shift?: 'MORNING' | 'AFTERNOON' | 'EVENING'` tại `HandoverController.getPoolHandovers` và `HandoverPoolCompensationService`.
+    - Đồng bộ logic kế thừa ca: Phiếu giao nhận tự động kế thừa `deliveryShift` từ đối tác (`MORNING`, `AFTERNOON` hoặc `EVENING`).
+    - Verification: Toàn bộ 50 test suites (233 unit tests pass 100%), typecheck `tsc --noEmit` pass.
+  - **Frontend Cổng Nội Bộ (`fe-react-thanhxuan-internal`):**
+    - **Quản trị đối tác:** Khai báo kiểu `deliveryShift?: 'MORNING' | 'AFTERNOON' | 'EVENING'` trong `partner.types.ts`, `PartnerModal.tsx`. Thêm lựa chọn `<option value="AFTERNOON">Ca Chiều (Buổi chiều)</option>` trong `PartnerContactScheduleFieldsComponent.tsx`.
+    - **Thẻ chi nhánh đối tác:** Cập nhật `PartnerCardComponent.tsx` hiển thị badge trực quan theo ca: Ca Sáng (Vàng hổ phách), Ca Chiều (Cam ấm), Ca Tối (Tím).
+    - **Màn hình giao nhận Shipper (`ShipperHandoverPage.tsx`):**
+      - Nâng cấp thanh lọc ca thành 4 nút: `Tất Cả`, `Sáng (x)`, `Chiều (y)`, `Tối (z)` (tối ưu responsive dạng lưới `grid-cols-2 sm:grid-cols-4` trên điện thoại di động).
+      - Icon trực quan: `Sun` (Sáng), `SunMedium` (Chiều), `Moon` (Tối).
+      - Mở rộng `useShipperHandoverPage.ts` tính toán chính xác `afternoonCount`, lọc `filteredPoints` và `filteredPoolJobs` theo `AFTERNOON`.
+    - **Thẻ điểm giao nhận & Thẻ nhận chuyến:** Cập nhật `ShipperHandoverItemCardComponent.tsx`, `ShipperPendingPointCardComponent.tsx`, `ShipperJobPoolTabComponent.tsx` hiển thị chuẩn xác badge Ca Chiều với nền cam nhạt và chữ cam đậm.
+    - **Dropdown chọn chi nhánh khi xuất phiếu kho:** Cập nhật `PrepOrderConfigHeaderComponent.tsx` hiển thị ca giao nhận bên cạnh tên chi nhánh (`• Ca Chiều`, `• Ca Sáng`, `• Ca Tối`) trên cả Mobile và Desktop.
+    - Verification: `tsc --noEmit` pass 100%, `pnpm build` pass tạo PWA bundle thành công.
+- **Tài liệu & CSDL:** Cập nhật bảng `partners` (1.6) và `handover_records` (1.8) trong `DATABASE_DICTIONARY.md`, cập nhật `srs_sdd_backend.md`, `srs_sdd_fe_internal.md` và `SRS_SDD.md`.
+
 ### Bugfix: Khóa Chặt Chuyến Tự Do Chỉ Nhận Cho Ngày Hôm Đó, Ngăn Tự Động Add Vào Lộ Trình Các Ngày Sau Của Shipper
 
 - **Vấn đề phát hiện:** Khi tài xế Shipper bấm nhận một chuyến tự do (đối tác chưa có tài xế cố định), chuyến đi đã được lưu đúng vào ngày được chọn (`recordDate`). Tuy nhiên, khi Shipper chuyển sang xem lộ trình của ngày hôm sau (`selectedDate + 1`), chi nhánh đối tác tự do đó lại tự động xuất hiện trong Tab "Lộ Trình" (`ROUTE`) của ngày hôm sau dưới dạng chưa có phiếu (`record: undefined`), khiến Shipper nhầm tưởng mình bị gán luôn cho đối tác đó vào các ngày sau.
