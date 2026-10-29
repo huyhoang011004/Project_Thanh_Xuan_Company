@@ -4,6 +4,35 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
 
 ## 2026-10-29
 
+### Plan 54: Tính Năng Soạn Đồ Giao Trước Ca Chiều Cho Thủ Kho (Prep Order Advance Delivery)
+
+- **Bối cảnh nghiệp vụ:** Tại các nhà hàng đối tác đông khách (đặc biệt chuỗi Pizza 4P's), những hôm quá tải lượng khăn ăn của thực khách, xưởng giặt Thanh Xuân phải chở trước một lượng đồ sạch (như khăn ăn xám) vào buổi chiều (cùng ngày với ca giao tối, hoặc chiều hôm trước với ca giao sáng) để nhà hàng đủ khăn phục vụ khách.
+- **Yêu cầu & Quyết định thiết kế:**
+  1. Dòng ghi chú tương ứng của chiếc đồ trong phiếu tự động ghi nhận cú pháp chuẩn: `Đã giao xxx chiếc vào chiều dd/mm/yyyy`.
+  2. Màn hình của Thủ kho khi soạn đồ (`PrepOrderModal` gồm cả dạng Bảng Table và dạng Thẻ Mobile Card) ở cột số lượng hiển thị phân rã trực quan: `xxx (cần giao ca chính) + xxx (chiều - màu cam hổ phách nổi bật)`.
+  3. Giá trị số lượng lưu trong hệ thống (`quantity`) là tổng cả 2 đợt ($xxx + yyy = zzz$) để Shipper và Đối tác ký nhận, đối soát và tính sản lượng trọn vẹn.
+  4. Các màn hình khác (Shipper, Đối tác, Canvas/ảnh phiếu xuất) giữ nguyên số lượng tổng và hiển thị dòng ghi chú đó, hoàn toàn không bị ảnh hưởng.
+  5. Hỗ trợ nhập liệu 2 chiều (Hybrid): Tiện ích 1 chạm (Popover nhập số lượng + ngày giao chiều tự sinh ghi chú) VÀ tự động nhận diện thông minh (Regex parser) nếu thủ kho gõ tay vào ô ghi chú.
+- **Các thay đổi kỹ thuật chi tiết:**
+  - **Tạo Helper Phân Rã & Parser Ghi Chú (`prepOrderAdvanceDeliveryHelper.ts`):**
+    - Biểu thức Regex: `/(?:Đã giao|Giao trước)\s*(\d+)\s*(?:chiếc|cái)?\s*vào chiều\s*(\d{1,2}[\/\-]\d{1,2}(?:[\/\-]\d{4})?)/i`.
+    - Các hàm chuẩn hóa: `parseAdvanceDeliveryFromNote`, `formatAdvanceDeliveryNote`, `calculateDisplayQuantities`, `applyAdvanceDeliveryToNote`, `removeAdvanceDeliveryFromNote`.
+    - Viết unit test hoàn chỉnh tại `__tests__/prepOrderAdvanceDeliveryHelper.test.ts`.
+  - **Xây dựng Popover Tiện Ích 1 Chạm (`AdvanceDeliveryPopoverComponent.tsx`):**
+    - Thiết kế nút trigger tinh tế: Khi có giao chiều, hiển thị badge cam `Chiều: +{qty}`; khi chưa có, hiển thị icon `Sunset` nhỏ gọn.
+    - Modal popup tiện ích: Nhập số lượng giao chiều, chọn nhanh chip `+50`, `+100`, `+200`, `+300`; chọn ngày nhanh "Chiều hôm nay" / "Chiều hôm trước" hoặc gõ ngày tùy ý; xem trước câu ghi chú sẽ sinh ra; hỗ trợ nút "Áp dụng" và "Xóa".
+    - Kỷ luật kích thước: 239 dòng (< 250 dòng).
+  - **Nâng Cấp Bảng Soạn Đồ Desktop (`PrepOrderItemTableComponent.tsx`):**
+    - Cột "Sẽ giao ngày mai" hiển thị stepper ca chính kèm badge cam `+{advanceQty} chiều (= {quantity})`.
+    - Cột "Ghi chú dòng" tích hợp nút trigger Popover bên cạnh input ghi chú.
+    - Kỷ luật kích thước: 247 dòng (< 250 dòng).
+  - **Nâng Cấp Thẻ Soạn Đồ Mobile (`PrepOrderItemCardComponent.tsx`):**
+    - Stepper cảm ứng lớn cho ca chính, badge cam hổ phách hiển thị rõ ràng phân rã ca chiều.
+    - Tích hợp nút Popover bên cạnh ô ghi chú dòng.
+    - Kỷ luật kích thước: 235 dòng (< 250 dòng).
+  - **Verification:** `tsc -b && vite build` pass 100%, tạo PWA bundle thành công; `pnpm exec tsc --noEmit` pass không có lỗi.
+
+
 ### Plan 53: Bổ Sung Ca Giao Nhận Buổi Chiều (AFTERNOON) Toàn Hệ Thống
 
 - **Bối cảnh & Yêu cầu:** Trước đây hệ thống giao nhận xưởng và logistics chỉ định nghĩa 2 ca giao nhận mặc định: **Ca Sáng (`MORNING`)** và **Ca Tối (`EVENING`)**. Thực tế phát sinh nhu cầu giao nhận bổ sung **Buổi Chiều (`AFTERNOON`)** (khoảng 14h00 - 17h00) đối với các chuỗi đối tác tiệc chiều hoặc chuyến trung chuyển khẩn cấp trước giờ cao điểm tối.

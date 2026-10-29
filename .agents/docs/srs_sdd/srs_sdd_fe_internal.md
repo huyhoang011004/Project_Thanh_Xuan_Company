@@ -300,7 +300,8 @@ sequenceDiagram
 - **Soạn Đồ Thủ Công & Prefill Thông Minh (`PrepOrderModal`):**
   - Cho phép chọn Thương hiệu -> Chi nhánh đối tác -> nạp danh mục đồ giặt (`item_catalogs`).
   - Tự động gọi API `/handover/previous-dirty` lấy số lượng đồ bẩn nhận hôm trước để điền sẵn vào cột số lượng sẽ giao ngày mai.
-  - Hỗ trợ nhập 3 loại số lượng sạch: _Đã giao_, _Chưa giao_, _Giao trả nợ_ kèm cột _Ghi chú_ từng dòng (ví dụ: _"đã giao trước trong ngày xxx chiếc"_).
+  - Hỗ trợ nhập 3 loại số lượng sạch: _Đã giao_, _Chưa giao_, _Giao trả nợ_ kèm cột _Ghi chú_ từng dòng.
+  - **Tính năng Soạn đồ giao trước ca chiều (Plan 54):** Phục vụ các nhà hàng đông khách (Pizza 4P's...) thiếu khăn ăn cần giao trước một lượng khăn vào buổi chiều. Hỗ trợ tiện ích 1 chạm `AdvanceDeliveryPopoverComponent` (nhập số lượng và ngày giao chiều tự động sinh ghi chú chuẩn `Đã giao xxx chiếc vào chiều dd/mm/yyyy`) kết hợp Regex parser tự động nhận diện từ ghi chú gõ tay (`prepOrderAdvanceDeliveryHelper.ts`). Trên màn hình Thủ kho (`PrepOrderItemTableComponent` & `PrepOrderItemCardComponent`), cột số lượng phân rã trực quan `xxx (ca chính) + xxx (chiều - màu cam hổ phách)` với tổng số lượng bàn giao lưu vào database ($xxx + yyy$). Trên màn hình Shipper/Đối tác và Canvas ảnh phiếu giao nhận hiển thị số lượng tổng và ghi chú đó mà không bị ảnh hưởng.
   - Tích hợp khung Canvas ký tên điện tử và tự động điền họ tên người lập phiếu theo tài khoản đăng nhập.
   - Tối ưu hiển thị Responsive trên di động: Hỗ trợ chuyển đổi linh hoạt Dual View Mode giữa **Dạng Thẻ (`Card View`)** tiện bấm stepper và **Dạng Bảng (`Table View`)** cuộn ngang với cột STT, Tên đồ giặt ghim cố định bên trái (ẩn mã đồ phụ).
 - **Xuất Phiếu Xuất Nhập Kho Vận Chuyển Chuẩn Mẫu Thực Tế (`HandoverDeliverySlipModal` & `HandoverExportHelper`):**
