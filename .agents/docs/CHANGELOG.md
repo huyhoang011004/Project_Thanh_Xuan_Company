@@ -22,8 +22,9 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
      - Thanh bộ lọc trạng thái nhanh: Tất cả, Chờ duyệt, Đã duyệt, Đã hủy / Từ chối kèm số lượng đếm thực tế.
      - Thẻ đơn hiển thị các ngày nghỉ dạng badge lịch sang trọng, stepper tiến độ duyệt, thông tin tài xế nhận giao thay, số tiền công hỗ trợ (VND), lý do từ chối nổi bật (nếu có).
      - Nút hủy đơn an toàn tích hợp modal xác nhận trước khi hủy.
-  4. **Tái Sử Dụng Đồng Bộ Cho Bộ 2 Modals Giao Nhận:**
-     - Cập nhật `ShipperLeaveRequestModal.tsx` và `ShipperLeaveHistoryModal.tsx` tái sử dụng hoàn toàn các sub-component mới, bổ sung callback `onRequestNewLeave` chuyển tiếp mượt mà.
+  4. **Xóa Bỏ Hoàn Toàn 2 Modal Cũ & Tối Giản Màn Hình Giao Nhận:**
+     - Xóa triệt để hai tệp modal cũ (`ShipperLeaveRequestModal.tsx` và `ShipperLeaveHistoryModal.tsx`) tại thư mục `modals/` của phân hệ giao nhận.
+     - Thay thế nút thao tác trên header của `ShipperHandoverPage.tsx` bằng nút liên kết điều hướng trực tiếp sang trang `/operations/shipper/leave`.
   5. **Tích Hợp Điều Hướng (Navigation):**
      - `nav-mobile-config.ts`: Thêm tab **"Xin Nghỉ"** (icon `CalendarOff`) vào Mobile Bottom Bar cho `StaffRole.SHIPPER` (Giao Nhận | Xăng Xe | Xin Nghỉ | Lương).
      - `nav-config.ts`: Bổ sung mục **"Xin Nghỉ Giao Nhận"** vào nhóm CÁ NHÂN & CHẤM CÔNG cho Shipper.

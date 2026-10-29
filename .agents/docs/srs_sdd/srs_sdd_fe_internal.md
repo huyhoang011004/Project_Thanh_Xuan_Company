@@ -463,8 +463,9 @@ sequenceDiagram
   - Phân chia 2 Tabs giao diện chuyên biệt:
     + **"Tạo Đơn Xin Nghỉ" (`ShipperLeaveFormComponent.tsx`)**: Chọn nhanh ngày mai, 2 ngày, 3 ngày liên tiếp; date picker; chip hiển thị thứ trong tuần (Thứ Hai, Thứ Ba...); danh mục gợi ý lý do nghỉ phổ biến 1 chạm; ô ghi chú chi tiết; cảnh báo quy trình 2 bước.
     + **"Lịch Sử & Tiến Độ" (`ShipperLeaveHistoryComponent.tsx`)**: Lọc theo Tất cả / Chờ duyệt / Đã duyệt / Từ chối hoặc Đã hủy. Thẻ đơn (`ShipperLeaveCardComponent.tsx`) hiển thị trực quan các ngày nghỉ, stepper tiến độ duyệt, thông tin tài xế nhận giao thay, số tiền công bù, lý do từ chối nếu có, và nút hủy đơn an toàn có modal xác nhận.
-- **Nâng Cấp Toàn Diện Bộ 2 Modals Giao Nhận:**
-  - `ShipperLeaveRequestModal.tsx` và `ShipperLeaveHistoryModal.tsx` tại màn hình `ShipperHandoverPage.tsx` được đồng bộ sang thiết kế cao cấp mới, tái sử dụng các sub-component chuyên biệt.
+- **Tối Giản Hóa Màn Hình Giao Nhận (`ShipperHandoverPage.tsx`):**
+  - Xóa bỏ hoàn toàn 2 modal popup cũ (`ShipperLeaveRequestModal.tsx` và `ShipperLeaveHistoryModal.tsx`) để tránh code thừa và popup chồng chéo.
+  - Tích hợp nút liên kết nhanh trực tiếp tới cổng `/operations/shipper/leave` ngay trên header của trang giao nhận.
 - **Trang Quản Trị & Xét Duyệt Đơn (`ShipperLeaveReviewPage.tsx` tại `/management/shipper-leaves`):**
   - Dành cho các vai trò `ADMIN`, `MANAGER` và `ACCOUNTANT`.
   - Bộ lọc tabs theo trạng thái: Tất cả, Chờ Quản lý duyệt, Chờ Kế toán set công, Đã duyệt, Đã từ chối.
