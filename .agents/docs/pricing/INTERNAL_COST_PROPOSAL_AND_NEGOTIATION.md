@@ -118,30 +118,32 @@ Tổng ngân sách đầu tư: **25.000.000 VNĐ** (Hai mươi lăm triệu đ�
 
 ## PHẦN 3: BẢNG TÍNH TOÁN HIỆU QUẢ ĐẦU TƯ & HOÀN VỐN (ROI CALCULATOR)
 
-Để Ban Giám Đốc thấy việc đầu tư **25.000.000 VNĐ** không phải là chi phí tiêu hao mà là một **khoản đầu tư sinh lời ngay lập tức**:
+Để Ban Giám Đốc thấy việc đầu tư **25.000.000 VNĐ** không phải là chi phí tiêu hao mà là một **khoản đầu tư sinh lời và bảo toàn dòng tiền thực tế** (xưởng công suất 3.000 - 5.000 sản phẩm/ngày):
 
 ```
 ┌────────────────────────────────────────────────────────┬──────────────────────────────────┐
-│ CÁC KHOẢN TIẾT KIỆM TÀI CHÍNH THỰC TẾ MỖI THÁNG        │ SỐ TIỀN TIẾT KIỆM ĐƯỢC / THÁNG   │
+│ KHOẢN MỤC BẢO TOÀN DÒNG TIỀN THỰC TẾ HÀNG THÁNG        │ GIÁ TRỊ TIẾT KIỆM / THÁNG        │
 ├────────────────────────────────────────────────────────┼──────────────────────────────────┤
-│ 1. Chống thất thoát đồ giặt & giảm chi phí đền bù vải  │ 8.000.000 - 12.000.000 VNĐ       │
-│    (Nhờ quy trình đối soát 2 chiều, 3 chữ ký số)       │                                  │
-│ 2. Tiết kiệm thời gian kế toán chấm công & tính lương  │ 3.000.000 - 5.000.000 VNĐ        │
-│    (Từ 4-5 ngày/tháng giảm xuống còn 30 phút rà soát)  │                                  │
-│ 3. Tối ưu chi phí nhiên liệu & quản lý xe máy chặt chẽ │ 2.000.000 - 3.000.000 VNĐ        │
-│    (Kiểm soát 2 ảnh hóa đơn + Km đồng hồ chống gian lận)│                                 │
-│ 4. Chống gian lận giờ công thợ (Camera Selfie + GPS)   │ 3.000.000 - 4.000.000 VNĐ        │
+│ 1. Giảm thiểu thất thoát & đền bù đồ giặt B2B          │ 1.800.000 - 2.800.000 VNĐ        │
+│    (Chữ ký số 2 chiều + Trạm rạch bao đếm lại xưởng)   │ (Tránh mất 15-30 chiếc khăn/bàn) │
+│ 2. Tiết kiệm thời gian kế toán tính công & chốt lương  │ 1.200.000 - 1.800.000 VNĐ        │
+│    (Từ 4-5 ngày nhập tay giảm xuống còn 30 phút/tháng) │ (Tối ưu 0.5 định mức kế toán)    │
+│ 3. Kiểm soát chi phí xăng dầu & sửa xe máy chặt chẽ    │   600.000 - 1.000.000 VNĐ        │
+│    (Kiểm soát 2 ảnh bắt buộc: ODO đồng hồ + Hóa đơn)   │ (Chống kê khống km di chuyển)    │
+│ 4. Chống lãng phí giờ công thợ (Camera Selfie + GPS)   │ 1.000.000 - 1.500.000 VNĐ        │
+│    (Chấm công đúng người, đúng khâu, đúng phút máy)    │ (Ngăn đi muộn, chấm hộ ca)       │
 ├────────────────────────────────────────────────────────┼──────────────────────────────────┤
-│ 💰 TỔNG LỢI ÍCH TIẾT KIỆM TỐI THIỂU MỖI THÁNG          │ 16.000.000 - 24.000.000 VNĐ      │
+│ 💰 TỔNG LỢI ÍCH BẢO TOÀN DÒNG TIỀN THỰC TẾ MỖI THÁNG   │ 4.600.000 - 7.100.000 VNĐ        │
+│    (Mức trung bình thực tế ước tính)                   │ ~ 5.800.000 VNĐ / THÁNG          │
 └────────────────────────────────────────────────────────┴──────────────────────────────────┘
 ```
 
-> ⚡ **THỜI GIAN HOÀN VỐN (PAYBACK PERIOD):**
+> ⚡ **THỜI GIAN HOÀN VỐN THỰC TẾ (REALISTIC PAYBACK PERIOD):**
 >
 > $$
-> \text{Thời gian hoàn vốn} = \frac{\text{Chi phí đầu tư 25.000.000 VNĐ}}{\text{Tiết kiệm 16.000.000 VNĐ/tháng}} \approx \mathbf{1.5 \text{ Tháng!}}$$  
-> **Chỉ sau chưa đầy 02 tháng vận hành, hệ thống đã tự hoàn trả 100% chi phí đầu tư ban đầu!** Kể từ tháng thứ 3 trở đi, doanh nghiệp liên tục hưởng lợi ích tiết kiệm hàng chục triệu đồng mỗi tháng.
-> $$
+> \text{Thời gian hoàn vốn} = \frac{\text{Chi phí đầu tư 25.000.000 VNĐ}}{\text{Mức tiết kiệm thực tế 5.800.000 VNĐ/tháng}} \approx \mathbf{4.3 \text{ Tháng!}}
+> $$  
+> **Chỉ sau hơn 4 tháng vận hành thực tế**, khoản đầu tư 25 triệu đã được hoàn trả 100% từ chính các khoản thất thoát nhỏ lẻ được bịt kín mỗi ngày! Kể từ tháng thứ 5 trở đi, doanh nghiệp liên tục hưởng lợi ích bảo toàn dòng tiền ròng từ 4.6 - 7.1 triệu đồng mỗi tháng.
 
 ---
 

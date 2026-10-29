@@ -46,7 +46,7 @@ function buildHtml(markdownContent) {
   <title>HỒ SƠ ĐỀ XUẤT GIẢI PHÁP & CHI PHÍ ĐẦU TƯ PHÂN HỆ NỘI BỘ - CÔNG TY TNHH KINH DOANH THƯƠNG MẠI VÀ DỊCH VỤ THANH XUÂN</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
@@ -61,7 +61,7 @@ function buildHtml(markdownContent) {
     }
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      font-size: 9.75pt;
+      font-size: 10pt;
       line-height: 1.6;
       color: #1e293b;
       background-color: #ffffff;
@@ -72,7 +72,7 @@ function buildHtml(markdownContent) {
 
     /* Headings */
     h1 {
-      font-size: 16pt;
+      font-size: 16.5pt;
       font-weight: 800;
       color: #0f172a;
       border-bottom: 2.5px solid #1e3a8a;
@@ -83,17 +83,17 @@ function buildHtml(markdownContent) {
       page-break-after: avoid;
     }
     h2 {
-      font-size: 12.5pt;
+      font-size: 13pt;
       font-weight: 700;
       color: #1e3a8a;
-      border-bottom: 1.5px solid #e2e8f0;
+      border-bottom: 1.5px solid #cbd5e1;
       padding-bottom: 5px;
       margin-top: 24px;
       margin-bottom: 12px;
       page-break-after: avoid;
     }
     h3 {
-      font-size: 10.75pt;
+      font-size: 11.25pt;
       font-weight: 700;
       color: #0369a1;
       margin-top: 18px;
@@ -101,7 +101,7 @@ function buildHtml(markdownContent) {
       page-break-after: avoid;
     }
     h4 {
-      font-size: 10pt;
+      font-size: 10.5pt;
       font-weight: 600;
       color: #334155;
       margin-top: 14px;
@@ -144,10 +144,10 @@ function buildHtml(markdownContent) {
       margin: 14px 0;
       padding: 12px 18px;
       background-color: #f8fafc;
-      border-left: 4px solid #3b82f6;
+      border-left: 4.5px solid #3b82f6;
       border-radius: 6px;
       color: #334155;
-      font-size: 9.25pt;
+      font-size: 9.75pt;
       box-shadow: 0 1px 3px rgba(0,0,0,0.02);
       page-break-inside: avoid;
     }
@@ -157,7 +157,7 @@ function buildHtml(markdownContent) {
 
     /* Highlight badge for specific callouts */
     blockquote:has(strong:contains("CAM KẾT")),
-    blockquote:has(strong:contains("KẾT QUẢ")) {
+    blockquote:has(strong:contains("ĐÁNH GIÁ")) {
       background-color: #f0fdf4;
       border-left-color: #10b981;
       color: #166534;
@@ -168,8 +168,8 @@ function buildHtml(markdownContent) {
       width: 100%;
       border-collapse: collapse;
       margin: 16px 0;
-      font-size: 8.75pt;
-      line-height: 1.45;
+      font-size: 9.25pt;
+      line-height: 1.5;
       page-break-inside: auto;
     }
     tr {
@@ -184,17 +184,17 @@ function buildHtml(markdownContent) {
       color: #ffffff;
       font-weight: 700;
       text-align: left;
-      padding: 8px 10px;
+      padding: 9px 10px;
       border: 1px solid #1e3a8a;
-      font-size: 8.5pt;
+      font-size: 9pt;
       letter-spacing: 0.3px;
     }
     th:first-child {
       text-align: center;
     }
     td {
-      padding: 7px 10px;
-      border: 1px solid #e2e8f0;
+      padding: 8px 10px;
+      border: 1px solid #cbd5e1;
       vertical-align: top;
       color: #334155;
     }
@@ -218,38 +218,63 @@ function buildHtml(markdownContent) {
       color: #0f172a;
     }
 
-    /* Mermaid Container */
+    /* Mermaid Container - TO RÕ NÉT CĂNG TRÊN A4 */
     .mermaid-container {
-      margin: 18px 0;
-      padding: 14px;
+      margin: 20px 0;
+      padding: 18px 14px;
       background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 10px;
       text-align: center;
       page-break-inside: avoid;
     }
+    .mermaid {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
     .mermaid svg {
+      width: 100% !important;
       max-width: 100% !important;
       height: auto !important;
+      min-height: 180px;
+    }
+    .mermaid .node rect, 
+    .mermaid .node circle, 
+    .mermaid .node polygon {
+      stroke-width: 2px !important;
+      rx: 8px !important;
+      ry: 8px !important;
+    }
+    .mermaid .node .label {
+      font-size: 14.5px !important;
+      font-weight: 700 !important;
+      line-height: 1.4 !important;
+      font-family: 'Inter', sans-serif !important;
+    }
+    .mermaid .edgeLabel {
+      font-size: 13px !important;
+      font-weight: 600 !important;
+      font-family: 'Inter', sans-serif !important;
     }
 
     /* Code blocks & ASCII tables */
     pre {
       background: #0f172a;
       color: #e2e8f0;
-      padding: 12px 16px;
+      padding: 14px 18px;
       border-radius: 8px;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 8pt;
+      font-size: 8.75pt;
       line-height: 1.45;
       overflow-x: auto;
-      margin: 14px 0;
+      margin: 16px 0;
       page-break-inside: avoid;
-      border-left: 4px solid #10b981;
+      border-left: 4.5px solid #10b981;
     }
     code {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 8.5pt;
+      font-size: 9pt;
       padding: 1.5px 5px;
       background-color: #f1f5f9;
       color: #0f766e;
@@ -262,6 +287,12 @@ function buildHtml(markdownContent) {
       color: inherit;
       border: none;
       font-size: inherit;
+    }
+
+    /* KaTeX Math Display */
+    .katex-display {
+      margin: 16px 0 !important;
+      font-size: 1.1em !important;
     }
 
     /* Footer stamp / Signature blocks */
@@ -295,7 +326,7 @@ function buildHtml(markdownContent) {
       font-size: 9.5pt;
       font-weight: 700;
       color: #0f172a;
-      border-top: 1px solid #e2e8f0;
+      border-top: 1px solid #cbd5e1;
       padding-top: 6px;
       display: inline-block;
       min-width: 180px;
@@ -328,25 +359,27 @@ function buildHtml(markdownContent) {
         console.error('KaTeX error:', e);
       }
 
-      // 2. Render Mermaid
+      // 2. Render Mermaid với font chữ TO RÕ NÉT
       try {
         if (typeof mermaid !== 'undefined') {
           mermaid.initialize({
             startOnLoad: false,
             theme: 'base',
             themeVariables: {
-              primaryColor: '#e0e7ff',
+              primaryColor: '#eef2ff',
               primaryTextColor: '#1e1b4b',
-              primaryBorderColor: '#6366f1',
-              lineColor: '#4338ca',
+              primaryBorderColor: '#4f46e5',
+              lineColor: '#2563eb',
               secondaryColor: '#f0fdf4',
-              tertiaryColor: '#fef2f2',
-              fontSize: '12px',
+              tertiaryColor: '#fff1f2',
+              fontSize: '16px',
               fontFamily: 'Inter, sans-serif'
             },
             flowchart: {
               curve: 'basis',
-              padding: 14
+              nodeSpacing: 45,
+              rankSpacing: 45,
+              padding: 16
             }
           });
           await mermaid.run();
@@ -363,7 +396,7 @@ function buildHtml(markdownContent) {
 }
 
 async function generateAllProposalPdfs() {
-  console.log('🚀 Bắt đầu quá trình xuất PDF Hồ Sơ Đề Xuất Dành Cho Khách Hàng...');
+  console.log('🚀 Bắt đầu quá trình xuất PDF Hồ Sơ Đề Xuất Dành Cho Khách Hàng (Tối Ưu Typography & Độ Lớn Sơ Đồ)...');
   console.log(`📄 Nguồn: ${INPUT_MD_PATH}`);
 
   if (!fs.existsSync(INPUT_MD_PATH)) {

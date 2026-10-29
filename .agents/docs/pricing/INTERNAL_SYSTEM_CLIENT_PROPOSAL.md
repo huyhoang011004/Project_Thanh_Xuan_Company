@@ -4,7 +4,7 @@
 
 > **Kính gửi:** Ban Giám Đốc / Chủ Doanh Nghiệp - Công ty TNHH Kinh doanh Thương mại và Dịch vụ Thanh Xuân  
 > **Đơn vị lập hồ sơ:** Đội Ngũ Kỹ Thuật & Tư Vấn Giải Pháp Chuyển Đổi Số  
-> **Mục tiêu:** Cung cấp hồ sơ phân tích giá trị nghiệp vụ, bảng phân rã chi phí đầu tư 13 phân hệ, tính toán hiệu quả hoàn vốn (ROI) và cam kết chất lượng dịch vụ (SLA) của Phân hệ Cổng Vận Hành Nội Bộ (`fe-react-thanhxuan-internal` + Backend API Internal).  
+> **Mục tiêu:** Cung cấp hồ sơ phân tích giá trị nghiệp vụ, bảng phân rã chi phí đầu tư 13 phân hệ, tính toán hiệu quả hoàn vốn (ROI) thực tế và cam kết chất lượng dịch vụ (SLA) của Phân hệ Cổng Vận Hành Nội Bộ (`fe-react-thanhxuan-internal` + Backend API Internal).  
 > **Ngày phát hành:** 2026-10-29  
 > **Hiệu lực báo giá:** 30 ngày kể từ ngày phát hành  
 
@@ -12,55 +12,52 @@
 
 ## MỤC LỤC HỒ SƠ
 
-1. [PHẦN 1: BẢN ĐỀ XUẤT GIÁ TRỊ DOANH NGHIỆP (THE VALUE PROPOSITION)](#phan-1)
+1. [PHẦN 1: BẢN ĐỀ XUẤT GIÁ TRỊ DOANH NGHIỆP & BẢNG ĐỐI CHIẾU VẬN HÀNH](#phan-1)
 2. [PHẦN 2: BẢN TRÌNH BÀY CHI PHÍ ĐẦU TƯ PHÂN HỆ NỘI BỘ (25.000.000 VNĐ)](#phan-2)
-3. [PHẦN 3: BẢNG TÍNH TOÁN HIỆU QUẢ ĐẦU TƯ & HOÀN VỐN (ROI CALCULATOR)](#phan-3)
-4. [PHẦN 4: ĐIỀU KHOẢN HỢP ĐỒNG, LỘ TRÌNH THANH TOÁN & CAM KẾT BÀN GIAO](#phan-4)
+3. [PHẦN 3: BẢNG TÍNH TOÁN HIỆU QUẢ ĐẦU TƯ & HOÀN VỐN THỰC TẾ (ROI CALCULATOR)](#phan-3)
+4. [PHẦN 4: ĐIỀU KHOẢN HỢP ĐỒNG, TIẾN ĐỘ BÀN GIAO & CAM KẾT 4 "KHÔNG"](#phan-4)
 
 ---
 
 <a name="phan-1"></a>
 
-## PHẦN 1: BẢN ĐỀ XUẤT GIÁ TRỊ DOANH NGHIỆP (THE VALUE PROPOSITION)
+## PHẦN 1: BẢN ĐỀ XUẤT GIÁ TRỊ DOANH NGHIỆP & BẢNG ĐỐI CHIẾU VẬN HÀNH
 
-### 1.1. Giải Quyết Triệt Để 4 "Nỗi Đau Vận Hành" Lớn Nhất Của Xưởng Giặt Là
+### 1.1. Giải Quyết Triệt Để 4 "Nỗi Đau Vận Hành" Của Xưởng Giặt Công Nghiệp (Quy mô 3.000 - 5.000 SP/ngày)
 
-Xưởng giặt là công nghiệp truyền thống luôn đối mặt với 4 lỗ rò rỉ tài chính và thất thoát nghiêm trọng mà việc ghi chép sổ sách thủ công không thể xử lý được:
+Với quy mô sản xuất **3.000 - 5.000 sản phẩm/ngày** phục vụ chuỗi nhà hàng (Pizza 4P's, Haidilao...) và khách sạn lớn, việc ghi sổ tay hay nhắn tin Zalo truyền thống bộc lộ những lỗ hổng thất thoát tài chính rõ rệt:
 
-```mermaid
-flowchart TD
-    subgraph NOI_DAU_TRUYEN_THONG ["4 LỖ RÒ RỈ TÀI CHÍNH TRUYỀN THỐNG"]
-        N1["1. Thất thoát đồ giặt B2B<br/>(Mất khăn ăn, khăn bếp chuỗi lớn)"]
-        N2["2. Tắc nghẽn tính lương kế toán<br/>(Mất 4-5 ngày cộng sổ tay mỗi tháng)"]
-        N3["3. Đội xe tải chạy rỗng & Lệch tuyến<br/>(Tài xế nghỉ phép làm đứt gãy giao hàng)"]
-        N4["4. Gian lận giờ công sàn xưởng<br/>(Chấm công hộ, đi muộn về sớm, sai khâu)"]
-    end
+| Nỗi Đau Vận Hành Thủ Công (Zalo / Sổ Tay) | Giải Pháp Số Hóa Cổng Nội Bộ Thanh Xuân | Lợi Ích Trực Tiếp Đem Lại |
+| :--- | :--- | :--- |
+| **1. Thất thoát & Tranh cãi số lượng đồ giặt:** Nhà hàng báo thiếu khăn, tài xế bảo đếm đủ, xưởng không có bằng chứng đối soát. | **Quy trình giao nhận 2 chiều + Chữ ký số Canvas + Trạm rạch bao đếm lại:** Soạn đồ sạch $\rightarrow$ Ký nhận mobile $\rightarrow$ Nhận đồ bẩn $\rightarrow$ Ký nhận $\rightarrow$ Về trạm rạch bao đếm lại. Phiếu lưu ảnh Cloudinary. | Chấm dứt 100% tình trạng đền bù đồ oan. Phân định rõ trách nhiệm giữa Đối tác - Tài xế - Thợ xưởng. |
+| **2. Tắc nghẽn tính lương cuối tháng:** Kế toán mất 4-5 ngày cộng sổ tay từng ca thợ, dễ nhầm lẫn gây khiếu nại lương. | **Tự động hóa 100% công thức lương:** Tính lương giờ thợ 7 khâu và định mức 28 ngày Shipper chỉ bằng **1 cú click**. | Kế toán chỉ mất 30 phút rà soát; loại bỏ hoàn toàn sai sót tính công; nhân viên yên tâm gắn bó. |
+| **3. Đội xe tải chạy rỗng & Lệch tuyến:** Tài xế đột xuất xin nghỉ làm đứt gãy tuyến giao nhận nhà hàng. | **Điều phối tuyến 4 ca + Chợ chuyến POOL tự động:** Chợ chuyến nhận đơn lẻ có thù lao; tự động giao đơn cho người chạy thay khi có đơn xin nghỉ phép. | Xe luôn đầy tải, đảm bảo trả đồ sạch đúng giờ cam kết (SLA) với các chuỗi lớn. |
+| **4. Gian lận giờ công & Chấm công hộ:** Thợ xưởng chấm công hộ nhau, đi muộn về sớm, chấm sai khâu làm việc. | **Chấm công Camera Selfie + GPS Geofencing $\le 150\text{m}$ + Đồng hồ tính giờ 7 khâu (Auto-Resume):** Bắt buộc chụp ảnh mặt thật tại xưởng; đồng hồ tính tiền theo phút. | Trả lương đúng người, đúng việc; thúc đẩy năng suất lao động sàn xưởng tăng 15-20%. |
 
-    subgraph GIAI_PHAP_CONG_NGHE ["GIẢI PHÁP SỐ HÓA PHÂN HỆ NỘI BỘ THANH XUÂN"]
-        S1["Quy trình giao nhận 2 chiều + Chữ ký số Canvas + Trạm đếm gom bao rạch bao xưởng"]
-        S2["Tự động hóa 100% công thức lương: 28 ngày Shipper + Giờ thợ 7 khâu chỉ với 1 click"]
-        S3["Chợ chuyến POOL khóa nguyên tử + Điều phối tuyến xe + Tự động giao thay khi nghỉ"]
-        S4["Chấm công Camera Selfie + Định vị GPS Geofencing 150m + Wi-Fi Modem IP xưởng"]
-    end
-
-    N1 ==> S1
-    N2 ==> S2
-    N3 ==> S3
-    N4 ==> S4
-```
+---
 
 ### 1.2. Hệ Thống 8 Vai Trò Chuyên Nghiệp (RBAC) Khép Kín Chuỗi Cung Ứng
 
-Không chỉ là một trang web đơn giản, đây là một nền tảng **ERP / WMS / TMS thu nhỏ** phục vụ toàn diện mọi mắt xích trong công ty:
+Không chỉ là một trang web đơn giản, đây là một nền tảng **ERP / WMS / TMS thu nhỏ** chuyên biệt cho ngành giặt là công nghiệp:
 
-1. **Ban Giám Đốc (`ADMIN`):** Giám sát KPI thời gian thực, toàn quyền nhân sự 60 ngày, khóa/mở khóa kỳ lương an toàn tuyệt đối.
-2. **Quản Lý Xưởng (`MANAGER`):** Chỉ huy 7 khâu sản xuất, rà soát ca bất thường, duyệt công ngày *(Bảo mật: Phân quyền che giấu 100% dữ liệu tiền bạc)*.
+```mermaid
+flowchart LR
+    A["BAN GIÁM ĐỐC<br/>(ADMIN)<br/>Giám sát KPI"] --> B["QUẢN LÝ XƯỞNG<br/>(MANAGER)<br/>Điều hành 7 khâu"]
+    B --> C["THỦ KHO<br/>(WAREHOUSE)<br/>Soạn & Rạch bao"]
+    C --> D["TÀI XẾ XE TẢI<br/>(SHIPPER)<br/>Giao nhận PWA"]
+    D --> E["ĐỐI TÁC B2B<br/>(PARTNER)<br/>Ký số & Đếm đồ"]
+    B --> F["THỢ XƯỞNG<br/>(WORKER)<br/>Tính giờ 7 khâu"]
+    A --> G["KẾ TOÁN<br/>(ACCOUNTANT)<br/>Lương & Chi phí xe"]
+```
+
+1. **Ban Giám Đốc (`ADMIN`):** Giám sát doanh thu, chi phí, KPI thời gian thực; toàn quyền khóa/mở khóa kỳ lương an toàn tuyệt đối.
+2. **Quản Lý Xưởng (`MANAGER`):** Chỉ huy 7 khâu sản xuất, rà soát ca bất thường, duyệt công ngày *(Phân quyền che giấu 100% dữ liệu tiền bạc)*.
 3. **Thủ Kho (`WAREHOUSE_MANAGER`):** Soạn đồ sạch xuất kho theo ngày, ký Canvas xuất ảnh phiếu Cloudinary, quản lý thư viện ảnh phiếu và trạm đếm rạch bao.
-4. **Kế Toán (`ACCOUNTANT`):** Thẩm định chi phí xe máy (xăng + sửa xe với 2 ảnh bắt buộc), định mức thù lao chuyến lẻ, chạy tính bảng lương tự động và xuất báo cáo Excel chuẩn kế toán.
+4. **Kế Toán (`ACCOUNTANT`):** Thẩm định chi phí xe máy (xăng + sửa xe với 2 ảnh bằng chứng), duyệt thù lao chuyến lẻ, chạy tính bảng lương tự động và xuất Excel chuẩn kế toán.
 5. **Tài Xế Xe Tải (`SHIPPER`):** 100% Mobile PWA, lộ trình 4 ca sáng/chiều/tối, chợ chuyến nhận đơn lẻ hưởng thù lao, đếm thay đồ bẩn toàn màn hình và xin nghỉ phép không làm đứt gãy tuyến.
 6. **Thợ Xưởng (`WORKER`):** Chấm công selfie + GPS vệ tinh $\le 150\text{m}$, đồng hồ đếm giờ làm việc 7 khâu cập nhật mỗi 30s, tự động quay lại khâu mặc định (`AUTO_RESUME`), tra cứu lương ngày minh bạch.
-7. **Quản Lý Đối Tác (`PARTNER_MANAGER`):** Cổng nhà hàng (Pizza 4P's, Haidilao...), đếm đồ bẩn Auto-save onBlur chống xung đột, kiểm nhận đồ sạch qua ảnh WebP, duyệt nhân viên cơ sở.
-8. **Nhân Viên Đối Tác (`PARTNER_STAFF`):** Giao diện 3 tab di động tinh gọn đếm đồ bẩn và nhận đồ sạch trực quan ngay trên điện thoại.
+7. **Quản Lý Đối Tác (`PARTNER_MANAGER`):** Cổng nhà hàng (Pizza 4P's, Haidilao...), đếm đồ bẩn Auto-save onBlur chống xung đột mạng, kiểm nhận đồ sạch qua ảnh WebP, duyệt nhân viên cơ sở.
+8. **Nhân Viên Đối Tác (`PARTNER_STAFF`):** Giao diện 3 tab di động tinh gọn đếm đồ bẩn và nhận đồ sạch trực quan ngay trên smartphone.
 
 ---
 
@@ -116,74 +113,80 @@ Tổng ngân sách đầu tư: **25.000.000 VNĐ** (Hai mươi lăm triệu đ�
 
 <a name="phan-3"></a>
 
-## PHẦN 3: BẢNG TÍNH TOÁN HIỆU QUẢ ĐẦU TƯ & HOÀN VỐN (ROI CALCULATOR)
+## PHẦN 3: BẢNG TÍNH TOÁN HIỆU QUẢ ĐẦU TƯ & HOÀN VỐN THỰC TẾ (ROI CALCULATOR)
 
-### 3.1. Phân Tích Lợi Ích Kinh Tế Thực Tế Hàng Tháng
+### 3.1. Phân Tích Lợi Ích Kinh Tế Thực Tế Hàng Tháng (Xưởng 3.000 - 5.000 SP/ngày)
 
-Dựa trên khảo sát thực tế tại các xưởng giặt công nghiệp công suất 1.000 - 3.000 sản phẩm/ngày, việc áp dụng Phân hệ Nội Bộ giúp ngăn chặn các khoản thất thoát trực tiếp như sau:
+Dựa trên khảo sát thực tế tại xưởng giặt Thanh Xuân với công suất **3.000 - 5.000 sản phẩm/ngày**, các khoản thất thoát được bảo toàn thực tế mỗi tháng gồm:
 
 ```
 ┌────────────────────────────────────────────────────────┬──────────────────────────────────┐
-│ KHOẢN MỤC TIẾT KIỆM TÀI CHÍNH THỰC TẾ                  │ GIÁ TRỊ TIẾT KIỆM / THÁNG        │
+│ KHOẢN MỤC BẢO TOÀN DÒNG TIỀN THỰC TẾ HÀNG THÁNG        │ GIÁ TRỊ TIẾT KIỆM / THÁNG        │
 ├────────────────────────────────────────────────────────┼──────────────────────────────────┤
-│ 1. Chống thất thoát đồ giặt B2B (Khăn ăn, đồ nhà hàng) │ 8.000.000 - 12.000.000 VNĐ       │
-│    (Chữ ký số 2 chiều + Trạm đếm ảnh phiếu Cloudinary) │                                  │
-│ 2. Cắt giảm 80% thời gian tính lương của Kế toán       │ 3.000.000 - 5.000.000 VNĐ        │
-│    (Từ 4-5 ngày/tháng giảm xuống còn 30 phút rà soát)  │                                  │
-│ 3. Tối ưu chi phí nhiên liệu & quản lý xe máy chặt chẽ │ 2.000.000 - 3.000.000 VNĐ        │
-│    (Kiểm soát 2 ảnh hóa đơn + Km đồng hồ chống gian lận)│                                 │
-│ 4. Chống gian lận giờ công thợ (Camera Selfie + GPS)   │ 3.000.000 - 4.000.000 VNĐ        │
+│ 1. Giảm thiểu thất thoát & đền bù đồ giặt B2B          │ 1.800.000 - 2.800.000 VNĐ        │
+│    (Chữ ký số 2 chiều + Trạm rạch bao đếm lại xưởng)   │ (Tránh mất 15-30 chiếc khăn/bàn) │
+│ 2. Tiết kiệm thời gian kế toán tính công & chốt lương  │ 1.200.000 - 1.800.000 VNĐ        │
+│    (Từ 4-5 ngày nhập tay giảm xuống còn 30 phút/tháng) │ (Tối ưu 0.5 định mức kế toán)    │
+│ 3. Kiểm soát chi phí xăng dầu & sửa xe máy chặt chẽ    │   600.000 - 1.000.000 VNĐ        │
+│    (Kiểm soát 2 ảnh bắt buộc: ODO đồng hồ + Hóa đơn)   │ (Chống kê khống km di chuyển)    │
+│ 4. Chống lãng phí giờ công thợ (Camera Selfie + GPS)   │ 1.000.000 - 1.500.000 VNĐ        │
+│    (Chấm công đúng người, đúng khâu, đúng phút máy)    │ (Ngăn đi muộn, chấm hộ ca)       │
 ├────────────────────────────────────────────────────────┼──────────────────────────────────┤
-│ 💰 TỔNG LỢI ÍCH TIẾT KIỆM TỐI THIỂU MỖI THÁNG          │ 16.000.000 - 24.000.000 VNĐ      │
+│ 💰 TỔNG LỢI ÍCH BẢO TOÀN DÒNG TIỀN THỰC TẾ MỖI THÁNG   │ 4.600.000 - 7.100.000 VNĐ        │
+│    (Mức trung bình thực tế ước tính)                   │ ~ 5.800.000 VNĐ / THÁNG          │
 └────────────────────────────────────────────────────────┴──────────────────────────────────┘
 ```
 
-### 3.2. Thời Gian Hoàn Vốn Đầu Tư (Payback Period)
+### 3.2. Thời Gian Hoàn Vốn Đầu Tư Thực Tế (Realistic Payback Period)
 
 $$
-\text{Thời gian hoàn vốn} = \frac{\text{Chi phí đầu tư 25.000.000 VNĐ}}{\text{Mức tiết kiệm trung bình 16.000.000 VNĐ/tháng}} \approx \mathbf{1.5 \text{ Tháng!}}
+\text{Thời gian hoàn vốn} = \frac{\text{Chi phí đầu tư 25.000.000 VNĐ}}{\text{Mức tiết kiệm thực tế 5.800.000 VNĐ/tháng}} \approx \mathbf{4.3 \text{ Tháng (chưa tới 1 quý rưỡi!)}}
 $$
 
-> ⚡ **KẾT QUẢ PHÂN TÍCH ĐẦU TƯ:**  
-> **Chỉ sau 1.5 tháng vận hành thực tế, hệ thống đã bù đắp 100% số tiền đầu tư ban đầu!** Kể từ tháng thứ 2 trở đi, doanh nghiệp liên tục hưởng lợi ích tiết kiệm dòng tiền từ 16 đến 24 triệu đồng mỗi tháng.
+> ⚡ **ĐÁNH GIÁ TÍNH KHẢ THI TÀI CHÍNH:**  
+> **Chỉ sau hơn 4 tháng vận hành thực tế**, khoản đầu tư 25 triệu đồng đã được bù đắp hoàn toàn từ chính các khoản tiền thất thoát nhỏ lẻ được bịt kín mỗi ngày. Kể từ tháng thứ 5 trở đi, hệ thống tiếp tục mang lại lợi nhuận ròng bền vững từ **4.6 - 7.1 triệu đồng/tháng** mà không tốn thêm bất kỳ chi phí duy trì nào!
 
 ---
 
 <a name="phan-4"></a>
 
-## PHẦN 4: ĐIỀU KHOẢN HỢP ĐỒNG, LỘ TRÌNH THANH TOÁN & CAM KẾT BÀN GIAO
+## PHẦN 4: ĐIỀU KHOẢN HỢP ĐỒNG, TIẾN ĐỘ BÀN GIAO & CAM KẾT 4 "KHÔNG"
 
-### 4.1. Lộ Trình Thanh Toán 3 Đợt An Toàn & Linh Hoạt
+### 4.1. Cam Kết 4 "KHÔNG" - Bảo Vệ Tài Chính Tuyệt Đối Cho Doanh Nghiệp
 
-Để đảm bảo quyền lợi tối đa cho doanh nghiệp, chúng tôi áp dụng tiến độ thanh toán gắn chặt với kết quả nghiệm thu thực tế:
+Để Ban Giám Đốc hoàn toàn an tâm khi đầu tư, chúng tôi cam kết nguyên tắc minh bạch tài chính:
+
+1. ❌ **KHÔNG PHÍ THUÊ BAO HÀNG THÁNG (No SaaS Subscription):** Không giống như các nền tảng Base, KiotViet hay Sapo thu phí 300.000 - 1.000.000 VNĐ/tháng trọn đời. Doanh nghiệp đầu tư một lần và sở hữu vĩnh viễn hệ thống.
+2. ❌ **KHÔNG GIỚI HẠN TÀI KHOẢN & NGƯỜI DÙNG:** Tự do cấp tài khoản cho 50 - 200 nhân viên (Thủ kho, Tài xế, Thợ xưởng) và không giới hạn số lượng đối tác nhà hàng B2B kết nối.
+3. ❌ **KHÔNG PHÁT SINH CHI PHÍ PHẦN CỨNG:** Ứng dụng chạy mượt mà dưới dạng Mobile PWA ngay trên các dòng điện thoại thông minh phổ thông có sẵn của tài xế và thợ xưởng (Android/iOS), không cần đầu tư máy POS đắt tiền.
+4. ❌ **KHÔNG SỢ NGHẼN MẠNG NGOẠI TUYẾN:** Có hàng đợi ngoại tuyến (Offline Queue), tài xế thao tác ký nhận và đếm đồ ngay cả khi xuống tầng hầm sâu trung tâm thương mại mất sóng 4G; dữ liệu tự động đồng bộ khi có mạng trở lại.
+
+---
+
+### 4.2. Lộ Trình Thanh Toán 3 Đợt Linh Hoạt
 
 ```
 ┌───────┬──────────────────────────────────┬──────────┬──────────────────────────────────────┐
 │ ĐỢT   │ GIAI ĐOẠN TRIỂN KHAI             │ TỶ LỆ    │ SỐ TIỀN (VNĐ)                        │
 ├───────┼──────────────────────────────────┼──────────┼──────────────────────────────────────┤
-│ Đợt 1 │ Ngay sau khi ký hợp đồng         │ 40%      │ 10.000.000 VNĐ                       │
-│ Đợt 2 │ Bàn giao thử nghiệm (UAT)        │ 40%      │ 10.000.000 VNĐ                       │
+│ Đợt 1 │ Ngay sau khi ký kết hợp đồng     │ 40%      │ 10.000.000 VNĐ                       │
+│ Đợt 2 │ Bàn giao thử nghiệm thực tế (UAT)│ 40%      │ 10.000.000 VNĐ                       │
 │ Đợt 3 │ Nghiệm thu toàn diện & Vận hành  │ 20%      │ 5.000.000 VNĐ                        │
 ├───────┼──────────────────────────────────┼──────────┼──────────────────────────────────────┤
 │ TỔNG  │ TOÀN BỘ DỰ ÁN                    │ 100%     │ 25.000.000 VNĐ                       │
 └───────┴──────────────────────────────────┴──────────┴──────────────────────────────────────┘
 ```
 
-### 4.2. Chính Sách Bảo Hành & Cam Kết Dịch Vụ Kỹ Thuật (SLA)
+---
 
-```mermaid
-flowchart LR
-    A["Bảo Hành 12 Tháng<br/>(Sửa lỗi phần mềm 24/7)"] --> B["Đào Tạo 1:1 Tận Xưởng<br/>(Cho Quản lý, Thủ kho, Tài xế)"]
-    B --> C["Cập Nhật Nâng Cấp<br/>(Miễn phí các bản vá bảo mật)"]
-    C --> D["Bàn Giao Toàn Diện<br/>(Mã nguồn + Database + Tài liệu)"]
-```
+### 4.3. Chính Sách Bảo Hành & Đào Tạo "Cầm Tay Chỉ Việc"
 
-1. **Bảo hành kỹ thuật miễn phí 12 tháng:** Khắc phục mọi lỗi phát sinh (bugs) trong quá trình vận hành thực tế mà không thu thêm bất kỳ phụ phí nào.
-2. **Đào tạo hướng dẫn trực tiếp:** Cung cấp trọn bộ 8 cẩm nang hướng dẫn sử dụng chuyên biệt cho từng vai trò và tổ chức các buổi hướng dẫn thực tế cho Quản lý xưởng, Thủ kho, Kế toán và Tài xế.
-3. **Bàn giao trọn gói (No Vendor Lock-in):** Bàn giao toàn bộ quyền quản trị VPS, mã nguồn và tài liệu kiến trúc, doanh nghiệp toàn quyền làm chủ hệ thống công nghệ của mình.
+1. **Bảo hành kỹ thuật miễn phí 12 tháng:** Hỗ trợ xử lý lỗi phần mềm 24/7 trong suốt quá trình xưởng vận hành, không phát sinh chi phí.
+2. **Đào tạo chuyển giao tận xưởng:** Cung cấp trọn bộ 8 cẩm nang hướng dẫn sử dụng chuyên biệt cho từng vai trò; kỹ sư trực tiếp hướng dẫn tại xưởng cho Tài xế và Thợ xưởng cho đến khi thao tác thành thạo 100%.
+3. **Bàn giao trọn gói mã nguồn & quyền quản trị:** Bàn giao toàn bộ mã nguồn, cơ sở dữ liệu MongoDB và tài liệu kiến trúc hệ thống; doanh nghiệp làm chủ công nghệ 100%.
 
 ---
 
-### 4.3. Kết Luận
+### 4.4. Kết Luận
 
-Phân hệ Cổng Vận Hành Nội Bộ trị giá **25.000.000 VNĐ** là khoản đầu tư chiến lược mang lại giá trị hoàn vốn tức thì, giúp Công ty TNHH Kinh doanh Thương mại và Dịch vụ Thanh Xuân chuyển mình từ một xưởng giặt thủ công trở thành một **doanh nghiệp F&B Logistics chuyên nghiệp chuẩn công nghệ cao**, sẵn sàng tiếp nhận các hợp đồng lớn hàng chục nghìn sản phẩm mỗi ngày.
+Với chi phí đầu tư ưu đãi **25.000.000 VNĐ** và thời gian hoàn vốn thực tế chỉ **4.3 tháng**, Phân hệ Cổng Vận Hành Nội Bộ là đòn bẩy công nghệ vững chắc giúp Công ty TNHH Kinh doanh Thương mại và Dịch vụ Thanh Xuân vận hành trơn tru chuỗi giao nhận 3.000 - 5.000 sản phẩm/ngày, nâng tầm vị thế đối tác uy tín với các tập đoàn nhà hàng, khách sạn lớn.
