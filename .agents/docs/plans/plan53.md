@@ -1,6 +1,6 @@
 # Plan 53: Bổ Sung Ca Giao Nhận Buổi Chiều (AFTERNOON) Cho Hệ Sinh Thái Vận Hành Xưởng & Quản Vận Shipper
 
-> Status: In progress | Created: 2026-10-29
+> Status: Done | Created: 2026-10-29 | Completed: 2026-10-29
 
 ## 1. Overview & Affected Files
 
@@ -71,11 +71,18 @@ Thực tế phát sinh nhu cầu giao nhận bổ sung **Buổi Chiều (`AFTERN
 
 ## 3. Checklist Công Việc & Verification
 
-- [ ] **T1 (Backend):** Cập nhật Schema `Partner` và `HandoverRecord` hỗ trợ enum `'AFTERNOON'`.
-- [ ] **T2 (Backend):** Cập nhật DTOs (`create-partner.dto`, `update-partner.dto`, `clean-clothes.dto`, `create-handover.dto`).
-- [ ] **T3 (Backend):** Cập nhật Controller và Service Pool compensation nhận tham số `shift` có `AFTERNOON`.
-- [ ] **T4 (Backend Verification):** Chạy `pnpm exec tsc --noEmit` & `pnpm test` trong `be-nestjs-thanhxuan`.
-- [ ] **T5 (Frontend Types & Management):** Cập nhật `partner.types.ts`, `PartnerModal.tsx`, `PartnerContactScheduleFieldsComponent.tsx`, `PartnerCardComponent.tsx`.
-- [ ] **T6 (Frontend Operations):** Cập nhật `handover.types.ts`, `useShipperHandoverPage.ts`, `ShipperHandoverPage.tsx`, `ShipperHandoverItemCardComponent.tsx`, `ShipperPendingPointCardComponent.tsx`, `ShipperJobPoolTabComponent.tsx`.
-- [ ] **T7 (Frontend Verification):** Chạy `pnpm exec tsc --noEmit` & `pnpm build` trong `fe-react-thanhxuan-internal`.
-- [ ] **T8 (Docs Sync & Git):** Cập nhật `DATABASE_DICTIONARY.md`, `srs_sdd_backend.md`, `srs_sdd_fe_internal.md`, `CHANGELOG.md`, sau đó commit và push lên nhánh `dev`.
+- [x] **T1 (Backend):** Cập nhật Schema `Partner` và `HandoverRecord` hỗ trợ enum `'AFTERNOON'`.
+- [x] **T2 (Backend):** Cập nhật DTOs (`create-partner.dto`, `update-partner.dto`, `clean-clothes.dto`, `create-handover.dto`).
+- [x] **T3 (Backend):** Cập nhật Controller và Service Pool compensation nhận tham số `shift` có `AFTERNOON`.
+- [x] **T4 (Backend Verification):** Chạy `pnpm exec tsc --noEmit` & `pnpm test` trong `be-nestjs-thanhxuan`.
+- [x] **T5 (Frontend Types & Management):** Cập nhật `partner.types.ts`, `PartnerModal.tsx`, `PartnerContactScheduleFieldsComponent.tsx`, `PartnerCardComponent.tsx`.
+- [x] **T6 (Frontend Operations):** Cập nhật `handover.types.ts`, `useShipperHandoverPage.ts`, `ShipperHandoverPage.tsx`, `ShipperHandoverItemCardComponent.tsx`, `ShipperPendingPointCardComponent.tsx`, `ShipperJobPoolTabComponent.tsx`.
+- [x] **T7 (Frontend Verification):** Chạy `pnpm exec tsc --noEmit` & `pnpm build` trong `fe-react-thanhxuan-internal`.
+- [x] **T8 (Docs Sync & Git):** Cập nhật `DATABASE_DICTIONARY.md`, `srs_sdd_backend.md`, `srs_sdd_fe_internal.md`, `CHANGELOG.md`, sau đó commit và push lên nhánh `dev`.
+
+## 4. Execution Log
+- **2026-10-29:**
+  - Hoàn tất toàn bộ 8 tasks T1 -> T8.
+  - Backend: `pnpm exec tsc --noEmit` pass sạch, `pnpm test` pass 50/50 test suites (233 unit tests pass).
+  - Frontend: `pnpm exec tsc --noEmit` pass sạch, `pnpm build` pass tạo bundle PWA thành công.
+  - Cập nhật đồng bộ hệ thống tài liệu 5 trụ cột và tự động commit/push lên nhánh `dev`.
