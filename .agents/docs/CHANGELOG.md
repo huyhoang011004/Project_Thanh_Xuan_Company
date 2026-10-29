@@ -4,6 +4,36 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
 
 ## 2026-10-29
 
+### Docs & User Guides: Biên Soạn Bộ 8 Bản Cẩm Nang Hướng Dẫn Sử Dụng RBAC & Đồng Bộ Tài Liệu Phân Hệ Nội Bộ
+
+- **Bối cảnh & Yêu cầu:**
+  - Hệ sinh thái Cổng vận hành nội bộ (`fe-react-thanhxuan-internal`) sở hữu 8 vai trò RBAC (`ADMIN`, `MANAGER`, `WAREHOUSE_MANAGER`, `ACCOUNTANT`, `SHIPPER`, `WORKER`, `PARTNER_MANAGER`, `PARTNER_STAFF`) với các quy trình nghiệp vụ chuyên biệt từ khâu thu gom, vận chuyển, sản xuất 7 khâu, xuất kho, kiểm nhận đến tính lương và quản lý tài chính.
+  - Người dùng yêu cầu biên soạn 8 bản tài liệu hướng dẫn sử dụng chi tiết cho từng vai trò để đào tạo nhân sự, đồng thời rà soát và khắc phục các sai lệch trong các tài liệu kỹ thuật cốt lõi (`srs_sdd_fe_internal.md`, `CODEBASE_ATLAS.md`, `DATABASE_DICTIONARY.md`).
+- **Các thay đổi và cập nhật tài liệu:**
+  1. **Biên soạn bộ 8 cuốn cẩm nang hướng dẫn sử dụng chuyên biệt (`.agents/docs/user_guides/`):**
+     - `README.md`: Mục lục tra cứu tổng thể, sơ đồ phối hợp vận hành giữa 4 khối nghiệp vụ và bảng tài khoản thử nghiệm mẫu (Demo accounts).
+     - `user_guide_admin.md`: Cẩm nang Quản trị viên (giám sát thời gian thực, quản lý nhân sự 60 ngày & xóa vĩnh viễn, cấu hình GPS OpenStreetMap & IP Wi-Fi xưởng, duyệt nghỉ giao nhận, chốt bảng lương chu kỳ).
+     - `user_guide_manager.md`: Cẩm nang Quản lý Xưởng (chỉ huy sàn sản xuất, duyệt ca quên check-out, phân khâu mặc định, duyệt công thợ theo ngày, gán tài xế tuyến cố định, tuân thủ nghiêm ngặt bảo mật ẩn 100% dữ liệu tiền bạc).
+     - `user_guide_warehouse_manager.md`: Cẩm nang Thủ kho (soạn đồ sạch xuất xưởng `CLEAN_PLAN`, ký tên Canvas phát hành ảnh phiếu WebP gửi Cloudinary, quản lý thư viện ảnh phiếu `SLIP_GALLERY`, trạm rạch bao đếm lại gom bao xưởng).
+     - `user_guide_accountant.md`: Cẩm nang Kế toán (duyệt chi phí xăng/sửa xe tài xế với 2 ảnh bắt buộc, định mức thù lao chuyến lẻ `TripCompensationModal`, thiết lập tiền công giao thay khi shipper nghỉ, cấu hình đơn giá giờ 7 khâu, chạy tính bảng lương tự động và xuất Excel).
+     - `user_guide_shipper.md`: Cẩm nang Tài xế xe tải (100% Mobile PWA, lộ trình 4 ca sáng/chiều/tối, chợ chuyến `POOL` khóa nguyên tử, đếm thay đồ bẩn `ShipperCountPartnerModal` với biểu thức thông minh và số bao gom, nộp chi phí xe, xin nghỉ phép, minh bạch công thức lương 28 ngày chuẩn).
+     - `user_guide_worker.md`: Cẩm nang Thợ xưởng (chấm công camera selfie & Geofencing GPS $\le 150\text{m}$, tự động kích hoạt khâu mặc định, chuyển đổi giữa 7 khâu công việc tính giờ chuẩn xác từng phút, cơ chế tự động quay lại khâu mặc định `AUTO_RESUME`, rạch bao đếm lại, theo dõi thu nhập hàng ngày).
+     - `user_guide_partner_manager.md`: Cẩm nang Quản lý Đối tác B2B (đếm đồ bẩn auto-save onBlur chống xung đột, tự động nhảy ngày sau 21h, kiểm nhận đồ sạch qua ảnh WebP, đánh dấu Đủ/Thiếu/Thừa, tra cứu thư viện ảnh lịch sử, phê duyệt kích hoạt nhân viên cơ sở mình).
+     - `user_guide_partner_staff.md`: Cẩm nang Nhân viên Đối tác (giao diện 3 tab tinh gọn trên điện thoại: đếm đồ bẩn gửi giặt, kiểm nhận đồ sạch khi xe tải đến giao, tra cứu ảnh phiếu đối soát).
+  2. **Đồng bộ và sửa sai lệch trong Từ điển cơ sở dữ liệu (`DATABASE_DICTIONARY.md`):**
+     - Sửa lỗi trùng số thứ tự mục: 1.11 `hourly_work` và 1.11 `fuel_logs` $\rightarrow$ Đánh số lại liền mạch từ 1.11 đến 1.16 (`hourly_work` $\rightarrow$ `fuel_logs` $\rightarrow$ `pay_settings` $\rightarrow$ `payroll_periods` $\rightarrow$ `payslips` $\rightarrow$ `shipper_leave_requests`).
+     - Cập nhật số lượng collections: Phân vùng 1 (`internal_express`) có 16 collections (sửa từ 15); tổng số collections toàn hệ thống là 34 (sửa từ 33).
+  3. **Đồng bộ Bản đồ mã nguồn (`CODEBASE_ATLAS.md`):**
+     - Bổ sung nhóm màn hình Auth công khai (`/login`, `/register`, `/forgot-password`, `ProfileEditModal`, `ChangePasswordModal`, `useAuth.ts`, `useProfileEdit.ts`).
+     - Tách riêng route `/management/manager/approval` (`ApprovalManagementPage.tsx`) khỏi `/management/manager/personnel` (`StaffManagementPage.tsx`).
+     - Bổ sung component `PartnerStaffTabComponent.tsx` vào cổng đối tác.
+     - Cập nhật quyền hạn truy cập màn hình Kho Sạch (`/operations/warehouse-manager/warehouse`) và Duyệt Nghỉ (`/management/shipper-leaves`) của Kế toán.
+  4. **Đồng bộ Đặc tả phân hệ nội bộ (`srs_sdd_fe_internal.md`):**
+     - Chuẩn hóa tên vai trò đối tác trong toàn bộ tài liệu: `PARTNER_MANAGER` và `PARTNER_STAFF` (thay thế alias cũ `RESTAURANT_MANAGER`/`STAFF`).
+     - Bổ sung chức năng `FE-INT-FR-08: Quản Lý Đơn Xin Nghỉ Giao Nhận & Phân Tuyến Bù`.
+     - Cập nhật cấu trúc thư mục mã nguồn 2.1 (bổ sung `features/management/shipper-leaves/`, `features/management/workshop/`, `InternalLayout.tsx`).
+     - Cập nhật ma trận điều hướng 2.2 phản ánh chính xác quyền hạn thực tế của cả 8 vai trò.
+
 ### Plan 55: Chức Năng Shipper Xin Nghỉ Giao Nhận & Phân Tuyến Kèm Tiền Công (Shipper Leave & Route Reassignment Workflow)
 
 - **Bối cảnh & Vấn đề nghiệp vụ:**
