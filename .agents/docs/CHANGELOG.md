@@ -4,6 +4,38 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
 
 ## 2026-10-30
 
+### Plan 56: Hoàn Thiện Toàn Diện Cấu Hình & Trải Nghiệm PWA Cho Cổng Vận Hành Nội Bộ (fe-react-thanhxuan-internal)
+
+- **Bối cảnh & Vấn đề:**
+  - Cổng vận hành nội bộ (`fe-react-thanhxuan-internal`) phục vụ thợ xưởng, thủ kho và tài xế xe tải di chuyển thường xuyên vào vùng sóng yếu (hầm nhà hàng, xưởng tôn khép kín).
+  - Dù đã có `OfflineBanner` và `offline-queue.ts` (IndexedDB) cho luồng đếm đồ và đổ xăng, ứng dụng vẫn chưa đạt chuẩn PWA hoàn chỉnh:
+    1. Thiếu toàn bộ icon PNG chuẩn (`192x192`, `512x512`, `maskable`, `apple-touch-icon-180x180`), chỉ dùng file `icon.svg` khiến iOS Safari không nhận diện được icon ứng dụng và Lighthouse PWA bị đánh trượt tiêu chí Installability.
+    2. Thiếu cấu hình Workbox Runtime Caching cho ảnh Cloudinary CDN (`res.cloudinary.com`) và Google Fonts Webfonts (`fonts.gstatic.com`).
+    3. Thiếu App Shortcuts trong Web App Manifest để truy cập nhanh các nghiệp vụ cốt lõi từ màn hình chính điện thoại.
+    4. Thiếu thông báo bản cập nhật mới (PWA Reload Prompt): khi deploy bản build mới, người dùng không nhận được thông báo để reload trang mà chạy ngầm mã nguồn cũ.
+- **Các giải pháp và thay đổi kỹ thuật:**
+  1. **Tạo bộ Icon PNG chuẩn chất lượng cao từ vector `icon.svg`:**
+     - Sử dụng Headless Chrome render pixel-perfect thành các file PNG:
+       - `public/pwa-192x192.png`: Icon tiêu chuẩn cho Android và thanh tác vụ Desktop.
+       - `public/pwa-512x512.png`: Icon phân giải cao cho màn hình khởi động Splash Screen.
+       - `public/pwa-maskable-512x512.png`: Icon Adaptive bo tròn thông minh cho Android hiện đại.
+       - `public/apple-touch-icon-180x180.png`: Icon chuẩn cho thiết bị iOS Safari.
+       - `public/favicon-64x64.png`: Favicon sắc nét cho trình duyệt máy tính.
+  2. **Nâng cấp cấu hình Vite PWA (`vite.config.ts`):**
+     - Cập nhật mảng `manifest.icons` với đầy đủ định dạng PNG (`any` và `maskable`).
+     - Bổ sung `manifest.shortcuts` với 4 lối tắt vận hành 1 chạm: Giao Nhận Shipper (`/operations/shipper/handover`), Chấm Công Selfie (`/operations/attendance`), Trạm Công Thợ (`/operations/worker/piecework`), Soạn Đồ Xuất Xưởng (`/operations/warehouse-manager/warehouse`).
+     - Mở rộng `runtimeCaching` với `CacheFirst` cho `fonts.gstatic.com` và `StaleWhileRevalidate` cho `res.cloudinary.com` (chữ ký số, ảnh phiếu bàn giao, hóa đơn xăng xe lưu 30 ngày, tối đa 120 mục).
+  3. **Cập nhật thẻ Meta PWA chuẩn iOS trong `index.html`:**
+     - Đổi link `apple-touch-icon` trỏ vào `/apple-touch-icon-180x180.png`.
+     - Thêm `favicon-64x64.png`, `<meta name="application-name" content="Thanh Xuân Quản Vận" />` và `apple-mobile-web-app-title`.
+  4. **Xây dựng Component `PwaReloadPrompt.tsx`:**
+     - Thiết kế theo chuẩn Zero-Dependency, sử dụng trực tiếp Native Browser Service Worker API (`navigator.serviceWorker.ready`, sự kiện `updatefound`, `controllerchange` và tự động kiểm tra mỗi 30 phút).
+     - Hiển thị Toast nổi hiện đại góc màn hình kèm nút "Cập nhật ngay" kích hoạt `SKIP_WAITING` để nạp ngay bản mới mà không cần xóa cache thủ công.
+     - Nhúng trực tiếp vào `AppLayout.tsx`.
+- **Kết quả kiểm thử:**
+  - `pnpm exec tsc --noEmit` và `pnpm build` pass 100%.
+  - Service Worker precache 21 static entries, sinh file `manifest.webmanifest`, `sw.js` và `workbox-*.js` đầy đủ.
+
 ### Bugfix: Sửa Lỗi Hiển Thị Chi Nhánh Không Thuộc Thương Hiệu Trong Modal Tạo Phiếu Giao Nhận (PrepOrderModal)
 
 - **Vấn đề phát hiện:** Khi người dùng mở modal "Tạo Phiếu Giao Nhận Mới" và chọn thương hiệu (ví dụ: `Pizza 4P's (PIZZA_4PS)`), danh sách thả xuống ở ô "CHI NHÁNH ĐỐI TÁC" lại hiển thị lẫn cả chi nhánh của thương hiệu khác (ví dụ: `Haidilao Hotpot Phạm Ngọc Thạch`).

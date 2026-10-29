@@ -291,6 +291,11 @@ sequenceDiagram
 
 - **An toàn giao dịch:** Mỗi request gửi từ offline queue luôn đính kèm header `Idempotency-Key` (UUIDv4) để Backend nhận diện và xử lý idempotent, tuyệt đối không bị trùng lặp dữ liệu khi kết nối mạng chập chờn.
 - **Tối ưu hóa ảnh & Canvas:** Ảnh chụp camera selfie và ảnh hóa đơn xăng được nén trực tiếp qua canvas client trước khi lưu queue hoặc gửi API (giới hạn dung lượng < 500KB) nhằm tiết kiệm băng thông di động 4G.
+- **Tiêu chuẩn PWA Toàn Diện & Mobile-First (Plan 56):**
+  - **Bộ Icon Chuẩn Kích Thước:** Cung cấp đầy đủ `pwa-192x192.png`, `pwa-512x512.png`, `pwa-maskable-512x512.png`, `apple-touch-icon-180x180.png` và `favicon-64x64.png`, đáp ứng trọn vẹn tiêu chí Installability của Google Lighthouse và iOS Safari Add to Home Screen.
+  - **Lối Tắt Ứng Dụng (Web App Shortcuts):** Tích hợp 4 shortcut truy cập 1 chạm ngoài màn hình điện thoại: Giao Nhận Shipper (`/operations/shipper/handover`), Chấm Công Selfie (`/operations/attendance`), Trạm Công Thợ (`/operations/worker/piecework`), và Soạn Đồ Xuất Xưởng (`/operations/warehouse-manager/warehouse`).
+  - **Bộ Nhớ Đệm CDN Thông Minh (Workbox Runtime Caching):** Precache toàn bộ bundle tĩnh HTML/CSS/JS, áp dụng chiến lược `CacheFirst` cho Google Fonts và `StaleWhileRevalidate` cho Cloudinary CDN (`res.cloudinary.com` - chữ ký số, ảnh phiếu bàn giao, hóa đơn xăng với thời gian lưu 30 ngày, tối đa 120 mục).
+  - **Thông Báo Bản Cập Nhật Mới (`PwaReloadPrompt`):** Lắng nghe sự kiện `waiting` và `updatefound` từ Native Service Worker, tự động kiểm tra mỗi 30 phút và hiển thị Toast nổi kèm nút "Cập nhật ngay" (`skipWaiting` + `reload`).
 
 ---
 
