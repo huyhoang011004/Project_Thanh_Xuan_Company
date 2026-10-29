@@ -76,6 +76,7 @@ Backend API tập trung phục vụ toàn bộ các kênh tương tác của Cô
   - Cài đặt chuyến lẻ (`PATCH /handover/:id/compensation`): Admin và Kế toán (`ACCOUNTANT`) thiết lập tiền công `amount` (`x` VNĐ) và ghi chú tuyến.
   - Gom cụm đối tác cùng tuyến (`POST /handover/cluster-compensation`): Cho phép gom `N` phiếu giao nhận thành một cụm chuyến với tổng tiền `totalAmount` (`xx` VNĐ). Hệ thống sinh mã cụm `CLUSTER-YYYYMMDD-XXXX` và chia đều `perRecordAmount = Math.round(totalAmount / N)` vào từng phiếu.
   - Tích hợp Bảng lương Shipper: Khi tài xế hoàn thành phiếu giao nhận trong tháng, tổng tiền các chuyến tự do được helper `payroll-shipper-calculator.helper.ts` tự động tổng hợp vào trường `extraDeliveryPay` và cộng trực tiếp vào thu nhập thực nhận `netPay` của tháng đó.
+  - Phân quyền bảo mật tài chính: Cả hai endpoint cấu hình tiền chuyến (`/compensation` và `/cluster-compensation`) được bảo vệ bằng quyền duy nhất `pay.rate.manage` (`PERMISSIONS.PAY_RATE_MANAGE`), chỉ cho phép Quản trị viên (`ADMIN`) và Kế toán (`ACCOUNTANT`) thực hiện, ngăn chặn hoàn toàn Thủ kho (`WAREHOUSE_MANAGER`) hay Quản lý xưởng (`MANAGER`) can thiệp vào định mức thù lao.
 
 #### BE-FR-04: Chấm Công Camera Selfie & Công Thợ Theo Thời Gian x Hệ Số (`/api/v1/internal/attendance`, `/piecework`)
 - **Chấm công camera selfie:**

@@ -4,6 +4,20 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
 
 ## 2026-10-29
 
+### Bugfix: Giới Hạn Quyền Set Giá Phiếu Chỉ Cho Admin & Accountant và Cấp Menu Soạn Đồ Cho Accountant
+
+- **Vấn đề phát hiện:**
+  1. Nút "Set Giá" / "Sửa Giá" trên thẻ phiếu giao nhận xưởng (`WarehouseCleanPlanTabComponent`) trước đây hiển thị cho mọi vai trò xem được trang (bao gồm cả Thủ kho `WAREHOUSE_MANAGER` và Quản lý xưởng `MANAGER`), vi phạm nguyên tắc bảo mật tài chính của công ty (chỉ Ban Quản Trị và Kế toán mới có quyền can thiệp vào định mức tiền công giao nhận).
+  2. Tài khoản Kế toán (`ACCOUNTANT`) chưa có mục menu để vào màn hình "Kho Sạch & Soạn Đồ" (`/operations/warehouse-manager/warehouse`) trên cả Desktop Sidebar và Mobile Quick Bottom Bar, khiến Kế toán không thể vào rà soát và cấu hình tiền công các chuyến giao nhận tự do.
+- **Giải pháp xử lý triệt để:**
+  1. **Frontend (`fe-react-thanhxuan-internal`):**
+     - Tại `WarehouseCleanPlanTabComponent.tsx`: Kiểm tra `canSetCompensation = user?.role === StaffRole.ADMIN || user?.role === StaffRole.ACCOUNTANT`. Nút "Set Giá" / "Sửa Giá" chỉ hiển thị cho 2 vai trò này; ẩn hoàn toàn với `WAREHOUSE_MANAGER`, `MANAGER`, `SHIPPER`, `WORKER`.
+     - Tại `nav-config.ts`: Cấp quyền `StaffRole.ACCOUNTANT` vào mục "Kho Sạch & Soạn Đồ" (`id: "kho"`), giúp Kế toán thấy menu trên Desktop Sidebar và Drawer Mobile.
+     - Tại `nav-mobile-config.ts`: Bổ sung mục "Kho Sạch" (icon `Warehouse`) vào thanh điều hướng nhanh Mobile Bottom Bar của vai trò `ACCOUNTANT` (`Tổng Quan`, `Báo Cáo`, `Kho Sạch`, `Bảng Lương` + nút `Thêm`), giúp Kế toán trên điện thoại truy cập 1 chạm vào danh sách phiếu kho để set giá.
+  2. **Backend API Security (`be-nestjs-thanhxuan`):**
+     - Tại `handover.controller.ts`: Sửa quyền bảo vệ của cả hai endpoint `@Patch(':id/compensation')` và `@Post('cluster-compensation')` thành duy nhất `@Permissions(PERMISSIONS.PAY_RATE_MANAGE)` (loại bỏ `PERMISSIONS.HANDOVER_EDIT_FIELD`), khóa chặt cổng API chỉ cho `ADMIN` và `ACCOUNTANT` thực thi.
+  3. **Verification:** Backend 50/50 suites (235 tests pass), nest build pass; Frontend `tsc --noEmit` pass 100%, vite build pass tạo PWA bundle thành công.
+
 ### Plan 54: Tính Năng Soạn Đồ Giao Trước Ca Chiều Cho Thủ Kho (Prep Order Advance Delivery)
 
 - **Bối cảnh nghiệp vụ:** Tại các nhà hàng đối tác đông khách (đặc biệt chuỗi Pizza 4P's), những hôm quá tải lượng khăn ăn của thực khách, xưởng giặt Thanh Xuân phải chở trước một lượng đồ sạch (như khăn ăn xám) vào buổi chiều (cùng ngày với ca giao tối, hoặc chiều hôm trước với ca giao sáng) để nhà hàng đủ khăn phục vụ khách.
