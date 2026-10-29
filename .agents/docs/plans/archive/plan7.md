@@ -5,6 +5,7 @@
 ## 1. Overview & Affected Files
 
 ### 1.1. Mục tiêu & Phạm vi
+
 - **Chuyển đổi route và phân quyền**:
   - Di chuyển trang Quản lý Đối tác từ `/doi-tac` sang `/quan-ly/doi-tac`.
   - Phân quyền giới hạn nghiêm ngặt: Chỉ vai trò `ADMIN` và `MANAGER` mới có quyền truy cập màn hình này (loại bỏ quyền của `ACCOUNTANT` và `WAREHOUSE_MANAGER` trên trang này theo đúng yêu cầu).
@@ -37,34 +38,36 @@
     14. `4PS_TUI_BOC_TUONG` - `Túi bọc tương` - Đơn vị: `Chiếc`
 
 ### 1.2. Out of Scope
+
 - Không làm gián đoạn luồng tạo Phiếu giao nhận (`handover`) và Ghi nhận năng suất trạm đếm (`piecework`) hiện hành; các module này tiếp tục đọc danh mục theo thương hiệu đối tác bình thường.
 
 ### 1.3. Assumptions & Open Questions
+
 - **Assumptions**:
   - Xóa đối tác / thương hiệu / mặt hàng đồ giặt áp dụng cơ chế Xóa mềm (`isActive: false`) để bảo toàn toàn vẹn dữ liệu lịch sử đối soát và phiếu giao nhận cũ.
   - Người dùng có vai trò `ADMIN` và `MANAGER` có toàn quyền CRUD đối tác, thương hiệu và danh mục đồ.
 
 ### 1.4. Bảng file ảnh hưởng
 
-| Path | Action | Lý do |
-| :--- | :---: | :--- |
-| `be-nestjs-thanhxuan/src/modules/internal/partners/schemas/brand.schema.ts` | Add | Định nghĩa Schema Mongoose cho Brand (thương hiệu) |
-| `be-nestjs-thanhxuan/src/modules/internal/partners/repositories/brand.repository.ts` | Add | Tầng Repository truy xuất collection `brands` |
-| `be-nestjs-thanhxuan/src/modules/internal/partners/dto/create-brand.dto.ts` | Add | DTO xác thực dữ liệu khi tạo thương hiệu |
-| `be-nestjs-thanhxuan/src/modules/internal/partners/dto/update-brand.dto.ts` | Add | DTO xác thực dữ liệu khi cập nhật thương hiệu |
-| `be-nestjs-thanhxuan/src/modules/internal/partners/schemas/partner.schema.ts` | Edit | Nới lỏng kiểm tra enum `brand` sang string có index để hỗ trợ brand tạo động |
-| `be-nestjs-thanhxuan/src/modules/internal/partners/schemas/item-catalog.schema.ts` | Edit | Nới lỏng kiểm tra enum `brand` sang string có index; hỗ trợ đơn vị `Chiếc` / `Kg` |
-| `be-nestjs-thanhxuan/src/modules/internal/partners/dto/create-partner.dto.ts` | Edit | Cho phép `brand` nhận mã chuỗi thương hiệu linh hoạt |
-| `be-nestjs-thanhxuan/src/modules/internal/partners/dto/create-item-catalog.dto.ts` | Edit | Cho phép `brand` nhận mã chuỗi thương hiệu linh hoạt |
-| `be-nestjs-thanhxuan/src/modules/internal/partners/partners.controller.ts` | Edit | Bổ sung các endpoint CRUD cho Brands (`/partners/brands`) |
-| `be-nestjs-thanhxuan/src/modules/internal/partners/partners.service.ts` | Edit | Triển khai business logic CRUD Brand |
-| `be-nestjs-thanhxuan/src/modules/internal/partners/partners.module.ts` | Edit | Khai báo `Brand` schema và `BrandRepository` vào module |
-| `be-nestjs-thanhxuan/src/scripts/seed-pizza-4ps-catalogs.ts` | Add | Script khởi tạo thương hiệu Pizza 4P's và 14 mặt hàng từ phiếu kho |
-| `fe-react-thanhxuan-internal/src/types/index.ts` | Edit | Khai báo interface `Brand`, chuẩn hóa thuộc tính `Partner`, `ItemCatalog` |
-| `fe-react-thanhxuan-internal/src/app/(internal)/quan-ly/doi-tac/page.tsx` | Add | Tạo trang Quản lý Đối tác mới, phân quyền `[StaffRole.ADMIN, StaffRole.MANAGER]` |
-| `fe-react-thanhxuan-internal/src/app/(internal)/doi-tac/page.tsx` | Delete/Edit | Redirect hoặc thay thế sang `/quan-ly/doi-tac` |
-| `fe-react-thanhxuan-internal/src/app/router.tsx` | Edit | Đăng ký route `quan-ly/doi-tac` và điều hướng |
-| `fe-react-thanhxuan-internal/src/features/partners/PartnersPage.tsx` | Edit | Tái cấu trúc 3 Tab (Đối Tác, Thương Hiệu, Danh Mục Đồ), bỏ chú thích `()`, modal Sửa/Xóa đối tác, CRUD đồ giặt |
+| Path                                                                                 |   Action    | Lý do                                                                                                          |
+| :----------------------------------------------------------------------------------- | :---------: | :------------------------------------------------------------------------------------------------------------- |
+| `be-nestjs-thanhxuan/src/modules/internal/partners/schemas/brand.schema.ts`          |     Add     | Định nghĩa Schema Mongoose cho Brand (thương hiệu)                                                             |
+| `be-nestjs-thanhxuan/src/modules/internal/partners/repositories/brand.repository.ts` |     Add     | Tầng Repository truy xuất collection `brands`                                                                  |
+| `be-nestjs-thanhxuan/src/modules/internal/partners/dto/create-brand.dto.ts`          |     Add     | DTO xác thực dữ liệu khi tạo thương hiệu                                                                       |
+| `be-nestjs-thanhxuan/src/modules/internal/partners/dto/update-brand.dto.ts`          |     Add     | DTO xác thực dữ liệu khi cập nhật thương hiệu                                                                  |
+| `be-nestjs-thanhxuan/src/modules/internal/partners/schemas/partner.schema.ts`        |    Edit     | Nới lỏng kiểm tra enum `brand` sang string có index để hỗ trợ brand tạo động                                   |
+| `be-nestjs-thanhxuan/src/modules/internal/partners/schemas/item-catalog.schema.ts`   |    Edit     | Nới lỏng kiểm tra enum `brand` sang string có index; hỗ trợ đơn vị `Chiếc` / `Kg`                              |
+| `be-nestjs-thanhxuan/src/modules/internal/partners/dto/create-partner.dto.ts`        |    Edit     | Cho phép `brand` nhận mã chuỗi thương hiệu linh hoạt                                                           |
+| `be-nestjs-thanhxuan/src/modules/internal/partners/dto/create-item-catalog.dto.ts`   |    Edit     | Cho phép `brand` nhận mã chuỗi thương hiệu linh hoạt                                                           |
+| `be-nestjs-thanhxuan/src/modules/internal/partners/partners.controller.ts`           |    Edit     | Bổ sung các endpoint CRUD cho Brands (`/partners/brands`)                                                      |
+| `be-nestjs-thanhxuan/src/modules/internal/partners/partners.service.ts`              |    Edit     | Triển khai business logic CRUD Brand                                                                           |
+| `be-nestjs-thanhxuan/src/modules/internal/partners/partners.module.ts`               |    Edit     | Khai báo `Brand` schema và `BrandRepository` vào module                                                        |
+| `be-nestjs-thanhxuan/src/scripts/seed-pizza-4ps-catalogs.ts`                         |     Add     | Script khởi tạo thương hiệu Pizza 4P's và 14 mặt hàng từ phiếu kho                                             |
+| `fe-react-thanhxuan-internal/src/types/index.ts`                                     |    Edit     | Khai báo interface `Brand`, chuẩn hóa thuộc tính `Partner`, `ItemCatalog`                                      |
+| `fe-react-thanhxuan-internal/src/app/(internal)/quan-ly/doi-tac/page.tsx`            |     Add     | Tạo trang Quản lý Đối tác mới, phân quyền `[StaffRole.ADMIN, StaffRole.MANAGER]`                               |
+| `fe-react-thanhxuan-internal/src/app/(internal)/doi-tac/page.tsx`                    | Delete/Edit | Redirect hoặc thay thế sang `/quan-ly/doi-tac`                                                                 |
+| `fe-react-thanhxuan-internal/src/app/router.tsx`                                     |    Edit     | Đăng ký route `quan-ly/doi-tac` và điều hướng                                                                  |
+| `fe-react-thanhxuan-internal/src/features/partners/PartnersPage.tsx`                 |    Edit     | Tái cấu trúc 3 Tab (Đối Tác, Thương Hiệu, Danh Mục Đồ), bỏ chú thích `()`, modal Sửa/Xóa đối tác, CRUD đồ giặt |
 
 ---
 
@@ -115,9 +118,16 @@ flowchart TD
 ### 2.2. Interface / Schema Contract (Backend & Frontend)
 
 #### 2.2.1. Brand Schema (`Brand`)
+
 ```ts
 export class Brand {
-  @Prop({ required: true, unique: true, uppercase: true, trim: true, index: true })
+  @Prop({
+    required: true,
+    unique: true,
+    uppercase: true,
+    trim: true,
+    index: true,
+  })
   code!: string; // Ví dụ: 'PIZZA_4PS', 'HAIDILAO'
 
   @Prop({ required: true, trim: true })
@@ -132,6 +142,7 @@ export class Brand {
 ```
 
 #### 2.2.2. API Endpoints mới / nâng cấp:
+
 1. `GET /partners/brands` - Lấy danh sách thương hiệu đang hoạt động (`isActive: true`).
 2. `POST /partners/brands` - Tạo thương hiệu mới (`code`, `name`, `description`).
 3. `PATCH /partners/brands/:id` - Cập nhật thông tin thương hiệu.
@@ -145,6 +156,7 @@ export class Brand {
 11. `DELETE /partners/catalogs/:id` - Xóa đồ giặt (giữ nguyên Backend, gắn nút xóa Frontend).
 
 #### 2.2.3. Quy ước Đơn vị tính (`ItemUnit`):
+
 - `PIECE`: Chiếc / Cái (mặc định)
 - `KG`: Kilogram (Kg)
 
@@ -153,6 +165,7 @@ export class Brand {
 ## 3. Implementation Tasks (Checklist)
 
 ### Giai đoạn 1: Backend - Schema, Repository, DTO & Controller cho Brand và nới lỏng validation
+
 - [x] T1: Tạo Schema `brand.schema.ts` trong `be-nestjs-thanhxuan/src/modules/internal/partners/schemas/` và `BrandRepository` trong `repositories/brand.repository.ts`.
 - [x] T2: Tạo `CreateBrandDto` và `UpdateBrandDto` trong `be-nestjs-thanhxuan/src/modules/internal/partners/dto/`.
 - [x] T3: Cập nhật `Partner` schema, `ItemCatalog` schema, `CreatePartnerDto`, `CreateItemCatalogDto` để trường `brand` nhận `string` (hỗ trợ mã brand động), giữ index.
@@ -161,6 +174,7 @@ export class Brand {
 - [x] T6: Tạo script seed `seed-pizza-4ps-catalogs.ts` khởi tạo Brand `PIZZA_4PS` và 14 mặt hàng từ phiếu xuất nhập kho thực tế ngày 03/10/2026.
 
 ### Giai đoạn 2: Frontend - Đổi Route, Phân quyền & Quản lý Đối tác
+
 - [x] T7: Cập nhật types trong `fe-react-thanhxuan-internal/src/types/index.ts`: Thêm interface `Brand`, cập nhật `ItemCatalog` và `Partner`.
 - [x] T8: Tạo trang mới `fe-react-thanhxuan-internal/src/app/(internal)/quan-ly/doi-tac/page.tsx` bọc bởi `ProtectedRoute` với `allowedRoles={[StaffRole.ADMIN, StaffRole.MANAGER]}`.
 - [x] T9: Xóa/chuyển tiếp trang cũ `fe-react-thanhxuan-internal/src/app/(internal)/doi-tac/page.tsx` và cập nhật router `src/app/router.tsx`.
@@ -170,6 +184,7 @@ export class Brand {
   - Bổ sung sự kiện click vào Card đối tác để mở Modal Sửa / Xóa đối tác (với dialog xác nhận trước khi xóa mềm).
 
 ### Giai đoạn 3: Frontend - Quản lý Thương hiệu & Danh mục đồ giặt theo Thương hiệu
+
 - [x] T11: Cập nhật `PartnersPage.tsx` bổ sung Tab "Thương Hiệu":
   - Hiển thị danh sách các thương hiệu hiện có (Mã, Tên, Mô tả, Trạng thái).
   - Modal Thêm mới Thương hiệu (`code`, `name`, `description`).
@@ -181,6 +196,7 @@ export class Brand {
 - [x] T13: Chạy script seed dữ liệu Pizza 4P's vào database và kiểm tra hiển thị trên giao diện.
 
 ### Giai đoạn 4: Kiểm thử và Hoàn thiện
+
 - [x] T14: Chạy kiểm tra TypeScript (`pnpm exec tsc --noEmit`) và Build (`pnpm build`) trên cả Backend và Frontend Internal.
 - [x] T15: Xác minh bằng Browser: Đăng nhập tài khoản Admin/Manager, truy cập `/quan-ly/doi-tac`, kiểm tra các chức năng Thêm/Sửa/Xóa Đối tác, Thương hiệu, Danh mục đồ giặt.
 
@@ -189,6 +205,7 @@ export class Brand {
 ## 4. Verification & Testing
 
 ### 4.1. Lệnh kiểm tra kỹ thuật
+
 - **Backend (`be-nestjs-thanhxuan`)**:
   ```bash
   cd be-nestjs-thanhxuan
@@ -203,6 +220,7 @@ export class Brand {
   ```
 
 ### 4.2. Kịch bản kiểm thử (Test Scenarios)
+
 1. **Phân quyền truy cập**:
    - Đăng nhập tài khoản `ADMIN` hoặc `MANAGER`: Truy cập được `/quan-ly/doi-tac` bình thường.
    - Đăng nhập tài khoản `WORKER`, `SHIPPER`, hoặc `ACCOUNTANT`: Truy cập `/quan-ly/doi-tac` bị chặn (chuyển hướng hoặc báo không có quyền).
@@ -219,6 +237,7 @@ export class Brand {
    - Thêm đồ giặt mới với đơn vị `Chiếc` hoặc `Kg`. Sửa thông tin và xóa thử 1 mặt hàng.
 
 ### 4.3. Definition of Done
+
 - Route `/quan-ly/doi-tac` hoạt động trơn tru với phân quyền chuẩn.
 - Các API CRUD cho Brand, Partner, ItemCatalog hoạt động ổn định.
 - Form UI sạch sẽ, không còn chú thích `()`.
@@ -230,20 +249,24 @@ export class Brand {
 ## 5. Risks & Rollback
 
 ### 5.1. Rủi ro
+
 - **Rủi ro tương thích ngược**: Một số bản ghi `Partner` hoặc `ItemCatalog` cũ sử dụng enum `PartnerBrand`.
-  - *Giải pháp*: Giữ nguyên các mã giá trị enum cũ (`PIZZA_4PS`, `HAIDILAO`, `SMALL_RESTAURANT`) làm mã `code` trong bảng `brands`, đảm bảo 100% bản ghi cũ liên kết khớp hoàn hảo.
+  - _Giải pháp_: Giữ nguyên các mã giá trị enum cũ (`PIZZA_4PS`, `HAIDILAO`, `SMALL_RESTAURANT`) làm mã `code` trong bảng `brands`, đảm bảo 100% bản ghi cũ liên kết khớp hoàn hảo.
 - **Rủi ro xóa nhầm**: Xóa đối tác hoặc thương hiệu đang có phiếu giao nhận.
-  - *Giải pháp*: Chỉ thực hiện Soft Delete (`isActive: false`), không dùng `deleteOne`/`deleteMany` vật lý.
+  - _Giải pháp_: Chỉ thực hiện Soft Delete (`isActive: false`), không dùng `deleteOne`/`deleteMany` vật lý.
 
 ### 5.2. Kế hoạch Rollback
+
 - Nếu phát sinh lỗi nghiêm trọng, revert commit liên quan và khôi phục route `/doi-tac`.
 
 ---
 
 ## Changelog
+
 - 2026-10-04: Khởi tạo Plan 7 theo yêu cầu tái cấu trúc trang Đối tác, quản lý thương hiệu và danh mục đồ giặt Pizza 4P's.
 
 ## Execution Log
+
 - **2026-10-04**:
   - Hoàn tất toàn bộ 15/15 task (T1 - T15).
   - Backend: Đã tạo `Brand` schema, `BrandRepository`, DTOs, Controllers/Services CRUD `/partners/brands`. Nới lỏng kiểm tra brand sang string uppercase có index.
@@ -251,4 +274,3 @@ export class Brand {
   - Frontend: Di chuyển route sang `/quan-ly/doi-tac` với `allowedRoles={[StaffRole.ADMIN, StaffRole.MANAGER]}`. Nâng cấp `PartnersPage.tsx` với 3 Tab hoàn chỉnh, bỏ sạch dấu `()`, modal Sửa/Xóa đối tác, modal Thêm/Sửa/Xóa thương hiệu và danh mục đồ giặt.
   - Verification: Cả backend và frontend đều build và typecheck pass 100%. Xác minh browser giao diện hoạt động chính xác.
   - Docs: Cập nhật tài liệu SRS/SDD tại `.agents/docs/SRS_SDD.md`.
-

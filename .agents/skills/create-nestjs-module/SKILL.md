@@ -1,6 +1,6 @@
 ---
 name: create-nestjs-module
-description: Workflow chuẩn để tạo một Module Backend mới trong NestJS cho dự án Laundry Express Thanh Xuan, tuân thủ nghiêm ngặt Repository Pattern, Multi-Database (laundry_express, moving_express, internal_express), Clean Architecture và các nguyên tắc SOLID. Kích hoạt khi cần tạo API mới, thêm bảng CSDL mới, hoặc mở rộng nghiệp vụ Backend.
+description: Workflow chuẩn để tạo một Module Backend mới trong NestJS cho dự án Laundry Express Thanh Xuan, tuân thủ nghiêm ngặt Repository Pattern, Multi-Database (laundry_express, moving_express, internal_express, core_express), Clean Architecture và các nguyên tắc SOLID. Kích hoạt khi cần tạo API mới, thêm bảng CSDL mới, hoặc mở rộng nghiệp vụ Backend.
 ---
 
 # Quy trình tạo Module Backend (NestJS Multi-Database)
@@ -16,15 +16,16 @@ Skill này hướng dẫn quy chuẩn kỹ thuật và các bước thực thi �
    - **Tuyệt đối KHÔNG** gọi Mongoose Model trực tiếp từ Service hoặc Controller.
    - Mọi thao tác truy vấn DB bắt buộc thông qua lớp `Repository` kế thừa `BaseRepository<TDocument>`.
 2. **Multi-Database Connection:**
-   Hệ thống vận hành 3 cơ sở dữ liệu MongoDB độc lập:
+   Hệ thống vận hành các cơ sở dữ liệu MongoDB độc lập:
    - **`laundry_express` (Default Connection):** Các nghiệp vụ giặt là B2C/B2B (`src/modules/laundry/*`).
    - **`moving_express` (`MOVING_CONNECTION`):** Dịch vụ chuyển nhà và vận tải (`src/modules/moving/*`).
-   - **`internal_express` (`INTERNAL_CONNECTION`):** Vận hành xưởng, giao nhận, chấm công, khoán việc (`src/modules/internal/*`).
+   - **`internal_express` (`INTERNAL_CONNECTION`):** Vận hành xưởng, giao nhận, chấm công, công thợ theo giờ, xăng xe, bảng lương (`src/modules/internal/*`).
+   - **`core_express` (`CORE_CONNECTION`):** Hạ tầng dùng chung như AuditLog, MediaFile, Idempotency, Notifications (`src/modules/core/*`).
 3. **Quy chuẩn Code:**
    - Đầu file code mới luôn có: `// Adhering to SOLID & Design Patterns`.
    - TypeScript Strict Mode: **Không dùng `any`**; dùng `unknown` có type guard hoặc định nghĩa interface/type/DTO rõ ràng.
    - Biến/hàm: `camelCase`; Class: `PascalCase`; File: `kebab-case`.
-   - Timezone: Chuẩn hóa thời gian (sinh mã phiếu, ca kíp, báo cáo, chấm công) theo múi giờ `Asia/Ho_Chi_Minh` qua helper (`startOfDayVN`, `endOfDayVN`, `getDatePrefixVN`). Tuyệt đối không dùng `setHours(0,0,0,0)`.
+   - Timezone: Chuẩn hóa thời gian (sinh mã phiếu, ca kíp, báo cáo, chấm công) theo múi giờ `Asia/Ho_Chi_Minh` qua helper `src/common/utils/date.util.ts` (`startOfDayVN`, `endOfDayVN`, `getDatePrefixVN`). Tuyệt đối không dùng `setHours(0,0,0,0)`.
 
 ---
 
@@ -38,7 +39,7 @@ Module phải được đặt đúng phân hệ tương ứng:
 
 **Quy ước danh xưng module chuẩn ngữ pháp tiếng Anh:**
 - **Danh từ đếm được (Countable Nouns):** Dùng số nhiều (ví dụ: `handovers/`, `partners/`, `reports/`, `articles/`, `categories/`, `contacts/`, `quotes/`...).
-- **Danh từ không đếm được (Uncountable Nouns) & Từ viết tắt:** Giữ số ít chuẩn chính tả (ví dụ: `auth/` [Authentication], `attendance/` [Chấm công], `fuel/` [Xăng xe], `piecework/` [Khoán việc - không đếm được], `payroll/` [Hệ thống tính lương], `settings/`, `crm/`...).
+- **Danh từ không đếm được (Uncountable Nouns) & Từ viết tắt:** Giữ số ít chuẩn chính tả (ví dụ: `auth/` [Authentication], `attendance/` [Chấm công], `fuel/` [Xăng xe], `piecework/` [Công thợ - không đếm được], `payroll/` [Hệ thống tính lương], `settings/`, `crm/`...).
 - **Cấu trúc thư mục con bên trong module:**
   - `dto/` (Bắt buộc): Chứa Data Transfer Objects (`create-*.dto.ts`, `update-*.dto.ts`, `query-*.dto.ts`...). Giữ nguyên `dto/` (từ viết tắt Data Transfer Object, không thêm số nhiều).
   - `schemas/` (Bắt buộc nếu có model DB): Chứa Mongoose Schemas (Số nhiều).
@@ -131,51 +132,25 @@ PartnerSchema.index({ createdAt: -1 });
     - Laundry: `@InjectModel(<Entity>.name)`
     - Moving: `@InjectModel(<Entity>.name, 'MOVING_CONNECTION')`
     - Internal: `@InjectModel(<Entity>.name, 'INTERNAL_CONNECTION')`
+    - Core: `@InjectModel(<Entity>.name, 'CORE_CONNECTION')`
   - Query chỉ đọc: Bắt buộc dùng `.lean()` và `.select(...)` để tối ưu RAM.
   - Phân trang chuẩn xác trả về `{ data: T[], total: number, page: number, totalPages: number }`.
-
-```typescript
-// Adhering to SOLID & Design Patterns
-import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { BaseRepository } from '@/common/repositories/base.repository';
-import { Partner, PartnerDocument } from '../schemas/partner.schema';
-
-@Injectable()
-export class PartnerRepository extends BaseRepository<PartnerDocument> {
-  constructor(
-    @InjectModel(Partner.name, 'INTERNAL_CONNECTION')
-    partnerModel: Model<PartnerDocument>,
-  ) {
-    super(partnerModel);
-  }
-
-  async findActivePartners(): Promise<PartnerDocument[]> {
-    return this.model.find({ isActive: true }).select('name code').lean().exec();
-  }
-}
-```
 
 ### Bước 4: Tạo Service (Business Logic)
 - **Đường dẫn:** `src/modules/<domain>/<module-name>/<module-name>.service.ts`
 - **Quy tắc bắt buộc:**
-  - Inject `PartnerRepository`, tuyệt đối không inject `Model` Mongoose trực tiếp.
+  - Inject Repository tương ứng, tuyệt đối không inject `Model` Mongoose trực tiếp.
   - **Defensive Programming:** Luôn dùng Optional Chaining (`?.`) và Nullish Coalescing (`??`) để tránh `TypeError: Cannot read property of undefined` (HTTP 500).
-  - **Exception Handling:** Sử dụng đúng Exception chuẩn của NestJS:
-    - Không tìm thấy tài nguyên: `throw new NotFoundException('Không tìm thấy đối tác với mã đã cho');`
-    - Dữ liệu trùng lặp/vi phạm ràng buộc: `throw new ConflictException('Mã đối tác đã tồn tại');`
-    - Dữ liệu gửi lên sai quy tắc: `throw new BadRequestException('Thông tin không hợp lệ');`
-    - Không có quyền: `throw new ForbiddenException('Bạn không có quyền thực hiện');`
+  - **Exception Handling:** Sử dụng đúng Exception chuẩn của NestJS (`NotFoundException`, `ConflictException`, `BadRequestException`, `ForbiddenException`).
   - **Timezone Helper:** Xử lý ngày giờ bắt đầu/kết thúc báo cáo, sinh mã theo ngày qua helper giờ Việt Nam:
     ```typescript
-    import { startOfDayVN, endOfDayVN, getDatePrefixVN } from '@/common/helpers/timezone.helper';
+    import { startOfDayVN, endOfDayVN, getDatePrefixVN } from '@/common/utils/date.util';
     ```
 
 ### Bước 5: Tạo Controller (API Endpoints)
 - **Đường dẫn:** `src/modules/<domain>/<module-name>/<module-name>.controller.ts`
 - **Quy tắc bắt buộc:**
-  - Định tuyến rõ ràng qua `@Controller('<prefix>')` (ví dụ: `@Controller('internal/partners')` hoặc `@Controller('api/v1/orders')`).
+  - Định tuyến rõ ràng qua `@Controller('<prefix>')`.
   - Gắn Guard bảo vệ tương ứng:
     - Customer/Admin chung: `@UseGuards(JwtAuthGuard)`
     - Phân hệ Nội Bộ Xưởng: `@UseGuards(StaffJwtGuard)` với kiểm tra `aud: 'internal'`.
@@ -184,19 +159,12 @@ export class PartnerRepository extends BaseRepository<PartnerDocument> {
 
 ### Bước 6: Đăng ký Module & Tích hợp
 - **Đường dẫn:** `src/modules/<domain>/<module-name>/<module-name>.module.ts`
-- Khai báo Schema với đúng named connection:
-  ```typescript
-  MongooseModule.forFeature(
-    [{ name: Partner.name, schema: PartnerSchema }],
-    'INTERNAL_CONNECTION', // hoặc 'MOVING_CONNECTION', để trống nếu là Laundry
-  )
-  ```
-- Khai báo `controllers: [PartnerController]`, `providers: [PartnerService, PartnerRepository]`.
-- Export `PartnerService` hoặc `PartnerRepository` nếu module khác cần sử dụng.
+- Khai báo Schema với đúng named connection (`INTERNAL_CONNECTION`, `MOVING_CONNECTION`, `CORE_CONNECTION` hoặc để trống nếu là Laundry).
 - Đăng ký module này vào Module cha của phân hệ (`InternalModule`, `MovingModule`, `LaundryModule` hoặc `AppModule`).
 
-### Bước 7: Viết Unit Test Hồi Quy
-- Tạo file `.spec.ts` cho Service và Controller đặt trong thư mục `specs/` của module (`specs/<name>.service.spec.ts`, `specs/<name>.controller.spec.ts`), với mock repository/service đầy đủ, đảm bảo `pnpm test` vượt qua 100%.
+### Bước 7: Viết Unit Test Hồi Quy & Cập Nhật Tài Liệu
+- Tạo file `.spec.ts` cho Service và Controller đặt trong thư mục `specs/` của module, đảm bảo `pnpm test` vượt qua 100%.
+- Cập nhật đồng bộ `.agents/docs/DATABASE_DICTIONARY.md` (nếu có thêm/sửa bảng DB) và `.agents/docs/CODEBASE_ATLAS.md`.
 
 ---
 
@@ -205,8 +173,9 @@ export class PartnerRepository extends BaseRepository<PartnerDocument> {
 - [ ] DTO có class-validator đầy đủ; Nested object có đủ bộ 3: `@IsDefined()`, `@ValidateNested()`, `@Type()`.
 - [ ] Mọi truy vấn DB nằm trong Repository kế thừa `BaseRepository`, sử dụng `.lean()`.
 - [ ] Service dùng Defensive Programming (`?.`, `??`) và ném exception chuẩn NestJS có thông điệp tiếng Việt rõ nghĩa.
-- [ ] Xử lý ngày giờ tuân thủ múi giờ `Asia/Ho_Chi_Minh`.
-- [ ] Chạy typecheck và build xác thực:
+- [ ] Xử lý ngày giờ tuân thủ múi giờ `Asia/Ho_Chi_Minh` qua `src/common/utils/date.util.ts`.
+- [ ] Đã cập nhật `DATABASE_DICTIONARY.md` và `CODEBASE_ATLAS.md`.
+- [ ] Chạy typecheck, test và build xác thực:
   ```bash
-  cd be-nestjs-thanhxuan && pnpm build
+  cd be-nestjs-thanhxuan && pnpm exec tsc --noEmit && pnpm test && pnpm build
   ```

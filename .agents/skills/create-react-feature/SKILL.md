@@ -1,119 +1,64 @@
 ---
 name: create-react-feature
-description: Workflow chuẩn để phát triển tính năng Frontend cho Cổng Vận Hành Xưởng & Quản Trị Đối Tác Nội Bộ (fe-react-thanhxuan-internal). Tuân thủ kiến trúc thư mục tinh gọn đồng bộ với fe-nextjs-thanhxuan-laundry (Feature-Based Flat Colocation, Barrel index.ts), React Router v7, TanStack Query v5, react-hook-form + zod, TailwindCSS, tách biệt logic ra Custom Hooks, thiết kế Mobile-First cho thợ xưởng & tài xế xe tải (chữ ký số, offline/PWA). Dùng khi tạo màn hình vận hành, modal nghiệp vụ, giao nhận, chấm công hoặc khoán việc.
+description: Workflow chuẩn để phát triển tính năng Frontend cho Cổng Vận Hành Xưởng & Quản Trị Đối Tác Nội Bộ (fe-react-thanhxuan-internal). Tuân thủ kiến trúc Feature-Based Colocation (operations/ và management/), React Router v7, TanStack Query v5, react-hook-form + zod, TailwindCSS, tách biệt logic ra Custom Hooks, chia nhỏ file (< 250-300 dòng), thiết kế Mobile-First cho thợ xưởng & tài xế xe tải (chữ ký số, offline/PWA). Dùng khi tạo màn hình vận hành, modal nghiệp vụ, giao nhận, chấm công hoặc công thợ theo giờ.
 ---
 
 # Quy trình tạo Feature Frontend React (Internal Operations App)
 
-Skill này hướng dẫn quy chuẩn kiến trúc, **bản đồ định tuyến toàn diện (Routing Map) bao phủ 100% các API Backend trong `SRS_SDD.md`**, và các bước phát triển tính năng mới trong ứng dụng `fe-react-thanhxuan-internal`. Cấu trúc thư mục được **chuẩn hóa đồng bộ với phong cách tinh gọn của `fe-nextjs-thanhxuan-laundry`** để lập trình viên dễ nhìn, dễ tìm kiếm và làm việc hiệu quả nhất.
+Skill này hướng dẫn quy chuẩn kiến trúc, **bản đồ định tuyến toàn diện (Routing Map) bao phủ 100% các API Backend trong `SRS_SDD.md`**, và các bước phát triển tính năng mới trong ứng dụng `fe-react-thanhxuan-internal`.
 
 ---
 
 ## 1. Ma trận đối chiếu Backend API -> Frontend Routes
 
-Để đảm bảo Frontend có đầy đủ tất cả các màn hình phục vụ mọi API mà Backend NestJS đã xây dựng trong tài liệu đặc tả [SRS_SDD.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/SRS_SDD.md) và tài liệu phân hệ [srs_sdd_fe_internal.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_internal.md), hệ thống routes được phân tầng theo bảng ánh xạ sau:
+Hệ thống routes trong [router.tsx](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/app/router.tsx) được chuẩn hóa theo danh pháp tiếng Anh rõ ràng, phân tách 2 nhóm chính `operations/` (Vận hành) và `management/` (Quản trị):
 
-| STT    | Phân hệ Backend (`SRS_SDD.md`)                    | Tuyến API Backend (`/api/v1/internal`)                                | Route Frontend (`fe-react-thanhxuan-internal`) | Màn hình & Vai trò chính                                    |
-| :----- | :------------------------------------------------ | :-------------------------------------------------------------------- | :--------------------------------------------- | :---------------------------------------------------------- |
-| **1**  | **Xác thực & Tài khoản**                          | `POST /auth/login`                                                    | `/dang-nhap`                                   | Đăng nhập nhân sự xưởng / nhà hàng                          |
-|        |                                                   | `POST /auth/register`, `/verify-otp`, `/resend-otp`                   | `/dang-ky`                                     | Đăng ký tài khoản kèm xác thực OTP email                    |
-|        |                                                   | `POST /auth/forgot-password`, `/reset-password`                       | `/quen-mat-khau`                               | Quên & đặt lại mật khẩu qua OTP                             |
-| **2**  | **Dashboard Vận Hành**                            | Tổng hợp trạng thái xưởng                                             | `/tong-quan`                                   | Bảng điều khiển KPI vận hành theo ngày                      |
-| **3**  | **Vận Hành: Dùng chung (Toàn xưởng)**             | `POST /attendance/check-in`, `/check-out`, `GET /today`, `/history`   | `/van-hanh/cham-cong`                          | Chấm công camera selfie cá nhân, xem lịch sử ca làm         |
-|        |                                                   | `GET /payroll/me/payslips`                                            | `/van-hanh/phieu-luong`                        | Nhân viên tra cứu phiếu lương cá nhân (kỳ đã khóa/chi trả)  |
-|        |                                                   | `GET /reports/*`, `GET /reports/export/excel`, `/export/pdf`          | `/van-hanh/bao-cao`                            | 6 Báo cáo tổng hợp Aggregation và xuất streaming file       |
-| **4**  | **Vận Hành: Thủ kho (`warehouse-manager`)**       | `POST /handover/clean-planned`, `PATCH /:id/clean-delivery`           | `/van-hanh/warehouse-manager/kho`              | Thủ kho xưởng soạn đồ sạch xuất kho theo lịch               |
-| **5**  | **Vận Hành: Tài xế (`shipper`)**                  | `GET, POST /handover`                                                 | `/van-hanh/shipper/giao-nhan`                  | Danh sách phiếu giao nhận (lọc ngày, trạng thái, shipper)   |
-|        |                                                   | `GET /handover/:recordCode`, `PATCH /sign`, `/fields`, `/adjustments` | `/van-hanh/shipper/giao-nhan/:recordCode`      | Chi tiết phiếu, chữ ký cảm ứng Canvas, đối soát             |
-|        |                                                   | `POST /fuel`, `GET /fuel/me`, `PATCH, DELETE /fuel/:id`               | `/van-hanh/shipper/xang`                       | Tài xế nộp đề xuất hoàn tiền xăng kèm ảnh công-tơ-mét       |
-| **6**  | **Vận Hành: Thợ xưởng (`worker`)**                | `POST /handover/:id/request-recount`, `PATCH /complete-recount`       | `/van-hanh/worker/tram-dem`                    | Rạch bao niêm phong đếm lại đồ bẩn, đối chiếu chênh lệch    |
-|        |                                                   | `GET /piecework/me`, `POST /piecework/me/tasks`                       | `/van-hanh/worker/khoan-viec`                  | Thợ xưởng chấm sản lượng khoán (gấp, ủi, đóng gói)          |
-| **7**  | **Vận Hành: Quản lý nhà hàng (`restaurant-manager`)** | `GET /handover/monthly`, `PATCH /:id/receipt-check`                   | `/van-hanh/restaurant-manager/nha-hang`        | Nhà hàng đối soát nhận đồ sạch, tra cứu bảng kê tháng       |
-| **8**  | **Vận Hành: Nhân viên nhà hàng (`restaurant-staff`)**   | `PATCH /:id/receipt-check`                                            | `/van-hanh/restaurant-staff/nha-hang`          | Nhân viên nhà hàng ký nhận đồ sạch / đếm đồ bẩn             |
-| **9**  | **Trung Tâm Quản Lý (Dùng chung Quản trị)**       | Hub điều hành trung tâm                                               | `/quan-ly`                                     | Hub điều hành trung tâm dành cho Quản lý & Kế toán          |
-|        |                                                   | `GET, PATCH /auth/approvals/:id`                                      | `/quan-ly/phe-duyet`                           | Phê duyệt đăng ký nhân viên nội bộ & nhân viên nhà hàng     |
-| **10** | **Quản Lý: Điều Hành (`manager`)**                | `GET, POST, PATCH /auth/staffs`, `PATCH /:id/lock`                    | `/quan-ly/manager/nhan-su`                     | Danh sách nhân sự, phân quyền vai trò, khóa tài khoản       |
-|        |                                                   | `CRUD /partners`, `CRUD /partners/catalogs`, `GET /schedule`          | `/quan-ly/manager/doi-tac`                     | Quản lý chuỗi đối tác, chi nhánh, danh mục đồ & đơn giá     |
-|        |                                                   | `GET /attendance`, `PATCH /attendance/:id/review`                     | `/quan-ly/manager/cham-cong`                   | Bảng công toàn xưởng & duyệt ca bất thường (`NEEDS_REVIEW`) |
-|        |                                                   | `GET /piecework`, `GET /piecework/report`, `PATCH /:id/confirm`       | `/quan-ly/manager/khoan-viec`                  | Báo cáo sản lượng toàn xưởng & chốt sản lượng cuối ngày     |
-| **11** | **Quản Lý: Kế Toán (`accountant`)**               | `GET /fuel`, `PATCH /fuel/:id/approve`, `PATCH /reject`               | `/quan-ly/accountant/xang`                     | Kế toán duyệt/từ chối hóa đơn xăng của đội xe               |
-|        |                                                   | `GET, PUT /payroll/settings`, `POST /calculate`, `PATCH /lock, /pay`  | `/quan-ly/accountant/bang-luong`               | Cấu hình tham số lương & chốt bảng lương chu kỳ tháng       |
-
----
-
-## 2. Cấu trúc thư mục định tuyến `src/app/` hoàn chỉnh
-
-Mô phỏng kiến trúc App Router tinh gọn tương tự `fe-nextjs-thanhxuan-laundry`, kết hợp bộ định tuyến `React Router v7`:
-
-```
-fe-react-thanhxuan-internal/src/
-├── app/                                 # Hệ thống Routes
-│   ├── (auth)/                          # Nhóm Route xác thực
-│   │   ├── layout.tsx
-│   │   ├── dang-nhap/page.tsx           # POST /auth/login
-│   │   ├── dang-ky/page.tsx             # POST /auth/register, /verify-otp
-│   │   └── quen-mat-khau/page.tsx       # POST /auth/forgot-password, /reset-password
-│   │
-│   ├── (internal)/                      # Nhóm Route vận hành xưởng nội bộ
-│   │   ├── layout.tsx                   # Layout chung (Header chuông thông báo, Sidebar, BottomNav)
-│   │   ├── tong-quan/page.tsx           # Dashboard tổng quan xưởng
-│   │   │
-│   │   ├── van-hanh/                    # Phân hệ Vận hành xưởng & Đối tác
-│   │   │   ├── cham-cong/page.tsx       # Chấm công camera selfie cá nhân (Dành riêng cho WORKER mở ca khoán)
-│   │   │   ├── phieu-luong/page.tsx     # Nhân viên nội bộ tra cứu phiếu lương (Ẩn với Nhà hàng)
-│   │   │   ├── bao-cao/page.tsx         # 6 Báo cáo tổng hợp Aggregation & xuất Excel/PDF (Dùng chung)
-│   │   │   ├── warehouse-manager/       # Nhóm Thủ kho
-│   │   │   │   └── kho/page.tsx         # Thủ kho soạn đồ sạch xuất kho theo lịch
-│   │   │   ├── shipper/                 # Nhóm Tài xế xe tải
-│   │   │   │   ├── giao-nhan/page.tsx   # Danh sách phiếu giao nhận 2 chiều
-│   │   │   │   ├── giao-nhan/[recordCode]/page.tsx # Chi tiết phiếu giao nhận & ký nhận
-│   │   │   │   └── xang/page.tsx        # Tài xế nộp đề xuất hoàn tiền xăng kèm ảnh
-│   │   │   ├── worker/                  # Nhóm Thợ xưởng
-│   │   │   │   ├── tram-dem/page.tsx    # Trạm rạch bao đếm lại đồ bẩn xưởng
-│   │   │   │   └── khoan-viec/page.tsx  # Thợ xưởng chấm sản lượng khoán (gấp, ủi, đóng gói)
-│   │   │   ├── restaurant-manager/      # Nhóm Quản lý nhà hàng
-│   │   │   │   └── nha-hang/page.tsx    # Bảng kê đối soát giao nhận tháng & duyệt nhân viên
-│   │   │   └── restaurant-staff/        # Nhóm Nhân viên nhà hàng
-│   │   │       └── nha-hang/page.tsx    # Đối soát giao nhận & ký nhận đồ vải
-│   │   │
-│   │   └── quan-ly/                     # Trung tâm Quản trị & Điều hành
-│   │       ├── page.tsx                 # Hub tổng quan quản trị (Dùng chung ngoài)
-│   │       ├── phe-duyet/page.tsx       # Phê duyệt tài khoản nhân viên & nhà hàng (Dùng chung ngoài)
-│   │       ├── manager/                 # Nhóm Quản lý điều hành xưởng
-│   │       │   ├── nhan-su/page.tsx     # Quản lý nhân sự, phân quyền, khóa tài khoản
-│   │       │   ├── doi-tac/page.tsx     # Quản lý đối tác, chi nhánh, catalog đồ giặt
-│   │       │   ├── cham-cong/page.tsx   # Bảng công toàn xưởng & duyệt ca bất thường
-│   │       │   └── khoan-viec/page.tsx  # Báo cáo sản lượng toàn xưởng & chốt sản lượng
-│   │       └── accountant/              # Nhóm Kế toán
-│   │           ├── xang/page.tsx        # Kế toán duyệt/từ chối hóa đơn hoàn xăng
-│   │           └── bang-luong/page.tsx  # Cấu hình lương & chốt bảng lương chu kỳ
-│   │
-│   ├── layout.tsx                       # RootLayout (QueryClientProvider, AuthProvider, Toaster)
-│   └── router.tsx                       # Cấu hình createBrowserRouter
-```
+| STT | Phân hệ Nghiệp vụ | Tuyến API Backend (`/api/v1/internal`) | Route Frontend (`fe-react-thanhxuan-internal`) | Màn hình & Vai trò chính |
+| :--- | :--- | :--- | :--- | :--- |
+| **1** | **Xác thực & Tài khoản** | `POST /auth/login` | `/login` | Đăng nhập nhân sự xưởng / đối tác |
+| | | `POST /auth/register`, `/verify-otp`, `/resend-otp` | `/register` | Đăng ký tài khoản kèm xác thực OTP email |
+| | | `POST /auth/forgot-password`, `/reset-password` | `/forgot-password` | Quên & đặt lại mật khẩu qua OTP |
+| **2** | **Dashboard Vận Hành** | Tổng hợp trạng thái xưởng | `/dashboard` | Bảng điều khiển KPI vận hành theo ngày |
+| **3** | **Vận Hành: Dùng chung** | `POST /attendance/check-in`, `/check-out`, `GET /today`, `/history` | `/operations/attendance` | Chấm công camera selfie cá nhân, xem lịch sử ca làm |
+| | | `GET /payroll/me/payslips` | `/operations/payslip` | Nhân viên tra cứu phiếu lương cá nhân |
+| | | `GET /reports/*`, `GET /reports/export/excel`, `/export/pdf` | `/operations/report` | 6 Báo cáo tổng hợp Aggregation và xuất streaming file |
+| **4** | **Vận Hành: Thủ kho (`WAREHOUSE_MANAGER`)** | `POST /handovers/clean-planned`, `PATCH /:id/clean-delivery` | `/operations/warehouse-manager/warehouse` | Thủ kho xưởng soạn đồ sạch xuất kho (`PrepOrderModal`) |
+| **5** | **Vận Hành: Tài xế (`SHIPPER`)** | `GET, POST /handovers`, `PATCH /sign`, `/fields` | `/operations/shipper/handover` | Phiếu giao nhận 2 chiều, ký số Canvas, thư viện ảnh phiếu |
+| | | `POST /fuel`, `GET /fuel/me`, `PATCH, DELETE /fuel/:id` | `/operations/shipper/fuel` | Tài xế nộp đề xuất hoàn tiền xăng kèm ảnh ODO & hóa đơn |
+| **6** | **Vận Hành: Thợ xưởng (`WORKER`)** | `POST /handovers/:id/request-recount`, `PATCH /complete-recount` | `/operations/worker/recount` | Trạm rạch bao đếm lại đồ bẩn tại xưởng (`RecountStationPage`) |
+| | | `GET /piecework/me`, `POST /piecework/me/tasks` | `/operations/worker/piecework` | Trạm công thợ theo giờ (`HourlyWorkStationPage` - 7 khâu chuẩn) |
+| **7** | **Vận Hành: Đối tác (`PARTNER`)** | `GET /handovers/monthly`, `PATCH /:id/receipt-check` | `/operations/partner-manager/partner` | Quản lý đối tác đối soát nhận đồ sạch, giao đồ bẩn, bảng kê tháng |
+| | | `PATCH /:id/receipt-check` | `/operations/partner-staff/partner` | Nhân viên đối tác ký nhận đồ sạch / đếm đồ bẩn |
+| **8** | **Trung Tâm Quản Lý** | Hub điều hành trung tâm | `/management` | Hub điều hành trung tâm dành cho Quản lý & Kế toán |
+| | | `GET, PATCH /accounts/approvals/:id` | `/management/manager/approval` | Phê duyệt đăng ký nhân viên nội bộ & tài khoản đối tác |
+| **9** | **Quản Lý: Điều Hành (`MANAGER`)** | `GET, POST, PATCH /accounts/staffs`, `PATCH /:id/lock` | `/management/manager/personnel` | Danh sách nhân sự, phân quyền vai trò, khóa tài khoản |
+| | | `CRUD /partners`, `CRUD /partners/catalogs`, `GET /schedule` | `/management/manager/partner` | Quản lý chuỗi thương hiệu, đối tác, danh mục bảng giá `item_catalogs` |
+| | | `GET /attendance`, `PATCH /attendance/:id/review` | `/management/manager/attendance` | Bảng công toàn xưởng & duyệt ca bất thường (`AttendanceReviewPage`) |
+| | | `GET /piecework`, `GET /piecework/report`, `PATCH /:id/confirm` | `/management/manager/piecework` | Xét duyệt và chốt giờ công thợ (`HourlyWorkReviewPage`) |
+| **10** | **Quản Lý: Kế Toán (`ACCOUNTANT`)** | `GET /fuel`, `PATCH /fuel/:id/approve`, `PATCH /reject` | `/management/accountant/fuel` | Kế toán thẩm định, phê duyệt và thanh toán chi phí xăng xe |
+| | | `GET, PUT /payroll/settings`, `POST /calculate`, `PATCH /lock, /pay` | `/management/accountant/payroll` | Cấu hình tham số lương & chốt bảng lương chu kỳ tháng |
 
 ---
 
-## 3. Cấu trúc thư mục Feature chuẩn (Đồng bộ với Next.js)
+## 2. Cấu trúc thư mục Feature chuẩn & Kỷ luật chia nhỏ file (`< 250 - 300 dòng`)
 
-Toàn bộ các nghiệp vụ tương ứng được đóng gói theo mô hình **Feature-Based Flat Colocation** tại `src/features/<feature-name>/`:
+Toàn bộ các nghiệp vụ được tổ chức tại `src/features/operations/<feature>/`, `src/features/management/<feature>/`, `src/features/auth/` và `src/features/dashboard/`:
 
 ```
-src/features/<feature-name>/
-├── <FeatureName>Page.tsx             # File lớn nhất / Màn hình view chính cấp cao nhất
+src/features/operations/<feature-name>/
+├── <FeatureName>Page.tsx             # File lớn nhất / Màn hình view chính cấp cao nhất (chỉ điều phối layout, tabs)
 ├── modals/                           # Thư mục chứa toàn bộ modals/dialogs liên quan đến feature/page
 │   ├── <FeatureName>Modal.tsx
-│   ├── <Action>Modal.tsx
-│   └── index.ts                      # Re-export modals
-├── components/                       # Chứa các sub-components (bảng, thẻ, bộ lọc, action bar, v.v...)
+│   └── <Action>Modal.tsx
+├── components/                       # Chứa các sub-components (bảng, thẻ, bộ lọc, action bar, canvas...)
 │   ├── <FeatureName>CardComponent.tsx
 │   ├── <FeatureName>TableComponent.tsx
-│   ├── <FeatureName>FilterComponent.tsx
-│   └── index.ts                      # Re-export components
+│   └── <FeatureName>FilterComponent.tsx
+├── hooks/                            # Chứa Custom Hooks quản lý state/query/mutation phức tạp
+│   └── use<FeatureName>.ts
 ├── <feature-name>.service.ts         # API fetcher gọi Backend (Axios instance)
 ├── <feature-name>.types.ts           # Interfaces, types, filters
 ├── <feature-name>.schema.ts          # Zod schema validation (nếu có form)
-├── use<FeatureName>.ts               # Custom Hook TanStack Query v5 (state, query, mutation)
 └── index.ts                          # Barrel export duy nhất của Feature
 ```
 
@@ -123,47 +68,26 @@ src/features/<feature-name>/
 > - Bóc tách các thành phần hiển thị con (card, table, form con, tabs, filter...) sang thư mục `components/` với tên `[Tên]Component.tsx`.
 > - File gốc lớn nhất luôn là `[Tên]Page.tsx` đóng vai trò điều phối layout, state và kết nối components.
 
-### Danh sách các Features tương ứng trong `src/features/`:
-
-- `auth/`: Đăng nhập, đăng ký, xác thực OTP, đổi/quên mật khẩu.
-- `handover/`: Phiếu giao nhận kép, chữ ký cảm ứng Canvas, đối soát đồ bẩn/sạch, sửa ô sau ký.
-- `warehouse/`: Thủ kho soạn đồ sạch xuất kho theo lịch đối tác.
-- `recount/`: Trạm rạch bao đếm lại đồ bẩn tại xưởng, tính chênh lệch thừa/thiếu.
-- `restaurant/`: Bảng kê tháng nhà hàng đối tác, kiểm nhận đồ sạch.
-- `attendance/`: Chấm công camera selfie, lịch sử công, rà soát ca bất thường.
-- `piecework/`: Chấm sản lượng khoán thợ, tính tiền công tự động, chốt sản lượng.
-- `fuel/`: Nộp đề xuất hoàn tiền xăng, phê duyệt/từ chối xăng xe.
-- `payroll/`: Cấu hình tham số lương, tính bảng lương chu kỳ, tra cứu phiếu lương cá nhân.
-- `reports/`: 6 báo cáo aggregation, streaming export XLSX/PDF.
-- `partners/`: Đối tác chuỗi, chi nhánh, lịch giao hàng, danh mục đồ giặt (`item_catalogs`).
-- `management/`: Quản lý nhân sự, phân quyền RBAC 8 vai trò, phê duyệt tài khoản.
-
 ---
 
-## 4. Nguyên tắc thiết kế & Nghiệp vụ xưởng
+## 3. Nguyên tắc thiết kế & Nghiệp vụ xưởng
 
 1. **Thiết kế Mobile-First & Môi trường Xưởng Giặt:**
-   - Đối tượng sử dụng: Thợ xưởng, tài xế giao nhận, thủ kho, quản lý chi nhánh đối tác (Pizza 4P's, Haidilao...).
+   - Đối tượng sử dụng: Thợ xưởng, tài xế giao nhận, thủ kho, quản lý chi nhánh đối tác.
    - Thao tác nhanh bằng một tay trên điện thoại: Touch target tối thiểu `44px x 44px`, phông chữ to rõ, tương phản màu sắc cao.
-   - Hỗ trợ ký điện tử 2 chiều trên màn hình cảm ứng bằng `react-signature-canvas`.
+   - Hỗ trợ ký điện tử 2 chiều trên màn hình cảm ứng (kèm tùy chọn chọn chữ ký mẫu đã lưu trong tài khoản qua `SignatureInputComponent`).
 2. **State Management với TanStack Query v5:**
-   - Mọi thao tác đọc (`useQuery`) và ghi (`useMutation`) bắt buộc bọc trong Custom Hook (`use<FeatureName>.ts`).
-   - Tuyệt đối không gọi Axios trực tiếp trong UI Component.
-   - Tự động làm mới cache bằng `queryClient.invalidateQueries` sau khi mutate thành công.
+   - Mọi thao tác đọc (`useQuery`) và ghi (`useMutation`) bọc trong Custom Hook hoặc Service, tuyệt đối không viết logic gọi API trực tiếp trong JSX.
+   - Không dùng kiểu `any` trong xử lý lỗi hay dữ liệu trả về; dùng `unknown` kèm hàm helper bóc tách thông báo lỗi.
 3. **Múi Giờ & Biến Môi Trường:**
    - Mọi ngày giờ hiển thị, điểm danh, lọc ca kíp, và gửi lên API phải chuẩn hóa theo múi giờ **`Asia/Ho_Chi_Minh` (GMT+7)**.
    - Biến môi trường client bắt buộc có tiền tố **`VITE_`** (ví dụ: `VITE_API_URL`).
 
 ---
 
-## 5. Quy trình thực thi từng bước (Workflow)
-
-Khi tạo một tính năng mới (ví dụ: quản lý đối tác `partners` hoặc phiếu giao nhận `handover`):
+## 4. Quy trình thực thi từng bước (Workflow)
 
 ### Bước 1: Khai báo Types (`<feature-name>.types.ts`)
-
-- **Đường dẫn:** `src/features/<feature-name>/<feature-name>.types.ts`
-- Định nghĩa rõ ràng interface dữ liệu từ API và các tham số filter:
 
 ```typescript
 // Adhering to SOLID & Design Patterns
@@ -197,9 +121,6 @@ export interface PartnerFilters {
 
 ### Bước 2: Khai báo Zod Schema (`<feature-name>.schema.ts`)
 
-- **Đường dẫn:** `src/features/<feature-name>/<feature-name>.schema.ts`
-- Sử dụng Zod để kiểm tra dữ liệu form với thông điệp tiếng Việt thân thiện:
-
 ```typescript
 // Adhering to SOLID & Design Patterns
 import { z } from "zod";
@@ -219,9 +140,6 @@ export type PartnerFormValues = z.infer<typeof partnerFormSchema>;
 
 ### Bước 3: Tạo Service gọi API (`<feature-name>.service.ts`)
 
-- **Đường dẫn:** `src/features/<feature-name>/<feature-name>.service.ts`
-- Sử dụng axios instance từ `@/lib/api`:
-
 ```typescript
 // Adhering to SOLID & Design Patterns
 import api from "@/lib/api";
@@ -239,11 +157,6 @@ export const partnerService = {
     return res.data;
   },
 
-  getById: async (id: string): Promise<Partner> => {
-    const res = await api.get<Partner>(`/internal/partners/${id}`);
-    return res.data;
-  },
-
   create: async (data: CreatePartnerDto): Promise<Partner> => {
     const res = await api.post<Partner>("/internal/partners", data);
     return res.data;
@@ -251,40 +164,44 @@ export const partnerService = {
 };
 ```
 
-### Bước 4: Tạo Custom Hook (`use<FeatureName>.ts`)
-
-- **Đường dẫn:** `src/features/<feature-name>/use<FeatureName>.ts`
-- Tách toàn bộ TanStack Query, form handlers và toast thông báo:
+### Bước 4: Tạo Custom Hook (`hooks/use<FeatureName>.ts`)
 
 ```typescript
 // Adhering to SOLID & Design Patterns
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { partnerService } from "./<feature-name>.service";
-import { CreatePartnerDto, PartnerFilters } from "./<feature-name>.types";
+import { partnerService } from "../<feature-name>.service";
+import { CreatePartnerDto, PartnerFilters } from "../<feature-name>.types";
 
 export const PARTNERS_QUERY_KEY = ["internal", "partners"];
+
+function extractErrorMessage(err: unknown, fallback: string): string {
+  if (typeof err === "object" && err !== null && "response" in err) {
+    const response = (err as { response?: { data?: { message?: string } } }).response;
+    if (typeof response?.data?.message === "string") {
+      return response.data.message;
+    }
+  }
+  return fallback;
+}
 
 export function usePartners(filters?: PartnerFilters) {
   const queryClient = useQueryClient();
 
-  // Query: Lấy danh sách
   const partnersQuery = useQuery({
     queryKey: [...PARTNERS_QUERY_KEY, filters],
     queryFn: () => partnerService.getAll(filters),
     staleTime: 60 * 1000,
   });
 
-  // Mutation: Tạo mới
   const createMutation = useMutation({
     mutationFn: (dto: CreatePartnerDto) => partnerService.create(dto),
     onSuccess: (newPartner) => {
       toast.success(`Đã thêm đối tác ${newPartner.name} thành công`);
       queryClient.invalidateQueries({ queryKey: PARTNERS_QUERY_KEY });
     },
-    onError: (err: any) => {
-      const msg = err.response?.data?.message || "Không thể tạo đối tác";
-      toast.error(msg);
+    onError: (err: unknown) => {
+      toast.error(extractErrorMessage(err, "Không thể tạo đối tác"));
     },
   });
 
@@ -299,45 +216,21 @@ export function usePartners(filters?: PartnerFilters) {
 }
 ```
 
-### Bước 5: Xây dựng UI Components (`components/`)
+### Bước 5: Xây dựng UI Components (`components/` & `modals/`) & Tích hợp App Router
 
-- **Đường dẫn:** `src/features/<feature-name>/components/`
-- Chứa các thành phần:
-  - `<FeatureName>Card.tsx`: Card hiển thị trên mobile.
-  - `<FeatureName>Table.tsx`: Bảng dữ liệu hiển thị trên desktop/tablet.
-  - `<FeatureName>Modal.tsx`: Form popup dùng `react-hook-form` + `zodResolver(partnerFormSchema)`.
-  - `index.ts`: Re-export tất cả components.
-
-### Bước 6: Tạo Barrel Export (`index.ts`)
-
-- **Đường dẫn:** `src/features/<feature-name>/index.ts`
-- Đóng gói toàn bộ Feature để các Page bên ngoài sử dụng:
-
-```typescript
-// Adhering to SOLID & Design Patterns
-export * from "./<feature-name>.types";
-export * from "./<feature-name>.schema";
-export * from "./<feature-name>.service";
-export * from "./use<FeatureName>";
-export * from "./components";
-```
-
-### Bước 7: Tích hợp vào App Router (`src/app/`)
-
-- Tạo page: `src/app/(internal)/<route-name>/page.tsx`.
-- Import các components và hook từ `@/features/<feature-name>`.
-- Đăng ký route tương ứng trong `src/app/router.tsx`.
+- Chia tách rõ `<FeatureName>Page.tsx`, `modals/<Action>Modal.tsx`, `components/<Sub>Component.tsx`.
+- Đăng ký route trong `src/app/router.tsx` và cập nhật `.agents/docs/CODEBASE_ATLAS.md`.
 
 ---
 
-## 6. Checklist Kiểm Định Trước Khi Hoàn Tất
+## 5. Checklist Kiểm Định Trước Khi Hoàn Tất
 
-- [ ] Route mới nằm đúng cấu trúc phân tầng `src/app/(auth)/` hoặc `src/app/(internal)/`.
-- [ ] Cấu trúc thư mục feature phẳng gọn gàng: `components/`, `.service.ts`, `.types.ts`, `.schema.ts`, `use<Feature>.ts`, `index.ts`.
-- [ ] Toàn bộ API và State quản lý qua Custom Hook TanStack Query, JSX thuần túy hiển thị.
+- [ ] Route mới nằm đúng cấu trúc phân tầng `src/app/(auth)/` hoặc `src/app/(internal)/operations/` / `management/`.
+- [ ] Không có file nào vượt quá 250 - 300 dòng mà chưa chia tách sub-components (`components/`) và modals (`modals/`).
+- [ ] Tuyệt đối không dùng kiểu `any`, không để lại file re-export tạm thời.
 - [ ] Giao diện tối ưu Mobile-First, nút bấm to dễ thao tác trong môi trường xưởng giặt.
-- [ ] Dùng Zod schema và toast `sonner` thông báo tiếng Việt.
-- [ ] Chạy typecheck và build xác thực:
+- [ ] Đã cập nhật `.agents/docs/CODEBASE_ATLAS.md` và `.agents/docs/srs_sdd/srs_sdd_fe_internal.md`.
+- [ ] Chạy typecheck, test và build xác thực:
   ```bash
-  cd fe-react-thanhxuan-internal && pnpm exec tsc -b && pnpm run build
+  cd fe-react-thanhxuan-internal && pnpm exec tsc --noEmit && pnpm test && pnpm build
   ```

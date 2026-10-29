@@ -1,9 +1,9 @@
 # TỪ ĐIỂN CƠ SỞ DỮ LIỆU TOÀN HỆ THỐNG (DATABASE DATA DICTIONARY)
 
 > **Hệ sinh thái:** Công ty Giặt Sấy Thanh Xuân (Thanh Xuan Laundry & Moving Company)
-> **Phiên bản:** 2.2 | **Ngày cập nhật:** 2026-10-13
+> **Phiên bản:** 2.3 | **Ngày cập nhật:** 2026-10-29
 > **Kiến trúc dữ liệu:** Multi-Database Isolation trên MongoDB (4 Databases độc lập)
-> **Tổng số bảng (Collections):** 32 Collections
+> **Tổng số bảng (Collections):** 33 Collections
 > **Quy chuẩn duy trì:** Mọi thay đổi Schema trong Backend NestJS bắt buộc cập nhật đồng bộ file này theo Definition of Done trong [AGENTS.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/rules/AGENTS.md). Xóa bỏ hoàn toàn bảng đã xóa khỏi tài liệu và chạy script dọn dẹp DB thực tế.
 
 ---
@@ -13,7 +13,7 @@
 ```mermaid
 graph TD
     subgraph Multi_Database_Topology ["Hạ Tầng 4 MongoDB Độc Lập"]
-        DB_Internal[("1. internal_express<br/>14 Collections - Vận hành, Đối tác, Lương")]
+        DB_Internal[("1. internal_express<br/>15 Collections - Vận hành, Đối tác, Lương")]
         DB_Laundry[("2. laundry_express<br/>11 Collections - Website B2B, SEO, CRM")]
         DB_Moving[("3. moving_express<br/>3 Collections - Khảo sát chuyển nhà")]
         DB_Core[("4. core_express<br/>4 Collections - Audit, Media, Idempotency, Notifications")]
@@ -22,7 +22,7 @@ graph TD
 
 | Phân Vùng CSDL  | Tên Database MongoDB | Số Collections | Trọng Tâm Nghiệp Vụ                                                                                                                                            |
 | :-------------- | :------------------- | :------------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Phân Vùng 1** | `internal_express`   |     **14**     | Tài khoản nội bộ, thương hiệu & đối tác, danh mục đồ, phiếu giao nhận kép, chấm công selfie, công thợ theo giờ (`hourly_work`), chi phí xe, bảng lương chu kỳ. |
+| **Phân Vùng 1** | `internal_express`   |     **15**     | Tài khoản nội bộ, thương hiệu & đối tác, danh mục đồ, phiếu giao nhận kép, chấm công selfie, công thợ theo giờ (`hourly_work`), chi phí xe, bảng lương chu kỳ, đơn xin nghỉ giao nhận & phân tuyến (`shipper_leave_requests`). |
 | **Phân Vùng 2** | `laundry_express`    |     **11**     | Website khách hàng`thanhxuanlaundry.com`, CMS bài viết chuẩn SEO, đơn hàng giặt ủi, CRM khách hàng, chiến dịch Email & Zalo OA Marketing.                      |
 | **Phân Vùng 3** | `moving_express`     |     **3**      | Website dịch vụ chuyển nhà`chuyennhatietkiem.vn`, khảo sát báo giá cước vận tải xe tải, danh mục xe tải & cẩm nang chuyển nhà.                                 |
 | **Phân Vùng 4** | `core_express`       |     **4**      | Kết nối qua`CORE_CONNECTION`: Nhật ký kiểm toán bảo mật (Audit Log), file media Cloudinary, khóa chống trùng lặp (Idempotency), thông báo in-app.              |
@@ -45,7 +45,7 @@ erDiagram
     partners ||--o{ accounts : "partnerId"
     partners ||--o{ handover_records : "partnerId"
     brands ||--o{ item_catalogs : "brand"
-    pay_settings ||--o{ hourly_work : "jobCoefficients"
+    pay_settings ||--o{ hourly_work : "jobRates"
     payroll_periods ||--o{ payslips : "periodId"
 ```
 
@@ -56,29 +56,30 @@ erDiagram
 - **Mã nguồn:** [`staff-account.schema.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/auth/schemas/staff-account.schema.ts)
 - **Mục đích nghiệp vụ:** Lưu trữ thông tin tài khoản nhân viên nội bộ xưởng (Thợ, Tài xế, Quản lý kho, Kế toán, Admin) và đối tác chuỗi nhà hàng (Quản lý chi nhánh, Nhân viên nhà hàng). Quản lý đăng nhập, trạng thái tài khoản, mức lương cấu hình và avatar Cloudinary.
 
-| Tên Trường                | Kiểu Dữ Liệu    |      Ràng Buộc / Mặc Định       |    Index / Ref     | Ý Nghĩa & Tác Dụng Nghiệp Vụ                                                                                                           |
-| :------------------------ | :-------------- | :-----------------------------: | :----------------: | :------------------------------------------------------------------------------------------------------------------------------------- |
-| `username`                | `String`        | Bắt buộc, Unique, min 3, max 30 |       Unique       | Tên đăng nhập tài khoản (viết thường).                                                                                                 |
-| `email`                   | `String`        |   Bắt buộc, Unique, lowercase   |       Unique       | Email nhận mã OTP xác thực và thông báo hệ thống.                                                                                      |
-| `phone`                   | `String`        |        Bắt buộc, Unique         |       Unique       | Số điện thoại liên hệ cá nhân.                                                                                                         |
-| `passwordHash`            | `String`        |            Bắt buộc             |         -          | Mật khẩu băm an toàn bằng bcrypt.                                                                                                      |
-| `fullName`                | `String`        |            Bắt buộc             |         -          | Họ và tên đầy đủ hiển thị trên giao diện và phiếu ký.                                                                                  |
-| `role`                    | `String (Enum)` |        Mặc định:`GUEST`         |         -          | Vai trò chính:`ADMIN`, `MANAGER`, `WAREHOUSE_MANAGER`, `ACCOUNTANT`, `SHIPPER`, `WORKER`, `PARTNER_MANAGER`, `PARTNER_STAFF`, `GUEST`. |
-| `roles`                   | `Array<String>` |          Mặc định`[]`           |         -          | Danh sách vai trò phụ mở rộng quyền RBAC.                                                                                              |
-| `brand`                   | `String`        |            Tùy chọn             |       Index        | Mã thương hiệu đối tác nếu là nhân sự nhà hàng (ví dụ:`PIZZA_4PS`, `HAIDILAO`).                                                        |
-| `partnerId`               | `ObjectId`      |            Tùy chọn             |   Ref:`Partner`    | Chi nhánh nhà hàng cụ thể mà nhân sự đối tác trực thuộc.                                                                               |
-| `status`                  | `String (Enum)` |    Mặc định:`PENDING_EMAIL`     |       Index        | Trạng thái:`PENDING_EMAIL` (chờ OTP), `PENDING_APPROVAL` (chờ duyệt), `ACTIVE`, `REJECTED`, `LOCKED` (tạm khóa).                       |
-| `emailVerifiedAt`         | `Date`          |            Tùy chọn             |         -          | Thời điểm xác thực email bằng OTP thành công.                                                                                          |
-| `approvedBy`              | `ObjectId`      |            Tùy chọn             | Ref:`StaffAccount` | Người duyệt tài khoản (Admin hoặc Quản lý đối tác).                                                                                    |
-| `approvedAt`              | `Date`          |            Tùy chọn             |         -          | Thời điểm phê duyệt tài khoản.                                                                                                         |
-| `rejectedReason`          | `String`        |            Tùy chọn             |         -          | Lý do từ chối đăng ký nếu trạng thái là`REJECTED`.                                                                                     |
-| `failedLoginCount`        | `Number`        |          Mặc định:`0`           |         -          | Đếm số lần nhập sai mật khẩu liên tiếp (quá 5 lần bị khóa 15 phút).                                                                    |
-| `lockedUntil`             | `Date`          |            Tùy chọn             |         -          | Thời điểm hết hạn tạm khóa 15 phút do nhập sai mật khẩu.                                                                               |
-| `lockedAt`                | `Date`          |            Tùy chọn             |         -          | Thời điểm bị Admin/Manager tạm khóa (nếu quá 60 ngày tự động xóa vĩnh viễn).                                                           |
-| `avatarUrl`               | `String`        |            Tùy chọn             |         -          | Đường dẫn ảnh đại diện lưu trên Cloudinary (`internal/avatars`).                                                                       |
-| `avatarPublicId`          | `String`        |            Tùy chọn             |         -          | Mã định danh Cloudinary public ID để tự xóa ảnh cũ khi upload ảnh mới.                                                                 |
-| `payProfile`              | `Object`        |            Tùy chọn             |         -          | Cấu hình lương cá nhân:`pay_type` (HOURLY, PIECEWORK, HYBRID, MONTHLY_FIXED), `hourly_rate`, `monthly_salary`.                         |
-| `createdAt` / `updatedAt` | `Date`          |             Tự động             |         -          | Dấu thời gian tạo và cập nhật bản ghi.                                                                                                 |
+| Tên Trường                | Kiểu Dữ Liệu    |      Ràng Buộc / Mặc Định       |    Index / Ref     | Ý Nghĩa & Tác Dụng Nghiệp Vụ                                                                                                                                                                                               |
+| :------------------------ | :-------------- | :-----------------------------: | :----------------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- |
+| `username`                | `String`        | Bắt buộc, Unique, min 3, max 30 |       Unique       | Tên đăng nhập tài khoản (viết thường).                                                                                                                                                                                     |
+| `email`                   | `String`        |   Bắt buộc, Unique, lowercase   |       Unique       | Email nhận mã OTP xác thực và thông báo hệ thống.                                                                                                                                                                          |
+| `phone`                   | `String`        |        Bắt buộc, Unique         |       Unique       | Số điện thoại liên hệ cá nhân.                                                                                                                                                                                             |
+| `passwordHash`            | `String`        |            Bắt buộc             |         -          | Mật khẩu băm an toàn bằng bcrypt.                                                                                                                                                                                          |
+| `fullName`                | `String`        |            Bắt buộc             |         -          | Họ và tên đầy đủ hiển thị trên giao diện và phiếu ký.                                                                                                                                                                      |
+| `role`                    | `String (Enum)` |        Mặc định:`GUEST`         |         -          | Vai trò chính:`ADMIN`, `MANAGER`, `WAREHOUSE_MANAGER`, `ACCOUNTANT`, `SHIPPER`, `WORKER`, `PARTNER_MANAGER`, `PARTNER_STAFF`, `GUEST`.                                                                                     |
+| `brand`                   | `String`        |            Tùy chọn             |       Index        | Mã thương hiệu đối tác nếu là nhân sự nhà hàng (ví dụ:`PIZZA_4PS`, `HAIDILAO`).                                                                                                                                            |
+| `partnerId`               | `ObjectId`      |            Tùy chọn             |   Ref:`Partner`    | Chi nhánh nhà hàng cụ thể mà nhân sự đối tác trực thuộc.                                                                                                                                                                   |
+| `status`                  | `String (Enum)` |    Mặc định:`PENDING_EMAIL`     |       Index        | Trạng thái:`PENDING_EMAIL` (chờ OTP), `PENDING_APPROVAL` (chờ duyệt), `ACTIVE`, `REJECTED`, `LOCKED` (tạm khóa).                                                                                                           |
+| `emailVerifiedAt`         | `Date`          |            Tùy chọn             |         -          | Thời điểm xác thực email bằng OTP thành công.                                                                                                                                                                              |
+| `approvedBy`              | `ObjectId`      |            Tùy chọn             | Ref:`StaffAccount` | Người duyệt tài khoản (Admin hoặc Quản lý đối tác).                                                                                                                                                                        |
+| `approvedAt`              | `Date`          |            Tùy chọn             |         -          | Thời điểm phê duyệt tài khoản.                                                                                                                                                                                             |
+| `rejectedReason`          | `String`        |            Tùy chọn             |         -          | Lý do từ chối đăng ký nếu trạng thái là`REJECTED`.                                                                                                                                                                         |
+| `failedLoginCount`        | `Number`        |          Mặc định:`0`           |         -          | Đếm số lần nhập sai mật khẩu liên tiếp (quá 5 lần bị khóa 15 phút).                                                                                                                                                        |
+| `lockedUntil`             | `Date`          |            Tùy chọn             |         -          | Thời điểm hết hạn tạm khóa 15 phút do nhập sai mật khẩu.                                                                                                                                                                   |
+| `lockedAt`                | `Date`          |            Tùy chọn             |         -          | Thời điểm bị Admin/Manager tạm khóa (nếu quá 60 ngày tự động xóa vĩnh viễn).                                                                                                                                               |
+| `avatarUrl`               | `String`        |            Tùy chọn             |         -          | Đường dẫn ảnh đại diện lưu trên Cloudinary (`internal/avatars`).                                                                                                                                                           |
+| `defaultJobType`          | `String`        |     Tùy chọn, uppercase, trim   |         -          | Khâu công việc mặc định phân cho thợ xưởng (role = WORKER) tự động kích hoạt khi check-in ca (ví dụ: FOLD, IRON).                                                                                                          |
+| `avatarPublicId`          | `String`        |            Tùy chọn             |         -          | Mã định danh Cloudinary public ID để tự xóa ảnh cũ khi upload ảnh mới.                                                                                                                                                     |
+| `signatureUrl`            | `String`        |            Tùy chọn             |         -          | Chuỗi Data URL Base64 PNG hoặc URL chữ ký điện tử mẫu đã lưu của nhân sự nội bộ/đối tác.                                                                                                                                   |     |
+| `pay_profile`             | `Object`        |            Tùy chọn             |         -          | Cấu hình lương thợ/tài xế (không sinh default rỗng cho quản lý/đối tác): `pay_type` (HOURLY, PIECEWORK, HYBRID, MONTHLY_FIXED), `hourly_rate`, `monthly_salary`, `baseSalary`, `hasPersonalVehicle`, `insuranceDeduction`. |
+| `createdAt` / `updatedAt` | `Date`          |             Tự động             |         -          | Dấu thời gian tạo và cập nhật bản ghi.                                                                                                                                                                                     |
 
 ---
 
@@ -149,67 +150,69 @@ erDiagram
 - **Mã nguồn:** [`partner.schema.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/partners/schemas/partner.schema.ts)
 - **Mục đích nghiệp vụ:** Quản lý danh bạ khách hàng chuỗi B2B (Nhà hàng Pizza 4P's Tràng Tiền, Haidilao Phạm Ngọc Thạch...). Lưu địa chỉ, cấu hình lịch giao định kỳ và thông tin người phụ trách.
 
-| Tên Trường           | Kiểu Dữ Liệu    |          Ràng Buộc / Mặc Định          |        Index / Ref        | Ý Nghĩa & Tác Dụng Nghiệp Vụ                                                                                             |
-| :------------------- | :-------------- | :------------------------------------: | :-----------------------: | :----------------------------------------------------------------------------------------------------------------------- |
-| `shortCode`          | `String`        |      Bắt buộc, Unique, uppercase       |          Unique           | Tên viết tắt đối tác (ví dụ:`TT` cho Tràng Tiền, `TDH` cho Trần Duy Hưng), dùng làm tiền tố mã phiếu `GN-XXX-DDMMYYYY`.  |
-| `brand`              | `String`        |          Bắt buộc, uppercase           |           Index           | Thương hiệu chuỗi nhà hàng (ví dụ:`PIZZA_4PS`, `HAIDILAO`).                                                              |
-| `name`               | `String`        |             Bắt buộc, trim             |           Index           | Tên đầy đủ của chi nhánh (ví dụ: "Pizza 4P's - Tràng Tiền").                                                             |
-| `address`            | `String`        |                Tùy chọn                |             -             | Địa chỉ chi nhánh nhà hàng shipper sẽ giao/nhận hàng.                                                                    |
-| `deliverySchedule`   | `String (Enum)` | `DAILY`, `ALTERNATE_DAYS`, `ON_DEMAND` |             -             | Tần suất giao hàng: Mỗi ngày (`DAILY`), Cách ngày (`ALTERNATE_DAYS`), Theo yêu cầu (`ON_DEMAND`).                        |
-| `deliveryShift`      | `String (Enum)` |        `MORNING` hoặc `EVENING`        |             -             | Ca giao nhận mặc định của chi nhánh (Sáng hoặc Tối).                                                                     |
-| `scheduleAnchorDate` | `String`        |                Tùy chọn                |             -             | Ngày neo chu kỳ giao cách ngày YYYY-MM-DD (cho trường hợp `ALTERNATE_DAYS`).                                             |
-| `billingType`        | `String (Enum)` |         `PER_UNIT` hoặc `PER_KG`       |             -             | Phương thức tính phí giặt: theo món (`PER_UNIT`) hoặc theo cân (`PER_KG`).                                               |
-| `defaultShipperId`   | `ObjectId`      |                Tùy chọn                | Ref:`StaffAccount`, Index | Tài xế / Shipper mặc định phụ trách tuyến đối tác này.                                                                   |
-| `contactPerson`      | `String`        |                Tùy chọn                |             -             | Họ tên người đại diện tiếp nhận giao đồ tại chi nhánh.                                                                   |
-| `contactPhone`       | `String`        |                Tùy chọn                |             -             | Số điện thoại liên hệ đại diện nhà hàng.                                                                                 |
-| `isActive`           | `Boolean`       |            Mặc định:`true`             |           Index           | Đánh dấu đối tác còn đang hợp tác giặt ủi hay tạm ngưng.                                                                 |
+| Tên Trường           | Kiểu Dữ Liệu    |          Ràng Buộc / Mặc Định          |        Index / Ref        | Ý Nghĩa & Tác Dụng Nghiệp Vụ                                                                                            |
+| :------------------- | :-------------- | :------------------------------------: | :-----------------------: | :---------------------------------------------------------------------------------------------------------------------- |
+| `shortCode`          | `String`        |      Bắt buộc, Unique, uppercase       |          Unique           | Tên viết tắt đối tác (ví dụ:`TT` cho Tràng Tiền, `TDH` cho Trần Duy Hưng), dùng làm tiền tố mã phiếu `GN-XXX-DDMMYYYY`. |
+| `brand`              | `String`        |          Bắt buộc, uppercase           |           Index           | Thương hiệu chuỗi nhà hàng (ví dụ:`PIZZA_4PS`, `HAIDILAO`).                                                             |
+| `name`               | `String`        |             Bắt buộc, trim             |           Index           | Tên đầy đủ của chi nhánh (ví dụ: "Pizza 4P's - Tràng Tiền").                                                            |
+| `address`            | `String`        |                Tùy chọn                |             -             | Địa chỉ chi nhánh nhà hàng shipper sẽ giao/nhận hàng.                                                                   |
+| `deliverySchedule`   | `String (Enum)` | `DAILY`, `ALTERNATE_DAYS`, `ON_DEMAND` |             -             | Tần suất giao hàng: Mỗi ngày (`DAILY`), Cách ngày (`ALTERNATE_DAYS`), Theo yêu cầu (`ON_DEMAND`).                       |
+| `deliveryShift`      | `String (Enum)` | `MORNING`, `AFTERNOON` hoặc `EVENING`  |             -             | Ca giao nhận mặc định của chi nhánh (Sáng, Chiều hoặc Tối).                                                             |
+| `scheduleAnchorDate` | `String`        |                Tùy chọn                |             -             | Ngày neo chu kỳ giao cách ngày YYYY-MM-DD (cho trường hợp`ALTERNATE_DAYS`).                                             |
+| `billingType`        | `String (Enum)` |        `PER_UNIT` hoặc `PER_KG`        |             -             | Phương thức tính phí giặt: theo chiếc (`PER_UNIT`) hoặc theo cân (`PER_KG`).                                            |
+| `defaultShipperId`   | `ObjectId`      |                Tùy chọn                | Ref:`StaffAccount`, Index | Tài xế / Shipper mặc định phụ trách tuyến cố định của chi nhánh (tính vào lương tháng cố định + phụ cấp định mức). Nếu để trống là Tuyến Tự Do đưa vào Chợ Chuyến. |
+| `contactPerson`      | `String`        |                Tùy chọn                |             -             | Họ tên người đại diện tiếp nhận giao đồ tại chi nhánh.                                                                  |
+| `contactPhone`       | `String`        |                Tùy chọn                |             -             | Số điện thoại liên hệ đại diện nhà hàng.                                                                                |
+| `isActive`           | `Boolean`       |            Mặc định:`true`             |           Index           | Đánh dấu đối tác còn đang hợp tác giặt ủi hay tạm ngưng.                                                                |
 
 ---
 
 ### 1.7. Bảng `item_catalogs` (ItemCatalog)
 
 - **Mã nguồn:** [`item-catalog.schema.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/partners/schemas/item-catalog.schema.ts)
-- **Mục đích nghiệp vụ:** Quản lý mã quy chuẩn từng loại đồ giặt (Khăn lau bàn, Tạp dề, Khăn ăn, Áo bếp...). Lưu đơn giá giặt khách hàng, đơn giá khoán thợ (gấp, ủi, đóng gói) và ảnh chụp mẫu đồ giặt Cloudinary.
+- **Mục đích nghiệp vụ:** Quản lý danh mục mã quy chuẩn từng loại đồ giặt (Khăn lau bàn, Tạp dề, Khăn ăn, Áo bếp...), đơn giá dịch vụ thu đối tác phục vụ đối soát công nợ, thứ tự sắp xếp và ảnh chụp mẫu đồ giặt trên Cloudinary.
 
-| Tên Trường          | Kiểu Dữ Liệu |    Ràng Buộc / Mặc Định     | Index / Ref | Ý Nghĩa & Tác Dụng Nghiệp Vụ                                       |
-| :------------------ | :----------- | :-------------------------: | :---------: | :----------------------------------------------------------------- |
-| `itemCode`          | `String`     | Bắt buộc, Unique, uppercase |   Unique    | Mã chuẩn đồ giặt (ví dụ:`4PS_GRAY_TOWEL`, `4PS_APRON_DENIM`).      |
-| `brand`             | `String`     |     Bắt buộc, uppercase     |    Index    | Thương hiệu sở hữu loại đồ giặt này.                               |
-| `name`              | `String`     |          Bắt buộc           |      -      | Tên tiếng Việt của món đồ (ví dụ: "Khăn xám lau bàn lớn").         |
-| `unit`              | `String`     |       Mặc định:`Cái`        |      -      | Đơn vị tính:`Cái`, `Bộ`, `Kg`...                                   |
-| `foldingRateWorker` | `Number`     |        Mặc định:`0`         |      -      | Đơn giá khoán trả cho thợ xưởng khi gấp 1 cái (VND).               |
-| `ironingRateWorker` | `Number`     |        Mặc định:`0`         |      -      | Đơn giá khoán trả cho thợ khi ủi 1 cái (VND).                      |
-| `priceToCustomer`   | `Number`     |        Mặc định:`0`         |      -      | Đơn giá dịch vụ thu của đối tác (bảo mật, chỉ Admin/Kế toán thấy). |
-| `imageUrl`          | `String`     |          Tùy chọn           |      -      | Ảnh chụp mẫu món đồ giặt thực tế trên Cloudinary.                  |
-| `isActive`          | `Boolean`    |       Mặc định:`true`       |    Index    | Đánh dấu loại đồ còn sử dụng hay đã ngưng.                         |
+| Tên Trường        | Kiểu Dữ Liệu |    Ràng Buộc / Mặc Định     | Index / Ref | Ý Nghĩa & Tác Dụng Nghiệp Vụ                                                                                            |
+| :---------------- | :----------- | :-------------------------: | :---------: | :---------------------------------------------------------------------------------------------------------------------- |
+| `itemCode`        | `String`     | Bắt buộc, Unique, uppercase |   Unique    | Mã chuẩn đồ giặt (ví dụ: `4PS_GRAY_TOWEL`, `4PS_APRON_DENIM`).                                                          |
+| `brand`           | `String`     |     Bắt buộc, uppercase     |    Index    | Thương hiệu sở hữu loại đồ giặt này (`PIZZA_4PS`, `HAIDILAO`...).                                                       |
+| `name`            | `String`     |          Bắt buộc           |      -      | Tên tiếng Việt của chiếc đồ (ví dụ: "Khăn ăn xám lau bàn lớn").                                                         |
+| `unit`            | `String`     |      Mặc định: `PIECE`      |      -      | Đơn vị tính: `PIECE` (Cái), `SET` (Bộ), `KG` (Kg)...                                                                    |
+| `priceToCustomer` | `Number`     |        Mặc định: `0`        |      -      | **Đơn giá dịch vụ thu của đối tác (VND)** (phục vụ đối soát doanh thu, bảo mật qua interceptor chỉ Admin/Kế toán thấy). |
+| `sortOrder`       | `Number`     |        Mặc định: `0`        |    Index    | **Thứ tự sắp xếp hiển thị** trên bảng đếm đồ và phiếu in A4.                                                            |
+| `imageUrl`        | `String`     |          Tùy chọn           |      -      | Ảnh chụp mẫu chiếc đồ giặt thực tế trên Cloudinary.                                                                     |
+| `isActive`        | `Boolean`    |      Mặc định: `true`       |    Index    | Đánh dấu loại đồ còn sử dụng hay đã ngưng.                                                                              |
 
 ---
 
 ### 1.8. Bảng `handover_records` (HandoverRecord)
 
 - **Mã nguồn:** [`handover-record.schema.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/handovers/schemas/handover-record.schema.ts)
-- **Mục đích nghiệp vụ:** **Bảng nghiệp vụ quan trọng nhất của xưởng.** Quản lý phiếu giao nhận 2 chiều giữa xưởng và chi nhánh đối tác. Lưu trữ toàn bộ quy trình: Thủ kho soạn đồ sạch xuất xưởng (`cleanClothes`), Nhà hàng/Shipper đếm đồ bẩn thu gom (`dirtyClothes`), ghi chú theo từng món (`notes`), chữ ký 4 bên (`signatures`), trạm rạch bao đếm lại tại xưởng (`recount`), link ảnh Cloudinary (`slipImageUrl`) và cơ chế chống xung đột đồng thời qua version Optimistic Lock. Trạng thái phiếu được dẫn xuất tự nhiên từ các mốc chữ ký thực tế, không lưu status enum cứng trong DB.
+- **Mục đích nghiệp vụ:** **Bảng nghiệp vụ quan trọng nhất của xưởng.** Quản lý phiếu giao nhận 2 chiều giữa xưởng và chi nhánh đối tác. Lưu trữ toàn bộ quy trình: Thủ kho soạn đồ sạch xuất xưởng (`cleanClothes`), Nhà hàng/Shipper đếm đồ bẩn thu gom (`dirtyClothes`), ghi chú theo từng chiếc (`notes`), chữ ký 4 bên (`signatures`), trạm rạch bao đếm lại tại xưởng (`recount`), link ảnh Cloudinary (`slipImageUrl`) và cơ chế chống xung đột đồng thời qua version Optimistic Lock. Trạng thái phiếu được dẫn xuất tự nhiên từ các mốc chữ ký thực tế, không lưu status enum cứng trong DB.
 
-| Tên Trường             | Kiểu Dữ Liệu    |    Ràng Buộc / Mặc Định     |        Index / Ref        | Ý Nghĩa & Tác Dụng Nghiệp Vụ                                                                                                                                                                     |
-| :--------------------- | :-------------- | :-------------------------: | :-----------------------: | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `recordCode`           | `String`        | Bắt buộc, Unique, uppercase |          Unique           | Mã phiếu chuẩn `GN-XXX-DDMMYYYY` (ví dụ: `GN-TT-14102026` với XXX là tên viết tắt đối tác, ngày giờ Việt Nam UTC+7, kiểm tra trùng lặp và retry loop có hậu tố -1, -2 nếu phát sinh nhiều phiếu). |
-| `recordDate`           | `String`        |   Bắt buộc (`YYYY-MM-DD`)   |           Index           | Ngày giao nhận theo chuẩn múi giờ Việt Nam (`Asia/Ho_Chi_Minh`), mặc định ngày mai khi soạn tối hoặc tự động tính ngày mai nếu đếm đồ bẩn lúc 21h-23h59.                                         |
-| `brand`                | `String`        |     Bắt buộc, uppercase     |           Index           | Thương hiệu nhà hàng đối tác (`PIZZA_4PS`, `HAIDILAO`...).                                                                                                                                       |
-| `partnerId`            | `ObjectId`      |          Bắt buộc           |   Ref:`Partner`, Index    | Chi nhánh nhà hàng tiếp nhận giao nhận.                                                                                                                                                          |
-| `partnerName`          | `String`        |          Tùy chọn           |             -             | Snapshot tên chi nhánh đối tác tại thời điểm tạo phiếu (truy vấn nhanh không cần populate).                                                                                                      |
-| `warehouseManagerId`   | `ObjectId`      |          Tùy chọn           | Ref:`StaffAccount`, Index | Thủ kho chịu trách nhiệm soạn đồ và xuất kho.                                                                                                                                                    |
-| `warehouseManagerName` | `String`        |          Tùy chọn           |             -             | Snapshot tên thủ kho xuất kho.                                                                                                                                                                   |
-| `shipperId`            | `ObjectId`      |          Tùy chọn           | Ref:`StaffAccount`, Index | Tài xế / Shipper vận chuyển phụ trách giao nhận.                                                                                                                                                 |
-| `shipperName`          | `String`        |          Tùy chọn           |             -             | Snapshot tên tài xế vận chuyển.                                                                                                                                                                  |
-| `deliveryShift`        | `String (Enum)` |  `MORNING` hoặc `EVENING`   |             -             | Ca giao nhận (Sáng hoặc Tối), tự động kế thừa từ cấu hình chi nhánh đối tác.                                                                                                                     |
-| `cleanClothes`         | `Object`        |          Tùy chọn           |             -             | **Nhánh Đồ Sạch Xuất Xưởng:** `items: CleanItemLine[]` (`itemCode`, `itemName`, `deliveryQuantity`, `undeliveredQuantity`, `quantityReturned`), người soạn và chữ ký thủ kho.                   |
-| `dirtyClothes`         | `Object`        |          Tùy chọn           |             -             | **Nhánh Đồ Bẩn Thu Gom:** `items: DirtyItemLine[]` (`itemCode`, `itemName`, `quantityReceived`, `actualQuantityReceived`), thông tin người đếm và chữ ký đếm đồ bẩn.                          |
-| `notes`                | `Array<Object>` |        Mặc định `[]`        |             -             | **Ghi Chú Theo Món:** `HandoverItemNote[]` (`itemCode`, `itemName`, `note`) ghi nhận lỗi hỏng, rách, bẩn... thay thế hoàn toàn sub-schema defects cũ.                                           |
-| `isRecount`            | `Boolean`       |      Mặc định:`false`       |           Index           | Cờ đánh dấu cần rạch bao đếm lại tại xưởng (do shipper bật hoặc đối tác chưa đếm).                                                                                                               |
-| `recount`              | `Object`        |          Tùy chọn           |             -             | **Trạm Đếm Lại Tại Xưởng:** Gồm `isRecount`, `status` (`NONE`, `PENDING`, `DONE`), `note`, `recountedBy`, `recountedAt`.                                                                         |
-| `signatures`           | `Object`        |          Tùy chọn           |             -             | Lưu thông tin chữ ký 4 bên: `warehouseManager` (thủ kho), `shipper` (tài xế), `partnerCount` (đếm đồ bẩn), `partnerCheck` (kiểm nhận đồ sạch).                                                    |
-| `slipImageUrl`         | `String`        |          Tùy chọn           |             -             | Đường dẫn ảnh phiếu giao nhận WebP xuất từ Canvas lưu trên Cloudinary (`internal/handovers/slips/`).                                                                                             |
-| `version`              | `Number`        |        Mặc định:`1`         |             -             | Phiên bản khóa lạc quan (Optimistic Concurrency Control) chống ghi đè đồng thời.                                                                                                                 |
+| Tên Trường             | Kiểu Dữ Liệu    |    Ràng Buộc / Mặc Định     |        Index / Ref        | Ý Nghĩa & Tác Dụng Nghiệp Vụ                                                                                                                                                                                                                                                                   |
+| :--------------------- | :-------------- | :-------------------------: | :-----------------------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `recordCode`           | `String`        | Bắt buộc, Unique, uppercase |          Unique           | Mã phiếu chuẩn`GN-XXX-DDMMYYYY` (ví dụ: `GN-TT-14102026` với XXX là tên viết tắt đối tác, ngày giờ Việt Nam UTC+7, kiểm tra trùng lặp và retry loop có hậu tố -1, -2 nếu phát sinh nhiều phiếu).                                                                                               |
+| `recordDate`           | `String`        |   Bắt buộc (`YYYY-MM-DD`)   |           Index           | Ngày giao nhận theo chuẩn múi giờ Việt Nam (`Asia/Ho_Chi_Minh`), mặc định ngày mai khi soạn tối hoặc tự động tính ngày mai nếu đếm đồ bẩn lúc 21h-23h59.                                                                                                                                       |
+| `brand`                | `String`        |     Bắt buộc, uppercase     |           Index           | Thương hiệu nhà hàng đối tác (`PIZZA_4PS`, `HAIDILAO`...).                                                                                                                                                                                                                                     |
+| `partnerId`            | `ObjectId`      |          Bắt buộc           |   Ref:`Partner`, Index    | Chi nhánh nhà hàng tiếp nhận giao nhận.                                                                                                                                                                                                                                                        |
+| `partnerName`          | `String`        |          Tùy chọn           |             -             | Snapshot tên chi nhánh đối tác tại thời điểm tạo phiếu (truy vấn nhanh không cần populate).                                                                                                                                                                                                    |
+| `warehouseManagerId`   | `ObjectId`      |          Tùy chọn           | Ref:`StaffAccount`, Index | Thủ kho chịu trách nhiệm soạn đồ và xuất kho.                                                                                                                                                                                                                                                  |
+| `warehouseManagerName` | `String`        |          Tùy chọn           |             -             | Snapshot tên thủ kho xuất kho.                                                                                                                                                                                                                                                                 |
+| `shipperId`            | `ObjectId`      |          Tùy chọn           | Ref:`StaffAccount`, Index | Tài xế / Shipper vận chuyển phụ trách giao nhận.                                                                                                                                                                                                                                               |
+| `shipperName`          | `String`        |          Tùy chọn           |             -             | Snapshot tên tài xế vận chuyển.                                                                                                                                                                                                                                                                |
+| `deliveryShift`        | `String (Enum)` | `MORNING`, `AFTERNOON` hoặc `EVENING` |             -             | Ca giao nhận (Sáng, Chiều hoặc Tối), tự động kế thừa từ cấu hình chi nhánh đối tác hoặc chỉ định.                                                                                                                                                                |
+| `cleanClothes`         | `Object`        |          Tùy chọn           |             -             | **Nhánh Đồ Sạch Xuất Xưởng:** `items: CleanItemLine[]` (`itemCode`, `itemName`, `deliveryQuantity`, `undeliveredQuantity?`, `quantityReturned?`). Không còn chứa `preparedByName`, `preparedBySignature` (đã chuẩn hóa tại `signatures.warehouseManager` để triệt tiêu nhân đôi chuỗi Base64). |
+| `dirtyClothes`         | `Object`        |          Tùy chọn           |             -             | **Nhánh Đồ Bẩn Thu Gom:** `items: DirtyItemLine[]` (`itemCode`, `itemName`, `quantityReceived`, `actualQuantityReceived`), thông tin người đếm và chữ ký đếm đồ bẩn. Chỉ sinh ra khi có phát sinh đồ bẩn thực tế, không sinh object mảng rỗng mặc định.                                        |
+| `notes`                | `Array<Object>` |          Tùy chọn           |             -             | **Ghi Chú Theo chiếc:** `HandoverItemNote[]` (`itemCode`, `itemName`, `note`) ghi nhận lỗi hỏng, rách, bẩn... Chỉ lưu khi có ghi chú thực tế, không sinh mảng rỗng mặc định.                                                                                                                   |
+| `recount`              | `Object`        |          Tùy chọn           |      Index (Sparse)       | **Trạm Đếm Lại Tại Xưởng:** Gồm `isRecount`, `status` (`NONE`, `PENDING`, `DONE`), `reason`, `note`, `requestedBy`, `recountedBy`, `recountedAt`. Chỉ sinh ra khi shipper có yêu cầu kiểm đếm lại tại xưởng, không sinh object rỗng mặc định.                                                  |
+| `signatures`           | `Object`        |          Tùy chọn           |             -             | Lưu thông tin chữ ký 4 bên:`warehouseManager` (thủ kho), `shipper` (tài xế), `partnerCount` (đếm đồ bẩn), `partnerCheck` (kiểm nhận đồ sạch).                                                                                                                                                  |
+| `slipImageUrl`         | `String`        |          Tùy chọn           |             -             | Đường dẫn ảnh phiếu giao nhận WebP xuất từ Canvas lưu trên Cloudinary (`internal-thanhxuan/handovers/YYYY/MM/`).                                                                                                                                                                               |
+| `slipLocalPath`        | `String`        |          Tùy chọn           |             -             | Đường dẫn file ảnh gốc lưu trên ổ cứng VPS (`/uploads/internal-thanhxuan/handovers/YYYY/MM/`). Dùng để nén ZIP đối soát nội bộ và sao lưu Google Drive mà không tốn băng thông internet.                                                                                                     |
+| `version`              | `Number`        |        Mặc định:`1`         |             -             | Phiên bản khóa lạc quan (Optimistic Concurrency Control) chống ghi đè đồng thời.                                                                                                                                                                                                               |
+| `tripCompensation`     | `Object`        |          Tùy chọn           |             -             | **Tiền Công Chuyến Riêng:** `TripCompensation` (`amount` tiền công VND, `isCluster` cờ cụm, `clusterId` mã cụm gom đối tác, `clusterPartnerNames` danh sách quán trong cụm, `setBy` người duyệt giá, `setByName`, `note` ghi chú). Tự động cộng vào `extraDeliveryPay` trên bảng lương shipper. |
+| `claimedAt`            | `Date`          |          Tùy chọn           |             -             | Thời điểm tài xế bấm nhận chuyến từ Chợ Chuyến (Job Pool).                                                                                                                                                                                                                                     |
+| `claimedBy`            | `ObjectId`      |          Tùy chọn           |    Ref:`StaffAccount`     | Tài xế bấm nhận chuyến từ Chợ Chuyến.                                                                                                                                                                                                                                                          |
 
 - **Compound Unique Index:** `{ partnerId: 1, recordDate: 1 }` (Mỗi đối tác tối đa 1 phiếu giao nhận chính thức trong ngày, hoặc kèm tiền tố ca).
 
@@ -233,7 +236,27 @@ erDiagram
 
 ---
 
-### 1.10. Bảng `hourly_work` (HourlyWork)
+---
+
+### 1.10. Bảng `workshop_settings` (WorkshopSettings)
+
+- **Mã nguồn:** [`workshop-settings.schema.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/attendance/schemas/workshop-settings.schema.ts)
+- **Mục đích nghiệp vụ:** Lưu trữ cấu hình tọa độ xưởng (Latitude, Longitude), bán kính Geofencing và danh sách địa chỉ IP Public của modem Wi-Fi xưởng nhằm phục vụ công tác chống gian lận chấm công.
+
+| Tên Trường          | Kiểu Dữ Liệu       |  Ràng Buộc / Mặc Định   | Index / Ref | Ý Nghĩa & Tác Dụng Nghiệp Vụ                                                      |
+| :------------------ | :----------------- | :---------------------: | :---------: | :-------------------------------------------------------------------------------- |
+| `workshopName`      | `String`           | Mặc định:'Xưởng Giặt..' |      -      | Tên cơ sở / xưởng giặt là.                                                        |
+| `address`           | `String`           |        Tùy chọn         |      -      | Địa chỉ thực tế của xưởng.                                                        |
+| `latitude`          | `Number`           |   Mặc định: 20.99824    |      -      | Tọa độ vĩ độ gốc của xưởng (chuẩn WGS84).                                         |
+| `longitude`         | `Number`           |   Mặc định: 105.80153   |      -      | Tọa độ kinh độ gốc của xưởng (chuẩn WGS84).                                       |
+| `radiusMeters`      | `Number`           |     Mặc định: 150m      |      -      | Bán kính Geofencing cho phép điểm danh xung quanh xưởng.                          |
+| `maxAccuracyMeters` | `Number`           |     Mặc định: 350m      |      -      | Ngưỡng sai số GPS tối đa chấp nhận (±350m cho phép bù trừ sai số thiết bị di động). |
+| `wifiIps`           | `Array of String`  |     Mặc định: `[]`      |      -      | Danh sách địa chỉ IP Public của router Wi-Fi xưởng (VD: 113.190.234.12).         |
+| `isGpsRequired`     | `Boolean`          |     Mặc định: true      |      -      | Công tắc bắt buộc phải có GPS khi điểm danh.                                      |
+| `isWifiRequired`    | `Boolean`          |     Mặc định: false     |      -      | Bắt buộc kết nối Wi-Fi xưởng (chặn tuyệt đối nếu lệch IP).                        |
+| `ipStrictCheck`     | `Boolean`          |     Mặc định: false     |      -      | Chặn điểm danh nếu phát hiện IP lạ.                                               |
+
+### 1.11. Bảng `hourly_work` (HourlyWork)
 
 - **Mã nguồn:** [`piecework-log.schema.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/piecework/schemas/piecework-log.schema.ts)
 - **Mục đích nghiệp vụ:** Ghi nhận công việc và thời gian làm việc của thợ xưởng theo giờ nhân hệ số công việc (`WorkshopJobType`), thay thế mô hình khoán sản lượng đơn chiếc cũ. Tự động tính toán thu nhập dựa trên số phút làm việc, đơn giá giờ cơ bản snapshot từ tài khoản thợ và hệ số công việc lấy từ cấu hình công ty.
@@ -331,6 +354,38 @@ erDiagram
 | `shipperDetails` | `Object`        |       Tùy chọn       |             -              | Minh bạch chi tiết lương Shipper: ngày chuẩn, ngày thực tế, bonus ca cuối tuần, chuyên cần, phụ cấp, xăng/sửa xe, BHXH. |
 | `workerDetails`  | `Object`        |       Tùy chọn       |             -              | Minh bạch chi tiết lương Thợ xưởng: tổng phút làm việc, bảng tổng hợp thời gian và tiền công theo từng nhóm việc.       |
 | `status`         | `String (Enum)` |   Mặc định:`DRAFT`   |             -              | Trạng thái:`DRAFT` (nháp), `FINALIZED` (chốt), `PAID` (đã trả qua ngân hàng).                                           |
+
+---
+
+### 1.15. Bảng `shipper_leave_requests` (ShipperLeaveRequest)
+
+- **Mã nguồn:** [`shipper-leave.schema.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/shipper-leaves/schemas/shipper-leave.schema.ts)
+- **Mục đích nghiệp vụ:** Quản lý vòng đời đơn xin nghỉ phép giao nhận của Shipper, quy trình phê duyệt 2 bước hoặc 1 chạm của Admin, chỉ định tài khoản Shipper nhận giao thay các điểm đối tác và thiết lập mức tiền công giao thay. Tự động liên kết chuyển tuyến xe trong ngày nghỉ.
+
+| Tên Trường               | Kiểu Dữ Liệu         |           Ràng Buộc / Mặc Định            |        Index / Ref         | Ý Nghĩa & Tác Dụng Nghiệp Vụ                                                                                   |
+| :----------------------- | :------------------- | :---------------------------------------: | :------------------------: | :------------------------------------------------------------------------------------------------------------- |
+| `shipperId`              | `ObjectId`           |                 Bắt buộc                  | Ref:`StaffAccount`, Index  | Tài khoản Shipper nộp đơn xin nghỉ giao nhận.                                                                  |
+| `shipperName`            | `String`             |                 Tùy chọn                  |             -              | Snapshot họ tên Shipper xin nghỉ.                                                                              |
+| `leaveDates`             | `Array of String`    |           Bắt buộc, `YYYY-MM-DD`          |           Index            | Danh sách các ngày xin nghỉ (Asia/Ho_Chi_Minh).                                                                 |
+| `reason`                 | `String`             |                 Bắt buộc                  |             -              | Lý do xin nghỉ phép.                                                                                           |
+| `status`                 | `String (Enum)`      |       Mặc định:`PENDING_APPROVAL`         |           Index            | Trạng thái:`PENDING_APPROVAL`, `APPROVED_PENDING_COMPENSATION`, `APPROVED`, `REJECTED`, `CANCELLED`.           |
+| `substituteShipperId`    | `ObjectId`           |                 Tùy chọn                  | Ref:`StaffAccount`, Index  | Tài khoản Shipper được chỉ định nhận giao thay toàn bộ điểm trong ngày nghỉ.                                   |
+| `substituteShipperName`  | `String`             |                 Tùy chọn                  |             -              | Snapshot họ tên Shipper giao thay.                                                                             |
+| `reassignedPartnerIds`   | `Array of ObjectId`  |              Mặc định: `[]`               |       Ref:`Partner`        | Danh sách chi nhánh đối tác cần giao trong các ngày nghỉ đó.                                                   |
+| `reassignedPointsCount`  | `Number`             |               Mặc định: `0`               |             -              | Tổng số lượt giao nhận cần bàn giao trong các ngày nghỉ.                                                       |
+| `compensationAmount`     | `Number`             |                 min: `0`                  |             -              | Số tiền công giao thay (VNĐ) do Kế toán hoặc Admin thiết lập cho Shipper nhận việc.                            |
+| `compensationNote`       | `String`             |                 Tùy chọn                  |             -              | Ghi chú định mức tiền công của Kế toán/Admin.                                                                  |
+| `approvedByManagerId`    | `ObjectId`           |                 Tùy chọn                  |     Ref:`StaffAccount`     | Quản lý hoặc Admin duyệt đơn bước 1 và chỉ định người thay thế.                                                |
+| `approvedByManagerName`  | `String`             |                 Tùy chọn                  |             -              | Snapshot họ tên người duyệt bước 1.                                                                            |
+| `approvedByManagerAt`    | `Date`               |                 Tùy chọn                  |             -              | Thời điểm Quản lý phê duyệt bước 1.                                                                            |
+| `managerNote`            | `String`             |                 Tùy chọn                  |             -              | Ghi chú điều phối của Quản lý.                                                                                 |
+| `compensatedByAccountId` | `ObjectId`           |                 Tùy chọn                  |     Ref:`StaffAccount`     | Kế toán hoặc Admin thiết lập tiền công giao thay.                                                              |
+| `compensatedByAccountName` | `String`           |                 Tùy chọn                  |             -              | Snapshot họ tên Kế toán viên.                                                                                  |
+| `compensatedAt`          | `Date`               |                 Tùy chọn                  |             -              | Thời điểm thiết lập tiền công hoàn tất.                                                                        |
+| `rejectedById`           | `ObjectId`           |                 Tùy chọn                  |     Ref:`StaffAccount`     | Người từ chối đơn xin nghỉ.                                                                                    |
+| `rejectedByName`         | `String`             |                 Tùy chọn                  |             -              | Snapshot họ tên người từ chối.                                                                                 |
+| `rejectedAt`             | `Date`               |                 Tùy chọn                  |             -              | Thời điểm từ chối đơn.                                                                                         |
+| `rejectionReason`        | `String`             |                 Tùy chọn                  |             -              | Lý do từ chối đơn xin nghỉ.                                                                                    |
 
 ---
 
@@ -456,6 +511,21 @@ erDiagram
 - **Mã nguồn:** [`user.schema.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/laundry/users/schemas/user.schema.ts)
 - **Mục đích nghiệp vụ:** Quản lý tài khoản quản trị nội dung bài viết và marketing trên giao diện CMS Next.js (`/admin`).
 
+| Tên trường | Kiểu dữ liệu | Ràng buộc | Chỉ mục | Ý nghĩa nghiệp vụ |
+| :--- | :--- | :---: | :---: | :--- |
+| `_id` | `ObjectId` | Bắt buộc | Primary | Khóa chính bản ghi. |
+| `username` | `String` | Bắt buộc | Unique | Tên đăng nhập tài khoản CMS. |
+| `passwordHash` | `String` | Bắt buộc (`select: false`) | - | Mật khẩu băm an toàn bcrypt, ẩn mặc định khỏi truy vấn. |
+| `role` | `String` | Mặc định: `staff` | - | Quyền hạn: `admin` (toàn quyền quản trị), `staff` (nhân sự biên tập). |
+| `fullName` | `String` | Tùy chọn | - | Họ và tên hiển thị. |
+| `email` | `String` | Bắt buộc | - | Email nhận thông báo liên hệ/đơn hàng mới. |
+| `receiveEmailNotifications` | `Boolean` | Mặc định: `true` | - | Trạng thái nhận thông báo qua email. |
+| `refreshToken` | `String` | Tùy chọn (`select: false`) | - | Token refresh phiên đăng nhập băm bảo mật, ẩn mặc định. |
+| `lastReadArticleAt` | `Date` | Tùy chọn | - | Thời điểm đọc bài viết gần nhất. |
+| `lastReadContactAt` | `Date` | Tùy chọn | - | Thời điểm xem danh sách liên hệ gần nhất. |
+| `createdAt` | `Date` | Tự động | - | Thời điểm khởi tạo tài khoản. |
+| `updatedAt` | `Date` | Tự động | - | Thời điểm cập nhật hồ sơ gần nhất. |
+
 ---
 
 # PHẦN 3: CƠ SỞ DỮ LIỆU `moving_express` (DỊCH VỤ CHUYỂN NHÀ & XE TẢI)
@@ -484,6 +554,7 @@ Phạm vi: Cổng tiếp nhận dịch vụ chuyển nhà trọn gói `chuyennha
 | `bulkyItems`      | `Array<String>` |     Mặc định`[]`     |      -      | Danh sách đồ cồng kềnh (Tủ lạnh Side-by-side, Đàn Piano, Giường gỗ...).                         |
 | `photos`          | `Array<String>` |     Mặc định`[]`     |      -      | Ảnh chụp đồ đạc khách tải lên để xưởng ước lượng nhân công.                                     |
 | `estimatedPrice`  | `Number`        |     Mặc định:`0`     |      -      | Cước vận chuyển sơ bộ thuật toán tự động tính toán.                                             |
+| `serviceType`      | `String (Enum)` | Mặc định: `APARTMENT` | - | Loại hình dịch vụ: `STUDENT_ROOM` (trọ sinh viên), `APARTMENT` (chung cư/nhà phố), `OFFICE` (văn phòng), `TRUCK_RENTAL` (thuê xe), `LABOR_ONLY` (chỉ thuê thợ bốc xếp/tháo lắp). |
 | `status`          | `String (Enum)` |  Mặc định:`PENDING`  |    Index    | Trạng thái:`PENDING` (chờ khảo sát), `QUOTED` (đã báo giá), `CONFIRMED` (đã chốt), `CANCELLED`. |
 
 ---

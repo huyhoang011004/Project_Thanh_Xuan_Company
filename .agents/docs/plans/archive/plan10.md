@@ -12,6 +12,7 @@
 ## 1. Tổng quan & Mục tiêu
 
 Cải tiến toàn diện phân hệ Quản lý Danh mục Đồ giặt (`item_catalogs`) theo yêu cầu nghiệp vụ thực tế:
+
 1. **Loại bỏ thuộc tính thừa:** Xóa bỏ hoàn toàn 2 trường không dùng: `foldingRateWorker` (đơn giá khoán thợ) và `priceToCustomer` (đơn giá thu khách) khỏi Schema, DTOs, Giao diện Form và Bảng dữ liệu.
 2. **Bổ sung xếp thứ tự đồ giặt:** Thêm thuộc tính `sortOrder: number` (mặc định 0), index hỗ trợ sắp xếp theo thương hiệu `{ brand: 1, sortOrder: 1 }`. Cung cấp nút di chuyển Lên/Xuống hoặc cập nhật thứ tự trực tiếp trên giao diện để quản lý luồng hiển thị ưu tiên khi kiểm đếm và giao nhận.
 3. **Phân quyền Xóa vĩnh viễn (Hard Delete):**
@@ -21,7 +22,7 @@ Cải tiến toàn diện phân hệ Quản lý Danh mục Đồ giặt (`item_c
 4. **Phân quyền Bật/Tắt hiển thị đồ giặt (`isActive`):**
    - Cả tài khoản `ADMIN` và `MANAGER` đều có quyền Bật / Tắt trạng thái hoạt động của đồ giặt (`isActive: true/false`).
    - Giao diện có công tắc (Switch/Toggle) trực tiếp trên từng dòng danh mục đồ để thao tác nhanh chóng và mượt mà.
-   - Các màn hình vận hành (Giao nhận hàng ngày, Kho) chỉ hiển thị các món đồ đang Bật (`isActive: true`).
+   - Các màn hình vận hành (Giao nhận hàng ngày, Kho) chỉ hiển thị các chiếc đồ đang Bật (`isActive: true`).
 
 ---
 
@@ -58,7 +59,7 @@ Cải tiến toàn diện phân hệ Quản lý Danh mục Đồ giặt (`item_c
   - `GET /partners/catalogs?brand=...`: Trả về danh sách đồ giặt sắp xếp theo `sortOrder ASC, itemCode ASC`. Nếu là request từ quản lý (Admin/Manager), trả về cả đồ ẩn và đồ hiện.
   - `POST /partners/catalogs`: Tạo mới đồ giặt (Quyền: `PARTNER_MANAGE` - Admin & Manager).
   - `PATCH /partners/catalogs/:id`: Cập nhật thông tin / Bật-Tắt `isActive` / Thứ tự `sortOrder` (Quyền: `PARTNER_MANAGE` - Admin & Manager).
-  - `PATCH /partners/catalogs/reorder`: Bulk update thứ tự nhiều món hàng `{ items: { id: string; sortOrder: number }[] }` (Quyền: `PARTNER_MANAGE`).
+  - `PATCH /partners/catalogs/reorder`: Bulk update thứ tự nhiều chiếc hàng `{ items: { id: string; sortOrder: number }[] }` (Quyền: `PARTNER_MANAGE`).
   - `DELETE /partners/catalogs/:id`: Xóa vĩnh viễn (Hard Delete) khỏi database (Quyền: `ACCOUNT_ADMIN` - Chỉ Admin).
 
 ---
@@ -140,6 +141,7 @@ Cải tiến toàn diện phân hệ Quản lý Danh mục Đồ giặt (`item_c
 ## 4. Kế hoạch công việc (Tasks)
 
 ### Giai đoạn 1: Backend (`be-nestjs-thanhxuan`)
+
 - [x] Task 1.1: Cập nhật Schema `ItemCatalogSchema` (thêm `sortOrder`, xóa `priceToCustomer`, `foldingRateWorker`).
 - [x] Task 1.2: Cập nhật DTO `CreateItemCatalogDto` và `UpdateItemCatalogDto`.
 - [x] Task 1.3: Cập nhật `ItemCatalogRepository` (sắp xếp theo `sortOrder`, thêm `reorder`, thêm `hardDelete`).
@@ -148,6 +150,7 @@ Cải tiến toàn diện phân hệ Quản lý Danh mục Đồ giặt (`item_c
 - [x] Task 1.6: Chạy kiểm thử Backend: `pnpm exec tsc --noEmit` & `pnpm test`.
 
 ### Giai đoạn 2: Frontend (`fe-react-thanhxuan-internal`)
+
 - [x] Task 2.1: Cập nhật interface `ItemCatalog` và `CatalogFormData` trong `types/index.ts` và `CatalogDialog.tsx`.
 - [x] Task 2.2: Cập nhật `CatalogDialog.tsx` (bỏ 2 trường đơn giá, thêm `sortOrder` và `isActive`).
 - [x] Task 2.3: Nâng cấp `CatalogListView.tsx` (thêm cột Thứ tự + nút Lên/Xuống, thêm cột Toggle Hiển thị `isActive` cho Admin/Manager, ẩn nút xóa với Manager và chỉ hiện nút Xóa vĩnh viễn cho Admin).
@@ -156,6 +159,7 @@ Cải tiến toàn diện phân hệ Quản lý Danh mục Đồ giặt (`item_c
 - [x] Task 2.6: Chạy kiểm thử Frontend: `pnpm exec tsc --noEmit` & `pnpm build`.
 
 ### Giai đoạn 3: Xác minh End-to-End & Tài liệu
+
 - [x] Task 3.1: Kiểm tra thực tế trên trình duyệt với tài khoản Admin và tài khoản Manager.
 - [x] Task 3.2: Cập nhật tài liệu `.agents/docs/SRS_SDD.md` phản ánh thay đổi schema và quyền hạn.
 
@@ -165,7 +169,7 @@ Cải tiến toàn diện phân hệ Quản lý Danh mục Đồ giặt (`item_c
 
 1. Thuộc tính `foldingRateWorker` và `priceToCustomer` được loại bỏ hoàn toàn khỏi giao diện và schema danh mục đồ giặt.
 2. Danh mục đồ giặt hiển thị và sắp xếp chính xác theo `sortOrder` tăng dần.
-3. Người dùng có thể bấm đổi thứ tự các món đồ giặt dễ dàng.
+3. Người dùng có thể bấm đổi thứ tự các chiếc đồ giặt dễ dàng.
 4. Cả Admin và Manager đều có thể bật/tắt `isActive` của đồ giặt trực tiếp trên bảng.
 5. Tài khoản Manager không nhìn thấy nút Xóa; tài khoản Admin thấy nút "Xóa vĩnh viễn" kèm Popup cảnh báo màu đỏ xác nhận.
 6. TypeScript check `pnpm exec tsc --noEmit` và `pnpm build` pass 100% trên cả Backend và Frontend.

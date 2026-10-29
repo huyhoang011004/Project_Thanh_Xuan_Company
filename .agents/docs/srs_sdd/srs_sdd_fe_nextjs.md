@@ -2,7 +2,7 @@
 ## PHÂN HỆ WEB KHÁCH HÀNG & QUẢN TRỊ CMS (fe-nextjs-thanhxuan-laundry)
 
 > **Tài liệu tham chiếu cấp cao:** [SRS_SDD.md (Kiến Trúc Tổng Quan)](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/SRS_SDD.md)  
-> **Phiên bản:** 2.1 | **Môi trường:** Next.js 14+ (App Router), React 18/19, TailwindCSS, shadcn/ui  
+> **Phiên bản:** 2.3 | **Synced:** 2026-10-28 | **Môi trường:** Next.js 14+ (App Router), React 18/19, TailwindCSS, shadcn/ui  
 > **Phạm vi mã nguồn:** `fe-nextjs-thanhxuan-laundry/src/**`  
 > **Quy chuẩn kỹ thuật:** Server Components mặc định, Feature-based Colocation, Metadata SEO & JSON-LD, React Hook Form + Zod
 
@@ -24,7 +24,7 @@ Phân hệ đảm nhiệm 2 vai trò cốt lõi trong hệ sinh thái Thanh Xuâ
 ### 1.2. Danh Sách Tính Năng Theo Nhóm (Functional Requirements)
 
 #### FE-NEXT-FR-01: Phân Hệ Web Khách Hàng Công Khai (`(public)`)
-- **Trang chủ (`/`):** Giới thiệu năng lực xưởng giặt là công nghiệp, quy trình giặt sấy tiêu chuẩn, danh sách đối tác lớn (Pizza 4P's, Golden Gate, Haidilao Hotpot...), đánh giá của khách hàng, bảng giá tóm tắt và form đăng ký tư vấn.
+- **Trang chủ (`/`):** Hero Section chia chéo (Diagonal Split) video reel xưởng giặt công nghiệp + ảnh thành phẩm cao cấp & floating badges, giới thiệu năng lực xưởng giặt là công nghiệp, quy trình giặt sấy tiêu chuẩn, danh sách đối tác lớn, bảng giá tóm tắt và Pre-Footer CTA (cam kết tặng 01 tuần giặt mẫu, giao nhận 24/7, bồi thường 100% kèm form thu thập lead chuyển đổi).
 - **Giới thiệu (`/gioi-thieu`):** Lịch sử phát triển công ty, quy mô máy móc công nghệ, cam kết chất lượng dịch vụ.
 - **Dịch vụ giặt là (`/dich-vu`, `/dich-vu/[slug]`):**
   - Danh mục dịch vụ chuyên sâu: Giặt ủi nhà hàng, giặt chăn ga khách sạn, giặt đồ spa, giặt sấy công nghiệp, giặt hấp đồ hiệu.
@@ -36,7 +36,7 @@ Phân hệ đảm nhiệm 2 vai trò cốt lõi trong hệ sinh thái Thanh Xuâ
 - **Lead Capture & Context Tracking:** Mọi form gửi thông tin liên hệ đều tự động đính kèm ngữ cảnh (`sourceUrl`, `category`, `slug`) để đo lường hiệu quả từng bài viết marketing.
 
 #### FE-NEXT-FR-02: Phân Hệ Quản Trị Nội Dung CMS (`(admin)/admin`)
-- **Xác thực Quản trị viên (`/admin/login`):** Đăng nhập bảo mật bằng tài khoản Admin Backend, lưu JWT token an toàn trong httpOnly Cookie và quản lý phiên qua Next.js Middleware.
+- **Xác thực Quản trị viên (`/admin/login`):** Đăng nhập bảo mật bằng tài khoản Admin Backend, lưu JWT token an toàn trong httpOnly Cookie (`admin_access_token`, `admin_refresh_token`, cờ `secure: true` trên production, `sameSite: 'lax'`) và quản lý phiên tự động qua Next.js Middleware. Route Handler `/api/upload` được bảo vệ nghiêm ngặt bằng cookie xác thực trước khi cho phép tải hoặc xóa file.
 - **Tổng quan Bảng điều khiển (`/admin/dashboard`):** Thống kê số lượng leads mới, đơn hàng chờ xử lý, số bài viết đã xuất bản và biểu đồ tương tác khách hàng.
 - **Quản lý Bài viết & Danh mục (`/admin/articles`, `/admin/categories`):**
   - Thêm, sửa, xóa, xuất bản bài viết chuẩn SEO.
@@ -67,48 +67,65 @@ Phân hệ đảm nhiệm 2 vai trò cốt lõi trong hệ sinh thái Thanh Xuâ
 fe-nextjs-thanhxuan-laundry/src/
 ├── app/
 │   ├── (public)/                        # Route Group: Web Khách Hàng (Server Components)
-│   │   ├── page.tsx                     # Trang chủ
+│   │   ├── page.tsx                     # Trang chủ (Server Component render HomePage)
 │   │   ├── layout.tsx                   # Header, Footer, Zalo Widget chung cho public
-│   │   ├── dich-vu/                     # Danh sách và chi tiết dịch vụ
-│   │   ├── tin-tuc/                     # Cẩm nang & bài viết SEO
+│   │   ├── dich-vu/                     # Danh sách và chi tiết dịch vụ ([...slug]/page.tsx -> ServiceDetailPage)
+│   │   ├── tin-tuc/                     # Cẩm nang & bài viết SEO (page.tsx -> ArticleListPage)
 │   │   ├── gioi-thieu/                  # Giới thiệu công ty
-│   │   └── lien-he/                     # Form liên hệ & bản đồ
+│   │   └── lien-he/                     # Form liên hệ & bản đồ (page.tsx -> ContactPage)
 │   │
 │   ├── (admin)/admin/                   # Route Group: CMS Quản Trị
-│   │   ├── layout.tsx                   # Layout Sidebar & Topbar CMS
-│   │   ├── login/                       # Trang đăng nhập Admin
-│   │   ├── dashboard/                   # Bảng điều khiển tổng hợp
-│   │   ├── articles/                    # Quản lý bài viết SEO
-│   │   ├── categories/                  # Quản lý danh mục bài viết / dịch vụ
-│   │   ├── contacts/                    # Quản lý khách hàng liên hệ
-│   │   ├── crm/                         # Pipeline chăm sóc khách hàng
-│   │   ├── orders/                      # Quản trị đơn giặt sấy
-│   │   ├── zalo-marketing/              # Quản lý chiến dịch Zalo OA
-│   │   ├── email-marketing/             # Quản lý chiến dịch Email
-│   │   └── settings/                    # Cấu hình website
+│   │   ├── layout.tsx                   # AdminShellComponent (Sidebar & Topbar CMS)
+│   │   ├── login/                       # Trang đăng nhập Admin (LoginFormComponent)
+│   │   ├── dashboard/                   # Bảng điều khiển tổng hợp (DashboardPage)
+│   │   ├── articles/                    # Quản lý bài viết SEO (ArticleManagerPage)
+│   │   ├── categories/                  # Quản lý danh mục bài viết / dịch vụ (CategoryManagerPage)
+│   │   ├── contacts/                    # Quản lý khách hàng liên hệ (ContactManagerPage)
+│   │   ├── crm/                         # Pipeline chăm sóc khách hàng (CrmManagerPage)
+│   │   ├── orders/                      # Quản trị đơn giặt sấy (OrdersManagerPage)
+│   │   ├── zalo-marketing/              # Quản lý chiến dịch Zalo OA (ZaloMarketingPage)
+│   │   ├── email-marketing/             # Quản lý chiến dịch Email (EmailMarketingPage)
+│   │   ├── accounts/                    # Quản lý tài khoản Admin (AccountManagerPage)
+│   │   └── settings/                    # Cấu hình website (SettingEditor*Component)
 │   │
-│   ├── api/                             # Route Handlers nội bộ (proxy, webhook)
+│   ├── api/                             # Route Handlers nội bộ (proxy, upload)
 │   ├── globals.css                      # Tailwind tokens & CSS Variables
 │   ├── layout.tsx                       # Root Layout (Font Inter, Metadata chung)
 │   ├── robots.ts                        # Trả về robots.txt tự động
 │   └── sitemap.ts                       # Sinh sitemap.xml động từ Backend API
 │
-├── components/                          # UI Components dùng chung
-│   ├── ui/                              # shadcn/ui components (Button, Input, Dialog...)
-│   ├── public/                          # Header, Footer, ContactModal, ZaloWidget
-│   └── admin/                           # Sidebar, DataTable, ImageUploader
+├── components/                          # UI & Shared Components dùng chung
+│   ├── common/                          # Tiện ích chung (ConfirmAlertDialogComponent, ProfileModal, ThemeToggleComponent, ThemeProvider)
+│   ├── layout/                          # Layout shells & navigation
+│   │   ├── admin/                       # AdminShellComponent, AdminHeaderComponent, AdminSidebarComponent
+│   │   └── public/                      # PublicHeaderComponent, PublicFooterComponent, DraggableFloatingContactComponent
+│   └── ui/                              # shadcn/ui primitives (Button, Input, Dialog, Table, Form...)
 │
-├── features/                            # Feature-based logic colocation
-│   ├── articles/                        # ArticleCard, ArticleList, ArticleEditor
-│   ├── contacts/                        # ContactForm, ContactActions
-│   └── orders/                          # OrderForm, OrderStatusBadge
+├── features/                            # Feature-based Flat Colocation
+│   ├── admin/                           # 11 Modules Quản Trị CMS
+│   │   ├── articles/                    # ArticleManagerPage.tsx, modals/ (ArticleEditorModal, ArticleTrashModal), components/
+│   │   ├── categories/                  # CategoryManagerPage.tsx, modals/ (CategoryEditorModal), admin-categories.service.ts
+│   │   ├── contacts/                    # ContactManagerPage.tsx, modals/ (ContactTrashModal), components/
+│   │   ├── crm/                         # CrmManagerPage.tsx, components/ (CrmManagerTable, CrmManagerToolbar)
+│   │   ├── dashboard/                   # DashboardPage.tsx
+│   │   ├── email-marketing/             # EmailMarketingPage.tsx, modals/, components/
+│   │   ├── orders/                      # OrdersManagerPage.tsx, modals/, components/
+│   │   ├── settings/                    # SettingsPage.tsx, components/ (SettingEditor*Component)
+│   │   ├── users/                       # AccountManagerPage.tsx, modals/ (AccountEditorModal)
+│   │   ├── auth/                        # LoginFormComponent.tsx, admin-auth.service.ts
+│   │   ├── zalo/                        # ZaloMarketingPage.tsx, admin-zalo.service.ts
+│   │   └── index.ts                     # Barrel export 11 feature quản trị
+│   │
+│   └── public/                          # 6 Modules Web Khách Hàng B2B & Public
+│       ├── home/                        # HomePage.tsx, components/ (HeroSection, IntroSection, ServicesGrid, WhyChooseUs, FaqSection, PreFooterCta)
+│       ├── articles/                    # ArticleListPage.tsx, components/ (ArticleList, ArticleSortFilter)
+│       ├── contacts/                    # ContactPage.tsx, public-contacts.service.ts, public-contacts.action.ts
+│       ├── services/                    # ServiceDetailPage.tsx, public-services.service.ts
+│       ├── settings/                    # public-settings.service.ts
+│       ├── seo/                         # Cấu hình Metadata & Schema.org JSON-LD
+│       └── index.ts                     # Barrel export các feature public
 │
-├── services/                            # Tầng kết nối API Backend tập trung
-│   ├── api-client.ts                    # Axios / Fetch client cấu hình baseURL
-│   ├── article.service.ts               # Gọi API bài viết từ Backend NestJS
-│   ├── contact.service.ts               # Gửi dữ liệu lead sang Backend
-│   └── order.service.ts                 # Quản trị đơn hàng
-│
+├── services/                            # Tầng kết nối API Backend tập trung (api.service.ts)
 ├── types/                               # TypeScript Interfaces & DTOs
 └── middleware.ts                        # Bảo vệ route /admin/*, kiểm tra JWT Cookie
 ```
@@ -143,6 +160,39 @@ sequenceDiagram
 ---
 
 ### 2.3. Quy Chuẩn Kỹ Thuật Bắt Buộc
-1. **Server Components:** Mọi trang đọc dữ liệu hiển thị trong thư mục `(public)` bắt buộc là Server Component. Chỉ thêm `"use client"` cho các component tương tác ở lá (Leaf Components) như `ContactForm.tsx`, `Carousel.tsx`, `HeaderDropdown.tsx`.
+1. **Server Components:** Mọi trang đọc dữ liệu hiển thị trong thư mục `(public)` bắt buộc là Server Component. Chỉ thêm `"use client"` cho các component tương tác ở lá (Leaf Components) như form, slider, dynamic UI.
 2. **Form Validation:** Sử dụng `react-hook-form` kết hợp `zod` schema để validate dữ liệu form phía client trước khi gửi lên API Backend.
 3. **Quản lý Media:** Hình ảnh tải lên bài viết được gửi qua Backend để lưu trữ trực tiếp trên Cloudinary, không lưu trữ file tĩnh trên server Next.js.
+4. **Quy Chuẩn Cấu Trúc & Đặt Tên File Frontend (Đồng bộ với `fe-react-thanhxuan-internal` theo AGENTS.md Mục 5.5):**
+   - File màn hình chính cấp cao nhất: `[Tên]Page.tsx` đặt trực tiếp tại root của feature (VD: `ArticleManagerPage.tsx`, `HomePage.tsx`).
+   - Thư mục `modals/`: Chứa các modal nghiệp vụ `[Tên]Modal.tsx` kèm `modals/index.ts`.
+   - Thư mục `components/`: Chứa các subcomponent hiển thị `[Tên]Component.tsx` kèm `components/index.ts`.
+   - Shared components: Phân tách rõ ràng `components/layout/` (`admin/`, `public/`), `components/common/`, `components/ui/`.
+   - Giới hạn kích thước file 250 - 300 dòng; bóc tách modal và subcomponents kịp thời, không dồn hàng nghìn dòng vào 1 file.
+
+---
+
+## 3. PHÂN HỆ WEB DỊCH VỤ CHUYỂN NHÀ TIẾT KIỆM (`fe-nextjs-chuyennhatietkiem`)
+
+> **Môi trường:** Next.js 16 (App Router), React 19, TailwindCSS, Port 3002  
+> **Phạm vi mã nguồn:** `fe-nextjs-chuyennhatietkiem/src/**`  
+> **Định vị kinh doanh:** Mô hình Logistics Tinh Gọn (Asset-Light) — Thế mạnh là **Đội thợ bốc xếp, thợ mộc, thợ điện lạnh cơ hữu** kết hợp **Mạng lưới đối tác xe tải vệ tinh điều xe giá gốc**, giúp tiết kiệm 30% chi phí.
+
+### 3.1. Các Trang & Components Tương Tác Cốt Lõi
+1. **Trang Chủ (`src/app/page.tsx`):**
+   - `HeroEstimatorComponent`: Bảng dự toán tức thì với thanh trượt cự ly Km, tab chọn gói (Trọn gói / Chỉ thuê thợ / Tháo lắp kỹ thuật), bộ đếm nhảy số giá cước trong 5 giây.
+   - `WhySaveBentoComponent`: Thẻ Bento Grid 4 lý do tiết kiệm (Mô hình tinh gọn không phí nuôi xe, Thợ kiêm mộc & điện lạnh, Tặng vật tư carton/PE, Bảo hiểm 100%).
+   - `SmartCargoVisualizerComponent`: Khảo sát tải trọng thông minh bằng cách click chọn đồ đạc trực quan -> Đề xuất kích cỡ xe và số thợ tối ưu.
+   - `CostComparisonComponent`: Bảng so sánh đa chiều chi phí ẩn giữa tự dọn bằng xe ba gác vs Dịch vụ trọn gói Thanh Xuân.
+   - `PackingProtectionComponent`: Trực quan hóa quy chuẩn đóng gói bọc lót 4 lớp chống trầy xước.
+   - `InteractiveChecklistComponent`: Checklist 10 bước dọn nhà lưu tự động LocalStorage.
+2. **Khảo Sát Báo Giá (`src/app/dat-lich/page.tsx` - `QuoteWizardForm.tsx`):**
+   - Kiến trúc module hóa 4 sub-components (`< 200 dòng/file`):
+     - `Step1LocationComponent`: Điểm bốc, điểm dỡ, số tầng, thang máy, cự ly Km.
+     - `Step2ItemsComponent`: Gói dịch vụ (`STUDENT_ROOM`, `APARTMENT`, `OFFICE`, `TRUCK_RENTAL`, `LABOR_ONLY`) và bộ tăng giảm đồ cồng kềnh.
+     - `Step3ScheduleComponent`: Ngày giờ dọn, link ảnh hiện trường và ghi chú.
+     - `Step4ReviewComponent`: Thông tin liên hệ, bảng bóc tách dự toán tự động và gửi lead về MongoDB `moving_quotes`.
+3. **Bảng Giá Niêm Yết (`src/app/bang-gia/page.tsx`):**
+   - Công khai giá mở cửa xe tải đối tác và đơn giá thuê nhân công bốc xếp theo giờ/theo người (150.000đ/giờ) kèm bảng tháo lắp điều hòa/giường tủ.
+
+
