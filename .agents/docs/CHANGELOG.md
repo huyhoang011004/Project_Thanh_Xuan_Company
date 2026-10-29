@@ -4,6 +4,17 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
 
 ## 2026-10-29
 
+### Bugfix: Khóa Chặt Chuyến Tự Do Chỉ Nhận Cho Ngày Hôm Đó, Ngăn Tự Động Add Vào Lộ Trình Các Ngày Sau Của Shipper
+
+- **Vấn đề phát hiện:** Khi tài xế Shipper bấm nhận một chuyến tự do (đối tác chưa có tài xế cố định), chuyến đi đã được lưu đúng vào ngày được chọn (`recordDate`). Tuy nhiên, khi Shipper chuyển sang xem lộ trình của ngày hôm sau (`selectedDate + 1`), chi nhánh đối tác tự do đó lại tự động xuất hiện trong Tab "Lộ Trình" (`ROUTE`) của ngày hôm sau dưới dạng chưa có phiếu (`record: undefined`), khiến Shipper nhầm tưởng mình bị gán luôn cho đối tác đó vào các ngày sau.
+- **Nguyên nhân gốc rễ (Root Cause):**
+  1. Backend endpoint `GET /partners/schedule` trả về toàn bộ danh sách đối tác có lịch trong ngày mà không lọc theo `shipperId`, bao gồm cả đối tác tuyến tự do (`defaultShipperId == null`).
+  2. Frontend `useShipperHandoverPage.ts` khi tính `deliveryPoints` duyệt qua tất cả `scheduledPartners` và tự động push mọi đối tác chưa có phiếu vào danh sách lộ trình của Shipper mà không kiểm tra xem đối tác đó có phải tuyến cố định của Shipper này hay không.
+- **Giải pháp xử lý triệt để:**
+  1. **Backend (`be-nestjs-thanhxuan`):** Nâng cấp `GET /partners/schedule` nhận `@CurrentUser() user` và `@Query('shipperId')`. Nếu người gọi là vai trò `SHIPPER`, hệ thống tự động lọc chỉ trả về các đối tác mà Shipper đó được phân công cố định (`defaultShipperId == user.sub`), loại bỏ 100% các đối tác tuyến tự do khỏi schedule.
+  2. **Frontend (`fe-react-thanhxuan-internal`):** Trong `useShipperHandoverPage.ts`, bổ sung ràng buộc nghiêm ngặt khi duyệt `scheduledPartners`: chỉ đưa vào Tab "Lộ Trình" (`ROUTE`) nếu `sp.defaultShipperId === user.id`. Đối tác tuyến tự do chưa có phiếu tuyệt đối không xuất hiện trong Tab "Lộ Trình", mà chỉ hiển thị tại Tab "Nhận Chuyến" (`POOL`) của từng ngày để Shipper chủ động bấm nhận lại cho từng ngày riêng biệt.
+  3. **Verification:** Backend 50/50 suites (235 tests pass), nest build pass; Frontend `tsc --noEmit` pass 100%, vite build pass tạo PWA bundle thành công.
+
 ### Plan 52: Phân Shipper Cố Định Cho Chi Nhánh Đối Tác, Tab Nhận Chuyến Tự Do & Cài Đặt Tiền Công Job Lẻ / Cụm Tuyến
 
 - **Bối cảnh & Vấn đề giải quyết:**
