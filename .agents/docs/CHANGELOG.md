@@ -2,6 +2,24 @@
 
 Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâng cấp, bugfix và triển khai tính năng của Hệ sinh thái Công ty Thanh Xuân qua từng Plan.
 
+## 2026-10-30
+
+### Bugfix: Sửa Lỗi Hiển Thị Chi Nhánh Không Thuộc Thương Hiệu Trong Modal Tạo Phiếu Giao Nhận (PrepOrderModal)
+
+- **Vấn đề phát hiện:** Khi người dùng mở modal "Tạo Phiếu Giao Nhận Mới" và chọn thương hiệu (ví dụ: `Pizza 4P's (PIZZA_4PS)`), danh sách thả xuống ở ô "CHI NHÁNH ĐỐI TÁC" lại hiển thị lẫn cả chi nhánh của thương hiệu khác (ví dụ: `Haidilao Hotpot Phạm Ngọc Thạch`).
+- **Nguyên nhân gốc rễ (Root Cause):**
+  1. **Backend (`be-nestjs-thanhxuan`):** Endpoint `GET /partners` trong `PartnersController` (`partners.controller.ts:172`) chỉ tiếp nhận `@Query('includeInactive')` mà bỏ qua tham số query `@Query('brand')`. Mặc dù `usePrepOrderData.ts` và `useHandoverSlipGallery.ts` ở Frontend đều gọi `/partners?brand=${selectedBrand}`, Backend vẫn trả về toàn bộ chi nhánh của tất cả các thương hiệu.
+  2. **Frontend (`fe-react-thanhxuan-internal`):** Hook `usePrepOrderData.ts` và component `PrepOrderConfigHeaderComponent.tsx` chưa thực hiện lọc phòng thủ theo `selectedBrand`, dẫn đến việc render nguyên mảng đối tác trả về từ API.
+- **Giải pháp triển khai:**
+  - **Backend (`be-nestjs-thanhxuan`):**
+    - Cập nhật `PartnerRepository.findAllPartners` (`partner.repository.ts`): Bổ sung tham số `brand?: string`. Nếu có truyền, tiến hành lọc `{ brand: brand.trim().toUpperCase() }` tận dụng compound index `{ brand: 1, isActive: 1 }`.
+    - Cập nhật `PartnersService.getAllPartners` (`partners.service.ts`): Nhận và chuyển tiếp tham số `brand` vào repository.
+    - Cập nhật `PartnersController.getAllPartners` & `getPublicPartners` (`partners.controller.ts`): Tiếp nhận `@Query('brand') brand?: string` và truyền vào service.
+  - **Frontend (`fe-react-thanhxuan-internal`):**
+    - `usePrepOrderData.ts`: Bọc `rawPartners` qua `useMemo` lọc theo `selectedBrand`, đồng thời tự động cập nhật `selectedPartnerId` sang chi nhánh đầu tiên của thương hiệu mới khi chuyển đổi thương hiệu.
+    - `PrepOrderConfigHeaderComponent.tsx`: Lọc `filteredPartners` theo `selectedBrand` cho cả giao diện Mobile và Desktop, đảm bảo dropdown chỉ hiển thị các chi nhánh trực thuộc thương hiệu được chọn.
+
+
 ## 2026-10-29
 
 ### Docs & User Guides: Biên Soạn Bộ 8 Bản Cẩm Nang Hướng Dẫn Sử Dụng RBAC & Đồng Bộ Tài Liệu Phân Hệ Nội Bộ
