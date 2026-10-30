@@ -92,3 +92,4 @@ $feMovingLines | Set-Content $feMovingTarget -Encoding UTF8
 Write-Host "✓ Đã tạo $feMovingTarget ($($feMovingLines.Count - 1) biến)" -ForegroundColor Cyan
 
 Write-Host "`nHoàn tất phân tách 4 file .env thành công!" -ForegroundColor Green
+
