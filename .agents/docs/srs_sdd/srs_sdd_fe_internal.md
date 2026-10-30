@@ -3,9 +3,9 @@
 ## PHÂN HỆ CỔNG VẬN HÀNH XƯỞNG & ĐIỀU PHỐI ĐỐI TÁC (fe-react-thanhxuan-internal)
 
 > **Tài liệu tham chiếu cấp cao:** [SRS_SDD.md (Kiến Trúc Tổng Quan)](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/SRS_SDD.md)  
-> **Phiên bản:** 2.4 | **Synced:** 2026-10-27 | **Môi trường:** React 18, Vite, TypeScript Strict (Zero any), React Router v7, TailwindCSS, shadcn/ui  
+> **Phiên bản:** 2.5 | **Synced:** 2026-10-30 | **Môi trường:** React 18, Vite, TypeScript Strict (Zero any), React Router v7, TailwindCSS, shadcn/ui  
 > **Phạm vi mã nguồn:** `fe-react-thanhxuan-internal/src/**`  
-> **Quy chuẩn kỹ thuật:** Feature-Based Flat Colocation, Barrel `index.ts`, Mobile-First PWA, Canvas Signature, Offline Queue IndexedDB, RBAC UI Guards
+> **Quy chuẩn kỹ thuật:** Feature-Based Flat Colocation, Barrel `index.ts`, Mobile-First PWA, Canvas Signature, Offline Queue IndexedDB, RBAC UI Guards, Lightmode Default, AppLogo SVG Priority với Fallback PNG
 
 ---
 

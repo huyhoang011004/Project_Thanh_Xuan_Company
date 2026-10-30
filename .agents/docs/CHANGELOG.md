@@ -4,6 +4,35 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
 
 ## 2026-10-30
 
+### Bugfix: Khắc Phục Lỗi Upload 404, Ưu Tiên Icon SVG và Đặt Mặc Định Lightmode (fe-react-thanhxuan-internal)
+
+- **Bối cảnh & Vấn đề:**
+  1. Người dùng gặp lỗi khi chụp ảnh chấm công selfie hoặc gửi ảnh bao đồ đếm lại xưởng:
+     `index-B8Nts09O.js:3 POST https://noibo.thanhxuanlaundry.com/api/v1/internal/upload 404 (Not Found)`
+     `{url: '/upload', method: 'POST', status: 404, data: {…}, detailsString: '{"success":false,"statusCode":404,"error":"Cannot POST /api/v1/internal/upload","details":"Not Found"}'}`
+  2. Người dùng yêu cầu ưu tiên sử dụng `icon.svg` sắc nét cho toàn bộ cổng nội bộ, nếu thiết bị/trình duyệt không hỗ trợ mới fallback sang các ảnh `.png`.
+  3. Người dùng yêu cầu chuyển chế độ giao diện mặc định khi vào hệ thống thành `lightmode` (thay vì mặc định darkmode).
+- **Nguyên nhân gốc rễ (Root Cause):**
+  - **Lỗi 404 Upload:** Controller trong NestJS backend là `InternalUploadController` được khai báo `@Controller('uploads')` (có chữ `s`), trong khi một số hook ở Frontend (`useAttendance.ts:49` và `RecountRequestModal.tsx:45`) gọi endpoint số ít `apiClient.post('/upload')`, dẫn tới HTTP 404 Not Found từ NestJS Router.
+  - **Mặc định Theme:** Trong `src/lib/theme.tsx:23`, state khởi tạo ban đầu hardcode trả về `'dark'` nếu chưa có giá trị lưu trong `localStorage`.
+  - **Ưu tiên Icon SVG:** File `manifest.webmanifest` trong `vite.config.ts` đặt icon `.png` lên đầu và `icon.svg` ở cuối danh sách; các thẻ HTML `<link>` và component chưa có cơ chế `<picture>` fallback chuẩn.
+- **Giải pháp & Thay đổi kỹ thuật:**
+  1. **Sửa dứt điểm lỗi Upload (Đa tầng phòng thủ):**
+     - Sửa `useAttendance.ts:49` và `RecountRequestModal.tsx:45` gọi chuẩn `/uploads` đồng bộ với `useShipperFuel.ts`.
+     - Cấu hình Nginx reverse proxy tại `/etc/nginx/sites-available/noibo.thanhxuanlaundry.com`: Bổ sung rule `location = /api/v1/internal/upload` chuyển tiếp trực tiếp sang `http://127.0.0.1:5001/api/v1/internal/uploads`, đảm bảo tương thích ngược 100% cho mọi phiên bản PWA Service Worker cũ đang cache trên máy người dùng.
+  2. **Chuyển mặc định giao diện sang Lightmode:**
+     - Điều chỉnh `src/lib/theme.tsx` khởi tạo mặc định trả về `'light'`.
+  3. **Ưu tiên Icon SVG kèm Fallback PNG:**
+     - Tạo component chuyên dụng `src/components/common/AppLogo.tsx` sử dụng thẻ chuẩn `<picture>` với `<source srcSet="/icon.svg" type="image/svg+xml" />` và thẻ `<img>` fallback sang `pwa-192x192.png` / `favicon-64x64.png` khi lỗi tải.
+     - Đồng bộ `AppLogo` vào `LoginPage.tsx`, `RegisterPage.tsx`, `RootPage.tsx`, `AppHeader.tsx` và `MobileNavDrawer.tsx`.
+     - Sắp xếp lại `vite.config.ts` (Manifest Icons & Shortcuts) đưa `/icon.svg` lên vị trí ưu tiên đầu tiên; bổ sung các thẻ `<link rel="icon">` và `<link rel="alternate icon">` trong `index.html`.
+- **Kết quả xác minh:**
+  - `curl -X POST https://noibo.thanhxuanlaundry.com/api/v1/internal/upload` và `curl -X POST https://noibo.thanhxuanlaundry.com/api/v1/internal/uploads` đều trả về HTTP 401 Unauthorized (xác thực Guard NestJS thành công, không còn 404).
+  - PWA build pass 100% (`pnpm build` in 12s), đã deploy trực tiếp vào `/var/www/noibo/dist` và reload Nginx thành công.
+  - Push commit lên nhánh `dev` của repository `fe-react-thanhxuan-internal`.
+
+
+
 ### Plan 57: Cơ Chế Duy Trì Phiên Đăng Nhập Lâu Dài Như Mobile App Cho PWA (fe-react-thanhxuan-internal & be-nestjs-thanhxuan)
 
 - **Bối cảnh & Vấn đề:**
