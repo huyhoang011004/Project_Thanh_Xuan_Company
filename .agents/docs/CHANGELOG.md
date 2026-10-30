@@ -4,6 +4,92 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
 
 ## 2026-10-30
 
+### Plan 58: Triển Khai Xác Thực Khuôn Mặt On-Device AI (@vladmandic/face-api) & Liveness Detection (fe-react-thanhxuan-internal & be-nestjs-thanhxuan)
+
+- **Bối cảnh & Bài toán:**
+  - Hệ thống chấm công tại xưởng trước đây chỉ yêu cầu thợ chụp ảnh camera selfie tải lên server và kiểm tra Geofencing GPS.
+  - Người dùng đặt câu hỏi về giải pháp xác thực khuôn mặt khi check-in để chống điểm danh hộ. Tuy nhiên, nếu dùng Cloud AI (như Gemini Vision API gói Free tier chỉ có 15 RPM / 1,500 RPD), khi nhiều thợ cùng check-in đầu ca sáng 07:30 - 08:00 sẽ dễ bị lỗi nghẽn `429 Too Many Requests` và chi phí bản quyền phát sinh nếu nâng gói thương mại.
+- **Giải pháp On-Device AI WebAssembly/WebGL (Plan 58):**
+  - Chuyển toàn bộ tải tính toán AI về thiết bị của thợ (Client-Side PWA) sử dụng thư viện `@vladmandic/face-api` chạy trên nền tảng WebAssembly (WASM) và WebGL:
+    - **0đ chi phí vận hành:** Hoàn toàn không tốn tiền API hay quota hàng tháng.
+    - **0 giới hạn lượt check-in:** Đáp ứng không giới hạn số lượng công nhân check-in cùng lúc.
+    - **0% tải CPU/RAM trên VPS:** VPS (< 512MB RAM) chỉ lưu trữ ảnh và nhận vector đặc trưng 128 chiều (`faceDescriptor`), không phải xử lý AI nặng.
+    - **Hoạt động hoàn toàn Offline:** Các mô hình mạng nơ-ron thu nhỏ (`tiny_face_detector`, `face_landmark_68_tiny`, `face_recognition`) có tổng dung lượng nhẹ ~6.6MB, lưu tĩnh tại `/public/models/` và được Workbox PWA precache vào cache trình duyệt.
+- **Thay đổi chi tiết & Kiến trúc triển khai:**
+  1. **Frontend PWA (`fe-react-thanhxuan-internal`):**
+     - Cài đặt `@vladmandic/face-api@1.7.15`, cấu hình `runtimeCaching` trong `vite.config.ts`.
+     - Xây dựng Custom Hook `useFaceRecognition.ts`: Tải mô hình bất đồng bộ từ `/models/`, hỗ trợ phương thức `scanFrame` quét từng khung hình từ WebRTC Camera, tính toán tỷ lệ mở mắt (Eye Aspect Ratio - EAR) dựa trên 6 điểm mốc mắt để phát hiện hành vi chớp mắt sống thực tế (Liveness Blink Detection), và phương thức `extractDescriptorFromFile` trích xuất vector khuôn mặt từ file ảnh.
+     - Xây dựng Modal Camera thông minh `FaceScannerModal.tsx`: Khung Oval định vị gương mặt chuyển màu linh hoạt (Nét đứt trắng $\rightarrow$ Vàng nhấp nháy khi thấy mặt $\rightarrow$ Xanh lá rực rỡ khi hoàn tất chớp mắt tự nhiên), tự động trích xuất vector và chụp ngay lập tức. Hỗ trợ nút chụp thủ công và fallback tải ảnh thường.
+     - Cập nhật `AttendancePage.tsx`: Tích hợp mở `FaceScannerModal`, hiển thị huy hiệu `🟢 Khuôn mặt thực (AI)` trên ảnh selfie đã chụp.
+     - Tự động lưu mẫu khi đổi Avatar (`ProfileEditModal.tsx` & `useProfileEdit.ts`): Khi thợ đổi ảnh đại diện, hệ thống tự động quét và lưu vector làm mẫu hồ sơ gốc `StaffAccount.faceDescriptor`.
+     - Nâng cấp giao diện Quản lý duyệt ca (`AttendanceTableComponent.tsx` & `AttendanceReviewModal.tsx`): Bổ sung huy hiệu AI Face (độ khớp %, liveness) ở cột Vào ca / Hết ca; thiết kế 3 cột ảnh đối chứng trong Modal duyệt (Avatar hồ sơ gốc $\leftrightarrow$ Ảnh selfie vào ca $\leftrightarrow$ Ảnh hết ca) giúp Quản lý xưởng dễ dàng thẩm định mắt thường và phê duyệt.
+  2. **Backend API (`be-nestjs-thanhxuan`):**
+     - Mở rộng Schema `staff-account.schema.ts`: Bổ sung `@Prop({ type: [Number] }) faceDescriptor?: number[]`.
+     - Mở rộng Schema `attendance-record.schema.ts`: Bổ sung schema con `FaceVerificationInfo` (`isVerified`, `confidence`, `isLivePhoto`, `descriptor`) trong `CheckInInfo` và `CheckOutInfo`.
+     - Mở rộng DTO `CheckInDto`, `CheckOutDto`, `UpdateProfileDto` hỗ trợ `faceDescriptor` và `isLivePhoto`.
+     - Nâng cấp `AttendanceService`:
+       - Tự động ghi nhận vector mẫu (Auto-Enrollment) cho nhân sự check-in lần đầu.
+       - Tính toán khoảng cách Euclidean (Euclidean Distance): $d = \sqrt{\sum (a_i - b_i)^2}$, điểm tin cậy $\text{confidence} = \max(0, \min(100, \text{round}((1 - d) \times 100)))$.
+       - Ngưỡng đối soát chuẩn $d \le 0.50$. Nếu lệch mặt ($d > 0.50$), ca chấm công vẫn được ghi nhận nhưng tự động chuyển trạng thái sang `AttendanceStatus.NEEDS_REVIEW` kèm cờ cảnh báo AI để Quản lý rà soát.
+- **Kết quả kiểm thử & Triển khai thực tế:**
+  - TypeScript strict check và Build pass 100% trên cả 2 ứng dụng Backend và Frontend.
+  - Deploy bản build PWA mới thành công lên `https://noibo.thanhxuanlaundry.com`.
+  - Copy bản build backend vào Docker container `laundry_backend` và restart thành công.
+  - Cập nhật đầy đủ 5 trụ cột tài liệu kỹ thuật (`DATABASE_DICTIONARY.md`, `CODEBASE_ATLAS.md`, `srs_sdd_backend.md`, `srs_sdd_fe_internal.md`, `SRS_SDD.md`).
+
+
+
+### Feature: Mở Rộng Hỗ Trợ Đa Dạng Định Dạng Ảnh Cho POST /api/v1/internal/upload (be-nestjs-thanhxuan)
+
+- **Bối cảnh & Yêu cầu:**
+  - Endpoint upload ảnh xưởng `POST /api/v1/internal/upload` và `POST /api/v1/internal/uploads` trước đây chỉ cho phép một danh sách hạn chế các định dạng ảnh raster (`.jpg`, `.jpeg`, `.png`, `.webp`, `.heic`, `.heif`, `.gif`) và yêu cầu bắt buộc cả MIME type lẫn extension file đều phải khớp.
+  - Người dùng và thiết bị di động (đặc biệt là camera điện thoại đời mới, các trình duyệt xuất blob không đuôi hoặc gửi MIME `application/octet-stream`, định dạng vector SVG hoặc AVIF hiện đại) cần được hỗ trợ tải lên mượt mà mà không bị từ chối 400 Bad Request.
+- **Giải pháp & Thay đổi kỹ thuật:**
+  1. **Mở rộng bộ lọc MIME Types & File Extensions (`InternalUploadController`):**
+     - Bổ sung toàn diện danh mục định dạng: JPEG/JPG, PNG, WebP, HEIC, HEIF, AVIF, SVG, GIF, BMP, TIFF/TIF, ICO.
+     - Cho phép chấp nhận các file có MIME type `image/*` (kể cả Blob không đuôi từ camera hoặc Canvas nén ảnh) HOẶC các file có đuôi mở rộng ảnh hợp lệ (kể cả khi thiết bị gửi dạng `application/octet-stream`).
+     - Đăng ký alias `@Controller(['uploads', 'upload'])` trên Controller để NestJS xử lý song song cả 2 định dạng đường dẫn URL.
+  2. **Cập nhật Lưu Trữ Vật Lý (`UploadService.saveLocalCopy`):**
+     - Bổ sung các định dạng mới vào mảng `allowedExts` (`.heic`, `.heif`, `.avif`, `.svg`, `.bmp`, `.tiff`, `.tif`, `.ico`).
+     - Bổ sung cơ chế tự động suy luận đuôi file từ MIME type khi client tải lên file không có đuôi (như `blob` từ Canvas/Mobile).
+  3. **Đồng bộ Controller chung (`UploadController`):**
+     - Mở rộng hỗ trợ định dạng ảnh tương tự cho module Upload cốt lõi.
+- **Kết quả kiểm thử:**
+  - Build Backend pass 100% (`tsc --noEmit` & `nest build`).
+  - Container `laundry_backend` đã được cập nhật bản build mới và khởi động lại trơn tru.
+  - Push commit lên nhánh `dev` của kho `be-nestjs-thanhxuan`.
+
+
+
+### Bugfix: Khắc Phục Lỗi Upload 404, Ưu Tiên Icon SVG và Đặt Mặc Định Lightmode (fe-react-thanhxuan-internal)
+
+- **Bối cảnh & Vấn đề:**
+  1. Người dùng gặp lỗi khi chụp ảnh chấm công selfie hoặc gửi ảnh bao đồ đếm lại xưởng:
+     `index-B8Nts09O.js:3 POST https://noibo.thanhxuanlaundry.com/api/v1/internal/upload 404 (Not Found)`
+     `{url: '/upload', method: 'POST', status: 404, data: {…}, detailsString: '{"success":false,"statusCode":404,"error":"Cannot POST /api/v1/internal/upload","details":"Not Found"}'}`
+  2. Người dùng yêu cầu ưu tiên sử dụng `icon.svg` sắc nét cho toàn bộ cổng nội bộ, nếu thiết bị/trình duyệt không hỗ trợ mới fallback sang các ảnh `.png`.
+  3. Người dùng yêu cầu chuyển chế độ giao diện mặc định khi vào hệ thống thành `lightmode` (thay vì mặc định darkmode).
+- **Nguyên nhân gốc rễ (Root Cause):**
+  - **Lỗi 404 Upload:** Controller trong NestJS backend là `InternalUploadController` được khai báo `@Controller('uploads')` (có chữ `s`), trong khi một số hook ở Frontend (`useAttendance.ts:49` và `RecountRequestModal.tsx:45`) gọi endpoint số ít `apiClient.post('/upload')`, dẫn tới HTTP 404 Not Found từ NestJS Router.
+  - **Mặc định Theme:** Trong `src/lib/theme.tsx:23`, state khởi tạo ban đầu hardcode trả về `'dark'` nếu chưa có giá trị lưu trong `localStorage`.
+  - **Ưu tiên Icon SVG:** File `manifest.webmanifest` trong `vite.config.ts` đặt icon `.png` lên đầu và `icon.svg` ở cuối danh sách; các thẻ HTML `<link>` và component chưa có cơ chế `<picture>` fallback chuẩn.
+- **Giải pháp & Thay đổi kỹ thuật:**
+  1. **Sửa dứt điểm lỗi Upload (Đa tầng phòng thủ):**
+     - Sửa `useAttendance.ts:49` và `RecountRequestModal.tsx:45` gọi chuẩn `/uploads` đồng bộ với `useShipperFuel.ts`.
+     - Cấu hình Nginx reverse proxy tại `/etc/nginx/sites-available/noibo.thanhxuanlaundry.com`: Bổ sung rule `location = /api/v1/internal/upload` chuyển tiếp trực tiếp sang `http://127.0.0.1:5001/api/v1/internal/uploads`, đảm bảo tương thích ngược 100% cho mọi phiên bản PWA Service Worker cũ đang cache trên máy người dùng.
+  2. **Chuyển mặc định giao diện sang Lightmode:**
+     - Điều chỉnh `src/lib/theme.tsx` khởi tạo mặc định trả về `'light'`.
+  3. **Ưu tiên Icon SVG kèm Fallback PNG:**
+     - Tạo component chuyên dụng `src/components/common/AppLogo.tsx` sử dụng thẻ chuẩn `<picture>` với `<source srcSet="/icon.svg" type="image/svg+xml" />` và thẻ `<img>` fallback sang `pwa-192x192.png` / `favicon-64x64.png` khi lỗi tải.
+     - Đồng bộ `AppLogo` vào `LoginPage.tsx`, `RegisterPage.tsx`, `RootPage.tsx`, `AppHeader.tsx` và `MobileNavDrawer.tsx`.
+     - Sắp xếp lại `vite.config.ts` (Manifest Icons & Shortcuts) đưa `/icon.svg` lên vị trí ưu tiên đầu tiên; bổ sung các thẻ `<link rel="icon">` và `<link rel="alternate icon">` trong `index.html`.
+- **Kết quả xác minh:**
+  - `curl -X POST https://noibo.thanhxuanlaundry.com/api/v1/internal/upload` và `curl -X POST https://noibo.thanhxuanlaundry.com/api/v1/internal/uploads` đều trả về HTTP 401 Unauthorized (xác thực Guard NestJS thành công, không còn 404).
+  - PWA build pass 100% (`pnpm build` in 12s), đã deploy trực tiếp vào `/var/www/noibo/dist` và reload Nginx thành công.
+  - Push commit lên nhánh `dev` của repository `fe-react-thanhxuan-internal`.
+
+
+
 ### Plan 57: Cơ Chế Duy Trì Phiên Đăng Nhập Lâu Dài Như Mobile App Cho PWA (fe-react-thanhxuan-internal & be-nestjs-thanhxuan)
 
 - **Bối cảnh & Vấn đề:**

@@ -3,9 +3,9 @@
 ## PHÂN HỆ CỔNG VẬN HÀNH XƯỞNG & ĐIỀU PHỐI ĐỐI TÁC (fe-react-thanhxuan-internal)
 
 > **Tài liệu tham chiếu cấp cao:** [SRS_SDD.md (Kiến Trúc Tổng Quan)](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/SRS_SDD.md)  
-> **Phiên bản:** 2.4 | **Synced:** 2026-10-27 | **Môi trường:** React 18, Vite, TypeScript Strict (Zero any), React Router v7, TailwindCSS, shadcn/ui  
+> **Phiên bản:** 2.5 | **Synced:** 2026-10-30 | **Môi trường:** React 18, Vite, TypeScript Strict (Zero any), React Router v7, TailwindCSS, shadcn/ui  
 > **Phạm vi mã nguồn:** `fe-react-thanhxuan-internal/src/**`  
-> **Quy chuẩn kỹ thuật:** Feature-Based Flat Colocation, Barrel `index.ts`, Mobile-First PWA, Canvas Signature, Offline Queue IndexedDB, RBAC UI Guards
+> **Quy chuẩn kỹ thuật:** Feature-Based Flat Colocation, Barrel `index.ts`, Mobile-First PWA, Canvas Signature, Offline Queue IndexedDB, RBAC UI Guards, Lightmode Default, AppLogo SVG Priority với Fallback PNG
 
 ---
 
@@ -90,15 +90,16 @@ Phân hệ `fe-react-thanhxuan-internal` là cổng điều hành số hóa toà
 - Tự động lọc danh sách phiếu cần đếm lại: các phiếu có `isRecount === true` hoặc phiếu có đồ bẩn chưa đếm số lượng mà Shipper đã ký nhận giao về.
 - **Thao tác rạch bao đếm lại:** Thợ xưởng nhập số lượng thực tế từng chiếc đồ (`actualQuantityReceived`), cập nhật trực tiếp vào hệ thống qua endpoint `PATCH /recount-actual`, hoàn tất quy trình kiểm đếm đối chứng.
 
-#### FE-INT-FR-04: Chấm Công Camera Selfie & Phiên Khâu Công Thợ Theo Thời Gian Thực (Plan 37)
+#### FE-INT-FR-04: Chấm Công Xác Thực Khuôn Mặt AI & Phiên Khâu Công Thợ Theo Thời Gian Thực (Plan 37 & Plan 58)
 
-- **Chấm công camera selfie & Geofencing (`AttendancePage`, `useAttendance`, `useWorkshopGeo`):** Bắt buộc chụp ảnh selfie (`photoId`) và quét tọa độ GPS xưởng độ chính xác cao (`enableHighAccuracy: true`). Kiểm tra bán kính xưởng $\le 150m$, chống Fake GPS (chặn `accuracy <= 0`, sai số quá lớn, timestamp cũ). Sau khi check-in ca tự động kích hoạt mở phiên **khâu mặc định** (`defaultJobType`) cho thợ; khi check-out ca tự động đóng phiên khâu đang mở với thời điểm kết thúc bằng giờ check-out ca.
-- **Bảng công toàn xưởng & Rà soát ca (`AttendanceReviewPage`, `useAttendanceReview`):**
-  - Thiết kế theo chuẩn công thái học 4 tầng (`PageBanner` $\rightarrow$ `PageActionBar` $\rightarrow$ 4 `StatCard` $\rightarrow$ Bộ lọc & Bảng ca làm việc).
-  - Khắc phục triệt để lỗi xóa dấu gạch ngang ở `dateKey`: Truy vấn chính xác theo `YYYY-MM-DD` theo múi giờ `Asia/Ho_Chi_Minh` (`getTodayVN()`).
-  - Hỗ trợ chuyển đổi linh hoạt giữa chế độ xem **Theo Ngày** và **Khoảng Ngày**, lọc theo trạng thái (`OPEN`, `NEEDS_REVIEW`, `CLOSED`, `APPROVED`), lọc vai trò và tìm kiếm nhân viên.
-  - Hiển thị trực quan ảnh chụp camera selfie vào/ra (hoặc nhãn tự động từ phiếu giao nhận của tài xế), khoảng cách GPS tới xưởng và loại ngày công (`NORMAL`, `OVERTIME`, `SUNDAY`, `HOLIDAY`).
-  - Nút **Duyệt nhanh toàn bộ ca hoàn tất** trong ngày sang `APPROVED` và modal **Rà soát ca (`AttendanceReviewModal`)** cho phép bổ sung giờ ra ca cho các ca quên check-out (`NEEDS_REVIEW`), điều chỉnh loại ngày công và trạng thái ca kèm lý do audit. Phân quyền cho `ADMIN`, `MANAGER` và `ACCOUNTANT`.
+- **Chấm công On-Device AI & Liveness Detection (`AttendancePage`, `FaceScannerModal`, `useFaceRecognition`, `useAttendance`, `useWorkshopGeo`):**
+  - **On-Device AI WebAssembly/WebGL (`@vladmandic/face-api`):** Chạy trực tiếp trên trình duyệt PWA của thợ (0đ chi phí, 0 lượt giới hạn API, không phụ thuộc cloud API key, 0% CPU/RAM VPS). Bộ model nén nhẹ (~6.6MB) lưu tĩnh tại `/public/models/` và được Workbox PWA precache offline.
+  - **Khung Oval thông minh & Liveness Blink Detection:** Giao diện camera có khung Oval đổi màu theo trạng thái (Trắng nét đứt khi chưa thấy mặt $\rightarrow$ Vàng nhấp nháy khi đã phát hiện mặt $\rightarrow$ Xanh lá khi phát hiện chớp mắt tự nhiên dựa trên chỉ số Eye Aspect Ratio $\text{EAR} < 0.22$). Khi hoàn thành chớp mắt, hệ thống tự động chụp và trích xuất vector 128 chiều (`faceDescriptor`). Có nút chụp thủ công và fallback tải ảnh thường.
+  - **Geofencing & Chống gian lận:** Quét tọa độ GPS xưởng độ chính xác cao (`enableHighAccuracy: true`), kiểm tra bán kính xưởng $\le 150m$, chống Fake GPS. Sau khi check-in ca tự động kích hoạt mở phiên **khâu mặc định** (`defaultJobType`) cho thợ; khi check-out ca tự động đóng phiên khâu đang mở.
+- **Tự động lưu mẫu khuôn mặt (Auto-Enrollment):** Khi thợ cập nhật Avatar cá nhân trong `ProfileEditModal`, hệ thống tự động trích xuất vector khuôn mặt và lưu vào hồ sơ nhân viên `StaffAccount.faceDescriptor`.
+- **Bảng công toàn xưởng & Rà soát ca (`AttendanceReviewPage`, `AttendanceTableComponent`, `AttendanceReviewModal`):**
+  - Hiển thị huy hiệu AI Face Verification tại từng ca làm việc (`🟢 Khớp 95%` hoặc `🔴 Nghi vấn` nếu lệch mặt $d > 0.50$).
+  - Modal `AttendanceReviewModal` bố trí 3 cột ảnh đối chứng: Mẫu Avatar gốc hồ sơ $\leftrightarrow$ Ảnh selfie vào ca $\leftrightarrow$ Ảnh hết ca kèm chỉ số confidence% và khoảng cách GPS, giúp Quản lý xưởng dễ dàng thẩm định và phê duyệt.
 - **Trạm công việc thợ theo phiên (`HourlyWorkStationPage`, `useHourlyWorkStation`):**
   - Hiển thị khâu mặc định được phân công và thẻ phiên đang chạy kèm đồng hồ đếm thời gian thực cập nhật mỗi 30s (`CurrentSegmentCardComponent`).
   - Nút **Checkout khâu**: Đóng phiên hiện tại, tính số phút và tiền công tạm tính. Nếu khâu vừa đóng là khâu phụ (khác khâu mặc định) và ca làm việc vẫn mở, hệ thống **tự động check-in lại khâu mặc định** (`AUTO_RESUME`).
