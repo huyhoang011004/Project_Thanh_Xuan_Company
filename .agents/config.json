@@ -1,6 +1,6 @@
 {
   "project": {
-    "name": "Laundry Express Thanh Xuan",
+    "name": "Thanh Xuan Company Ecosystem",
     "techStack": [
       "Next.js (App Router)",
       "React",
@@ -18,7 +18,7 @@
       "Layered Architecture (Controller -> Service -> Repository -> Model)",
       "Repository Pattern (BaseRepository)",
       "Strategy Pattern",
-      "Multi-Database (3 Mongoose Connections)",
+      "Multi-Database Isolation (Mongoose Named Connections)",
       "Feature-based Colocation",
       "Docker Containerization"
     ]
@@ -48,23 +48,33 @@
       "domain": "noibo.thanhxuanlaundry.com"
     },
     "moving": {
-      "path": "./fe-nextjs-moving-express",
+      "path": "./fe-nextjs-chuyennhatietkiem",
       "port": 3002,
       "container": "moving_frontend",
-      "domain": "chuyennhatietkiem.com"
+      "domain": "chuyennhatietkiem.vn"
     }
   },
   "databases": {
     "laundry": "laundry_express",
     "moving": "moving_express",
-    "internal": "internal_express"
+    "internal": "internal_express",
+    "core": "core_express"
   },
   "modules": {
     "root": "./be-nestjs-thanhxuan/src/modules",
     "core": {
       "path": "core",
-      "database": null,
-      "items": ["ai", "upload"]
+      "database": "core_express",
+      "items": [
+        "ai",
+        "audit",
+        "auth",
+        "idempotency",
+        "media",
+        "notifications",
+        "schedule",
+        "upload"
+      ]
     },
     "laundry": {
       "path": "laundry",
@@ -98,22 +108,43 @@
       "moduleFile": "internal.module.ts",
       "constantsFile": "internal.constants.ts",
       "shared": ["common"],
-      "items": ["attendance", "handover", "partners", "piecework", "staff-auth"]
+      "items": [
+        "attendance",
+        "auth",
+        "fuel",
+        "handovers",
+        "partners",
+        "payroll",
+        "piecework",
+        "reports"
+      ]
     }
   },
   "infrastructure": {
     "dockerCompose": "./docker-compose.yml",
-    "containers": ["mongodb", "backend", "frontend", "internal_frontend"]
+    "containers": [
+      "mongodb",
+      "backend",
+      "frontend",
+      "internal_frontend",
+      "moving_frontend"
+    ]
   },
   "rules": {
     "systemContextFile": ".agents/rules/AGENTS.md",
-    "additionalContextFiles": [".agents/rules/GEMINI.md"],
+    "additionalContextFiles": [
+      ".agents/rules/GEMINI.md",
+      ".agents/rules/backend.md",
+      ".agents/rules/frontend.md",
+      ".agents/rules/readme.md"
+    ],
     "strictMode": true,
     "disallowedFeatures": [
       "client-auth",
       "any-type",
       "model-access-outside-repository",
-      "docker-build-on-vps"
+      "docker-build-on-vps",
+      "direct-push-to-master"
     ]
   },
   "generation": {
