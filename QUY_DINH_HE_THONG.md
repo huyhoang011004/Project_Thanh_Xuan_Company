@@ -60,10 +60,12 @@ Bạn có thể chạy các lệnh này từ **bất kỳ thư mục nào** trê
 
 ---
 
-## 4. Tài Liệu Nghiệp Vụ & Kiến Trúc Tra Cứu
+## 4. Tài Liệu Kỹ Thuật Lập Trình Được Lưu Trữ Trên VPS
 
-Tất cả tài liệu được duy trì tự động đồng bộ tại `.agents/docs/`:
-- **`SRS_SDD.md`**: Bản đặc tả kiến trúc tổng quan hệ thống.
-- **`DATABASE_DICTIONARY.md`**: Từ điển chi tiết 34+ Collections MongoDB, quan hệ và kiểu dữ liệu.
-- **`CODEBASE_ATLAS.md`**: Bản đồ định vị nhanh toàn bộ file mã nguồn theo route và endpoint.
-- **`CHANGELOG.md`**: Nhật ký chi tiết các phiên bản và tính năng đã triển khai.
+Theo yêu cầu tối ưu cho VPS lập trình, toàn bộ tài liệu cho khách/người dùng cuối (`pricing/`, `user_guides/`, các script xuất file PDF) đã được loại bỏ qua cơ chế `git sparse-checkout`. Trên VPS này chỉ lưu trữ các tài liệu kỹ thuật cốt lõi phục vụ viết code:
+
+- **`SRS_SDD.md`** & **`srs_sdd/`**: Đặc tả yêu cầu kỹ thuật và thiết kế kiến trúc toàn hệ sinh thái và từng phân hệ.
+- **`DATABASE_DICTIONARY.md`**: Từ điển dữ liệu chi tiết cho 34+ Collections MongoDB, schema, index và quan hệ.
+- **`CODEBASE_ATLAS.md`**: Bản đồ định vị mã nguồn (Endpoint ↔ Controller ↔ Service ↔ Repository và Route ↔ Component).
+- **`CHANGELOG.md`**: Nhật ký thay đổi và lịch sử triển khai kỹ thuật.
+- **`plans/` & `reviews/`**: Các tài liệu quy trình phát triển Plan/Review kỹ thuật.
