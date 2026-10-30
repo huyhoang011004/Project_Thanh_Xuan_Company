@@ -2,6 +2,50 @@
 
 Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâng cấp, bugfix và triển khai tính năng của Hệ sinh thái Công ty Thanh Xuân qua từng Plan.
 
+## 2026-10-31
+
+### Plan 59: Tích Hợp Xác Thực Sinh Trắc Học Thiết Bị (WebAuthn / Passkeys - Face ID & Vân Tay) & Tối Ưu Chụp Ảnh Hiện Trường Cho Chấm Công (be-nestjs-thanhxuan & fe-react-thanhxuan-internal)
+
+- **Bối cảnh & Bài toán thực tế:**
+  - Khi triển khai On-Device AI Face Verification (Plan 58), phát sinh tình huống thực tế tại xưởng giặt là:
+    - Công nhân đeo kính cận dày bị gọng kính và tròng phản quang làm sai lệch 6 điểm mốc mí mắt, khiến chỉ số EAR (Eye Aspect Ratio) không chạm ngưỡng < 0.22 để nhận diện chớp mắt tự nhiên.
+    - Công nhân đeo khẩu trang chống bụi xưởng bị che khuất 50% diện mạo khuôn mặt, khiến mô hình AI không thể nhận diện được cấu trúc mặt để trích xuất vector.
+  - Người dùng đề xuất giải pháp tận dụng tính năng **xác thực sinh trắc học phần cứng của điện thoại cá nhân** (Face ID trên iPhone, cảm biến Vân tay trên Android).
+- **Giải pháp & Kiến trúc triển khai (Plan 59):**
+  1. **Tích hợp Chuẩn Quốc Tế WebAuthn (FIDO2 / Passkeys / Web Authentication API):**
+     - **Backend (`be-nestjs-thanhxuan`):**
+       - Cài đặt `@simplewebauthn/server@14.0.3`.
+       - Mở rộng Schema `staff-account.schema.ts`: Bổ sung sub-schema `WebAuthnCredential` (`credentialId`, `publicKey`, `counter`, `transports`, `deviceName`, `createdAt`) và trường bảo mật `currentWebAuthnChallenge` (chống Replay Attack).
+       - Mở rộng Schema `attendance-record.schema.ts`: Bổ sung cờ `isBiometricDeviceVerified: boolean` trong `CheckInInfo` và `CheckOutInfo`.
+       - Xây dựng `WebAuthnService` (`webauthn.service.ts`) và `WebAuthnController` (`webauthn.controller.ts`) với 6 endpoints bảo mật tại `/api/v1/internal/auth/webauthn/*`:
+         - `POST /register-options`: Sinh challenge đăng ký thiết bị mới, hỗ trợ Relying Party ID động (`noibo.thanhxuanlaundry.com`, `thanhxuanlaundry.com`, `localhost`).
+         - `POST /register-verify`: Xác thực chữ ký Attestation, lưu Public Key vào tài khoản.
+         - `POST /auth-options`: Sinh challenge xác thực đăng nhập/chấm công.
+         - `POST /auth-verify`: Xác thực chữ ký sinh trắc học phần cứng (Face ID / Vân tay).
+         - `GET /credentials`: Liệt kê các thiết bị đã liên kết của nhân sự.
+         - `DELETE /credentials/:credentialId`: Hủy liên kết thiết bị cũ.
+       - Cập nhật `AttendanceService`: Khi có cờ `isBiometricDeviceVerified: true` (đã xác thực qua Face ID / Vân tay phần cứng chính chủ), hệ thống ưu tiên tin cậy cảm biến thiết bị, tự động mở ca `OPEN` hoặc chốt ca `CLOSED` sạch sẽ mà không bị treo vào cảnh báo `NEEDS_REVIEW`.
+     - **Frontend PWA (`fe-react-thanhxuan-internal`):**
+       - Cài đặt `@simplewebauthn/browser@14.0.0`.
+       - Xây dựng Custom Hook `useWebAuthn.ts`: Kiểm tra hỗ trợ Platform Authenticator (`PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable`), kích hoạt đăng ký thiết bị 1 chạm và bật popup quét Face ID / Vân tay siêu tốc (< 0.5s).
+       - Xây dựng Component `BiometricPromptBanner.tsx`: Hiển thị banner gợi ý kích hoạt Face ID / Vân tay công thái học trên trang chấm công.
+       - Tách Component `AttendanceTodayShiftCardComponent.tsx`: Đảm bảo quy chuẩn kích thước tệp tin tinh gọn (< 250-300 dòng).
+       - Cập nhật `AttendancePage.tsx`: Tích hợp xác thực phần cứng Face ID / Vân tay trước khi gửi ca chấm công; hiển thị huy hiệu xác thực trên ảnh selfie.
+  2. **Tối ưu Hóa Camera Hiện Trường (Bỏ ép buộc chớp mắt):**
+     - Nâng cấp `FaceScannerModal.tsx`:
+       - Loại bỏ điều kiện ép buộc phải chớp mắt mới cho chụp ảnh.
+       - Bổ sung nút **"CHỤP ẢNH NGAY"** to bản, nổi bật, sẵn sàng bấm chụp trong mọi điều kiện ánh sáng ngược, thợ đeo kính cận hay đeo khẩu trang.
+       - Giữ nguyên ảnh selfie camera làm bằng chứng hiện trường trực quan song song với GPS xưởng để Quản lý đối soát.
+  3. **Cập nhật Giao diện Quản lý Đối Soát Ca Làm Việc:**
+     - Nâng cấp `AttendanceTableComponent.tsx`: Hiển thị huy hiệu `📱 Passkey` (Face ID / Vân tay máy) tại cột Vào ca và Hết ca.
+     - Nâng cấp `AttendanceReviewModal.tsx`: Hiển thị chi tiết trạng thái xác thực phần cứng thiết bị song song với điểm tin cậy AI và tọa độ GPS.
+- **Kết quả kiểm thử & Triển khai thực tế:**
+  - TypeScript strict check và Build pass 100% trên cả 2 ứng dụng Backend và Frontend.
+  - Đóng gói standalone bundle `@simplewebauthn/server` tối ưu hóa bộ nhớ VPS.
+  - Deploy bản build PWA mới thành công vào `/var/www/noibo/dist/` và reload Nginx.
+  - Cập nhật dist Backend vào Docker container `laundry_backend` và restart thành công (NestJS khởi động trong 386ms).
+  - Đồng bộ 100% hệ thống 5 trụ cột tài liệu kỹ thuật (`DATABASE_DICTIONARY.md`, `CODEBASE_ATLAS.md`, `srs_sdd_backend.md`, `srs_sdd_fe_internal.md`, `SRS_SDD.md`).
+
 ## 2026-10-30
 
 ### Plan 58: Triển Khai Xác Thực Khuôn Mặt On-Device AI (@vladmandic/face-api) & Liveness Detection (fe-react-thanhxuan-internal & be-nestjs-thanhxuan)

@@ -154,7 +154,15 @@ Website_Thanh_Xuan_Company/
 
 ## 4. DOCUMENT HISTORY
 
-- **2026-10-29 - Tách Modular SRS/SDD Phân Hệ Frontend:** Phân tách tài liệu Web Next.js thành 2 tài liệu chuyên biệt: srs_sdd_fe_laundry.md (fe-nextjs-thanhxuan-laundry) và srs_sdd_fe_moving.md (fe-nextjs-chuyennhatietkiem); cập nhật toàn diện AGENTS.md, GEMINI.md và các skills (act, docs-sync, srs-sdd) với quy tắc bắt buộc Agent viết đúng tài liệu phân hệ tương ứng.
+- **2026-10-31 - Plan 59 - Tích Hợp Xác Thực Sinh Trắc Học Thiết Bị (WebAuthn / Passkeys - Face ID & Vân Tay) & Tối Ưu Chụp Ảnh Hiện Trường Cho Chấm Công:** Tích hợp cặp thư viện chuẩn `@simplewebauthn/server` và `@simplewebauthn/browser`, hỗ trợ công nhân kích hoạt Face ID / Vân tay phần cứng điện thoại 0.5s chấm công siêu tốc không lo kính cận hay khẩu trang, tối ưu camera hiện trường bỏ ép buộc chớp mắt kèm nút chụp tức thì, hiển thị huy hiệu Passkey đối soát trên bảng công quản lý; verify build và deploy live pass 100%.
+
+- **2026-10-30 - Plan 58 - Triển Khai Xác Thực Khuôn Mặt On-Device AI (@vladmandic/face-api) & Liveness Detection (fe-react-thanhxuan-internal & be-nestjs-thanhxuan):** Ứng dụng On-Device AI WebAssembly/WebGL không tốn chi phí API, 0 lượt giới hạn, 0% CPU/RAM VPS; phát hiện chớp mắt tự nhiên (EAR < 0.22) với khung Oval đổi màu; tự động trích xuất vector 128 chiều (`faceDescriptor`) và đối soát kép Euclidean distance ($d \le 0.50$); tự động enroll làm khuôn mặt gốc khi check-in lần đầu hoặc đổi ảnh đại diện trong `ProfileEditModal`; gắn cờ `NEEDS_REVIEW` khi phát hiện nghi vấn lệch mặt để Quản lý xưởng đối chiếu mắt thường với Avatar hồ sơ trong `AttendanceReviewModal`.
+
+- **2026-10-30 - Plan 57 - Cơ Chế Duy Trì Phiên Đăng Nhập Lâu Dài Như Mobile App Cho PWA (fe-react-thanhxuan-internal & be-nestjs-thanhxuan):** Phân rã toàn bộ 14 tệp vượt ngưỡng 300 dòng trong phân hệ Laundry xuống < 250-300 dòng; xây dựng DTO và Repository Pattern chuẩn cho EmailMarketing và ZaloMarketing; chuẩn hóa cookies và duy trì phiên đăng nhập lâu dài cho PWA.
+
+- **2026-10-30 - Plan 56 - Hoàn Thiện Toàn Diện Cấu Hình PWA (fe-react-thanhxuan-internal):** Sinh bộ icon PNG chuẩn (192px, 512px, maskable, iOS apple-touch 180px), cấu hình Web App Shortcuts 1 chạm ngoài màn hình, thiết lập Workbox runtime caching cho Cloudinary CDN/Google Fonts, và tích hợp PwaReloadPrompt nhắc nhở cập nhật bản mới.
+
+- **2026-10-29 - Plan 55 - Chức Năng Shipper Xin Nghỉ Giao Nhận & Phân Tuyến Kèm Tiền Công (Shipper Leave & Route Reassignment Workflow):** Xây dựng module `ShipperLeavesModule` (schema `shipper_leave_requests`), quy trình duyệt 2 bước, thông báo email tự động qua Nodemailer, tự động chuyển tuyến giao trên lịch trình đối tác; verify test 50/50 suites và build pass 100%.
 
 > 📌 **Chi tiết toàn bộ nhật ký các Plan và Bugfix:** Xem đầy đủ tại [CHANGELOG.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/CHANGELOG.md).
 
