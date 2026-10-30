@@ -4,6 +4,41 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
 
 ## 2026-10-30
 
+### Plan 58: Triển Khai Xác Thực Khuôn Mặt On-Device AI (@vladmandic/face-api) & Liveness Detection (fe-react-thanhxuan-internal & be-nestjs-thanhxuan)
+
+- **Bối cảnh & Bài toán:**
+  - Hệ thống chấm công tại xưởng trước đây chỉ yêu cầu thợ chụp ảnh camera selfie tải lên server và kiểm tra Geofencing GPS.
+  - Người dùng đặt câu hỏi về giải pháp xác thực khuôn mặt khi check-in để chống điểm danh hộ. Tuy nhiên, nếu dùng Cloud AI (như Gemini Vision API gói Free tier chỉ có 15 RPM / 1,500 RPD), khi nhiều thợ cùng check-in đầu ca sáng 07:30 - 08:00 sẽ dễ bị lỗi nghẽn `429 Too Many Requests` và chi phí bản quyền phát sinh nếu nâng gói thương mại.
+- **Giải pháp On-Device AI WebAssembly/WebGL (Plan 58):**
+  - Chuyển toàn bộ tải tính toán AI về thiết bị của thợ (Client-Side PWA) sử dụng thư viện `@vladmandic/face-api` chạy trên nền tảng WebAssembly (WASM) và WebGL:
+    - **0đ chi phí vận hành:** Hoàn toàn không tốn tiền API hay quota hàng tháng.
+    - **0 giới hạn lượt check-in:** Đáp ứng không giới hạn số lượng công nhân check-in cùng lúc.
+    - **0% tải CPU/RAM trên VPS:** VPS (< 512MB RAM) chỉ lưu trữ ảnh và nhận vector đặc trưng 128 chiều (`faceDescriptor`), không phải xử lý AI nặng.
+    - **Hoạt động hoàn toàn Offline:** Các mô hình mạng nơ-ron thu nhỏ (`tiny_face_detector`, `face_landmark_68_tiny`, `face_recognition`) có tổng dung lượng nhẹ ~6.6MB, lưu tĩnh tại `/public/models/` và được Workbox PWA precache vào cache trình duyệt.
+- **Thay đổi chi tiết & Kiến trúc triển khai:**
+  1. **Frontend PWA (`fe-react-thanhxuan-internal`):**
+     - Cài đặt `@vladmandic/face-api@1.7.15`, cấu hình `runtimeCaching` trong `vite.config.ts`.
+     - Xây dựng Custom Hook `useFaceRecognition.ts`: Tải mô hình bất đồng bộ từ `/models/`, hỗ trợ phương thức `scanFrame` quét từng khung hình từ WebRTC Camera, tính toán tỷ lệ mở mắt (Eye Aspect Ratio - EAR) dựa trên 6 điểm mốc mắt để phát hiện hành vi chớp mắt sống thực tế (Liveness Blink Detection), và phương thức `extractDescriptorFromFile` trích xuất vector khuôn mặt từ file ảnh.
+     - Xây dựng Modal Camera thông minh `FaceScannerModal.tsx`: Khung Oval định vị gương mặt chuyển màu linh hoạt (Nét đứt trắng $\rightarrow$ Vàng nhấp nháy khi thấy mặt $\rightarrow$ Xanh lá rực rỡ khi hoàn tất chớp mắt tự nhiên), tự động trích xuất vector và chụp ngay lập tức. Hỗ trợ nút chụp thủ công và fallback tải ảnh thường.
+     - Cập nhật `AttendancePage.tsx`: Tích hợp mở `FaceScannerModal`, hiển thị huy hiệu `🟢 Khuôn mặt thực (AI)` trên ảnh selfie đã chụp.
+     - Tự động lưu mẫu khi đổi Avatar (`ProfileEditModal.tsx` & `useProfileEdit.ts`): Khi thợ đổi ảnh đại diện, hệ thống tự động quét và lưu vector làm mẫu hồ sơ gốc `StaffAccount.faceDescriptor`.
+     - Nâng cấp giao diện Quản lý duyệt ca (`AttendanceTableComponent.tsx` & `AttendanceReviewModal.tsx`): Bổ sung huy hiệu AI Face (độ khớp %, liveness) ở cột Vào ca / Hết ca; thiết kế 3 cột ảnh đối chứng trong Modal duyệt (Avatar hồ sơ gốc $\leftrightarrow$ Ảnh selfie vào ca $\leftrightarrow$ Ảnh hết ca) giúp Quản lý xưởng dễ dàng thẩm định mắt thường và phê duyệt.
+  2. **Backend API (`be-nestjs-thanhxuan`):**
+     - Mở rộng Schema `staff-account.schema.ts`: Bổ sung `@Prop({ type: [Number] }) faceDescriptor?: number[]`.
+     - Mở rộng Schema `attendance-record.schema.ts`: Bổ sung schema con `FaceVerificationInfo` (`isVerified`, `confidence`, `isLivePhoto`, `descriptor`) trong `CheckInInfo` và `CheckOutInfo`.
+     - Mở rộng DTO `CheckInDto`, `CheckOutDto`, `UpdateProfileDto` hỗ trợ `faceDescriptor` và `isLivePhoto`.
+     - Nâng cấp `AttendanceService`:
+       - Tự động ghi nhận vector mẫu (Auto-Enrollment) cho nhân sự check-in lần đầu.
+       - Tính toán khoảng cách Euclidean (Euclidean Distance): $d = \sqrt{\sum (a_i - b_i)^2}$, điểm tin cậy $\text{confidence} = \max(0, \min(100, \text{round}((1 - d) \times 100)))$.
+       - Ngưỡng đối soát chuẩn $d \le 0.50$. Nếu lệch mặt ($d > 0.50$), ca chấm công vẫn được ghi nhận nhưng tự động chuyển trạng thái sang `AttendanceStatus.NEEDS_REVIEW` kèm cờ cảnh báo AI để Quản lý rà soát.
+- **Kết quả kiểm thử & Triển khai thực tế:**
+  - TypeScript strict check và Build pass 100% trên cả 2 ứng dụng Backend và Frontend.
+  - Deploy bản build PWA mới thành công lên `https://noibo.thanhxuanlaundry.com`.
+  - Copy bản build backend vào Docker container `laundry_backend` và restart thành công.
+  - Cập nhật đầy đủ 5 trụ cột tài liệu kỹ thuật (`DATABASE_DICTIONARY.md`, `CODEBASE_ATLAS.md`, `srs_sdd_backend.md`, `srs_sdd_fe_internal.md`, `SRS_SDD.md`).
+
+
+
 ### Feature: Mở Rộng Hỗ Trợ Đa Dạng Định Dạng Ảnh Cho POST /api/v1/internal/upload (be-nestjs-thanhxuan)
 
 - **Bối cảnh & Yêu cầu:**

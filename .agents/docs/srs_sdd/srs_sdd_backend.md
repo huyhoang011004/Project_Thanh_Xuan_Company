@@ -78,9 +78,14 @@ Backend API tập trung phục vụ toàn bộ các kênh tương tác của Cô
   - Tích hợp Bảng lương Shipper: Khi tài xế hoàn thành phiếu giao nhận trong tháng, tổng tiền các chuyến tự do được helper `payroll-shipper-calculator.helper.ts` tự động tổng hợp vào trường `extraDeliveryPay` và cộng trực tiếp vào thu nhập thực nhận `netPay` của tháng đó.
   - Phân quyền bảo mật tài chính: Cả hai endpoint cấu hình tiền chuyến (`/compensation` và `/cluster-compensation`) được bảo vệ bằng quyền duy nhất `pay.rate.manage` (`PERMISSIONS.PAY_RATE_MANAGE`), chỉ cho phép Quản trị viên (`ADMIN`) và Kế toán (`ACCOUNTANT`) thực hiện, ngăn chặn hoàn toàn Thủ kho (`WAREHOUSE_MANAGER`) hay Quản lý xưởng (`MANAGER`) can thiệp vào định mức thù lao.
 
-#### BE-FR-04: Chấm Công Camera Selfie & Công Thợ Theo Thời Gian x Hệ Số (`/api/v1/internal/attendance`, `/piecework`)
-- **Chấm công camera selfie:**
-  - Bắt buộc tải ảnh chụp trực tiếp từ camera của thợ/nhân viên, lưu trữ trên Cloudinary.
+#### BE-FR-04: Chấm Công Camera Selfie & Xác Thực Khuôn Mặt AI (`/api/v1/internal/attendance`, `/piecework`)
+- **Chấm công camera selfie & On-Device AI Face Verification:**
+  - Bắt buộc tải ảnh chụp trực tiếp từ camera của thợ/nhân viên, lưu trữ trên Cloudinary & VPS.
+  - Nhận diện khuôn mặt và tính toán khoảng cách Euclidean (Euclidean Distance):
+    - Client trích xuất vector đặc trưng khuôn mặt 128 chiều (`faceDescriptor`) và liveness detection (chớp mắt tự nhiên) gửi kèm payload chấm công.
+    - **Tự động đăng ký (Auto-Enrollment):** Nếu nhân sự chưa có khuôn mặt mẫu trong `StaffAccount`, hệ thống tự động lưu vector đầu tiên làm mẫu chuẩn (`confidence: 100%`).
+    - **Đối soát tính toán:** Tính khoảng cách $d = \sqrt{\sum (a_i - b_i)^2}$, điểm tin cậy $\text{confidence} = \max(0, \min(100, \text{round}((1 - d) \times 100)))$. Ngưỡng chấp nhận $d \le 0.50$.
+    - **Chống gian lận:** Nếu $d > 0.50$ (lệch mặt/nghi vấn điểm danh hộ), ca chấm công vẫn được ghi nhận nhưng tự động gắn cờ `status = AttendanceStatus.NEEDS_REVIEW` kèm thông báo cảnh báo để Quản lý xưởng trực tiếp đối chiếu mắt thường với Avatar hồ sơ gốc trước khi duyệt.
   - Mỗi nhân sự chỉ có duy nhất 1 ca làm việc `OPEN` tại một thời điểm (trùng trả về HTTP `409 Conflict`).
   - Ghi nhận giờ vào/ra chuẩn server theo múi giờ `Asia/Ho_Chi_Minh`, tự động tính số phút làm việc `workedMinutes`.
   - Cron lúc 00:30 mỗi ngày quét các ca làm việc quá 16 giờ chưa check-out để chuyển sang trạng thái cảnh báo `NEEDS_REVIEW`.
