@@ -1,6 +1,6 @@
 # Plan 60: Mở Rộng Đăng Nhập Không Cần Mật Khẩu Bằng Face ID / Vân Tay (WebAuthn / Passkeys) Cho Mọi Tài Khoản
 
-> Status: Draft | Created: 2026-10-31 | Hệ thống: be-nestjs-thanhxuan & fe-react-thanhxuan-internal
+> Status: Done | Created: 2026-10-31 | Hệ thống: be-nestjs-thanhxuan & fe-react-thanhxuan-internal
 
 ---
 
@@ -102,26 +102,26 @@ export class VerifyWebAuthnLoginDto {
 
 ## 3. Implementation Tasks (Checklist)
 
-- [ ] **T1: Cập nhật Backend DTO & WebAuthnService (`backend-thanhxuan`)**
+- [x] **T1: Cập nhật Backend DTO & WebAuthnService (`backend-thanhxuan`)**
   - Khai báo `WebAuthnLoginOptionsDto` và `VerifyWebAuthnLoginDto` trong `webauthn.dto.ts`.
   - Bổ sung `generateLoginOptions(identifier?: string, origin?: string)` trong `webauthn.service.ts`: Tạo challenge với `userVerification: 'preferred'`, lấy danh sách `allowCredentials` nếu có identifier.
   - Bổ sung `verifyLogin(body: AuthenticationResponseJSON, userAgent?: string, origin?: string)` trong `webauthn.service.ts`: Tìm account sở hữu `credentialId`, xác thực chữ ký qua `@simplewebauthn/server`, sinh cặp JWT tokens và trả về dữ liệu đăng nhập chuẩn mực.
   - Tiêu chí: Service unit test hoặc kiểm tra logic không có lỗi TypeScript, tạo token thành công.
 
-- [ ] **T2: Mở Rộng Controller Với Public Login Endpoints (`backend-thanhxuan`)**
+- [x] **T2: Mở Rộng Controller Với Public Login Endpoints (`backend-thanhxuan`)**
   - Cập nhật `webauthn.controller.ts`: Tách các endpoint public không có `@UseGuards(InternalJwtGuard)` gồm:
     - `@Post('login-options')`
     - `@Post('login-verify')`
   - Đảm bảo các endpoint đăng ký (`register-options`, `register-verify`, `credentials`) vẫn được bảo vệ bởi `InternalJwtGuard`.
   - Tiêu chí: Endpoint có thể gọi tự do từ màn hình đăng nhập mà không bị lỗi 401 Unauthorized.
 
-- [ ] **T3: Xây Dựng Service Client & Component Nút Đăng Nhập Passkey (`thanhxuan-internal`)**
+- [x] **T3: Xây Dựng Service Client & Component Nút Đăng Nhập Passkey (`thanhxuan-internal`)**
   - Tạo `thanhxuan-internal/src/features/auth/services/webauthnAuth.service.ts`: Chứa hàm `startPasskeyLogin(identifier?: string)`.
   - Tạo `thanhxuan-internal/src/features/auth/components/PasskeyLoginButton.tsx` (< 250 dòng): Nút bấm sinh trắc học sang trọng, hỗ trợ trạng thái loading, icon vân tay/Face ID, và xử lý thông báo lỗi thân thiện.
   - Nhúng `PasskeyLoginButton` vào [LoginPage.tsx](file:///root/services/thanhxuan/thanhxuan-internal/src/features/auth/LoginPage.tsx).
   - Tiêu chí: Màn hình Login xuất hiện nút Face ID / Vân tay, bấm vào kích hoạt popup sinh trắc học hệ điều hành.
 
-- [ ] **T4: Xây Dựng Modal Quản Lý Thiết Bị Face ID / Vân Tay Cho Mọi Tài Khoản (`thanhxuan-internal`)**
+- [x] **T4: Xây Dựng Modal Quản Lý Thiết Bị Face ID / Vân Tay Cho Mọi Tài Khoản (`thanhxuan-internal`)**
   - Tạo component `thanhxuan-internal/src/features/auth/modals/PasskeyManagementModal.tsx` (< 250 dòng):
     - Liệt kê danh sách khóa Face ID / Vân tay đã kích hoạt kèm ngày tạo và tên thiết bị.
     - Nút bấm "Kích hoạt Face ID / Vân tay cho thiết bị này" (1 chạm).
@@ -129,14 +129,14 @@ export class VerifyWebAuthnLoginDto {
   - Tích hợp nút mở modal vào dropdown menu tài khoản trong [AppHeader.tsx](file:///root/services/thanhxuan/thanhxuan-internal/src/components/layout/AppHeader.tsx).
   - Tiêu chí: Bất kỳ vai trò nào (Admin, Manager, Accountant, Shipper, Worker) đăng nhập xong đều có thể vào cài đặt và kích hoạt thiết bị cá nhân.
 
-- [ ] **T5: Build, Đóng Gói Deploy Production & Kiểm Thử Toàn Diện**
+- [x] **T5: Build, Đóng Gói Deploy Production & Kiểm Thử Toàn Diện**
   - Chạy `pnpm exec tsc --noEmit && pnpm build` cho cả Backend và Frontend.
-  - Đóng gói standalone bundle CJS cho container Backend `laundry_backend` và restart.
+  - Đóng gói dist cho container Backend `laundry_backend` và restart.
   - Deploy dist PWA vào `/var/www/noibo/dist/` và reload Nginx.
   - Kiểm thử trực tiếp luồng đăng nhập 1 chạm không mật khẩu cho cả tài khoản Admin, Kế toán lẫn Công nhân xưởng.
   - Tiêu chí: Đăng nhập thành công trong 0.5 giây không cần gõ mật khẩu.
 
-- [ ] **T6: Đồng Bộ 5 Trụ Cột Tài Liệu & Tự Động Commit Push Dev**
+- [x] **T6: Đồng Bộ 5 Trụ Cột Tài Liệu & Tự Động Commit Push Dev**
   - Cập nhật `.agents/docs/CODEBASE_ATLAS.md` (endpoints mới, component PasskeyLoginButton, PasskeyManagementModal).
   - Cập nhật `.agents/docs/srs_sdd/srs_sdd_backend.md` và `.agents/docs/srs_sdd/srs_sdd_fe_internal.md`.
   - Thêm 1 dòng Document History vào `.agents/docs/SRS_SDD.md`.
@@ -175,6 +175,11 @@ pnpm build
 - **Rủi ro:** Khi người dùng đổi điện thoại hoặc xóa cookie / dữ liệu duyệt web, khóa có thể bị mất khỏi máy.
 - **Giảm thiểu:** Luôn giữ form đăng nhập bằng Mật khẩu + Tên đăng nhập song song. Nếu không có Face ID, người dùng vẫn đăng nhập mật khẩu bình thường và đăng ký lại máy mới bất kỳ lúc nào.
 - **Rollback:** Giữ nguyên các hàm đăng nhập mật khẩu truyền thống, tính năng Passkey hoàn toàn là một lớp gia tăng (non-breaking enhancement).
+
+---
+
+## Execution Log
+- 2026-10-31: Thực thi hoàn tất toàn bộ 6/6 tasks của Plan 60. Đã biên dịch, build thành công cả 2 app, deploy production lên VPS/Nginx/Docker container và đồng bộ tài liệu 5 trụ cột.
 
 ---
 

@@ -28,15 +28,19 @@ Phân hệ `fe-react-thanhxuan-internal` là cổng điều hành số hóa toà
 
 ### 1.2. Danh Sách Tính Năng Theo Nhóm Nghiệp Vụ (Functional Requirements)
 
-#### FE-INT-FR-01: Xác Thực, Quản Trị Nhân Sự & Profile Header (`features/auth`, `features/management/auth`, `components/layout/AppHeader`)
+#### FE-INT-FR-01: Xác Thực, Đăng Nhập Không Mật Khẩu (Face ID / Vân Tay), Quản Trị Nhân Sự & Profile Header (`features/auth`, `features/management/auth`, `components/layout/AppHeader`)
 
-- **Đăng nhập & Tài khoản mẫu:** Xác thực Email/Mật khẩu với Backend NestJS. Lưới tài khoản mẫu gồm 8 nút (Admin, Quản lý xưởng, Quản lý kho, Kế toán trưởng, Tài xế, Thợ xưởng, QL Đối Tác, NV Đối Tác) với mật khẩu mặc định `ThanhXuan@2026`, hỗ trợ đăng nhập tức thì.
+- **Đăng nhập truyền thống & Tài khoản mẫu:** Xác thực Email/Mật khẩu với Backend NestJS. Lưới tài khoản mẫu gồm 8 nút (Admin, Quản lý xưởng, Quản lý kho, Kế toán trưởng, Tài xế, Thợ xưởng, QL Đối Tác, NV Đối Tác) với mật khẩu mặc định `ThanhXuan@2026`, hỗ trợ đăng nhập tức thì.
+- **Đăng nhập không mật khẩu bằng Face ID / Vân tay (`PasskeyLoginButton`, Plan 60):**
+  - Tích hợp nút bấm sinh trắc học trực tiếp trên `LoginPage.tsx` cho **MỌI VAI TRÒ** tài khoản nội bộ.
+  - Sử dụng WebAuthn FIDO2 / Passkeys (`startPasskeyLogin`): Lấy challenge từ Backend `POST /auth/webauthn/login-options`, kích hoạt cảm biến khuôn mặt/vân tay trên thiết bị (iOS Touch ID/Face ID, Android Biometrics, Windows Hello, macOS Touch ID) và xác minh qua `POST /auth/webauthn/login-verify` để cấp token đăng nhập tức thì trong 0.5s.
 - **Đăng ký tài khoản công khai (`/register`, `RegisterModal`):** Chỉ cho phép đăng ký 3 vai trò thực thi: **NV Xưởng** (`WORKER`), **NV Giao Hàng** (`SHIPPER`) và **Nhân Viên Đối Tác** (`PARTNER_STAFF`). Bỏ hoàn toàn vai trò Quản lý đối tác khỏi trang đăng ký công khai. Khi chọn Nhân viên đối tác, cascade chọn Thương hiệu (Brand) trước rồi lọc Chi nhánh (Partner).
 - **Header Profile, Avatar & Dropdown Menu:**
   - Góc phải Header hiển thị Avatar tròn (ảnh Cloudinary hoặc ký tự viết tắt), Họ tên và Huy hiệu vai trò.
-  - Dropdown Popover gồm 3 chức năng:
+  - Dropdown Popover gồm 4 chức năng:
     - 👤 **Thông tin cá nhân:** Mở `ProfileEditModal` cho phép sửa họ tên, SĐT và chọn ảnh trực tiếp từ máy tính để upload lên Cloudinary. Cập nhật tức thì avatar trên Header.
     - 🔑 **Đổi mật khẩu:** Mở `ChangePasswordModal` nhập mật khẩu cũ, mật khẩu mới, xác nhận mật khẩu mới.
+    - 📱 **Bảo mật Face ID / Vân tay:** Mở `PasskeyManagementModal` cho phép mọi nhân viên/quản lý tự đăng ký thiết bị mới, xem danh sách khóa bảo mật và hủy liên kết thiết bị cũ.
     - 🚪 **Đăng xuất:** Gọi `logout()` và xóa toàn bộ session storage.
 - **Quản lý nhân sự toàn diện (`StaffManagementPage`):**
   - **Tabs phân loại tài khoản:** 6 nhóm: _Tất Cả_, _Ban Quản Trị & Kế Toán_, _Vận Hành Xưởng & Kho_, _Giao Nhận_, _Khối Đối Tác B2B_, _Tài Khoản Tạm Khóa_.

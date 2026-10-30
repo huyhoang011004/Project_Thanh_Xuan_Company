@@ -4,6 +4,32 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
 
 ## 2026-10-31
 
+### Plan 60: Mở Rộng Đăng Nhập Không Cần Mật Khẩu Bằng Face ID / Vân Tay (WebAuthn / Passkeys) Cho Mọi Tài Khoản (be-nestjs-thanhxuan & fe-react-thanhxuan-internal)
+
+- **Bối cảnh & Mục tiêu:**
+  - Sau khi tích hợp thành công WebAuthn FIDO2 cho tính năng chấm công (Plan 59), người dùng yêu cầu mở rộng phạm vi: Cho phép **MỌI TÀI KHOẢN** thuộc toàn bộ các vai trò (`ADMIN`, `OPERATOR`, `MANAGER`, `WAREHOUSE_MANAGER`, `SHIPPER`, `WORKER`, `ACCOUNTANT`, `PARTNER`) được đăng nhập trực tiếp từ màn hình Login bằng Face ID / Vân tay mà **hoàn toàn không cần nhập mật khẩu** (Passwordless Authentication).
+- **Chi tiết kỹ thuật đã thực hiện:**
+  1. **Backend NestJS (`be-nestjs-thanhxuan`):**
+     - Mở rộng DTO `webauthn.dto.ts`: Bổ sung `WebAuthnLoginOptionsDto` (nhận `identifier` tùy chọn) và `VerifyWebAuthnLoginDto` (nhận `response: AuthenticationResponseJSON`).
+     - Cập nhật `StaffAccountRepository`: Thêm phương thức `findByWebAuthnCredentialId(credentialId: string)` tra cứu tài khoản trực tiếp qua ID khóa sinh trắc học đã lưu.
+     - Cập nhật `WebAuthnService`:
+       - `generateLoginOptions(identifier?, originHeader?)`: Phát sinh challenge ngẫu nhiên với `userVerification: 'preferred'`, đính kèm `allowCredentials` nếu người dùng đã nhập tên đăng nhập trước đó.
+       - `verifyLogin(dto, userAgent?, originHeader?)`: Tra cứu tài khoản theo `credentialId`, kiểm tra trạng thái khóa `validateAccountLockout` và `validateAccountStatus`, xác minh chữ ký phần cứng qua `@simplewebauthn/server`, cập nhật counter chống tấn công sao chép, reset số lần đăng nhập sai, cấp Access Token & Refresh Token chuẩn mực cho nhân sự.
+     - Cập nhật `WebAuthnController`: Tách 2 endpoint public không yêu cầu JWT Bearer (`POST /auth/webauthn/login-options` và `POST /auth/webauthn/login-verify`) phục vụ đăng nhập không mật khẩu, trong khi các endpoint đăng ký thiết bị vẫn được bảo vệ bởi `InternalJwtGuard`.
+  2. **Frontend React PWA (`fe-react-thanhxuan-internal`):**
+     - Xây dựng `webauthnAuth.service.ts`: Gọi API Backend nhận options và gọi `@simplewebauthn/browser` (`startAuthentication`) để kích hoạt cảm biến khuôn mặt/vân tay trên máy, tự động lưu session vào Storage và kích hoạt sự kiện `auth:token-refreshed`.
+     - Xây dựng Component `PasskeyLoginButton.tsx` (< 250 dòng): Nút bấm sinh trắc học sang trọng trên `LoginPage.tsx`, tự động nhận diện icon Face ID trên Apple thiết bị hoặc icon Vân tay trên Android/Windows, xử lý loading và hiển thị thông báo lỗi thân thiện.
+     - Tích hợp vào `LoginPage.tsx`: Cho phép đăng nhập 1 chạm vào đúng màn hình theo vai trò (0.5 giây).
+     - Xây dựng Modal `PasskeyManagementModal.tsx` (< 250 dòng): Cho phép mọi tài khoản (Admin, Quản lý, Kế toán, Tài xế, Thợ) tự kích hoạt thêm máy mới hoặc xóa thiết bị cũ khi đổi điện thoại.
+     - Tích hợp vào `AppHeader.tsx`: Thêm mục "Bảo mật Face ID / Vân tay" trong dropdown avatar người dùng.
+  3. **Verification & Deployment:**
+     - Typecheck strict và Build pass 100% cho cả Backend NestJS và Frontend React PWA.
+     - Cập nhật dist vào container `laundry_backend` và restart thành công (NestJS khởi động trong 430ms).
+     - Deploy dist PWA vào `/var/www/noibo/dist/` và reload Nginx thành công.
+     - Test gọi API `POST /auth/webauthn/login-options` trả về challenge thành công mà không bị chặn bởi JWT Guard.
+  4. **Tài liệu & Đồng bộ:**
+     - Đồng bộ `CODEBASE_ATLAS.md`, `srs_sdd_backend.md`, `srs_sdd_fe_internal.md`, `SRS_SDD.md` và `CHANGELOG.md`.
+
 ### Plan 59: Tích Hợp Xác Thực Sinh Trắc Học Thiết Bị (WebAuthn / Passkeys - Face ID & Vân Tay) & Tối Ưu Chụp Ảnh Hiện Trường Cho Chấm Công (be-nestjs-thanhxuan & fe-react-thanhxuan-internal)
 
 - **Bối cảnh & Bài toán thực tế:**
