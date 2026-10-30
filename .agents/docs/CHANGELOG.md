@@ -4,6 +4,28 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
 
 ## 2026-10-30
 
+### Feature: Mở Rộng Hỗ Trợ Đa Dạng Định Dạng Ảnh Cho POST /api/v1/internal/upload (be-nestjs-thanhxuan)
+
+- **Bối cảnh & Yêu cầu:**
+  - Endpoint upload ảnh xưởng `POST /api/v1/internal/upload` và `POST /api/v1/internal/uploads` trước đây chỉ cho phép một danh sách hạn chế các định dạng ảnh raster (`.jpg`, `.jpeg`, `.png`, `.webp`, `.heic`, `.heif`, `.gif`) và yêu cầu bắt buộc cả MIME type lẫn extension file đều phải khớp.
+  - Người dùng và thiết bị di động (đặc biệt là camera điện thoại đời mới, các trình duyệt xuất blob không đuôi hoặc gửi MIME `application/octet-stream`, định dạng vector SVG hoặc AVIF hiện đại) cần được hỗ trợ tải lên mượt mà mà không bị từ chối 400 Bad Request.
+- **Giải pháp & Thay đổi kỹ thuật:**
+  1. **Mở rộng bộ lọc MIME Types & File Extensions (`InternalUploadController`):**
+     - Bổ sung toàn diện danh mục định dạng: JPEG/JPG, PNG, WebP, HEIC, HEIF, AVIF, SVG, GIF, BMP, TIFF/TIF, ICO.
+     - Cho phép chấp nhận các file có MIME type `image/*` (kể cả Blob không đuôi từ camera hoặc Canvas nén ảnh) HOẶC các file có đuôi mở rộng ảnh hợp lệ (kể cả khi thiết bị gửi dạng `application/octet-stream`).
+     - Đăng ký alias `@Controller(['uploads', 'upload'])` trên Controller để NestJS xử lý song song cả 2 định dạng đường dẫn URL.
+  2. **Cập nhật Lưu Trữ Vật Lý (`UploadService.saveLocalCopy`):**
+     - Bổ sung các định dạng mới vào mảng `allowedExts` (`.heic`, `.heif`, `.avif`, `.svg`, `.bmp`, `.tiff`, `.tif`, `.ico`).
+     - Bổ sung cơ chế tự động suy luận đuôi file từ MIME type khi client tải lên file không có đuôi (như `blob` từ Canvas/Mobile).
+  3. **Đồng bộ Controller chung (`UploadController`):**
+     - Mở rộng hỗ trợ định dạng ảnh tương tự cho module Upload cốt lõi.
+- **Kết quả kiểm thử:**
+  - Build Backend pass 100% (`tsc --noEmit` & `nest build`).
+  - Container `laundry_backend` đã được cập nhật bản build mới và khởi động lại trơn tru.
+  - Push commit lên nhánh `dev` của kho `be-nestjs-thanhxuan`.
+
+
+
 ### Bugfix: Khắc Phục Lỗi Upload 404, Ưu Tiên Icon SVG và Đặt Mặc Định Lightmode (fe-react-thanhxuan-internal)
 
 - **Bối cảnh & Vấn đề:**
