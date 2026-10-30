@@ -3,7 +3,7 @@
 > **Hệ sinh thái:** Công ty Giặt Sấy Thanh Xuân (Thanh Xuan Laundry & Moving Company)
 > **Phiên bản:** 2.3 | **Ngày cập nhật:** 2026-10-29
 > **Kiến trúc dữ liệu:** Multi-Database Isolation trên MongoDB (4 Databases độc lập)
-> **Tổng số bảng (Collections):** 33 Collections
+> **Tổng số bảng (Collections):** 34 Collections
 > **Quy chuẩn duy trì:** Mọi thay đổi Schema trong Backend NestJS bắt buộc cập nhật đồng bộ file này theo Definition of Done trong [AGENTS.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/rules/AGENTS.md). Xóa bỏ hoàn toàn bảng đã xóa khỏi tài liệu và chạy script dọn dẹp DB thực tế.
 
 ---
@@ -13,7 +13,7 @@
 ```mermaid
 graph TD
     subgraph Multi_Database_Topology ["Hạ Tầng 4 MongoDB Độc Lập"]
-        DB_Internal[("1. internal_express<br/>15 Collections - Vận hành, Đối tác, Lương")]
+        DB_Internal[("1. internal_express<br/>16 Collections - Vận hành, Đối tác, Lương")]
         DB_Laundry[("2. laundry_express<br/>11 Collections - Website B2B, SEO, CRM")]
         DB_Moving[("3. moving_express<br/>3 Collections - Khảo sát chuyển nhà")]
         DB_Core[("4. core_express<br/>4 Collections - Audit, Media, Idempotency, Notifications")]
@@ -22,7 +22,7 @@ graph TD
 
 | Phân Vùng CSDL  | Tên Database MongoDB | Số Collections | Trọng Tâm Nghiệp Vụ                                                                                                                                            |
 | :-------------- | :------------------- | :------------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Phân Vùng 1** | `internal_express`   |     **15**     | Tài khoản nội bộ, thương hiệu & đối tác, danh mục đồ, phiếu giao nhận kép, chấm công selfie, công thợ theo giờ (`hourly_work`), chi phí xe, bảng lương chu kỳ, đơn xin nghỉ giao nhận & phân tuyến (`shipper_leave_requests`). |
+| **Phân Vùng 1** | `internal_express`   |     **16**     | Tài khoản nội bộ, thương hiệu & đối tác, danh mục đồ, phiếu giao nhận kép, chấm công selfie, công thợ theo giờ (`hourly_work`), chi phí xe, bảng lương chu kỳ, đơn xin nghỉ giao nhận & phân tuyến (`shipper_leave_requests`). |
 | **Phân Vùng 2** | `laundry_express`    |     **11**     | Website khách hàng`thanhxuanlaundry.com`, CMS bài viết chuẩn SEO, đơn hàng giặt ủi, CRM khách hàng, chiến dịch Email & Zalo OA Marketing.                      |
 | **Phân Vùng 3** | `moving_express`     |     **3**      | Website dịch vụ chuyển nhà`chuyennhatietkiem.vn`, khảo sát báo giá cước vận tải xe tải, danh mục xe tải & cẩm nang chuyển nhà.                                 |
 | **Phân Vùng 4** | `core_express`       |     **4**      | Kết nối qua`CORE_CONNECTION`: Nhật ký kiểm toán bảo mật (Audit Log), file media Cloudinary, khóa chống trùng lặp (Idempotency), thông báo in-app.              |
@@ -75,6 +75,7 @@ erDiagram
 | `lockedUntil`             | `Date`          |            Tùy chọn             |         -          | Thời điểm hết hạn tạm khóa 15 phút do nhập sai mật khẩu.                                                                                                                                                                   |
 | `lockedAt`                | `Date`          |            Tùy chọn             |         -          | Thời điểm bị Admin/Manager tạm khóa (nếu quá 60 ngày tự động xóa vĩnh viễn).                                                                                                                                               |
 | `avatarUrl`               | `String`        |            Tùy chọn             |         -          | Đường dẫn ảnh đại diện lưu trên Cloudinary (`internal/avatars`).                                                                                                                                                           |
+| `faceDescriptor`          | `Array of Number` |          Tùy chọn             |         -          | Vector 128 chiều biểu diễn đặc trưng khuôn mặt dùng cho On-Device AI WebAssembly đối soát danh tính khi check-in xưởng.                                                                                                    |
 | `defaultJobType`          | `String`        |     Tùy chọn, uppercase, trim   |         -          | Khâu công việc mặc định phân cho thợ xưởng (role = WORKER) tự động kích hoạt khi check-in ca (ví dụ: FOLD, IRON).                                                                                                          |
 | `avatarPublicId`          | `String`        |            Tùy chọn             |         -          | Mã định danh Cloudinary public ID để tự xóa ảnh cũ khi upload ảnh mới.                                                                                                                                                     |
 | `signatureUrl`            | `String`        |            Tùy chọn             |         -          | Chuỗi Data URL Base64 PNG hoặc URL chữ ký điện tử mẫu đã lưu của nhân sự nội bộ/đối tác.                                                                                                                                   |     |
@@ -227,9 +228,9 @@ erDiagram
 | :---------------- | :-------------- | :---------------------: | :-----------------------: | :----------------------------------------------------------------------------------------------------------------- |
 | `staffId`         | `ObjectId`      |        Bắt buộc         | Ref:`StaffAccount`, Index | Nhân sự chấm công.                                                                                                 |
 | `workDate`        | `String`        | Bắt buộc (`YYYY-MM-DD`) |           Index           | Ngày làm việc tính theo múi giờ Việt Nam.                                                                          |
-| `status`          | `String (Enum)` |     Mặc định:`OPEN`     |           Index           | Trạng thái:`OPEN` (đang trong ca), `CLOSED` (đã checkout), `NEEDS_REVIEW` (quên checkout > 16h), `APPROVED`.       |
-| `checkIn`         | `Object`        |        Bắt buộc         |             -             | Giờ vào:`time` (Date), `photoUrl` (ảnh selfie Cloudinary), `source` (`CAMERA` hoặc `AUTO_SHIPPER_FIRST_HANDOVER`). |
-| `checkOut`        | `Object`        |        Tùy chọn         |             -             | Giờ ra:`time` (Date), `photoUrl` (ảnh selfie lúc về).                                                              |
+| `status`          | `String (Enum)` |     Mặc định:`OPEN`     |           Index           | Trạng thái:`OPEN` (đang trong ca), `CLOSED` (đã checkout), `NEEDS_REVIEW` (quên checkout > 16h hoặc khuôn mặt AI nghi vấn lệch mẫu), `APPROVED`. |
+| `checkIn`         | `Object`        |        Bắt buộc         |             -             | Giờ vào:`at` (Date), `photoId` (ảnh selfie), `gps` (GpsLocation), `faceVerification` (isVerified, confidence, isLivePhoto, descriptor), `clientIp`, `isWorkshopWifi`. |
+| `checkOut`        | `Object`        |        Tùy chọn         |             -             | Giờ ra:`at` (Date), `photoId` (ảnh selfie), `gps`, `faceVerification` (isVerified, confidence, isLivePhoto), `clientIp`. |
 | `workedMinutes`   | `Number`        |      Mặc định:`0`       |             -             | Tổng thời gian làm việc thực tế trong ca tính bằng phút.                                                           |
 | `overtimeMinutes` | `Number`        |      Mặc định:`0`       |             -             | Số phút làm tăng ca ngoài giờ quy định.                                                                            |
 | `isLocked`        | `Boolean`       |    Mặc định:`false`     |             -             | Đánh dấu đã đóng băng khi kỳ lương đã chốt.                                                                        |
@@ -277,7 +278,7 @@ erDiagram
 
 ---
 
-### 1.11. Bảng `fuel_logs` (FuelLog - Quản Lý Chi Phí Xe Shipper)
+### 1.12. Bảng `fuel_logs` (FuelLog - Quản Lý Chi Phí Xe Shipper)
 
 - **Mã nguồn:** [`fuel-log.schema.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/fuel/schemas/fuel-log.schema.ts)
 - **Mục đích nghiệp vụ:** Quản lý toàn diện các khoản chi phí phương tiện của đội tài xế shipper bao gồm: Đổ Xăng (`FUEL`) và Sửa Chữa Xe (`REPAIR`). Yêu cầu đầy đủ ảnh chụp hóa đơn/biên lai và ảnh đồng hồ công-tơ-mét hoặc ảnh xe máy sửa chữa. Kế toán duyệt để cộng tự động vào phiếu lương shipper.
@@ -298,7 +299,7 @@ erDiagram
 
 ---
 
-### 1.12. Bảng `pay_settings` (PaySettings)
+### 1.13. Bảng `pay_settings` (PaySettings)
 
 - **Mã nguồn:** [`pay-settings.schema.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/payroll/schemas/pay-settings.schema.ts)
 - **Mục đích nghiệp vụ:** Cấu hình chính sách tính lương toàn diện cho công ty: Bảng hệ số công việc của thợ xưởng (`jobCoefficients`) và bộ tham số định mức của tài xế shipper (chuẩn 28 ngày công, bonus ca cuối tuần, chuyên cần ngày, phụ cấp điện thoại, khấu trừ BHXH).
@@ -318,7 +319,7 @@ erDiagram
 
 ---
 
-### 1.13. Bảng `payroll_periods` (PayrollPeriod)
+### 1.14. Bảng `payroll_periods` (PayrollPeriod)
 
 - **Mã nguồn:** [`payroll-period.schema.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/payroll/schemas/payroll-period.schema.ts)
 - **Mục đích nghiệp vụ:** Quản lý vòng đời chu kỳ tính lương (tháng hoặc nửa tháng). Trạng thái `LOCKED` đóng băng toàn bộ dữ liệu nguồn để chống sửa đổi số liệu đã phát lương.
@@ -335,7 +336,7 @@ erDiagram
 
 ---
 
-### 1.14. Bảng `payslips` (Payslip)
+### 1.15. Bảng `payslips` (Payslip)
 
 - **Mã nguồn:** [`payslip.schema.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/payroll/schemas/payslip.schema.ts)
 - **Mục đích nghiệp vụ:** Phiếu lương chi tiết minh bạch của từng nhân sự. Tách bạch mô hình tính toán giữa Shipper (chuẩn 28 ngày công, ca cuối tuần, hoàn chi phí xăng xe/sửa xe, phụ cấp) và Thợ xưởng (tổng giờ làm việc nhân hệ số công việc).
@@ -357,7 +358,7 @@ erDiagram
 
 ---
 
-### 1.15. Bảng `shipper_leave_requests` (ShipperLeaveRequest)
+### 1.16. Bảng `shipper_leave_requests` (ShipperLeaveRequest)
 
 - **Mã nguồn:** [`shipper-leave.schema.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/internal/shipper-leaves/schemas/shipper-leave.schema.ts)
 - **Mục đích nghiệp vụ:** Quản lý vòng đời đơn xin nghỉ phép giao nhận của Shipper, quy trình phê duyệt 2 bước hoặc 1 chạm của Admin, chỉ định tài khoản Shipper nhận giao thay các điểm đối tác và thiết lập mức tiền công giao thay. Tự động liên kết chuyển tuyến xe trong ngày nghỉ.

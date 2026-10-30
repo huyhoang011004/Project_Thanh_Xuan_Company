@@ -1,17 +1,21 @@
-# ĐẶC TẢ YÊU CẦU & THIẾT KẾ HỆ THỐNG WEB & CMS (SRS & SDD)
-## PHÂN HỆ WEB KHÁCH HÀNG & QUẢN TRỊ CMS (fe-nextjs-thanhxuan-laundry)
+# ĐẶC TẢ YÊU CẦU & THIẾT KẾ HỆ THỐNG WEB GIẶT LÀ & CMS (SRS & SDD)
 
-> **Tài liệu tham chiếu cấp cao:** [SRS_SDD.md (Kiến Trúc Tổng Quan)](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/SRS_SDD.md)  
-> **Phiên bản:** 2.3 | **Synced:** 2026-10-28 | **Môi trường:** Next.js 14+ (App Router), React 18/19, TailwindCSS, shadcn/ui  
-> **Phạm vi mã nguồn:** `fe-nextjs-thanhxuan-laundry/src/**`  
+## PHÂN HỆ WEB KHÁCH HÀNG & QUẢN TRỊ MARKETING (fe-nextjs-thanhxuan-laundry)
+
+> **Tài liệu tham chiếu cấp cao:** [SRS_SDD.md (Kiến Trúc Tổng Quan)](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/SRS_SDD.md)
+> **Phiên bản:** 2.4 | **Môi trường:** Next.js 14+ (App Router), React 18/19, TailwindCSS, shadcn/ui, Port 3000
+> **Phạm vi mã nguồn:** `fe-nextjs-thanhxuan-laundry/src/**`
 > **Quy chuẩn kỹ thuật:** Server Components mặc định, Feature-based Colocation, Metadata SEO & JSON-LD, React Hook Form + Zod
+> **Database Backend kết nối:** MongoDB `laundry_express` qua Backend NestJS (Port 5001)
 
 ---
 
 ## 1. YÊU CẦU NGHIỆP VỤ (SRS)
 
 ### 1.1. Mục Tiêu & Đối Tượng Sử Dụng
-Phân hệ đảm nhiệm 2 vai trò cốt lõi trong hệ sinh thái Thanh Xuân Company:
+
+Phân hệ đảm nhiệm 2 vai trò cốt lõi trong mảng dịch vụ giặt là của Thanh Xuân Company:
+
 1. **Cổng Thông Tin Tiếp Thị & Dịch Vụ Khách Hàng (Public Facing - `thanhxuanlaundry.com`)**:
    - Đối tượng: Khách hàng doanh nghiệp B2B (Nhà hàng, khách sạn, spa) và khách hàng cá nhân có nhu cầu giặt sấy cao cấp.
    - Mục tiêu: Tiếp thị thương hiệu, tối ưu hóa công cụ tìm kiếm (SEO Top Google), cung cấp thông tin bảng giá minh bạch, thu thập leads liên hệ và yêu cầu báo giá chuyển đổi.
@@ -23,7 +27,8 @@ Phân hệ đảm nhiệm 2 vai trò cốt lõi trong hệ sinh thái Thanh Xuâ
 
 ### 1.2. Danh Sách Tính Năng Theo Nhóm (Functional Requirements)
 
-#### FE-NEXT-FR-01: Phân Hệ Web Khách Hàng Công Khai (`(public)`)
+#### FE-LAUNDRY-FR-01: Phân Hệ Web Khách Hàng Công Khai (`(public)`)
+
 - **Trang chủ (`/`):** Hero Section chia chéo (Diagonal Split) video reel xưởng giặt công nghiệp + ảnh thành phẩm cao cấp & floating badges, giới thiệu năng lực xưởng giặt là công nghiệp, quy trình giặt sấy tiêu chuẩn, danh sách đối tác lớn, bảng giá tóm tắt và Pre-Footer CTA (cam kết tặng 01 tuần giặt mẫu, giao nhận 24/7, bồi thường 100% kèm form thu thập lead chuyển đổi).
 - **Giới thiệu (`/gioi-thieu`):** Lịch sử phát triển công ty, quy mô máy móc công nghệ, cam kết chất lượng dịch vụ.
 - **Dịch vụ giặt là (`/dich-vu`, `/dich-vu/[slug]`):**
@@ -35,7 +40,8 @@ Phân hệ đảm nhiệm 2 vai trò cốt lõi trong hệ sinh thái Thanh Xuâ
 - **Liên hệ báo giá (`/lien-he`):** Form thu thập thông tin khách hàng (Tên, SĐT, Email, Nhu cầu, Số lượng ước tính, Ghi chú), tích hợp Google Maps vị trí xưởng và thông tin hotline.
 - **Lead Capture & Context Tracking:** Mọi form gửi thông tin liên hệ đều tự động đính kèm ngữ cảnh (`sourceUrl`, `category`, `slug`) để đo lường hiệu quả từng bài viết marketing.
 
-#### FE-NEXT-FR-02: Phân Hệ Quản Trị Nội Dung CMS (`(admin)/admin`)
+#### FE-LAUNDRY-FR-02: Phân Hệ Quản Trị Nội Dung CMS (`(admin)/admin`)
+
 - **Xác thực Quản trị viên (`/admin/login`):** Đăng nhập bảo mật bằng tài khoản Admin Backend, lưu JWT token an toàn trong httpOnly Cookie (`admin_access_token`, `admin_refresh_token`, cờ `secure: true` trên production, `sameSite: 'lax'`) và quản lý phiên tự động qua Next.js Middleware. Route Handler `/api/upload` được bảo vệ nghiêm ngặt bằng cookie xác thực trước khi cho phép tải hoặc xóa file.
 - **Tổng quan Bảng điều khiển (`/admin/dashboard`):** Thống kê số lượng leads mới, đơn hàng chờ xử lý, số bài viết đã xuất bản và biểu đồ tương tác khách hàng.
 - **Quản lý Bài viết & Danh mục (`/admin/articles`, `/admin/categories`):**
@@ -50,6 +56,7 @@ Phân hệ đảm nhiệm 2 vai trò cốt lõi trong hệ sinh thái Thanh Xuâ
 ---
 
 ### 1.3. Yêu Cầu Phi Chức Năng & SEO
+
 - **Tối ưu hóa SEO 100%:**
   - 100% các trang `(public)` sử dụng **React Server Components (RSC)** để HTML được render hoàn toàn tại server (SSR/SSG), tối đa hóa điểm Google Core Web Vitals.
   - Cung cấp Metadata động (`generateMetadata`) cho từng bài viết và dịch vụ (Title, Description, Canonical URL, OpenGraph, Twitter Card).
@@ -160,39 +167,13 @@ sequenceDiagram
 ---
 
 ### 2.3. Quy Chuẩn Kỹ Thuật Bắt Buộc
+
 1. **Server Components:** Mọi trang đọc dữ liệu hiển thị trong thư mục `(public)` bắt buộc là Server Component. Chỉ thêm `"use client"` cho các component tương tác ở lá (Leaf Components) như form, slider, dynamic UI.
 2. **Form Validation:** Sử dụng `react-hook-form` kết hợp `zod` schema để validate dữ liệu form phía client trước khi gửi lên API Backend.
 3. **Quản lý Media:** Hình ảnh tải lên bài viết được gửi qua Backend để lưu trữ trực tiếp trên Cloudinary, không lưu trữ file tĩnh trên server Next.js.
-4. **Quy Chuẩn Cấu Trúc & Đặt Tên File Frontend (Đồng bộ với `fe-react-thanhxuan-internal` theo AGENTS.md Mục 5.5):**
+4. **Quy Chuẩn Cấu Trúc & Đặt Tên File Frontend (Đồng bộ theo AGENTS.md Mục 5.3):**
    - File màn hình chính cấp cao nhất: `[Tên]Page.tsx` đặt trực tiếp tại root của feature (VD: `ArticleManagerPage.tsx`, `HomePage.tsx`).
    - Thư mục `modals/`: Chứa các modal nghiệp vụ `[Tên]Modal.tsx` kèm `modals/index.ts`.
    - Thư mục `components/`: Chứa các subcomponent hiển thị `[Tên]Component.tsx` kèm `components/index.ts`.
    - Shared components: Phân tách rõ ràng `components/layout/` (`admin/`, `public/`), `components/common/`, `components/ui/`.
    - Giới hạn kích thước file 250 - 300 dòng; bóc tách modal và subcomponents kịp thời, không dồn hàng nghìn dòng vào 1 file.
-
----
-
-## 3. PHÂN HỆ WEB DỊCH VỤ CHUYỂN NHÀ TIẾT KIỆM (`fe-nextjs-chuyennhatietkiem`)
-
-> **Môi trường:** Next.js 16 (App Router), React 19, TailwindCSS, Port 3002  
-> **Phạm vi mã nguồn:** `fe-nextjs-chuyennhatietkiem/src/**`  
-> **Định vị kinh doanh:** Mô hình Logistics Tinh Gọn (Asset-Light) — Thế mạnh là **Đội thợ bốc xếp, thợ mộc, thợ điện lạnh cơ hữu** kết hợp **Mạng lưới đối tác xe tải vệ tinh điều xe giá gốc**, giúp tiết kiệm 30% chi phí.
-
-### 3.1. Các Trang & Components Tương Tác Cốt Lõi
-1. **Trang Chủ (`src/app/page.tsx`):**
-   - `HeroEstimatorComponent`: Bảng dự toán tức thì với thanh trượt cự ly Km, tab chọn gói (Trọn gói / Chỉ thuê thợ / Tháo lắp kỹ thuật), bộ đếm nhảy số giá cước trong 5 giây.
-   - `WhySaveBentoComponent`: Thẻ Bento Grid 4 lý do tiết kiệm (Mô hình tinh gọn không phí nuôi xe, Thợ kiêm mộc & điện lạnh, Tặng vật tư carton/PE, Bảo hiểm 100%).
-   - `SmartCargoVisualizerComponent`: Khảo sát tải trọng thông minh bằng cách click chọn đồ đạc trực quan -> Đề xuất kích cỡ xe và số thợ tối ưu.
-   - `CostComparisonComponent`: Bảng so sánh đa chiều chi phí ẩn giữa tự dọn bằng xe ba gác vs Dịch vụ trọn gói Thanh Xuân.
-   - `PackingProtectionComponent`: Trực quan hóa quy chuẩn đóng gói bọc lót 4 lớp chống trầy xước.
-   - `InteractiveChecklistComponent`: Checklist 10 bước dọn nhà lưu tự động LocalStorage.
-2. **Khảo Sát Báo Giá (`src/app/dat-lich/page.tsx` - `QuoteWizardForm.tsx`):**
-   - Kiến trúc module hóa 4 sub-components (`< 200 dòng/file`):
-     - `Step1LocationComponent`: Điểm bốc, điểm dỡ, số tầng, thang máy, cự ly Km.
-     - `Step2ItemsComponent`: Gói dịch vụ (`STUDENT_ROOM`, `APARTMENT`, `OFFICE`, `TRUCK_RENTAL`, `LABOR_ONLY`) và bộ tăng giảm đồ cồng kềnh.
-     - `Step3ScheduleComponent`: Ngày giờ dọn, link ảnh hiện trường và ghi chú.
-     - `Step4ReviewComponent`: Thông tin liên hệ, bảng bóc tách dự toán tự động và gửi lead về MongoDB `moving_quotes`.
-3. **Bảng Giá Niêm Yết (`src/app/bang-gia/page.tsx`):**
-   - Công khai giá mở cửa xe tải đối tác và đơn giá thuê nhân công bốc xếp theo giờ/theo người (150.000đ/giờ) kèm bảng tháo lắp điều hòa/giường tủ.
-
-

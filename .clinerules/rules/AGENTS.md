@@ -5,7 +5,7 @@ Tài liệu này là nguồn quy ước chung cho mọi agent và workflow trong
 ## 1. Nguyên tắc cốt lõi & An toàn
 
 - **Dẫn chứng:** Mọi nhận định về code hiện có phải kèm `path:line`. Chưa xác minh được thì nêu rõ trong câu hỏi.
-- **Nguồn sự thật:** Code là hiện trạng; Plan là ý định thay đổi; `.agents/docs/SRS_SDD.md` phản ánh kiến trúc tổng thể và thư mục `.agents/docs/srs_sdd/` (`srs_sdd_backend.md`, `srs_sdd_fe_nextjs.md`, `srs_sdd_fe_internal.md`) phản ánh chi tiết từng phân hệ sau mỗi thay đổi hoàn tất.
+- **Nguồn sự thật:** Code là hiện trạng; Plan là ý định thay đổi; `.agents/docs/SRS_SDD.md` phản ánh kiến trúc tổng thể và thư mục `.agents/docs/srs_sdd/` (`srs_sdd_backend.md`, `srs_sdd_fe_laundry.md, srs_sdd_fe_moving.md`, `srs_sdd_fe_internal.md`) phản ánh chi tiết từng phân hệ sau mỗi thay đổi hoàn tất.
 - **An toàn:**
   - Không commit/push trừ khi người dùng yêu cầu rõ.
   - Không chạy lệnh phá hủy (`git reset --hard`, `rm -rf`, drop DB, force push).
@@ -37,7 +37,7 @@ Monorepo gồm 3 app, mỗi app chạy lệnh ở đúng thư mục của nó:
 
 *Quy tắc cập nhật tài liệu Modular SRS/SDD:*
 - `SRS_SDD.md`: Là Living Architecture Specification TỔNG QUAN (System Context, Topology, Master Index liên kết sang 3 file phân hệ, Document History giữ 3-5 dòng mới nhất của toàn hệ sinh thái).
-- `.agents/docs/srs_sdd/srs_sdd_<app>.md`: Đặc tả chi tiết từng phân hệ (`srs_sdd_backend.md`, `srs_sdd_fe_nextjs.md`, `srs_sdd_fe_internal.md`). Sửa app nào thì cập nhật file app đó.
+- `.agents/docs/srs_sdd/srs_sdd_<app>.md`: Đặc tả chi tiết từng phân hệ (`srs_sdd_backend.md`, `srs_sdd_fe_laundry.md, srs_sdd_fe_moving.md`, `srs_sdd_fe_internal.md`). Sửa app nào thì cập nhật file app đó.
 - `CHANGELOG.md`: Lưu trữ toàn bộ bài luận nhật ký chi tiết theo từng Plan/Fix.
 
 ## 4. Định nghĩa hoàn thành (Definition of Done)

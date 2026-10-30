@@ -3,9 +3,9 @@
 ## PHÂN HỆ CỔNG VẬN HÀNH XƯỞNG & ĐIỀU PHỐI ĐỐI TÁC (fe-react-thanhxuan-internal)
 
 > **Tài liệu tham chiếu cấp cao:** [SRS_SDD.md (Kiến Trúc Tổng Quan)](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/SRS_SDD.md)  
-> **Phiên bản:** 2.4 | **Synced:** 2026-10-27 | **Môi trường:** React 18, Vite, TypeScript Strict (Zero any), React Router v7, TailwindCSS, shadcn/ui  
+> **Phiên bản:** 2.5 | **Synced:** 2026-10-30 | **Môi trường:** React 18, Vite, TypeScript Strict (Zero any), React Router v7, TailwindCSS, shadcn/ui  
 > **Phạm vi mã nguồn:** `fe-react-thanhxuan-internal/src/**`  
-> **Quy chuẩn kỹ thuật:** Feature-Based Flat Colocation, Barrel `index.ts`, Mobile-First PWA, Canvas Signature, Offline Queue IndexedDB, RBAC UI Guards
+> **Quy chuẩn kỹ thuật:** Feature-Based Flat Colocation, Barrel `index.ts`, Mobile-First PWA, Canvas Signature, Offline Queue IndexedDB, RBAC UI Guards, Lightmode Default, AppLogo SVG Priority với Fallback PNG
 
 ---
 
@@ -90,15 +90,16 @@ Phân hệ `fe-react-thanhxuan-internal` là cổng điều hành số hóa toà
 - Tự động lọc danh sách phiếu cần đếm lại: các phiếu có `isRecount === true` hoặc phiếu có đồ bẩn chưa đếm số lượng mà Shipper đã ký nhận giao về.
 - **Thao tác rạch bao đếm lại:** Thợ xưởng nhập số lượng thực tế từng chiếc đồ (`actualQuantityReceived`), cập nhật trực tiếp vào hệ thống qua endpoint `PATCH /recount-actual`, hoàn tất quy trình kiểm đếm đối chứng.
 
-#### FE-INT-FR-04: Chấm Công Camera Selfie & Phiên Khâu Công Thợ Theo Thời Gian Thực (Plan 37)
+#### FE-INT-FR-04: Chấm Công Xác Thực Khuôn Mặt AI & Phiên Khâu Công Thợ Theo Thời Gian Thực (Plan 37 & Plan 58)
 
-- **Chấm công camera selfie & Geofencing (`AttendancePage`, `useAttendance`, `useWorkshopGeo`):** Bắt buộc chụp ảnh selfie (`photoId`) và quét tọa độ GPS xưởng độ chính xác cao (`enableHighAccuracy: true`). Kiểm tra bán kính xưởng $\le 150m$, chống Fake GPS (chặn `accuracy <= 0`, sai số quá lớn, timestamp cũ). Sau khi check-in ca tự động kích hoạt mở phiên **khâu mặc định** (`defaultJobType`) cho thợ; khi check-out ca tự động đóng phiên khâu đang mở với thời điểm kết thúc bằng giờ check-out ca.
-- **Bảng công toàn xưởng & Rà soát ca (`AttendanceReviewPage`, `useAttendanceReview`):**
-  - Thiết kế theo chuẩn công thái học 4 tầng (`PageBanner` $\rightarrow$ `PageActionBar` $\rightarrow$ 4 `StatCard` $\rightarrow$ Bộ lọc & Bảng ca làm việc).
-  - Khắc phục triệt để lỗi xóa dấu gạch ngang ở `dateKey`: Truy vấn chính xác theo `YYYY-MM-DD` theo múi giờ `Asia/Ho_Chi_Minh` (`getTodayVN()`).
-  - Hỗ trợ chuyển đổi linh hoạt giữa chế độ xem **Theo Ngày** và **Khoảng Ngày**, lọc theo trạng thái (`OPEN`, `NEEDS_REVIEW`, `CLOSED`, `APPROVED`), lọc vai trò và tìm kiếm nhân viên.
-  - Hiển thị trực quan ảnh chụp camera selfie vào/ra (hoặc nhãn tự động từ phiếu giao nhận của tài xế), khoảng cách GPS tới xưởng và loại ngày công (`NORMAL`, `OVERTIME`, `SUNDAY`, `HOLIDAY`).
-  - Nút **Duyệt nhanh toàn bộ ca hoàn tất** trong ngày sang `APPROVED` và modal **Rà soát ca (`AttendanceReviewModal`)** cho phép bổ sung giờ ra ca cho các ca quên check-out (`NEEDS_REVIEW`), điều chỉnh loại ngày công và trạng thái ca kèm lý do audit. Phân quyền cho `ADMIN`, `MANAGER` và `ACCOUNTANT`.
+- **Chấm công On-Device AI & Liveness Detection (`AttendancePage`, `FaceScannerModal`, `useFaceRecognition`, `useAttendance`, `useWorkshopGeo`):**
+  - **On-Device AI WebAssembly/WebGL (`@vladmandic/face-api`):** Chạy trực tiếp trên trình duyệt PWA của thợ (0đ chi phí, 0 lượt giới hạn API, không phụ thuộc cloud API key, 0% CPU/RAM VPS). Bộ model nén nhẹ (~6.6MB) lưu tĩnh tại `/public/models/` và được Workbox PWA precache offline.
+  - **Khung Oval thông minh & Liveness Blink Detection:** Giao diện camera có khung Oval đổi màu theo trạng thái (Trắng nét đứt khi chưa thấy mặt $\rightarrow$ Vàng nhấp nháy khi đã phát hiện mặt $\rightarrow$ Xanh lá khi phát hiện chớp mắt tự nhiên dựa trên chỉ số Eye Aspect Ratio $\text{EAR} < 0.22$). Khi hoàn thành chớp mắt, hệ thống tự động chụp và trích xuất vector 128 chiều (`faceDescriptor`). Có nút chụp thủ công và fallback tải ảnh thường.
+  - **Geofencing & Chống gian lận:** Quét tọa độ GPS xưởng độ chính xác cao (`enableHighAccuracy: true`), kiểm tra bán kính xưởng $\le 150m$, chống Fake GPS. Sau khi check-in ca tự động kích hoạt mở phiên **khâu mặc định** (`defaultJobType`) cho thợ; khi check-out ca tự động đóng phiên khâu đang mở.
+- **Tự động lưu mẫu khuôn mặt (Auto-Enrollment):** Khi thợ cập nhật Avatar cá nhân trong `ProfileEditModal`, hệ thống tự động trích xuất vector khuôn mặt và lưu vào hồ sơ nhân viên `StaffAccount.faceDescriptor`.
+- **Bảng công toàn xưởng & Rà soát ca (`AttendanceReviewPage`, `AttendanceTableComponent`, `AttendanceReviewModal`):**
+  - Hiển thị huy hiệu AI Face Verification tại từng ca làm việc (`🟢 Khớp 95%` hoặc `🔴 Nghi vấn` nếu lệch mặt $d > 0.50$).
+  - Modal `AttendanceReviewModal` bố trí 3 cột ảnh đối chứng: Mẫu Avatar gốc hồ sơ $\leftrightarrow$ Ảnh selfie vào ca $\leftrightarrow$ Ảnh hết ca kèm chỉ số confidence% và khoảng cách GPS, giúp Quản lý xưởng dễ dàng thẩm định và phê duyệt.
 - **Trạm công việc thợ theo phiên (`HourlyWorkStationPage`, `useHourlyWorkStation`):**
   - Hiển thị khâu mặc định được phân công và thẻ phiên đang chạy kèm đồng hồ đếm thời gian thực cập nhật mỗi 30s (`CurrentSegmentCardComponent`).
   - Nút **Checkout khâu**: Đóng phiên hiện tại, tính số phút và tiền công tạm tính. Nếu khâu vừa đóng là khâu phụ (khác khâu mặc định) và ca làm việc vẫn mở, hệ thống **tự động check-in lại khâu mặc định** (`AUTO_RESUME`).
@@ -144,6 +145,16 @@ Phân hệ `fe-react-thanhxuan-internal` là cổng điều hành số hóa toà
 - Xuất file tải về trực tiếp: Xuất file Excel XLSX và PDF streaming tốc độ cao.
 - Tự động bóc tách trường tiền lương khi Quản lý xưởng (`MANAGER`) truy cập.
 
+#### FE-INT-FR-08: Quản Lý Nghỉ Giao Nhận & Phân Tuyến Bù (`features/management/shipper-leaves`, `features/operations/handovers`)
+
+- **Tài xế Shipper xin nghỉ phép (`ShipperLeaveRequestModal`, `ShipperLeaveHistoryModal`):**
+  - Tài xế nộp đơn xin nghỉ trực tiếp từ màn hình Giao Nhận (`ShipperHandoverPage`), chọn một hoặc nhiều ngày nghỉ (`leaveDates`), nhập lý do xin nghỉ.
+  - Theo dõi lịch sử đơn và trạng thái duyệt (`PENDING_APPROVAL`, `APPROVED`, `REJECTED`, `CANCELLED`). Hỗ trợ hủy đơn khi chưa duyệt.
+- **Xét duyệt & Phân tuyến thay thế (`ShipperLeaveReviewPage`, `useShipperLeaveManagement`):**
+  - Quản lý xưởng (`MANAGER`) và `ADMIN` xét duyệt đơn bước 1 (`ApproveShipperLeaveModal`): chỉ định tài xế thay thế (`substituteShipperId`) để nhận bàn giao toàn bộ các chi nhánh đối tác trong các ngày nghỉ đó.
+  - Kế toán (`ACCOUNTANT`) hoặc `ADMIN` thiết lập định mức thù lao giao thay (`SetLeaveCompensationModal`): gán số tiền thù lao (`compensationAmount`) và ghi chú (`compensationNote`), tự động chuyển đơn sang `APPROVED` và cộng dồn vào phiếu lương của tài xế nhận việc.
+  - Nút từ chối đơn (`RejectShipperLeaveModal`) kèm bắt buộc nhập lý do từ chối.
+
 #### FE-INT-FR-09: Cấu Hình Vị Trí Xưởng, Geofencing & Wi-Fi Router (`features/management/workshop`)
 
 - Dành riêng cho Quản trị viên (`ADMIN`).
@@ -165,49 +176,55 @@ Phân hệ `fe-react-thanhxuan-internal` là cổng điều hành số hóa toà
 fe-react-thanhxuan-internal/src/
 ├── app/
 │   ├── (auth)/                          # Đăng nhập, Đăng ký OTP, Quên mật khẩu
-│   │   ├── login.tsx               # /login
-│   │   ├── register.tsx            # /register
-│   │   └── forgot-password.tsx     # /forgot-password
+│   │   ├── AuthLayout.tsx               # Khung bố cục xác thực
+│   │   ├── login.tsx                    # /login
+│   │   ├── register.tsx                 # /register
+│   │   └── forgot-password.tsx          # /forgot-password
 │   │
 │   ├── (internal)/                      # Vùng vận hành yêu cầu JWT xác thực
-│   │   ├── layout.tsx                   # Layout khung: Topbar, Sidebar, Navigation
-│   │   ├── dashboard.tsx           # /dashboard - Thống kê KPI tổng quan
+│   │   ├── InternalLayout.tsx           # Layout khung: Topbar, Sidebar, Navigation
+│   │   ├── dashboard.tsx                # /dashboard - Thống kê KPI tổng quan
 │   │   │
-│   │   ├── operations/                  # Phân hệ Vận Hành theo đối tượng (/operations/* - 100% số ít)
-│   │   │   ├── attendance.tsx      # /operations/attendance - Thợ chấm công selfie
-│   │   │   ├── payslip.tsx         # /operations/payslip - Tra cứu phiếu lương cá nhân
-│   │   │   ├── report.tsx          # /operations/report - Trung tâm báo cáo & xuất Excel/PDF (số ít)
+│   │   ├── operations/                  # Phân hệ Vận Hành theo đối tượng (/operations/*)
+│   │   │   ├── attendance.tsx           # /operations/attendance - Thợ chấm công selfie
+│   │   │   ├── payslip.tsx              # /operations/payslip - Tra cứu phiếu lương cá nhân
+│   │   │   ├── report.tsx               # /operations/report - Trung tâm báo cáo & xuất Excel/PDF
 │   │   │   ├── warehouse-manager/
-│   │   │   │   └── warehouse.tsx   # /operations/warehouse-manager/warehouse - Thủ kho soạn đồ sạch
+│   │   │   │   └── warehouse.tsx        # /operations/warehouse-manager/warehouse - Thủ kho soạn đồ & Kế toán set thù lao
 │   │   │   ├── shipper/
-│   │   │   │   ├── handover.tsx    # /operations/shipper/handover - Giao nhận 2 chiều
-│   │   │   │   ├── handover/[recordCode]/page.tsx # Chi tiết phiếu & chữ ký Canvas
-│   │   │   │   └── fuel.tsx        # /operations/shipper/fuel - Nộp hóa đơn xăng xe
+│   │   │   │   ├── handover.tsx         # /operations/shipper/handover - Giao nhận 2 chiều & Chợ chuyến
+│   │   │   │   └── fuel.tsx             # /operations/shipper/fuel - Nộp hóa đơn xăng xe & sửa chữa
 │   │   │   ├── worker/
-│   │   │   │   ├── recount.tsx     # /operations/worker/recount - Trạm đếm gom bao xưởng
-│   │   │   │   └── piecework.tsx   # /operations/worker/piecework - Chấm sản lượng khoán
+│   │   │   │   ├── recount.tsx          # /operations/worker/recount - Trạm đếm gom bao xưởng
+│   │   │   │   └── piecework.tsx        # /operations/worker/piecework - Trạm công thợ theo giờ
 │   │   │   ├── partner-manager/
-│   │   │   │   └── partner.tsx     # /operations/partner-manager/partner - Cổng đối tác (Quản lý)
+│   │   │   │   └── partner.tsx          # /operations/partner-manager/partner - Cổng đối tác (Quản lý)
 │   │   │   └── partner-staff/
-│   │   │       └── partner.tsx     # /operations/partner-staff/partner - Cổng đối tác (Nhân viên)
+│   │   │       └── partner.tsx          # /operations/partner-staff/partner - Cổng đối tác (Nhân viên)
 │   │   │
-│   │   └── management/                  # Phân hệ Quản Trị theo vai trò (/management/* - 100% số ít)
+│   │   └── management/                  # Phân hệ Quản Trị theo vai trò (/management/*)
 │   │       ├── manager/
-│   │       │   ├── approval.tsx    # /management/manager/approval - Phê duyệt tài khoản (số ít)
-│   │       │   ├── personnel.tsx   # /management/manager/personnel - Quản trị nhân sự & RBAC
-│   │       │   ├── partner.tsx     # /management/manager/partner - Quản trị chuỗi đối tác (số ít)
-│   │       │   ├── attendance.tsx  # /management/manager/attendance - Bảng công toàn xưởng
-│   │       │   └── piecework.tsx   # /management/manager/piecework - Chốt sản lượng khoán
-│   │       └── accountant/
-│   │           ├── fuel.tsx        # /management/accountant/fuel - Duyệt đề xuất xăng xe
-│   │           └── payroll.tsx     # /management/accountant/payroll - Bảng lương chu kỳ & chốt sổ
+│   │       │   ├── approval.tsx         # /management/manager/approval - Phê duyệt tài khoản thợ & đối tác
+│   │       │   ├── personnel.tsx        # /management/manager/personnel - Quản trị nhân sự & RBAC
+│   │       │   ├── partner.tsx          # /management/manager/partner - Quản trị chuỗi đối tác & bảng giá
+│   │       │   ├── attendance.tsx       # /management/manager/attendance - Bảng công toàn xưởng
+│   │       │   └── piecework.tsx        # /management/manager/piecework - Quản lý phân khâu & duyệt công
+│   │       ├── accountant/
+│   │       │   ├── fuel.tsx             # /management/accountant/fuel - Duyệt đề xuất xăng xe
+│   │       │   └── payroll.tsx          # /management/accountant/payroll - Bảng lương chu kỳ & chốt sổ
+│   │       ├── admin/
+│   │       │   └── workshop.tsx         # /management/admin/workshop - Cấu hình GPS xưởng & Wi-Fi IP
+│   │       └── shipper-leaves/
+│   │           └── (route trực tiếp)    # /management/shipper-leaves - Duyệt nghỉ giao nhận & phân tuyến bù
 │   │
-│   ├── layout.tsx                       # Root Layout: AuthProvider, QueryClientProvider
-│   └── router.tsx                       # Centralized Router cấu hình Route Guards & Backward Redirects
+│   ├── RootLayout.tsx                   # Root Layout: AuthProvider, QueryClientProvider
+│   ├── RootPage.tsx                     # Điều hướng mặc định theo vai trò khi vào trang chủ /
+│   ├── router.tsx                       # Centralized Router cấu hình Route Guards & Backward Redirects
+│   └── legacy-redirect-routes.tsx       # Tuyến đường tương thích ngược URL tiếng Việt
 │
 ├── components/                          # Layout (nav-config, AppHeader, Sidebar), Shell, shadcn/ui
 ├── features/                            # Phân định rõ ràng Management vs Operations, chuẩn hóa file: *Page.tsx, modals/*Modal.tsx, components/*Component.tsx
-│   ├── auth/                            # LoginPage, RegisterPage; modals/ (*Modal.tsx); components/ (*Component.tsx)
+│   ├── auth/                            # LoginPage, RegisterPage, ForgotPasswordPage; modals/ (*Modal.tsx); components/ (*Component.tsx)
 │   ├── dashboard/                       # DashboardPage; hooks: useDashboardData; components: DashboardHandoverPanel, DashboardWorkforcePanel
 │   ├── management/                      # Module Quản trị cấp quản lý & văn phòng
 │   │   ├── attendance/                  # AttendanceReviewPage
@@ -215,11 +232,13 @@ fe-react-thanhxuan-internal/src/
 │   │   ├── fuel/                        # FuelReviewPage
 │   │   ├── partners/                    # PartnersManagementPage; modals/ (PartnerModal, BrandModal, CatalogModal...); components/ (*Component.tsx)
 │   │   ├── payroll/                     # PayrollManagementPage
-│   │   └── piecework/                   # HourlyWorkReviewPage (components: JobRatesSettings, WorkerDefaultJob, DailyWorkReview; hooks: useJobRates, useWorkerDefaultJobs, useDailyWorkReview)
+│   │   ├── piecework/                   # HourlyWorkReviewPage (components: JobRatesSettings, WorkerDefaultJob, DailyWorkReview; hooks: useJobRates, useWorkerDefaultJobs, useDailyWorkReview)
+│   │   ├── shipper-leaves/              # ShipperLeaveReviewPage; modals/ (ApproveShipperLeaveModal, SetLeaveCompensationModal, RejectShipperLeaveModal); hooks: useShipperLeaveManagement
+│   │   └── workshop/                    # WorkshopSettingsPage; components: WorkshopGeofencingCard, WorkshopWifiCard, WorkshopSecurityPolicyCard; hooks: useWorkshopSettings
 │   │
 │   └── operations/                      # Module Vận hành hiện trường xưởng & di động
-│       ├── attendance/                  # AttendancePage; hooks: useAttendance
-│       ├── fuel/                        # ShipperFuelPage
+│       ├── attendance/                  # AttendancePage; hooks: useAttendance, useWorkshopGeo
+│       ├── fuel/                        # ShipperFuelPage; hooks: useShipperFuel
 │       ├── handovers/                   # ShipperHandoverPage, WarehouseHandoverPage, PartnerHandoverPage, RecountStationPage; modals/ (*Modal.tsx); components/ (*Component.tsx); hooks/ (use*Flow.ts)
 │       ├── payroll/                     # MyPayslipPage; components: DailyEarningsTable, OfficialPayslipCard; hooks: useMyPayslip
 │       ├── piecework/                   # HourlyWorkStationPage; components: CurrentSegmentCard, JobStagePicker, HourlyWorkTaskList; hooks: useHourlyWorkStation
@@ -233,18 +252,16 @@ fe-react-thanhxuan-internal/src/
 
 ### 2.2. Ma Trận Điều Hướng & Phân Quyền Menu (Navigation & RBAC)
 
-Dựa trên cấu hình chuẩn hóa từ Plan 13, Plan 14 và Plan 16:
-
-| Nhóm Tài Khoản           | Tuyến Đường Mặc Định                      | Quyền Truy Cập Vận Hành (`/operations`)                                                                                                     | Quyền Truy Cập Quản Lý (`/management`)                                                                                                                                                                                       |
-| :----------------------- | :---------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`SHIPPER`**            | `/operations/shipper/handover`            | `/operations/shipper/handover`, `/operations/shipper/fuel`, `/operations/payslip`                                                           | ❌ Không có quyền                                                                                                                                                                                                            |
-| **`WORKER`**             | `/operations/worker/piecework`            | `/operations/worker/piecework`, `/operations/attendance`, `/operations/worker/recount`, `/operations/payslip`                               | ❌ Không có quyền                                                                                                                                                                                                            |
-| **`WAREHOUSE_MANAGER`**  | `/operations/warehouse-manager/warehouse` | `/operations/warehouse-manager/warehouse`, `/operations/worker/recount`, `/operations/shipper/handover` (chế độ xem), `/operations/payslip` | ❌ Không có quyền _(Bị ẩn trường tiền)_                                                                                                                                                                                      |
-| **`RESTAURANT_MANAGER`** | `/operations/partner-manager/partner`     | `/operations/partner-manager/partner`, `/operations/shipper/handover` (chỉ chi nhánh mình)                                                  | `/management/manager/approval` (Chỉ xem và duyệt nhân viên chi nhánh mình)                                                                                                                                                   |
-| **`RESTAURANT_STAFF`**   | `/operations/partner-staff/partner`       | `/operations/partner-staff/partner`, `/operations/shipper/handover` (chỉ chi nhánh mình)                                                    | ❌ Không có quyền                                                                                                                                                                                                            |
-| **`ACCOUNTANT`**         | `/dashboard`                              | `/operations/payslip`, `/operations/report`                                                                                                 | Quản lý kế toán & đối tác: `/management/accountant/payroll`, `/management/accountant/fuel`, `/management/manager/partner`, `/management/manager/personnel` _(Không có quyền duyệt tài khoản)_                                |
-| **`MANAGER`**            | `/dashboard`                              | `/operations/shipper/handover` (chế độ xem), `/operations/report`                                                                           | Quản lý vận hành xưởng: `/management/manager/personnel`, `/management/manager/partner`, `/management/manager/attendance`, `/management/manager/piecework`, `/management/manager/approval` _(Ẩn hoàn toàn bảng lương & tiền)_ |
-| **`ADMIN`**              | `/dashboard`                              | Toàn bộ các trang vận hành                                                                                                                  | Toàn quyền tuyệt đối 100% các chức năng quản lý                                                                                                                                                                              |
+| Nhóm Tài Khoản          | Tuyến Đường Mặc Định                      | Quyền Truy Cập Vận Hành (`/operations`)                                                                                                     | Quyền Truy Cập Quản Lý (`/management`)                                                                                                                                                                                                                                                                        |
+| :---------------------- | :---------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **`SHIPPER`**           | `/operations/shipper/handover`            | `/operations/shipper/handover`, `/operations/shipper/fuel`, `/operations/payslip`                                                           | ❌ Không có quyền                                                                                                                                                                                                                                                                                             |
+| **`WORKER`**            | `/operations/worker/piecework`            | `/operations/worker/piecework`, `/operations/attendance`, `/operations/worker/recount`, `/operations/payslip`                               | ❌ Không có quyền                                                                                                                                                                                                                                                                                             |
+| **`WAREHOUSE_MANAGER`** | `/operations/warehouse-manager/warehouse` | `/operations/warehouse-manager/warehouse`, `/operations/worker/recount`, `/operations/shipper/handover` (chế độ xem), `/operations/payslip` | ❌ Không có quyền _(Bị ẩn trường tiền)_                                                                                                                                                                                                                                                                       |
+| **`PARTNER_MANAGER`**    | `/operations/partner-manager/partner`     | `/operations/partner-manager/partner` (có tab duyệt nhân sự cơ sở mình)                                                                     | `/management/manager/approval` (Xem và duyệt nhân viên chi nhánh cơ sở mình)                                                                                                                                                                                                                                  |
+| **`PARTNER_STAFF`**      | `/operations/partner-staff/partner`       | `/operations/partner-staff/partner`                                                                                                         | ❌ Không có quyền                                                                                                                                                                                                                                                                                             |
+| **`ACCOUNTANT`**        | `/dashboard`                              | `/operations/warehouse-manager/warehouse` (cài đặt thù lao chuyến lẻ), `/operations/report`, `/operations/payslip`                         | Quản lý kế toán, tiền công & đối tác: `/management/accountant/payroll`, `/management/accountant/fuel`, `/management/shipper-leaves` (định mức thù lao giao thay), `/management/manager/partner`, `/management/manager/attendance`, `/management/manager/piecework` _(Không có quyền duyệt tài khoản nhân sự)_ |
+| **`MANAGER`**           | `/dashboard`                              | `/operations/warehouse-manager/warehouse` (chế độ xem), `/operations/shipper/handover` (chế độ xem), `/operations/report`                 | Quản lý vận hành xưởng: `/management/manager/personnel`, `/management/manager/partner`, `/management/manager/attendance`, `/management/manager/piecework`, `/management/manager/approval`, `/management/shipper-leaves` (chỉ định shipper giao thay) _(Bị bóc tách 100% dữ liệu tiền bạc & lương)_       |
+| **`ADMIN`**             | `/dashboard`                              | Toàn bộ các trang vận hành                                                                                                                  | Toàn quyền tuyệt đối 100% các chức năng quản lý, bao gồm cấu hình xưởng `/management/admin/workshop` và xóa vĩnh viễn tài khoản nhân sự                                                                                                                                                                     |
 
 ---
 
@@ -275,6 +292,17 @@ sequenceDiagram
 
 - **An toàn giao dịch:** Mỗi request gửi từ offline queue luôn đính kèm header `Idempotency-Key` (UUIDv4) để Backend nhận diện và xử lý idempotent, tuyệt đối không bị trùng lặp dữ liệu khi kết nối mạng chập chờn.
 - **Tối ưu hóa ảnh & Canvas:** Ảnh chụp camera selfie và ảnh hóa đơn xăng được nén trực tiếp qua canvas client trước khi lưu queue hoặc gửi API (giới hạn dung lượng < 500KB) nhằm tiết kiệm băng thông di động 4G.
+- **Tiêu chuẩn PWA Toàn Diện & Mobile-First (Plan 56):**
+  - **Bộ Icon Chuẩn Kích Thước:** Cung cấp đầy đủ `pwa-192x192.png`, `pwa-512x512.png`, `pwa-maskable-512x512.png`, `apple-touch-icon-180x180.png` và `favicon-64x64.png`, đáp ứng trọn vẹn tiêu chí Installability của Google Lighthouse và iOS Safari Add to Home Screen.
+  - **Lối Tắt Ứng Dụng (Web App Shortcuts):** Tích hợp 4 shortcut truy cập 1 chạm ngoài màn hình điện thoại: Giao Nhận Shipper (`/operations/shipper/handover`), Chấm Công Selfie (`/operations/attendance`), Trạm Công Thợ (`/operations/worker/piecework`), và Soạn Đồ Xuất Xưởng (`/operations/warehouse-manager/warehouse`).
+  - **Bộ Nhớ Đệm CDN Thông Minh (Workbox Runtime Caching):** Precache toàn bộ bundle tĩnh HTML/CSS/JS, áp dụng chiến lược `CacheFirst` cho Google Fonts và `StaleWhileRevalidate` cho Cloudinary CDN (`res.cloudinary.com` - chữ ký số, ảnh phiếu bàn giao, hóa đơn xăng với thời gian lưu 30 ngày, tối đa 120 mục).
+  - **Thông Báo Bản Cập Nhật Mới (`PwaReloadPrompt`):** Lắng nghe sự kiện `waiting` và `updatefound` từ Native Service Worker, tự động kiểm tra mỗi 30 phút và hiển thị Toast nổi kèm nút "Cập nhật ngay" (`skipWaiting` + `reload`).
+- **Cơ Chế Duy Trì Phiên Lâu Dài Như Mobile App (Plan 57 - Long-Lived Session & Silent Refresh):**
+  - **Lưu Trữ Kép Bền Vững (`auth-storage.ts`):** Ghi đồng thời `staff_token`, `staff_refresh_token` và `staff_user` vào cả `localStorage` và `IndexedDB` (`thanhxuan_internal_auth_db`). Khi iOS Safari ITP hoặc Android Webview tự động dọn dẹp `localStorage`, PWA tự động khôi phục phiên từ `IndexedDB` dự phòng.
+  - **Refresh Token 60 Ngày & Sliding Expiration:** Backend duy trì Refresh Token lên tới 60 ngày. Mỗi lần xoay vòng, thời hạn mới lại được gia hạn thêm 60 ngày, giúp người dùng không bao giờ bị đăng xuất khi sử dụng ứng dụng định kỳ.
+  - **Proactive / Silent Refresh:** Khi mở lại PWA hoặc quay lại từ màn hình khóa (`visibilitychange`), ứng dụng kiểm tra `exp` của JWT; nếu Access Token còn dưới 5-10 phút sẽ tự động refresh ngầm trước khi các trang con gọi API.
+  - **Đồng Bộ Sự Kiện Token (`auth:token-refreshed`):** `apiClient` Interceptor phát CustomEvent khi xoay vòng token thành công, giúp React `AuthContext` cập nhật tức thì state `token` đồng bộ với storage.
+  - **Bảo Vệ Khi Offline:** Mất kết nối Internet (mã lỗi mạng / status 0) tuyệt đối không xóa session, bảo đảm an toàn dữ liệu và quyền truy cập ngoại tuyến cho thợ xưởng và tài xế.
 
 ---
 
@@ -434,20 +462,27 @@ sequenceDiagram
 
 ---
 
-### 2.11. Chức Năng Shipper Xin Nghỉ Giao Nhận & Phân Tuyến Kèm Tiền Công (Plan 55)
+### 2.11. Chức Năng Shipper Xin Nghỉ Giao Nhận & Phân Tuyến Kèm Tiền Công (Plan 55 & Cổng Riêng Shipper)
 
-- **Màn hình Shipper Giao Nhận (`ShipperHandoverPage.tsx`):**
-  - Tích hợp 2 nút bấm thao tác nhanh: **"Xin nghỉ giao nhận"** (`ShipperLeaveRequestModal.tsx`) và **"Lịch sử nghỉ"** (`ShipperLeaveHistoryModal.tsx`).
-  - Shipper chọn 1 hoặc nhiều ngày nghỉ (`leaveDates`), nhập lý do xin nghỉ. Hệ thống tự động tính toán số điểm giao cần phân công thay thế.
-  - Hiển thị badge chỉ báo nổi bật `Nhận giao thay: [Tên Shipper nghỉ]` kèm thông tin mức tiền công giao thay trong danh sách điểm giao nhận ngày hôm đó nếu Shipper là người được phân công làm thay.
+- **Trang Cổng Shipper Xin Nghỉ Riêng Biệt (`ShipperLeavePage.tsx` tại `/operations/shipper/leave`):**
+  - Tab điều hướng độc lập trên Mobile Bottom Bar (`nav-mobile-config.ts`) và Desktop Sidebar (`nav-config.ts`) dành cho `SHIPPER`.
+  - Bộ 3 thẻ chỉ số nhanh: Tổng số đơn, Đang chờ duyệt, Đã duyệt nghỉ.
+  - Phân chia 2 Tabs giao diện chuyên biệt:
+    + **"Tạo Đơn Xin Nghỉ" (`ShipperLeaveFormComponent.tsx`)**: Chọn nhanh ngày mai, 2 ngày, 3 ngày liên tiếp; date picker; chip hiển thị thứ trong tuần (Thứ Hai, Thứ Ba...); danh mục gợi ý lý do nghỉ phổ biến 1 chạm; ô ghi chú chi tiết; cảnh báo quy trình 2 bước.
+    + **"Lịch Sử & Tiến Độ" (`ShipperLeaveHistoryComponent.tsx`)**: Lọc theo Tất cả / Chờ duyệt / Đã duyệt / Từ chối hoặc Đã hủy. Thẻ đơn (`ShipperLeaveCardComponent.tsx`) hiển thị trực quan các ngày nghỉ, stepper tiến độ duyệt, thông tin tài xế nhận giao thay, số tiền công bù, lý do từ chối nếu có, và nút hủy đơn an toàn có modal xác nhận.
+- **Tối Giản Hóa Màn Hình Giao Nhận (`ShipperHandoverPage.tsx`):**
+  - Xóa bỏ hoàn toàn 2 modal popup cũ (`ShipperLeaveRequestModal.tsx` và `ShipperLeaveHistoryModal.tsx`) để tránh code thừa và popup chồng chéo.
+  - Tích hợp nút liên kết nhanh trực tiếp tới cổng `/operations/shipper/leave` ngay trên header của trang giao nhận.
 - **Trang Quản Trị & Xét Duyệt Đơn (`ShipperLeaveReviewPage.tsx` tại `/management/shipper-leaves`):**
   - Dành cho các vai trò `ADMIN`, `MANAGER` và `ACCOUNTANT`.
   - Bộ lọc tabs theo trạng thái: Tất cả, Chờ Quản lý duyệt, Chờ Kế toán set công, Đã duyệt, Đã từ chối.
   - Thẻ đơn xin nghỉ (`ShipperLeaveCardComponent.tsx`) hiển thị minh bạch thông tin shipper xin nghỉ, danh sách ngày nghỉ, lý do, số điểm cần bàn giao, người duyệt và tiền công giao thay.
-- **Bộ 3 Modals Nghiệp Vụ:**
+- **Bộ 3 Modals Nghiệp Vụ Quản Trị:**
   - `ApproveShipperLeaveModal.tsx`: Quản lý / Admin duyệt đơn, chọn tài khoản Shipper thay thế (từ danh sách shipper active). Nếu là `ADMIN`, hỗ trợ checkbox 1 chạm thiết lập tiền công luôn để hoàn tất phê duyệt ngay lập tức.
   - `SetLeaveCompensationModal.tsx`: Kế toán / Admin thiết lập số tiền công giao thay (hỗ trợ các nút chọn nhanh 100k, 150k, 200k, 250k, 300k và nhập số tiền tùy chọn), ghi chú kế toán và hoàn tất duyệt đơn.
   - `RejectShipperLeaveModal.tsx`: Quản lý / Admin từ chối đơn xin nghỉ kèm lý do phản hồi cho Shipper.
-- **Menu điều hướng (`nav-config.ts`):**
+- **Menu điều hướng (`nav-config.ts` & `nav-mobile-config.ts`):**
+  - Bổ sung mục **"Xin Nghỉ Giao Nhận"** vào nhóm CÁ NHÂN & CHẤM CÔNG cho Shipper.
+  - Bổ sung tab **"Xin Nghỉ"** vào thanh Bottom Nav trên Mobile cho Shipper.
   - Bổ sung mục **"Duyệt Nghỉ Giao Nhận"** vào nhóm ĐIỀU HÀNH & KINH DOANH cho Admin, Manager và Accountant.
 

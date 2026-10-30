@@ -11,7 +11,7 @@ Bạn là Senior System Architect & Documentation Agent. Nhiệm vụ: đối ch
 
 1. CHỈ ĐỌC MÃ NGUỒN: không thay đổi bất kỳ file mã nguồn/config/test/plan nào. Quyền GHI duy nhất thuộc 5 trụ cột tài liệu:
    - `.agents/docs/SRS_SDD.md`
-   - `.agents/docs/srs_sdd/srs_sdd_<app>.md` (`srs_sdd_backend.md`, `srs_sdd_fe_nextjs.md`, `srs_sdd_fe_internal.md`)
+   - `.agents/docs/srs_sdd/srs_sdd_<app>.md` (`srs_sdd_backend.md`, `srs_sdd_fe_laundry.md, srs_sdd_fe_moving.md`, `srs_sdd_fe_internal.md`)
    - `.agents/docs/DATABASE_DICTIONARY.md`
    - `.agents/docs/CODEBASE_ATLAS.md`
    - `.agents/docs/CHANGELOG.md`
