@@ -29,9 +29,10 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
      - Nhúng dữ liệu có cấu trúc JSON-LD chuẩn `CleaningService` / `LocalBusiness` với thông tin pháp lý, số hotline, giờ mở cửa và địa bàn phục vụ.
      - Thêm tuyến đường `/vesinh` vào `src/app/sitemap.ts` với `priority: 0.9` và `changeFrequency: 'daily'`.
   4. **Thanh Điều Hướng & Mobile Navigation:**
-     - `PublicMainNavBarComponent.tsx`: Thêm mục menu "Vệ Sinh" nổi bật kèm biểu tượng `Sparkles` sinh động.
-     - `PublicMobileBottomNavComponent.tsx`: Thêm tab "Vệ Sinh" trên thanh điều hướng di động 5 nút đáy.
-     - `HeaderClientWrapperComponent.tsx`: Nhận diện đường dẫn `/vesinh` để active menu chính xác.
+     - `PublicMainNavBarComponent.tsx`: Tối ưu thanh điều hướng xuống đúng 4 tab (`Trang chủ` | `Dịch vụ ▾` | `Tin tức` | `Giới thiệu`) theo yêu cầu tinh giản; tab `Dịch vụ ▾` nhận diện trạng thái active cho cả `/dich-vu` và `/vesinh`.
+     - `PublicSubMenuComponent.tsx`: Tích hợp 2 badge nổi bật hàng đầu (🧺 Giặt Sấy Công Nghiệp & ✨ Vệ Sinh Doanh Nghiệp) khi mở menu `Dịch vụ`, đồng thời ẩn hoàn toàn thanh submenu khi ở trang vệ sinh để giao diện luôn sạch đẹp.
+     - `PublicMobileBottomNavComponent.tsx`: Đồng bộ 4 tab đáy chuẩn mực trên di động (`Trang chủ`, `Dịch vụ`, `Tin tức`, `Giới thiệu`).
+     - `HeaderClientWrapperComponent.tsx`: Quản lý trạng thái đóng/mở menu thông suốt.
   5. **Hạ Tầng Nginx Reverse Proxy:**
      - Cập nhật cấu hình `/etc/nginx/sites-available/thanhxuanlaundry.com` bổ sung `vesinh.thanhxuanlaundry.com` vào `server_name` cho cả khối HTTP port 80 và HTTPS port 443.
      - Kiểm tra cú pháp `nginx -t` pass 100% và reload Nginx an toàn.
