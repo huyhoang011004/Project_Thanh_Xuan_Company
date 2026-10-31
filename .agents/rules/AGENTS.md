@@ -6,8 +6,13 @@ Tài liệu này là nguồn quy ước chung cho mọi agent và workflow trong
 
 - **Dẫn chứng:** Mọi nhận định về code hiện có phải kèm `path:line`. Chưa xác minh được thì nêu rõ trong câu hỏi.
 - **Nguồn sự thật:** Code là hiện trạng; Plan là ý định thay đổi; `.agents/docs/SRS_SDD.md` phản ánh kiến trúc tổng thể và thư mục `.agents/docs/srs_sdd/` (`srs_sdd_backend.md`, `srs_sdd_fe_laundry.md`, `srs_sdd_fe_internal.md`, `srs_sdd_fe_moving.md`), `.agents/docs/DATABASE_DICTIONARY.md`, `.agents/docs/CODEBASE_ATLAS.md` phản ánh chi tiết từng phân hệ sau mỗi thay đổi hoàn tất.
-- **An toàn:**
-  - **Tự động commit và push lên nhánh `dev`:** Khi hoàn thành mỗi task/tính năng (sau khi đã chạy lint/typecheck/test/build pass), Agent tự động commit và push code lên nhánh `dev` của ứng dụng hoặc repository tương ứng.
+- **An toàn & Chiến lược thực thi tiết kiệm Token:**
+  - **Phân định 2 luồng công việc (Có Plan vs Chỉnh sửa lẻ không lên Plan):**
+    - **Luồng 1 (Có Plan - /act):** Tính năng mới hoặc refactor lớn đã duyệt qua `/plan`. Agent triển khai code và thực hiện luôn toàn bộ quy trình kiểm thử DoD (Typecheck, Build, Đồng bộ 5 trụ cột tài liệu, tự động commit và push `dev`).
+    - **Luồng 2 (Chỉnh sửa lẻ không lên Plan - Quick edits / Bugfix nhỏ / UI tweaks):** Để tránh lãng phí token và thời gian build lặp đi lặp lại:
+      - **Pha 1:** Agent sửa code xong **CHỈ VIẾT BÁO CÁO GIẢI PHÁP / KẾT QUẢ ĐÃ SỬA VÀ DỪNG LẠI CHỜ NGƯỜI DÙNG DUYỆT OK**. Tuyệt đối KHÔNG tự ý chạy build, KHÔNG cập nhật CHANGELOG/SRS_SDD, KHÔNG commit/push git ở pha này.
+      - **Pha 2:** **CHỈ KHI NGƯỜI DÙNG DUYỆT OK** (ví dụ: *"ok", "được rồi", "hoàn tất đi", "chốt commit"*), Agent mới thực hiện Bước 3 (DoD): chạy typecheck/build, cập nhật CHANGELOG.md & SRS_SDD.md, và tự động commit/push lên nhánh `dev`.
+  - **Tự động commit và push lên nhánh `dev`:** Thực hiện theo đúng 2 luồng trên (sau khi có sự đồng thuận của người dùng đối với chỉnh sửa lẻ, hoặc tự động sau khi hoàn tất plan).
   - **Quy chuẩn thông điệp commit:** Viết bằng tiếng Việt tự nhiên, giữ nguyên thuật ngữ kỹ thuật/chuyên ngành bằng tiếng Anh (ví dụ: `feat(handovers): thêm Service xử lý kiểm kê và đồng bộ DTO`, `fix(auth): sửa lỗi Guard kiểm tra audience JWT`).
   - **Bảo vệ môi trường Production (`master`):** Không bao giờ push trực tiếp lên nhánh `master`. Nhánh `master` chỉ dùng khi người dùng yêu cầu merge/trigger phát hành lên Production VPS.
   - Không chạy lệnh phá hủy (`git reset --hard`, `rm -rf`, drop DB, force push).
@@ -30,10 +35,11 @@ Monorepo gồm 4 app, mỗi app chạy lệnh ở đúng thư mục của nó:
 
 ## 3. Quy trình làm việc & Tài liệu
 
-- **`/plan`:** Tính năng mới hoặc đổi thiết kế/API -> Tạo kế hoạch tại `.agents/docs/plans/plan<N>.md`.
-- **`/act`:** Thực thi plan đã duyệt -> Sửa code, verify test/build, tick checkbox trong plan, cập nhật đồng bộ 5 trụ cột tài liệu (`srs_sdd_<app>.md`, `SRS_SDD.md`, `DATABASE_DICTIONARY.md`, `CODEBASE_ATLAS.md`, `CHANGELOG.md`), tự động commit & push lên nhánh `dev`.
+- **`/plan` & `/act` (Tính năng có Plan):** Tính năng mới hoặc đổi thiết kế/API -> Tạo kế hoạch tại `.agents/docs/plans/plan<N>.md`. Khi chạy `/act`, Agent sửa code, **làm luôn trọn gói Bước 3 (DoD)**: verify test/build pass 100%, tick checkbox trong plan, cập nhật đồng bộ 5 trụ cột tài liệu (`srs_sdd_<app>.md`, `SRS_SDD.md`, `DATABASE_DICTIONARY.md`, `CODEBASE_ATLAS.md`, `CHANGELOG.md`), tự động commit & push lên nhánh `dev`.
+- **Chỉnh sửa lẻ KHÔNG lên Plan (`/fix`, quick edits, tinh chỉnh UI, bugfix nhỏ):**
+  - **Pha 1 (Sửa code & Báo cáo - Chờ duyệt để tránh tốn Token):** Sửa code chính xác $\rightarrow$ Viết báo cáo giải pháp/kết quả ngắn gọn $\rightarrow$ **DỪNG LẠI CHỜ NGƯỜI DÙNG DUYỆT OK**. Tuyệt đối **KHÔNG** chạy `pnpm build`, **KHÔNG** cập nhật `CHANGELOG.md`/`SRS_SDD.md`, và **KHÔNG** commit/push git ở pha này.
+  - **Pha 2 (Thực hiện DoD sau khi duyệt):** **CHỈ KHI NGƯỜI DÙNG DUYỆT OK** (ví dụ: *"ok", "được rồi", "chốt commit", "hoàn tất đi"*), Agent mới thực hiện Bước 3 (DoD): chạy typecheck & build (`tsc --noEmit` và `pnpm build`), cập nhật tài liệu `CHANGELOG.md` & `SRS_SDD.md`, tự động commit và push lên nhánh `dev`.
 - **`/review`:** Đánh giá chất lượng sau `/act` hoặc `/fix` -> Ghi nhận tại `.agents/docs/reviews/review<N>.md`.
-- **`/fix`:** Lỗi nhỏ, rõ ràng, tối đa 3 file code, không đổi schema/API contract.
 - **`/docs-sync`:** Quét đồng bộ khi nghi ngờ tài liệu lệch code -> Cập nhật `.agents/docs/srs_sdd/srs_sdd_<app>.md`, `SRS_SDD.md`, `DATABASE_DICTIONARY.md`, `CODEBASE_ATLAS.md` & `CHANGELOG.md`.
 
 *Quy tắc cập nhật tài liệu Modular SRS/SDD & Harness Data:*
@@ -49,9 +55,14 @@ Monorepo gồm 4 app, mỗi app chạy lệnh ở đúng thư mục của nó:
 
 ## 4. Định nghĩa hoàn thành (Definition of Done)
 
+> [!IMPORTANT]
+> **Quy Chuẩn Kích Hoạt Bước Kiểm Thử & Hoàn Tất (DoD Trigger):**
+> - **Khi có Plan (`/act`):** Agent tự động thực hiện liền mạch toàn bộ 10 tiêu chí DoD dưới đây ngay khi hoàn thành code.
+> - **Khi chỉnh sửa lẻ KHÔNG lên Plan (`/fix`, quick edit, tinh chỉnh UI/CSS):** Agent sửa code xong **BẮT BUỘC DỪNG LẠI**, viết báo cáo giải pháp/kết quả để **NGƯỜI DÙNG DUYỆT OK TRƯỚC**. Tuyệt đối không tự ý chạy build, không cập nhật CHANGELOG/SRS_SDD, không commit/push git để tránh lãng phí token. **Chỉ khi người dùng duyệt OK**, Agent mới thực hiện các tiêu chí kiểm thử DoD dưới đây.
+
 Một thay đổi coi là xong khi:
-1. Mọi task trong plan đã hoàn tất và kiểm chứng thực tế.
-2. Lint, typecheck và test pass cho **từng app bị ảnh hưởng**.
+1. Mọi task trong plan (hoặc yêu cầu chỉnh sửa) đã hoàn tất và kiểm chứng thực tế.
+2. Lint, typecheck và test pass cho **từng app bị ảnh hưởng** (`pnpm exec tsc --noEmit`).
 3. Build pass cho từng app bị ảnh hưởng (`pnpm build`).
 4. Thay đổi API contract (DTO, response) ở Backend thì phía gọi (Web, Internal) đã được cập nhật đồng bộ.
 5. **Cập nhật Database Dictionary, Sắp Xếp Thứ Tự & Dọn Dẹp Bảng Đã Xóa:**
