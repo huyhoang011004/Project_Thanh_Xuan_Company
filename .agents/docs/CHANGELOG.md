@@ -4,21 +4,20 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
 
 ## 2026-10-31
 
-### Fix (Header UX): Loại Bỏ Hiện Tượng Phóng To / Phình To Header Khi Kéo Lên Trên Mobile (fe-nextjs-thanhxuan-laundry)
+### Fix (Header UX): Giữ TopBar Đầu Trang Trên Mobile & Tự Động Ẩn Khi Cuộn (fe-nextjs-thanhxuan-laundry)
 
 - **Bối cảnh & Yêu cầu:**
-  - Người dùng phản ánh khi lướt trên điện thoại (mobile), mỗi khi kéo trang lên trên thì thanh Header bị phóng to ra, chiếm nhiều diện tích màn hình và gây giật cục giao diện.
+  - Khách hàng yêu cầu: Vẫn để lại thanh TopBar (hotline & ưu đãi) trên mobile ở đầu trang, nhưng chỉ khi cuộn trang (kéo lên xem nội dung) thì mới ẩn đi, tránh hiện tượng Header bị phình to hoặc phập phồng giữa chừng khi vuốt kéo lên lúc đang đọc bài.
 - **Nguyên nhân gốc rễ (Root Cause Analysis):**
-  - Trong `PublicTopBarComponent.tsx`, thanh TopBar (chứa marquee và hotline) trước đây hiển thị trên cả mobile. Khi người dùng cuộn xuống thì TopBar co lại `max-h-0`, nhưng khi người dùng vuốt/kéo trang lên trên thì TopBar bung ra `max-h-20 py-2`, cộng thêm vào chiều cao của Header khiến giao diện mobile bị đội lên đột ngột.
-  - Đồng thời, trong `PublicMainNavBarComponent.tsx`, class padding container (`py-4` vs `py-3`) và kích thước font chữ logo (`text-xl sm:text-2xl` vs `text-lg sm:text-xl`) bị phụ thuộc vào cờ `isScrolledDown`, làm cho Header thay đổi kích thước và font chữ nhảy gián đoạn khi cuộn trang.
+  - Trước đây, logic lắng nghe sự kiện scroll so sánh gia số `currentScrollY > lastScrollY.current` khiến TopBar liên tục ẩn/hiện bất cứ khi nào ngón tay vuốt ngược một khoảng ngắn ở giữa trang, làm Header thay đổi chiều cao và font size đột ngột.
 - **Chi tiết kỹ thuật thực hiện:**
-  1. **Ẩn thanh TopBar trên Mobile (`PublicTopBarComponent.tsx`):**
-     - Thêm tiền tố `hidden md:flex`, chỉ hiển thị TopBar trên màn hình máy tính (Desktop/Tablet ngang). Trên Mobile, ẩn hoàn toàn TopBar để Header luôn phẳng gọn, không bị phình to khi vuốt kéo lên.
-  2. **Cố định kích thước & Kỷ luật Layout (`PublicMainNavBarComponent.tsx`):**
-     - Cố định padding container ở mức chuẩn `py-2.5 sm:py-3`.
-     - Cố định kích thước logo thương hiệu `text-lg sm:text-xl` và text phụ `text-[10px] sm:text-xs`.
-     - Cố định kích thước nav links `text-sm sm:text-base px-2.5 py-1.5`.
-     - Loại bỏ toàn bộ các điều kiện động làm biến thiên kích thước Header theo thao tác cuộn trên mobile.
+  1. **Hiển thị TopBar trên Mobile & Desktop (`PublicTopBarComponent.tsx`):**
+     - Giữ TopBar hiển thị trên cả di động và máy tính (`flex`) khi ở đỉnh trang.
+     - Áp dụng transition mượt mà và ẩn hoàn toàn khi `isScrolledDown` (`max-h-0 py-0 opacity-0 pointer-events-none`).
+  2. **Chuẩn hóa Logic Scroll Ngưỡng Cố Định (`HeaderClientWrapperComponent.tsx`):**
+     - Đơn giản hóa trạng thái cuộn: `setIsScrolledDown(window.scrollY > 40)`.
+     - Khi khách hàng ở đầu trang (`scrollY <= 40`): TopBar hiển thị đầy đủ thông tin.
+     - Khi cuộn trang đọc nội dung (`scrollY > 40`): TopBar tự động ẩn đi để mở rộng không gian đọc. Trong suốt quá trình lướt giữa trang, TopBar giữ nguyên trạng thái ẩn, không phình to khi vuốt ngược. Chỉ khi cuộn hẳn về đỉnh trang mới hiển thị lại.
   3. **Verification:**
      - Typecheck `pnpm exec tsc --noEmit` pass 100%.
      - Build Next.js `pnpm build` pass 100%.
