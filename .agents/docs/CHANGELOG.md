@@ -4,6 +4,28 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
 
 ## 2026-10-31
 
+### Fix (Routing & Header): Sửa Lỗi Crash 500 Trang Chi Tiết Dịch Vụ /dich-vu/[...slug] & Khôi Phục Header Nguyên Bản (fe-nextjs-thanhxuan-laundry)
+
+- **Bối cảnh & Yêu cầu:**
+  - Khách hàng phản ánh lỗi truy cập trang chi tiết dịch vụ `https://thanhxuanlaundry.com/dich-vu/[...slug]` trả về mã lỗi HTTP 500.
+  - Đồng thời, khách hàng đề xuất phương án: Bỏ cấu hình gộp `/vesinh` trên thanh điều hướng Header, để Header trở lại như trước (4 tab tinh gọn: Trang chủ, Dịch vụ, Tin tức, Giới thiệu). Khách muốn xem dịch vụ vệ sinh sẽ vào tên miền phụ `https://vesinh.thanhxuanlaundry.com/` hoặc chủ động truy cập URL `/vesinh`.
+- **Nguyên nhân gốc rễ (Root Cause Analysis):**
+  - Tuyến `src/app/(public)/dich-vu/[...slug]/page.tsx` và `gioi-thieu/[...slug]/page.tsx` thực hiện gọi `fetch` thô trực tiếp tới Backend mà không qua tầng Service chuẩn hóa response.
+  - Backend NestJS kích hoạt `TransformInterceptor` bọc toàn bộ kết quả trả về trong cấu trúc ApiResponse `{ success: true, data: ... }`. Đối với endpoint bài viết phân trang, `unpinnedData.data` là một object `{ data: [...], total: N }` chứ không phải một mảng thuần.
+  - Việc gán `otherArticles = unpinnedData?.data || []` khiến biến `otherArticles` mang kiểu Object thay vì Array. Khi truyền xuống component hiển thị và thực hiện `otherArticles.map(...)`, Next.js quăng lỗi runtime crash `TypeError: otherArticles.map is not a function`, dẫn đến mã lỗi 500 Internal Server Error và làm `category.name` bị `undefined`.
+- **Chi tiết kỹ thuật thực hiện:**
+  1. **Khắc phục lỗi 500 tại `/dich-vu/[...slug]` và `/gioi-thieu/[...slug]`:**
+     - Tái cấu trúc `src/app/(public)/dich-vu/[...slug]/page.tsx` và `src/app/(public)/gioi-thieu/[...slug]/page.tsx` chuyển sang sử dụng trực tiếp các phương thức an toàn của `PublicCategoriesService` và `PublicArticlesService` (`getCategoryBySlug`, `getArticleBySlug`, `getPinnedArticles`, `getPaginatedArticles`).
+     - Tầng Service đã được thiết kế sẵn cơ chế unwrap an toàn cho discriminated union, đảm bảo `otherArticles` luôn là Array thuần túy và metadata lấy đúng thuộc tính `meta_title`, `name`, `description`.
+  2. **Khôi phục Header thanh điều hướng nguyên bản:**
+     - `PublicMainNavBarComponent.tsx`: Trả về 4 tab tiêu chuẩn (`Trang chủ`, `Dịch vụ`, `Tin tức`, `Giới thiệu`), gỡ bỏ biểu tượng mũi tên dropdown `ChevronDown` và bỏ logic kiểm tra active chung với `/vesinh`.
+     - `PublicSubMenuComponent.tsx`: Trả về submenu hiển thị danh sách các dịch vụ con của `serviceCategories` thuần túy như ban đầu, dỡ bỏ 2 nút "Giặt Sấy Công Nghiệp" và "Vệ Sinh Doanh Nghiệp"; loại bỏ hoàn toàn các kiểu `any`.
+     - `HeaderClientWrapperComponent.tsx`: Bỏ nhánh gán `currentMenu = 'vesinh'` khi ở URL `/vesinh`, giúp thanh SubMenu tự động ẩn sạch sẽ khi người dùng duyệt trang vệ sinh.
+  3. **Verification:**
+     - Typecheck `pnpm exec tsc --noEmit` pass 100% không lỗi.
+     - Build Next.js `pnpm build` biên dịch thành công 15/15 routes tĩnh và động.
+     - Curl kiểm thử phản hồi thành công và không còn lỗi crash 500.
+
 ### Plan 62: Xây Dựng Hệ Thống Quản Trị Cài Đặt CMS Cho Trang Dịch Vụ Vệ Sinh (/admin/settings/vesinh & /vesinh) & Chuẩn Hóa Khối Form Liên Hệ (fe-nextjs-thanhxuan-laundry & be-nestjs-thanhxuan)
 
 - **Bối cảnh & Yêu cầu:**
