@@ -87,7 +87,9 @@ Backend API tập trung phục vụ toàn bộ các kênh tương tác của Cô
     - **Đối soát tính toán:** Tính khoảng cách $d = \sqrt{\sum (a_i - b_i)^2}$, điểm tin cậy $\text{confidence} = \max(0, \min(100, \text{round}((1 - d) \times 100)))$. Ngưỡng chấp nhận $d \le 0.50$.
     - **Chống gian lận:** Nếu $d > 0.50$ (lệch mặt/nghi vấn điểm danh hộ), ca chấm công vẫn được ghi nhận nhưng tự động gắn cờ `status = AttendanceStatus.NEEDS_REVIEW` kèm thông báo cảnh báo để Quản lý xưởng trực tiếp đối chiếu mắt thường với Avatar hồ sơ gốc trước khi duyệt.
   - **Xác thực sinh trắc học phần cứng FIDO2 / Passkeys (WebAuthn API):**
-    - Tích hợp `@simplewebauthn/server` qua `WebAuthnController` & `WebAuthnService` tại `/api/v1/internal/auth/webauthn/*` (`register-options`, `register-verify`, `auth-options`, `auth-verify`, `credentials`, `credentials/:credentialId`).
+    - Tích hợp `@simplewebauthn/server` qua `WebAuthnController` & `WebAuthnService` tại `/api/v1/internal/auth/webauthn/*`:
+      - **Public Endpoints (Đăng nhập không mật khẩu cho mọi vai trò):** `POST /login-options` (phát sinh challenge ngẫu nhiên) và `POST /login-verify` (xác minh chữ ký phần cứng theo `credentialId`, cấp cặp Access Token & Refresh Token mà không cần mật khẩu).
+      - **Protected Endpoints (Quản lý thiết bị & Điểm danh):** `POST /register-options`, `POST /register-verify`, `POST /auth-options`, `POST /auth-verify`, `GET /credentials`, `DELETE /credentials/:credentialId`.
     - Hỗ trợ cấu hình RP ID linh hoạt (`noibo.thanhxuanlaundry.com`, `thanhxuanlaundry.com`, `localhost`) chống tấn công lừa đảo nguồn gốc (origin mismatch) và replay attack qua challenge một lần (`currentWebAuthnChallenge`).
     - Lưu trữ danh sách khóa xác thực trong `StaffAccount.webauthnCredentials`.
     - Khi chấm công mang cờ `isBiometricDeviceVerified: true` (đã xác thực Face ID / Vân tay phần cứng điện thoại): hệ thống ưu tiên tin cậy cảm biến thiết bị bảo mật, tự động mở ca `OPEN` hoặc chốt ca `CLOSED` sạch sẽ, khắc phục triệt để trường hợp thợ đeo kính cận hoặc khẩu trang phòng bụi xưởng bị On-Device AI hiểu lầm là người lạ.

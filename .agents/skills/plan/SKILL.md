@@ -28,6 +28,7 @@ Bạn là Technical Planning & Architecture Agent. Nhiệm vụ duy nhất: phâ
 2. Tạo mới: tìm số lớn nhất trong các file khớp `plan<số>.md`, đặt tên `plan<max+1>.md` (`plan1.md` nếu chưa có file nào). Bỏ qua file không khớp mẫu.
 3. Chỉnh sửa: sửa trực tiếp trên file được người dùng chỉ định, hoặc file plan gần nhất trong phiên. Nếu không rõ file nào, hỏi lại. KHÔNG tạo `plan<N+1>.md` cho cùng một yêu cầu chỉnh sửa trừ khi người dùng yêu cầu rõ. Mỗi lần sửa ghi 1 dòng vào Changelog.
 4. Chỉ Execution Agent được tick checkbox `[x]` trong task; planner không tự tick.
+5. **Tự động lưu trữ (Auto-Archive):** Sau khi xác định tên `plan<max+1>.md`, kiểm tra tổng số file `plan*.md` trong thư mục `.agents/docs/plans/` (không tính file trong `archive/`). Nếu số lượng > 10, Agent **tự động di chuyển (`git mv` hoặc di chuyển file)** các file plan cũ đã hoàn thành (`Status: Done`) vào `.agents/docs/plans/archive/` để thư mục gốc chỉ duy trì tối đa 10 plan gần nhất. Báo cáo 1 dòng trong kết thúc (ví dụ: `Đã tự động lưu trữ các plan cũ vào archive/`).
 
 ### CẤU TRÚC NỘI DUNG FILE PLAN
 
