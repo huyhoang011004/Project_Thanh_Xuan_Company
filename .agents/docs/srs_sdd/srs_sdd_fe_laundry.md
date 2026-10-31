@@ -63,9 +63,10 @@ Phân hệ đảm nhiệm 2 vai trò cốt lõi trong mảng dịch vụ giặt 
 
 - **Tối ưu hóa SEO 100%:**
   - 100% các trang `(public)` sử dụng **React Server Components (RSC)** để HTML được render hoàn toàn tại server (SSR/SSG), tối đa hóa điểm Google Core Web Vitals.
-  - Cung cấp Metadata động (`generateMetadata`) cho từng bài viết và dịch vụ (Title, Description, Canonical URL, OpenGraph, Twitter Card).
-  - Tự động phát sinh `sitemap.xml` qua `src/app/sitemap.ts` và `robots.txt` qua `src/app/robots.ts`.
-  - Nhúng dữ liệu có cấu trúc Schema.org JSON-LD (`LocalBusiness`, `Organization`, `Article`, `Service`).
+  - Cung cấp Metadata động (`generateMetadata`) cho từng bài viết và dịch vụ (Title, Description, Canonical URL, OpenGraph, Twitter Card) chuẩn hóa từ khóa hạt nhân có search volume cao (`dịch vụ giặt là`, `giặt sấy công nghiệp`, `dịch vụ vệ sinh công nghiệp hà nội`, `vệ sinh văn phòng`).
+  - Tự động phát sinh `sitemap.xml` qua `src/app/sitemap.ts` với priority cao (0.85 - 0.9) cho các trang dịch vụ và `robots.txt` qua `src/app/robots.ts`.
+  - Nhúng dữ liệu có cấu trúc Schema.org JSON-LD đa thực thể (`DryCleaningOrLaundry`, `LaundryService`, `CleaningService`, `FAQPage` Rich Snippets và `BreadcrumbList`).
+  - Vận hành mô hình cụm chủ đề (Topic Cluster) liên kết nội bộ theo ngữ cảnh từ các bài viết cẩm nang (`/tin-tuc/*`) trỏ sức mạnh về 2 trang trụ cột dịch vụ (`/` & `/vesinh`).
 - **Tối ưu hình ảnh:** Dùng `next/image` kết hợp Cloudinary Loader hoặc Next.js Image Optimization, định dạng WebP/AVIF, lazy loading ảnh ngoài màn hình.
 
 ---

@@ -2,6 +2,33 @@
 
 Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâng cấp, bugfix và triển khai tính năng của Hệ sinh thái Công ty Thanh Xuân qua từng Plan.
 
+## 2026-11-01
+
+### Plan 63: Chiến Lược Tối Ưu Hóa SEO Toàn Diện Dịch Vụ Giặt Là & Dịch Vụ Vệ Sinh B2B (fe-nextjs-thanhxuan-laundry)
+
+- **Bối cảnh & Vấn đề giải quyết:**
+  - Khách hàng phản ánh website `https://thanhxuanlaundry.com/` mới chỉ lọt top Google với từ khóa thương hiệu (`thanh xuân laundry`), trong khi các từ khóa mang lại doanh thu chuyển đổi chính về dịch vụ Giặt là (`dịch vụ giặt là`, `giặt sấy`, `giặt ủi`, `giặt là công nghiệp hà nội`) và dịch vụ Vệ sinh (`dịch vụ vệ sinh công nghiệp hà nội`, `vệ sinh văn phòng`, `giặt thảm sofa`) chưa lên trang nhất.
+  - Phân tích nguyên nhân: Do nhắm thẳng từ khóa ngắn quá sớm khi chưa có Topical Authority, thẻ Title/Description/Keywords thiếu các từ khóa hạt nhân có search volume cao, thiếu Schema Rich Snippets để kích hoạt FAQ/Ratings trên Google Search, và thiếu mạng lưới liên kết nội bộ theo mô hình Topic Cluster.
+
+- **Các thay đổi kiến trúc & kỹ thuật chi tiết:**
+  1. **Tối ưu On-Page Metadata cho Dịch Vụ Giặt Là (`src/app/layout.tsx` & `src/app/(public)/page.tsx`):**
+     - Title mặc định: Đổi thành `"Dịch Vụ Giặt Là, Giặt Sấy Công Nghiệp Uy Tín Hà Nội | Thanh Xuân Laundry"`.
+     - Description: Chứa đầy đủ bộ từ khóa chuyển đổi cao (`dịch vụ giặt là`, `giặt sấy công nghiệp`, `nhà hàng`, `khách sạn`, `Hà Nội`, `hóa đơn VAT`).
+     - Keywords: Bổ sung 14 từ khóa hạt nhân có lượt tìm kiếm lớn nhất ngành giặt là.
+     - Schema Root: Nâng cấp `@type` thành `["DryCleaningOrLaundry", "LaundryService"]`.
+  2. **Tối ưu On-Page & Schema Đa Thực Thể Cho Trang Vệ Sinh (`src/app/(public)/vesinh/page.tsx`):**
+     - Metadata: Title `"Dịch Vụ Vệ Sinh Công Nghiệp Hà Nội, Vệ Sinh Văn Phòng Trọn Gói | Thanh Xuân Cleaning"`, Canonical URL cố định `https://vesinh.thanhxuanlaundry.com`.
+     - Schema JSON-LD đa thực thể: Nhúng `@graph` bao gồm `CleaningService` (Hotline, GPS, OfferCatalog), `FAQPage` (tự động map 6 câu hỏi FAQ thực tế để kích hoạt Google Rich Snippets FAQ accordion), và `BreadcrumbList`.
+     - Heading H1/H2: Rà soát và chuẩn hóa `VesinhHeroSectionComponent` và `VesinhServicesGridComponent` chứa đúng từ khóa dịch vụ B2B mục tiêu.
+  3. **Cập nhật Sitemap (`src/app/sitemap.ts`):**
+     - Nâng priority các trang bài viết dịch vụ (`/dich-vu/*`) từ 0.6 lên 0.85 (ưu tiên hơn bài viết tin tức 0.7).
+  4. **Ban hành cẩm nang Topic Cluster (`SEO_CONTENT_CLUSTER_GUIDE.md`):**
+     - Hướng dẫn đội ngũ Marketing viết bài vệ tinh trên CMS (`/admin/articles`) và cách chèn anchor text ngữ cảnh trỏ dòng sức mạnh link nội bộ về các trang Pillar.
+
+- **Kết quả Kiểm Chứng (Verification):**
+  - Typecheck `pnpm exec tsc --noEmit` pass 100% (0 errors).
+  - Next.js Production Build: `pnpm build` pass 100%, render thành công toàn bộ 15/15 routes tĩnh và động.
+
 ## 2026-10-31
 
 ### Fix (Header UX): Giữ TopBar Đầu Trang Trên Mobile & Tự Động Ẩn Khi Cuộn (fe-nextjs-thanhxuan-laundry)
@@ -551,74 +578,10 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
   2. **Frontend (`fe-react-thanhxuan-internal`):** Trong `useShipperHandoverPage.ts`, bổ sung ràng buộc nghiêm ngặt khi duyệt `scheduledPartners`: chỉ đưa vào Tab "Lộ Trình" (`ROUTE`) nếu `sp.defaultShipperId === user.id`. Đối tác tuyến tự do chưa có phiếu tuyệt đối không xuất hiện trong Tab "Lộ Trình", mà chỉ hiển thị tại Tab "Nhận Chuyến" (`POOL`) của từng ngày để Shipper chủ động bấm nhận lại cho từng ngày riêng biệt.
   3. **Verification:** Backend 50/50 suites (235 tests pass), nest build pass; Frontend `tsc --noEmit` pass 100%, vite build pass tạo PWA bundle thành công.
 
-### Plan 52: Phân Shipper Cố Định Cho Chi Nhánh Đối Tác, Tab Nhận Chuyến Tự Do & Cài Đặt Tiền Công Job Lẻ / Cụm Tuyến
-
-- **Bối cảnh & Vấn đề giải quyết:**
-  - **Phân công Shipper cố định cho chi nhánh đối tác:** Trước đây hệ thống chưa có cơ chế chỉ định một tài xế xe tải (Shipper) cố định phụ trách từng chi nhánh đối tác. Trong mô hình vận hành của công ty Thanh Xuân, các tuyến cố định này được tính theo chế độ lương cố định + phụ cấp theo tháng (không tính tiền chuyến riêng).
-  - **Tuyến tự do & Chợ Nhận Chuyến (Job Pool):** Các đối tác chưa được gán cố định cho shipper nào (hoặc các job phát sinh) cần hiển thị tại một tab riêng để các tài xế Shipper có thể chủ động bấm "Nhận chuyến" đi giao nhận. Cần đảm bảo cơ chế nhận chuyến nguyên tử (Atomic Claim) chống xung đột khi 2 tài xế bấm nhận cùng lúc.
-  - **Cài đặt tiền công chuyến (Trip Compensation):** Admin và Kế toán (`ACCOUNTANT`) cần công cụ thiết lập tiền công riêng cho các job tự do/phát sinh: 1 job đi 1 đối tác lẻ = `x` VNĐ; 1 job đi nhiều cụm đối tác cùng tuyến = `xx` VNĐ (chia đều số tiền cho từng phiếu thuộc cụm). Toàn bộ tiền công chuyến hoàn thành trong tháng phải được tự động tích hợp cộng vào bảng lương của Shipper (`extraDeliveryPay` và `netPay`).
-
-- **Các thay đổi kiến trúc & kỹ thuật chi tiết:**
-  - **Backend (`be-nestjs-thanhxuan`):**
-    - Mở rộng Schema `Partner` (`partner.schema.ts`): Thêm trường `defaultShipperId?: Types.ObjectId` tham chiếu tới `StaffAccount` (index `{ defaultShipperId: 1 }`), hỗ trợ DTO `CreatePartnerDto` & `UpdatePartnerDto`.
-    - Mở rộng Schema `HandoverRecord` (`handover-record.schema.ts`): Thêm sub-schema `TripCompensation` (`amount`, `clusterId`, `note`, `configuredBy`, `configuredAt`), các trường `tripCompensation`, `claimedAt`, `claimedBy`.
-    - Tạo DTOs xác thực nghiêm ngặt: `ClaimHandoverDto` (`src/modules/internal/handovers/dto/claim-handover.dto.ts`), `SetTripCompensationDto` và `ClusterCompensationDto` (`src/modules/internal/handovers/dto/trip-compensation.dto.ts`).
-    - Endpoint lấy danh sách tài xế active: Thêm `GET /api/v1/internal/accounts/shippers-list` tại `AccountsController` / `AccountsService` / `StaffAccountRepository` trả về danh sách `_id, fullName, phone, username` của tài xế đang hoạt động.
-    - Xử lý nhận chuyến nguyên tử (Atomic Claim): Thêm `claimRecordAtomic` tại `HandoverRecordRepository` dùng MongoDB `findOneAndUpdate({ _id: id, shipperId: null }, { $set: { shipperId: user.sub, claimedAt, claimedBy } }, { new: true })`. Trả về HTTP `409 Conflict` nếu chuyến đã có tài xế khác nhận trước.
-    - Xây dựng `HandoverPoolCompensationService`: Quản lý logic lấy danh sách chợ chuyến (`getPoolHandovers`), nhận chuyến (`claimHandover`), cài đặt tiền chuyến lẻ (`setTripCompensation`) và gom cụm nhiều đối tác (`clusterCompensation` sinh mã `CLUSTER-YYYYMMDD-XXXX` chia đều `perRecordAmount = Math.round(totalAmount / N)`).
-    - Tích hợp tự động vào bảng lương Shipper: Nâng cấp `payroll-shipper-calculator.helper.ts` tự động lọc các phiếu giao nhận hoàn thành trong tháng có `tripCompensation.amount > 0` đưa vào `ShipperPayDetails.extraDeliveryPay` và cộng trực tiếp vào thu nhập thực nhận `netPay`.
-    - Viết bộ unit test toàn diện: `handover-pool-compensation.service.spec.ts` kiểm thử 7 kịch bản nghiệp vụ (Pool filtering, Atomic claim, Race condition handling, Set tiền lẻ, Gom cụm chia đều, Payroll integration). Test chạy PASS 7/7.
-  - **Frontend Cổng Nội Bộ (`fe-react-thanhxuan-internal`):**
-    - Phân công Shipper trong `PartnerModal.tsx`: Tích hợp dropdown tải danh sách tài xế từ `/accounts/shippers-list`, cho phép chọn Shipper cố định (hưởng lương cứng + phụ cấp) hoặc chọn "Tuyến tự do (Chờ nhận theo chuyến)".
-    - Hiển thị trên thẻ đối tác `PartnerCardComponent.tsx`: Badge màu tím hiển thị họ tên và SĐT tài xế cố định phụ trách chi nhánh hoặc nhãn Tuyến tự do.
-    - Thêm Tab "Nhận Chuyến" (`POOL`) trên `ShipperHandoverPage.tsx`: Mở rộng `useShipperHandoverPage.ts` hỗ trợ 3 tabs (`ROUTE`, `POOL`, `HISTORY`), query `poolJobs`, mutation `claimJobMutation`.
-    - Xây dựng component `ShipperJobPoolTabComponent.tsx`: Hiển thị danh sách chuyến tự do khả dụng kèm badge số lượng, thông tin điểm giao nhận, số món sạch/bao bẩn, tiền công dự kiến và nút "Nhận Chuyến Này".
-    - Xây dựng Modal cài đặt tiền công `TripCompensationModal.tsx`: Hỗ trợ 2 chế độ: Chuyến lẻ (`x` VNĐ) và Gom cụm nhiều đối tác cùng tuyến (`xx` VNĐ chia đều), hiển thị trực quan thông tin chi nhánh và tiền chia đều mỗi phiếu.
-    - Gắn nút cài đặt tiền công trên phiếu kho: Tích hợp vào `WarehouseCleanPlanTabComponent.tsx` và `WarehouseHandoverPage.tsx` cho phép Thủ kho, Quản lý và Kế toán xem và cập nhật tiền công chuyến ngay trên phiếu xuất kho.
-
-- **Kết quả Kiểm Chứng (Verification):**
-  - Backend Unit Tests: 50/50 suites passed, 233/233 tests passed (0 failures).
-  - Backend NestJS Build: `pnpm build` thành công (exit code 0).
-  - Frontend Internal Typecheck: `pnpm exec tsc --noEmit` pass 100% (0 errors).
-  - Frontend Internal Production Build: `pnpm build` thành công, sinh dist bundle và PWA Service Worker (exit code 0).
-- **Đồng bộ tài liệu:** Cập nhật đồng bộ `DATABASE_DICTIONARY.md` (1.6 bảng `partners` & 1.8 bảng `handover_records`), `CODEBASE_ATLAS.md` (Endpoints, Services, Components, Modals), `srs_sdd_backend.md`, `srs_sdd_fe_internal.md`, `SRS_SDD.md` (Document History) và `plan52.md`.
-
-### Plan 51: Bổ Sung Tự Nhập Món Đồ Ngoài Setting, Fix Lỗi Recount-Flag, Tối Ưu UI & Fullscreen Mobile Form Đếm Đồ
-
-- **Bối cảnh & Vấn đề giải quyết:**
-  - **Khắc phục lỗi HTTP 404 Recount-Flag:** Khi tài xế Shipper tick chọn hoặc hủy chọn checkbox *"Yêu cầu trạm rạch bao đếm lại tại xưởng"* trên màn hình xem trước phiếu, hệ thống gọi `PATCH /api/v1/internal/handover/:id/recount-flag` nhưng Backend thiếu endpoint này dẫn đến thông báo toast đỏ `Cannot PATCH ...`.
-  - **Khắc phục lỗi UI cắt viền & tràn lề:** Nút *"Xác Nhận Shipper Đã Giao Hàng & Nhận Đồ Bẩn"* trên mobile hẹp bị co cụm và cắt cụt văn bản (`ác Nhận Shipper...`); cụm nút chọn số bao gom niêm phong (`1 bao`, `2 bao`... `Khác..`) bị tràn ra khỏi mép phải màn hình.
-  - **Bổ sung tự nhập món đồ ngoài setting:** Khi chi nhánh đối tác có các món đồ vải phát sinh mới chưa có sẵn trong danh mục bảng giá (`item_catalogs`), tài xế shipper và đối tác không thể ghi nhận số lượng chính xác vào phiếu giao nhận.
-  - **Tối ưu Mobile-First & Fullscreen Form đếm đồ Shipper:** Modal đếm đồ trên di động trước đây bị giới hạn kích thước với khoảng cách lề thừa bao quanh khiến không gian đếm đồ bị thu hẹp.
-
-- **Các thay đổi kiến trúc & kỹ thuật chi tiết:**
-  - **Backend (`be-nestjs-thanhxuan`):**
-    - Tạo mới `RecountFlagDto` (`src/modules/internal/handovers/dto/recount-flag.dto.ts`) validate strict `@IsBoolean()` và `@IsOptional() @IsString() recountReason`.
-    - Bổ sung endpoint `@Patch(':id/recount-flag')` tại `HandoverDirtyOperationsController` với phân quyền an toàn `PERMISSIONS.HANDOVER_DELIVER, PERMISSIONS.HANDOVER_RECOUNT_REQUEST`.
-    - Cập nhật `HandoverDirtySignatureService` và `HandoverService` xử lý cập nhật trạng thái `recount.isRecount`, `recount.status` (`PENDING` hoặc `NONE`) và lưu ID người yêu cầu (`requestedBy`).
-    - Nâng cấp `updateDirtyItemOnBlur` nhận thêm `customItemName?: string` để lưu trực tiếp tên món đồ phát sinh người dùng tự nhập.
-  - **Frontend (`fe-react-thanhxuan-internal`):**
-    - Nâng cấp `Dialog` (`src/components/ui/dialog.tsx`) hỗ trợ prop `fullScreenOnMobile?: boolean`, tự động gỡ bỏ viền lề ngoài và bo góc trên mobile để modal chiếm trọn 100% diện tích màn hình điện thoại.
-    - Xây dựng `CustomHandoverItemModal.tsx` (`src/features/operations/handovers/modals/`) cho phép nhập Tên món đồ, Đơn vị tính (chọn nhanh hoặc tự gõ), Số lượng và Ghi chú; tự động sinh mã `CUSTOM_<timestamp>`.
-    - Nâng cấp `useShipperCountForm.ts` và `ShipperCountPartnerModal.tsx`: bật `fullScreenOnMobile={true}`, thêm nút `+ Tự nhập món`, quản lý state `customItems`, hiển thị badge `Ngoài setting` và nút Thùng rác xóa món tự nhập nếu nhập nhầm trong `ShipperCountItemsComponent.tsx`.
-    - Thiết kế lại bộ chọn số bao cho Shipper (`ShipperCountSignSectionComponent.tsx` & `ShipperHandoverSignatureSectionComponent.tsx`): hiển thị sẵn 3 nút chọn nhanh `1 bao`, `2 bao`, `3 bao`, kết hợp cụm stepper `[-] [Khác] [+]` vừa vặn trên 1 dòng đơn trên mọi smartphone; đồng bộ số bao gom niêm phong giữa form đếm thay và card giao hàng ngoài; rút gọn nhãn nút gửi thành **"Xác Nhận"** kèm icon Truck.
-    - Sửa nút giao hàng trong `ShipperHandoverSignatureSectionComponent.tsx`: chuyển sang `min-h-[46px] h-auto whitespace-normal leading-snug break-words` chống cắt chữ.
-    - Cổng đối tác (`PartnerCountTabComponent.tsx` & `PartnerCountItemsViewComponent.tsx`): tích hợp nút `+ Tự nhập món đồ` ngoài setting, hiển thị badge và nút xóa món custom; giữ nguyên không có trường số bao (số bao chỉ dành riêng cho Shipper).
-
-- **Kết quả Kiểm Chứng (Verification):**
-  - Backend Typecheck & Lint: Pass 100% (0 errors, 0 warnings).
-  - Backend Jest Tests: Pass 3/3 test suites matching handover (`create-handover.dto.spec.ts`, `handover.service.spec.ts`, `handover-state.spec.ts` - 42/42 tests pass).
-  - Frontend Internal Typecheck: Pass 100% (`tsc --noEmit` pass không lỗi).
-  - Frontend Internal Production Build: Pass 100% (`tsc -b && vite build` tạo bundle dist/ và service worker PWA sạch sẽ).
-- **Đồng bộ tài liệu:** Cập nhật `plan51.md` (Completed), `CODEBASE_ATLAS.md` (Bảng 1.1 Backend & Bảng 3 Frontend), `srs_sdd_backend.md`, `srs_sdd_fe_internal.md`, `SRS_SDD.md` (Document History) và `CHANGELOG.md`.
-
-## 2026-10-28
-
-
-
 ---
 
-## CÁC GIAI ĐOẠN LỊCH SỬ TRƯỚC ĐÓ (PLAN 1 ĐẾN PLAN 50)
+## CÁC GIAI ĐOẠN LỊCH SỬ TRƯỚC ĐÓ (PLAN 1 ĐẾN PLAN 52)
 
-> Toàn bộ 50 Plan lịch sử đầu tiên đã được lưu trữ sang file độc lập để tối ưu hóa hiệu năng và tiết kiệm token cho hệ thống:
-> 📦 **Xem chi tiết tại:** [CHANGELOG_ARCHIVE_V1.md](./changelogs/CHANGELOG_ARCHIVE_V1.md)
+> Toàn bộ các Plan lịch sử trước đây đã được tự động lưu trữ sang các file độc lập để tối ưu hóa token và hiệu năng tài liệu:
+> 📦 **Giai đoạn Plan 51 - Plan 52:** [CHANGELOG_ARCHIVE_V2.md](./changelogs/CHANGELOG_ARCHIVE_V2.md)  
+> 📦 **Giai đoạn Plan 1 - Plan 50:** [CHANGELOG_ARCHIVE_V1.md](./changelogs/CHANGELOG_ARCHIVE_V1.md)
