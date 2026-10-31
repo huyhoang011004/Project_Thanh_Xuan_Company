@@ -183,3 +183,27 @@ sequenceDiagram
    - Thư mục `components/`: Chứa các subcomponent hiển thị `[Tên]Component.tsx` kèm `components/index.ts`.
    - Shared components: Phân tách rõ ràng `components/layout/` (`admin/`, `public/`), `components/common/`, `components/ui/`.
    - Giới hạn kích thước file 250 - 300 dòng; bóc tách modal và subcomponents kịp thời, không dồn hàng nghìn dòng vào 1 file.
+
+---
+
+### 2.4. Kiến Trúc PWA (Progressive Web App) & Soạn Thảo Visual Phong Cách Canva
+
+1. **Chuẩn PWA Native (Next.js 16 + React 19):**
+   - **Web App Manifest (`src/app/manifest.ts`):** Khai báo Metadata Route tự động sinh `/manifest.webmanifest`. Đầy đủ cấu hình `standalone`, `theme_color: #1e40af`, bộ icons chuẩn PWA (192, 512, maskable, apple-touch-icon) và App Shortcuts điều hướng nhanh tới Bảng giá Giặt Sấy (`/dich-vu`), Dịch vụ Vệ Sinh (`/vesinh`), và Liên hệ Báo giá (`/lien-he`).
+   - **Vanilla Service Worker (`public/sw.js`):** Xử lý vòng đời caching:
+     - **Network-First cho Navigation HTML:** Đảm bảo khách hàng luôn xem được thông tin giá và bài viết cập nhật tức thì; tự động fallback về trang ngoại tuyến [`/offline`](file:///root/Project_Thanh_Xuan_Company/fe-nextjs-thanhxuan-laundry/src/app/offline/page.tsx) khi mất kết nối mạng.
+     - **Stale-While-Revalidate / Cache-First:** Caching static assets (icons, images, fonts, css, js).
+     - **Dynamic API Bypass:** Tuyệt đối không cache `/api/*` và CMS admin để đảm bảo an toàn dữ liệu.
+   - **PWA Prompt Engine:** Component lá [`PwaRegisterComponent.tsx`](file:///root/Project_Thanh_Xuan_Company/fe-nextjs-thanhxuan-laundry/src/components/pwa/PwaRegisterComponent.tsx) đăng ký Service Worker và [`PwaInstallPromptComponent.tsx`](file:///root/Project_Thanh_Xuan_Company/fe-nextjs-thanhxuan-laundry/src/components/pwa/PwaInstallPromptComponent.tsx) hiển thị banner cài đặt thông minh cho Chromium và hướng dẫn thêm vào màn hình chính cho iOS Safari (tự động ẩn khi ở chế độ Standalone).
+2. **Tối Ưu Hóa Giao Diện Mobile (Mobile Polish):**
+   - **iOS Safe Area Inset:** Utility classes `@supports (padding-bottom: env(safe-area-inset-bottom))` bảo vệ thanh điều hướng đáy [`PublicMobileBottomNavComponent`](file:///root/Project_Thanh_Xuan_Company/fe-nextjs-thanhxuan-laundry/src/components/layout/public/header/PublicMobileBottomNavComponent.tsx) khỏi bị che bởi Home Bar iPhone.
+   - **Chống Auto-Zoom:** Chuẩn hóa `text-base md:text-sm` trên `<Input />` để ngăn iOS Safari phóng to màn hình khi nhập liệu.
+   - **Đệm Đáy:** Bổ sung `pb-16 md:pb-0` cho `<main>` tránh nội dung chân trang bị thanh Bottom Nav đè lên.
+   - **Vị Trí Speed Dial:** Điều chỉnh vị trí nổi [`DraggableFloatingContactComponent`](file:///root/Project_Thanh_Xuan_Company/fe-nextjs-thanhxuan-laundry/src/components/layout/public/DraggableFloatingContactComponent.tsx) thành `bottom-20 md:bottom-8` gọn gàng.
+3. **Trình Soạn Thảo Rich Text Phong Cách Canva Cho Các Trang SEO:**
+   - **Canva Font Family Selector:** Bộ font Google Fonts tiếng Việt hiện đại (`Inter`, `Be Vietnam Pro`, `Montserrat`, `Roboto`, `Plus Jakarta Sans`, `Playfair Display`, `Merriweather`, `Lora`, `Oswald`) có Visual Preview trực quan trong dropdown.
+   - **Canva Font Size Presets:** Danh sách chọn nhanh từ 12px đến 48px Hero.
+   - **Canva Curated Color Palette & Highlight:** Popover bảng màu chọn sẵn chuẩn thương hiệu và pastel highlight, kèm HEX color picker tùy biến.
+   - **Line & Letter Spacing:** Tùy biến khoảng cách dòng (1.2 -> 2.0) và độ giãn chữ (-0.02em -> 0.1em).
+   - **Canva Callout Cards & CTA Builder:** Nút chèn khối điểm nhấn SEO (thông tin, lưu ý, cam kết) và nút kêu gọi hành động CTA (gọi hotline, nhận báo giá) trực quan vào nội dung bài viết.
+

@@ -4,6 +4,37 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
 
 ## 2026-11-01
 
+### Plan 64: Triển Khai PWA Toàn Diện, Tối Ưu Mobile UX & Nâng Cấp Trình Soạn Thảo Visual CMS Phong Cách Canva Cho Các Trang SEO Chính (fe-nextjs-thanhxuan-laundry)
+
+- **Bối cảnh & Vấn đề giải quyết:**
+  - Khách hàng và doanh nghiệp truy cập `https://thanhxuanlaundry.com/` chủ yếu qua smartphone. Tuy nhiên, trước đây website chưa có PWA (không thể cài đặt thành app điện thoại, thiếu Service Worker và Manifest, thiếu offline fallback khi mất mạng).
+  - Trải nghiệm di động còn một số điểm chưa tối ưu: nút speed dial liên hệ (`DraggableFloatingContactComponent`) bị đặt quá cao giữa màn hình (`bottom-[200px]`), thiếu hỗ trợ vùng an toàn notch/Home indicator trên iPhone (`pb-safe`), các ô input có thể gây giật cục do iOS Safari tự động phóng to (auto-zoom) khi chạm vào, và chân trang có nguy cơ bị thanh điều hướng mobile (`h-16`) đè lên.
+  - Về biên tập nội dung SEO: Quản trị viên CMS cần tạo các trang landing page dịch vụ (`/dich-vu/*`, `/vesinh`) và bài viết cẩm nang (`/tin-tuc/*`) bắt mắt. Trình soạn thảo cũ chỉ có 5 font chữ hệ thống cổ điển, thiếu bảng màu thiết kế trực quan, thiếu giãn dòng/giãn chữ (line/letter spacing) và không thể chèn khung nhấn hay nút kêu gọi hành động (CTA) như Canva.
+
+- **Các thay đổi kiến trúc & kỹ thuật chi tiết:**
+  1. **Triển khai PWA Native Đạt Chuẩn Next.js 16 (App Router):**
+     - **Web App Manifest (`src/app/manifest.ts`):** Khai báo Metadata Route chuẩn Next.js 16 sinh `/manifest.webmanifest` với `display: standalone`, `theme_color: #1e40af`, `orientation: portrait-primary`, và bộ 3 App Shortcuts chuyển đổi nhanh (*Dịch Vụ Giặt Sấy*, *Dịch Vụ Vệ Sinh*, *Liên Hệ Báo Giá*).
+     - **Bộ Icon PWA Đa Kích Thước:** Xây dựng script `scripts/generate-pwa-icons.mjs` sử dụng `sharp` để xuất bộ icon chuẩn PWA: `icon-192x192.png`, `icon-512x512.png`, `icon-maskable-192x192.png`, `icon-maskable-512x512.png`, `apple-touch-icon.png` (180x180), và favicon 32/16px.
+     - **Vanilla Service Worker (`public/sw.js`):** Triển khai chiến lược caching: **Network-First** cho các trang HTML navigation (đảm bảo tin tức & giá luôn tức thời), tự động fallback về trang ngoại tuyến [`/offline`](file:///root/Project_Thanh_Xuan_Company/fe-nextjs-thanhxuan-laundry/src/app/offline/page.tsx) khi mất mạng; **Stale-While-Revalidate / Cache-First** cho static assets; hoàn toàn bypass cache cho dynamic API `/api/*` và `/admin/*`.
+     - **Trang Ngoại Tuyến (`src/app/offline/page.tsx`):** Giao diện thông báo mất kết nối thân thiện, nút "Thử tải lại trang" và nút gọi hotline khẩn cấp 0769 270 676.
+     - **PWA Prompt Engine:** Component lá [`PwaRegisterComponent.tsx`](file:///root/Project_Thanh_Xuan_Company/fe-nextjs-thanhxuan-laundry/src/components/pwa/PwaRegisterComponent.tsx) đăng ký Service Worker mượt mà; component [`PwaInstallPromptComponent.tsx`](file:///root/Project_Thanh_Xuan_Company/fe-nextjs-thanhxuan-laundry/src/components/pwa/PwaInstallPromptComponent.tsx) tự động bắt sự kiện `beforeinstallprompt` trên Chromium/Android và Bottom Sheet hướng dẫn thêm vào màn hình chính trên iOS Safari (tự động ẩn khi đã cài đặt).
+  2. **Tối Ưu Hóa Giao Diện Mobile (Mobile Polish):**
+     - **iOS Safe Area Inset:** Bổ sung utility classes `@supports (padding-bottom: env(safe-area-inset-bottom))` vào `globals.css` để thanh điều hướng đáy [`PublicMobileBottomNavComponent`](file:///root/Project_Thanh_Xuan_Company/fe-nextjs-thanhxuan-laundry/src/components/layout/public/header/PublicMobileBottomNavComponent.tsx) không bị thanh Home Bar iPhone che.
+     - **Chống Auto-Zoom trên iOS Safari:** Chuẩn hóa `text-base md:text-sm` trong `src/components/ui/input.tsx` để ngăn iOS Safari tự động zoom in màn hình khi tap vào input.
+     - **Khoảng Đệm Đáy:** Bổ sung `pb-16 md:pb-0` cho `<main>` trong `src/app/(public)/layout.tsx` chống đè nội dung bởi Mobile Bottom Nav.
+     - **Cân Chỉnh Vị Trí Speed Dial:** Điều chỉnh vị trí nổi [`DraggableFloatingContactComponent`](file:///root/Project_Thanh_Xuan_Company/fe-nextjs-thanhxuan-laundry/src/components/layout/public/DraggableFloatingContactComponent.tsx) từ `bottom-[200px]` thành `bottom-20 md:bottom-8 right-4`.
+  3. **Nâng Cấp Trình Soạn Thảo Visual Rich Text CMS Phong Cách Canva Cho Các Trang SEO:**
+     - **Canva Font Family Selector:** Tuyển chọn 10 font Google Fonts tiếng Việt hiện đại (`Inter`, `Be Vietnam Pro`, `Montserrat`, `Roboto`, `Plus Jakarta Sans`, `Playfair Display`, `Merriweather`, `Lora`, `Oswald`) kèm xem trước font thực tế (Visual Font Preview) trong dropdown.
+     - **Canva Font Size Presets:** Danh sách chọn nhanh kích thước font từ 12px đến 48px Hero Title.
+     - **Canva Curated Color Palette & Highlight:** Popover bảng màu chọn sẵn chuẩn thương hiệu và màu pastel highlight, kèm HEX color picker tùy biến.
+     - **Line & Letter Spacing:** Thêm Tiptap extensions điều chỉnh khoảng cách dòng (1.2 -> 2.0) và độ giãn chữ (-0.02em -> 0.1em).
+     - **Canva Callout Cards & CTA Builder:** Nút chèn khối điểm nhấn SEO (thông tin, lưu ý, cam kết) và nút kêu gọi hành động CTA (gọi hotline, nhận báo giá) chuyển đổi cao trực quan vào nội dung bài viết.
+
+- **Kết Quả Kiểm Chứng (Verification):**
+  - Typecheck `pnpm exec tsc --noEmit` pass 100% (0 errors).
+  - Lint: Kiểm tra toàn bộ file mới/chạm pass 100%.
+  - Next.js Production Build: `pnpm build` pass 100% (17/17 routes tĩnh và động, route `/manifest.webmanifest` và `/offline` prerender thành công).
+
 ### Plan 63: Chiến Lược Tối Ưu Hóa SEO Toàn Diện Dịch Vụ Giặt Là & Dịch Vụ Vệ Sinh B2B (fe-nextjs-thanhxuan-laundry)
 
 - **Bối cảnh & Vấn đề giải quyết:**
@@ -545,43 +576,10 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
   - **Verification:** `tsc -b && vite build` pass 100%, tạo PWA bundle thành công; `pnpm exec tsc --noEmit` pass không có lỗi.
 
 
-### Plan 53: Bổ Sung Ca Giao Nhận Buổi Chiều (AFTERNOON) Toàn Hệ Thống
-
-- **Bối cảnh & Yêu cầu:** Trước đây hệ thống giao nhận xưởng và logistics chỉ định nghĩa 2 ca giao nhận mặc định: **Ca Sáng (`MORNING`)** và **Ca Tối (`EVENING`)**. Thực tế phát sinh nhu cầu giao nhận bổ sung **Buổi Chiều (`AFTERNOON`)** (khoảng 14h00 - 17h00) đối với các chuỗi đối tác tiệc chiều hoặc chuyến trung chuyển khẩn cấp trước giờ cao điểm tối.
-- **Các thay đổi kiến trúc & kỹ thuật chi tiết:**
-  - **Backend (`be-nestjs-thanhxuan`):**
-    - Mở rộng enum `deliveryShift` trong Schema `Partner` (`partner.schema.ts`) và `HandoverRecord` (`handover-record.schema.ts`): `['MORNING', 'AFTERNOON', 'EVENING']`.
-    - Cập nhật validation DTOs: `CreatePartnerDto`, `UpdatePartnerDto`, `CleanClothesDto` (PrepOrderDto), `CreateHandoverDto` xác thực nghiêm ngặt giá trị `'AFTERNOON'`.
-    - Nâng cấp Controller & Service Pool Compensation: Hỗ trợ query parameter `shift?: 'MORNING' | 'AFTERNOON' | 'EVENING'` tại `HandoverController.getPoolHandovers` và `HandoverPoolCompensationService`.
-    - Đồng bộ logic kế thừa ca: Phiếu giao nhận tự động kế thừa `deliveryShift` từ đối tác (`MORNING`, `AFTERNOON` hoặc `EVENING`).
-    - Verification: Toàn bộ 50 test suites (233 unit tests pass 100%), typecheck `tsc --noEmit` pass.
-  - **Frontend Cổng Nội Bộ (`fe-react-thanhxuan-internal`):**
-    - **Quản trị đối tác:** Khai báo kiểu `deliveryShift?: 'MORNING' | 'AFTERNOON' | 'EVENING'` trong `partner.types.ts`, `PartnerModal.tsx`. Thêm lựa chọn `<option value="AFTERNOON">Ca Chiều (Buổi chiều)</option>` trong `PartnerContactScheduleFieldsComponent.tsx`.
-    - **Thẻ chi nhánh đối tác:** Cập nhật `PartnerCardComponent.tsx` hiển thị badge trực quan theo ca: Ca Sáng (Vàng hổ phách), Ca Chiều (Cam ấm), Ca Tối (Tím).
-    - **Màn hình giao nhận Shipper (`ShipperHandoverPage.tsx`):**
-      - Nâng cấp thanh lọc ca thành 4 nút: `Tất Cả`, `Sáng (x)`, `Chiều (y)`, `Tối (z)` (tối ưu responsive dạng lưới `grid-cols-2 sm:grid-cols-4` trên điện thoại di động).
-      - Icon trực quan: `Sun` (Sáng), `SunMedium` (Chiều), `Moon` (Tối).
-      - Mở rộng `useShipperHandoverPage.ts` tính toán chính xác `afternoonCount`, lọc `filteredPoints` và `filteredPoolJobs` theo `AFTERNOON`.
-    - **Thẻ điểm giao nhận & Thẻ nhận chuyến:** Cập nhật `ShipperHandoverItemCardComponent.tsx`, `ShipperPendingPointCardComponent.tsx`, `ShipperJobPoolTabComponent.tsx` hiển thị chuẩn xác badge Ca Chiều với nền cam nhạt và chữ cam đậm.
-    - **Dropdown chọn chi nhánh khi xuất phiếu kho:** Cập nhật `PrepOrderConfigHeaderComponent.tsx` hiển thị ca giao nhận bên cạnh tên chi nhánh (`• Ca Chiều`, `• Ca Sáng`, `• Ca Tối`) trên cả Mobile và Desktop.
-    - Verification: `tsc --noEmit` pass 100%, `pnpm build` pass tạo PWA bundle thành công.
-- **Tài liệu & CSDL:** Cập nhật bảng `partners` (1.6) và `handover_records` (1.8) trong `DATABASE_DICTIONARY.md`, cập nhật `srs_sdd_backend.md`, `srs_sdd_fe_internal.md` và `SRS_SDD.md`.
-
-### Bugfix: Khóa Chặt Chuyến Tự Do Chỉ Nhận Cho Ngày Hôm Đó, Ngăn Tự Động Add Vào Lộ Trình Các Ngày Sau Của Shipper
-
-- **Vấn đề phát hiện:** Khi tài xế Shipper bấm nhận một chuyến tự do (đối tác chưa có tài xế cố định), chuyến đi đã được lưu đúng vào ngày được chọn (`recordDate`). Tuy nhiên, khi Shipper chuyển sang xem lộ trình của ngày hôm sau (`selectedDate + 1`), chi nhánh đối tác tự do đó lại tự động xuất hiện trong Tab "Lộ Trình" (`ROUTE`) của ngày hôm sau dưới dạng chưa có phiếu (`record: undefined`), khiến Shipper nhầm tưởng mình bị gán luôn cho đối tác đó vào các ngày sau.
-- **Nguyên nhân gốc rễ (Root Cause):**
-  1. Backend endpoint `GET /partners/schedule` trả về toàn bộ danh sách đối tác có lịch trong ngày mà không lọc theo `shipperId`, bao gồm cả đối tác tuyến tự do (`defaultShipperId == null`).
-  2. Frontend `useShipperHandoverPage.ts` khi tính `deliveryPoints` duyệt qua tất cả `scheduledPartners` và tự động push mọi đối tác chưa có phiếu vào danh sách lộ trình của Shipper mà không kiểm tra xem đối tác đó có phải tuyến cố định của Shipper này hay không.
-- **Giải pháp xử lý triệt để:**
-  1. **Backend (`be-nestjs-thanhxuan`):** Nâng cấp `GET /partners/schedule` nhận `@CurrentUser() user` và `@Query('shipperId')`. Nếu người gọi là vai trò `SHIPPER`, hệ thống tự động lọc chỉ trả về các đối tác mà Shipper đó được phân công cố định (`defaultShipperId == user.sub`), loại bỏ 100% các đối tác tuyến tự do khỏi schedule.
-  2. **Frontend (`fe-react-thanhxuan-internal`):** Trong `useShipperHandoverPage.ts`, bổ sung ràng buộc nghiêm ngặt khi duyệt `scheduledPartners`: chỉ đưa vào Tab "Lộ Trình" (`ROUTE`) nếu `sp.defaultShipperId === user.id`. Đối tác tuyến tự do chưa có phiếu tuyệt đối không xuất hiện trong Tab "Lộ Trình", mà chỉ hiển thị tại Tab "Nhận Chuyến" (`POOL`) của từng ngày để Shipper chủ động bấm nhận lại cho từng ngày riêng biệt.
-  3. **Verification:** Backend 50/50 suites (235 tests pass), nest build pass; Frontend `tsc --noEmit` pass 100%, vite build pass tạo PWA bundle thành công.
-
 ---
 
-## CÁC GIAI ĐOẠN LỊCH SỬ TRƯỚC ĐÓ (PLAN 1 ĐẾN PLAN 52)
+## CÁC GIAI ĐOẠN LỊCH SỬ TRƯỚC ĐÓ (PLAN 1 ĐẾN PLAN 53)
 
 > Toàn bộ các Plan lịch sử trước đây đã được tự động lưu trữ sang các file độc lập để tối ưu hóa token và hiệu năng tài liệu:
-> 📦 **Giai đoạn Plan 51 - Plan 52:** [CHANGELOG_ARCHIVE_V2.md](./changelogs/CHANGELOG_ARCHIVE_V2.md)  
+> 📦 **Giai đoạn Plan 51 - Plan 53:** [CHANGELOG_ARCHIVE_V2.md](./changelogs/CHANGELOG_ARCHIVE_V2.md)  
 > 📦 **Giai đoạn Plan 1 - Plan 50:** [CHANGELOG_ARCHIVE_V1.md](./changelogs/CHANGELOG_ARCHIVE_V1.md)
