@@ -504,8 +504,27 @@ erDiagram
 
 ### 2.10. Bảng `settings` (Setting)
 
-- **Mã nguồn:** [`setting.schema.ts`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/src/modules/laundry/settings/schemas/setting.schema.ts)
-- **Mục đích nghiệp vụ:** Cấu hình toàn trang website: Số điện thoại hotline, địa chỉ xưởng, liên kết mạng xã hội Facebook/Zalo, kịch bản Google Analytics/Tag Manager.
+- **Mã nguồn:** [`setting.schema.ts`](file:///root/services/thanhxuan/backend-thanhxuan/src/modules/laundry/settings/schemas/setting.schema.ts)
+- **Mục đích nghiệp vụ:** Cấu hình toàn trang website theo mô hình Singleton document (`key: 'singleton'`): Số điện thoại hotline, địa chỉ xưởng, liên kết mạng xã hội Facebook/Zalo, kịch bản Google Analytics/Tag Manager, cấu hình giao diện CMS trang chủ (`homepageConfig`), trang dịch vụ vệ sinh (`vesinhConfig`), trang dịch vụ giặt (`serviceConfig`) và trang liên hệ (`contactConfig`).
+
+| Tên trường | Kiểu dữ liệu | Ràng buộc | Chỉ mục | Ý nghĩa nghiệp vụ |
+| :--- | :--- | :---: | :---: | :--- |
+| `_id` | `ObjectId` | Bắt buộc | Primary | Khóa chính bản ghi cấu hình. |
+| `key` | `String` | Bắt buộc (default: 'singleton') | Unique | Khóa nhận diện singleton cấu hình toàn hệ thống. |
+| `hotline` | `String` | Tùy chọn | - | Số hotline chính thức toàn hệ thống. |
+| `email` | `String` | Tùy chọn | - | Email liên hệ hỗ trợ khách hàng. |
+| `address` | `String` | Tùy chọn | - | Địa chỉ xưởng giặt và văn phòng tiếp nhận. |
+| `googleMapsLink` | `String` | Tùy chọn | - | Đường dẫn nhúng bản đồ Google Maps. |
+| `description` | `String` | Tùy chọn | - | Mô tả tổng quan về doanh nghiệp. |
+| `facebookLink` | `String` | Tùy chọn | - | Liên kết Fanpage Facebook. |
+| `messengerLink` | `String` | Tùy chọn | - | Liên kết chat Facebook Messenger. |
+| `zaloLink` | `String` | Tùy chọn | - | Liên kết Zalo cá nhân / OA. |
+| `homepageConfig` | `Object` | Mặc định: `{}` | - | Cấu hình CMS trang chủ giặt: Banner Hero, video, lý do chọn, FAQs. |
+| `vesinhConfig` | `Object` | Mặc định: `{}` | - | Cấu hình CMS trang vệ sinh (`/vesinh` và subdomain `vesinh.`): Banner Hero, tiêu đề, hotline riêng, intro, lý do chọn, FAQs vệ sinh. |
+| `serviceConfig` | `Object` | Mặc định: `{}` | - | Cấu hình trang danh sách dịch vụ. |
+| `contactConfig` | `Object` | Mặc định: `{}` | - | Cấu hình trang liên hệ và hướng dẫn chỉ đường. |
+| `headerScripts` | `String` | Tùy chọn | - | Mã HTML/JS nhúng thẻ `<head>` (Google Tag Manager, Meta Pixel...). |
+| `footerScripts` | `String` | Tùy chọn | - | Mã HTML/JS nhúng cuối thẻ `<body>` (Chatbot live, tracking...). |
 
 ---
 

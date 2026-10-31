@@ -6,3 +6,8 @@ dist
 .DS_Store
 *.log
 .agents/docs/client/
+.agents/scripts
+be-nestjs-thanhxuan/
+fe-nextjs-chuyennhatietkiem/
+fe-nextjs-thanhxuan-laundry/
+fe-react-thanhxuan-internal/

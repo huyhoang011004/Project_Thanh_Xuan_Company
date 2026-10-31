@@ -6,8 +6,13 @@ Tài liệu này là nguồn quy ước chung cho mọi agent và workflow trong
 
 - **Dẫn chứng:** Mọi nhận định về code hiện có phải kèm `path:line`. Chưa xác minh được thì nêu rõ trong câu hỏi.
 - **Nguồn sự thật:** Code là hiện trạng; Plan là ý định thay đổi; `.agents/docs/SRS_SDD.md` phản ánh kiến trúc tổng thể và thư mục `.agents/docs/srs_sdd/` (`srs_sdd_backend.md`, `srs_sdd_fe_laundry.md`, `srs_sdd_fe_internal.md`, `srs_sdd_fe_moving.md`), `.agents/docs/DATABASE_DICTIONARY.md`, `.agents/docs/CODEBASE_ATLAS.md` phản ánh chi tiết từng phân hệ sau mỗi thay đổi hoàn tất.
-- **An toàn:**
-  - **Tự động commit và push lên nhánh `dev`:** Khi hoàn thành mỗi task/tính năng (sau khi đã chạy lint/typecheck/test/build pass), Agent tự động commit và push code lên nhánh `dev` của ứng dụng hoặc repository tương ứng.
+- **An toàn & Chiến lược thực thi tiết kiệm Token:**
+  - **Phân định 2 luồng công việc (Có Plan vs Chỉnh sửa lẻ không lên Plan):**
+    - **Luồng 1 (Có Plan - /act):** Tính năng mới hoặc refactor lớn đã duyệt qua `/plan`. Agent triển khai code và thực hiện luôn toàn bộ quy trình kiểm thử DoD (Typecheck, Build, Đồng bộ 5 trụ cột tài liệu, tự động commit và push `dev`).
+    - **Luồng 2 (Chỉnh sửa lẻ không lên Plan - Quick edits / Bugfix nhỏ / UI tweaks):** Để tránh lãng phí token và thời gian build lặp đi lặp lại:
+      - **Pha 1:** Agent sửa code xong **CHỈ VIẾT BÁO CÁO GIẢI PHÁP / KẾT QUẢ ĐÃ SỬA VÀ DỪNG LẠI CHỜ NGƯỜI DÙNG DUYỆT OK**. Tuyệt đối KHÔNG tự ý chạy build, KHÔNG cập nhật CHANGELOG/SRS_SDD, KHÔNG commit/push git ở pha này.
+      - **Pha 2:** **CHỈ KHI NGƯỜI DÙNG DUYỆT OK** (ví dụ: *"ok", "được rồi", "hoàn tất đi", "chốt commit"*), Agent mới thực hiện Bước 3 (DoD): chạy typecheck/build, cập nhật CHANGELOG.md & SRS_SDD.md, và tự động commit/push lên nhánh `dev`.
+  - **Tự động commit và push lên nhánh `dev`:** Thực hiện theo đúng 2 luồng trên (sau khi có sự đồng thuận của người dùng đối với chỉnh sửa lẻ, hoặc tự động sau khi hoàn tất plan).
   - **Quy chuẩn thông điệp commit:** Viết bằng tiếng Việt tự nhiên, giữ nguyên thuật ngữ kỹ thuật/chuyên ngành bằng tiếng Anh (ví dụ: `feat(handovers): thêm Service xử lý kiểm kê và đồng bộ DTO`, `fix(auth): sửa lỗi Guard kiểm tra audience JWT`).
   - **Bảo vệ môi trường Production (`master`):** Không bao giờ push trực tiếp lên nhánh `master`. Nhánh `master` chỉ dùng khi người dùng yêu cầu merge/trigger phát hành lên Production VPS.
   - Không chạy lệnh phá hủy (`git reset --hard`, `rm -rf`, drop DB, force push).
@@ -30,28 +35,43 @@ Monorepo gồm 4 app, mỗi app chạy lệnh ở đúng thư mục của nó:
 
 ## 3. Quy trình làm việc & Tài liệu
 
-- **`/plan`:** Tính năng mới hoặc đổi thiết kế/API -> Tạo kế hoạch tại `.agents/docs/plans/plan<N>.md`.
-- **`/act`:** Thực thi plan đã duyệt -> Sửa code, verify test/build, tick checkbox trong plan, cập nhật đồng bộ 5 trụ cột tài liệu (`srs_sdd_<app>.md`, `SRS_SDD.md`, `DATABASE_DICTIONARY.md`, `CODEBASE_ATLAS.md`, `CHANGELOG.md`), tự động commit & push lên nhánh `dev`.
+- **`/plan` & `/act` (Tính năng có Plan):** Tính năng mới hoặc đổi thiết kế/API -> Tạo kế hoạch tại `.agents/docs/plans/plan<N>.md`. Khi chạy `/act`, Agent sửa code, **làm luôn trọn gói Bước 3 (DoD)**: verify test/build pass 100%, tick checkbox trong plan, cập nhật đồng bộ 5 trụ cột tài liệu (`srs_sdd_<app>.md`, `SRS_SDD.md`, `DATABASE_DICTIONARY.md`, `CODEBASE_ATLAS.md`, `CHANGELOG.md`), tự động commit & push lên nhánh `dev`.
+- **Chỉnh sửa lẻ KHÔNG lên Plan (`/fix`, quick edits, tinh chỉnh UI, bugfix nhỏ):**
+  - **Pha 1 (Sửa code & Báo cáo - Chờ duyệt để tránh tốn Token):** Sửa code chính xác $\rightarrow$ Viết báo cáo giải pháp/kết quả ngắn gọn $\rightarrow$ **DỪNG LẠI CHỜ NGƯỜI DÙNG DUYỆT OK**. Tuyệt đối **KHÔNG** chạy `pnpm build`, **KHÔNG** cập nhật `CHANGELOG.md`/`SRS_SDD.md`, và **KHÔNG** commit/push git ở pha này.
+  - **Pha 2 (Thực hiện DoD sau khi duyệt):** **CHỈ KHI NGƯỜI DÙNG DUYỆT OK** (ví dụ: *"ok", "được rồi", "chốt commit", "hoàn tất đi"*), Agent mới thực hiện Bước 3 (DoD): chạy typecheck & build (`tsc --noEmit` và `pnpm build`), cập nhật tài liệu `CHANGELOG.md` & `SRS_SDD.md`, tự động commit và push lên nhánh `dev`.
 - **`/review`:** Đánh giá chất lượng sau `/act` hoặc `/fix` -> Ghi nhận tại `.agents/docs/reviews/review<N>.md`.
-- **`/fix`:** Lỗi nhỏ, rõ ràng, tối đa 3 file code, không đổi schema/API contract.
 - **`/docs-sync`:** Quét đồng bộ khi nghi ngờ tài liệu lệch code -> Cập nhật `.agents/docs/srs_sdd/srs_sdd_<app>.md`, `SRS_SDD.md`, `DATABASE_DICTIONARY.md`, `CODEBASE_ATLAS.md` & `CHANGELOG.md`.
 
-*Quy tắc cập nhật tài liệu Modular SRS/SDD & Harness Data:*
-- `SRS_SDD.md`: Là Living Architecture Specification TỔNG QUAN (System Context, Topology, Master Index liên kết sang 4 file phân hệ, Document History giữ 3-5 dòng mới nhất của toàn hệ sinh thái).
-- `.agents/docs/srs_sdd/srs_sdd_<app>.md`: Đặc tả chi tiết từng phân hệ trong Monorepo. **Quy tắc bắt buộc: Sửa app nào thì cập nhật đúng file phân hệ của app đó, tuyệt đối không viết chéo hay viết nhầm file:**
-  - `be-nestjs-thanhxuan/` $\rightarrow$ [srs_sdd_backend.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_backend.md)
-  - `fe-nextjs-thanhxuan-laundry/` $\rightarrow$ [srs_sdd_fe_laundry.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_laundry.md)
-  - `fe-react-thanhxuan-internal/` $\rightarrow$ [srs_sdd_fe_internal.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_internal.md)
-  - `fe-nextjs-chuyennhatietkiem/` $\rightarrow$ [srs_sdd_fe_moving.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_moving.md)
-- `.agents/docs/DATABASE_DICTIONARY.md`: Từ điển dữ liệu toàn diện (các databases, 34+ collections, chi tiết từng trường, kiểu dữ liệu, index, quan hệ và tác dụng nghiệp vụ).
-- `.agents/docs/CODEBASE_ATLAS.md`: Bản đồ định vị nhanh toàn bộ mã nguồn (Endpoint ↔ Controller ↔ Service ↔ Repository ↔ Schema và Route ↔ Page ↔ Component ↔ Hook) giúp Agent định vị file lập tức không cần grep dò tìm.
-- `CHANGELOG.md`: Lưu trữ toàn bộ bài luận nhật ký chi tiết theo từng Plan/Fix.
+*Quy tắc cập nhật tài liệu Modular SRS/SDD & Harness Data (Conditional Doc Sync - Tiết kiệm Token):*
+- **Nguyên tắc đồng bộ theo phạm vi ảnh hưởng (Conditional Sync):** Tuyệt đối không nạp và sửa tài liệu không liên quan đến phạm vi thay đổi:
+  - `SRS_SDD.md`: Living Architecture Specification TỔNG QUAN. Mọi Plan/Feature hoàn tất chỉ ghi nhận thêm **1 dòng Document History** tóm tắt.
+  - `CHANGELOG.md`: Lưu trữ bài luận nhật ký chi tiết theo từng Plan/Fix. Khi file vượt quá 500-600 dòng, chủ động lưu trữ các Plan cũ vào `.agents/docs/changelogs/CHANGELOG_ARCHIVE_V<N>.md` để giữ file chính luôn gọn nhẹ.
+  - `.agents/docs/srs_sdd/srs_sdd_<app>.md`: **Chỉ cập nhật khi có thay đổi Business Rule / Kiến trúc / Luồng dữ liệu của phân hệ đó.** Tuyệt đối không viết chéo hay viết nhầm file:
+    - `be-nestjs-thanhxuan/` $\rightarrow$ [srs_sdd_backend.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_backend.md)
+    - `fe-nextjs-thanhxuan-laundry/` $\rightarrow$ [srs_sdd_fe_laundry.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_laundry.md)
+    - `fe-react-thanhxuan-internal/` $\rightarrow$ [srs_sdd_fe_internal.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_internal.md)
+    - `fe-nextjs-chuyennhatietkiem/` $\rightarrow$ [srs_sdd_fe_moving.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_moving.md)
+  - `.agents/docs/DATABASE_DICTIONARY.md`: **CHỈ CẬP NHẬT KHI CÓ THAY ĐỔI SCHEMA / COLLECTION / FIELD / INDEX MONGODB.** Nếu thay đổi chỉ thuần túy ở Frontend hoặc logic Controller/Service không đổi bảng CSDL thì **bỏ qua không cập nhật file này** để tiết kiệm token.
+  - `.agents/docs/CODEBASE_ATLAS.md`: **CHỈ CẬP NHẬT KHI THÊM MỚI HOẶC XÓA BỎ ROUTE / ENDPOINT / CONTROLLER / SERVICE / HOOK CHÍNH.** Nếu chỉ chỉnh sửa nội bộ code hiện có thì **bỏ qua không cập nhật file này**.
+
+- **Cơ chế tự động lưu trữ tài liệu (Auto-Archiving Protocols - Chống đầy context & Tiết kiệm token):**
+  - **Tự động lưu trữ Plans (`.agents/docs/plans/archive/`):**
+    - Thư mục hoạt động `.agents/docs/plans/` chỉ duy trì tối đa **10 Plan gần nhất** (ví dụ từ `plan<N-9>.md` đến `plan<N>.md`).
+    - Khi tạo mới plan (`/plan`), Agent tự động quét: nếu số lượng file `plan*.md` trong thư mục `.agents/docs/plans/` (ngoại trừ thư mục `archive/`) vượt quá 10 file, Agent **tự động chuyển (dùng `git mv` hoặc di chuyển file)** tất cả các plan cũ đã có trạng thái `Done` vào `.agents/docs/plans/archive/`. Tuyệt đối không xóa file, không để người dùng phải tự dọn thủ công.
+  - **Tự động lưu trữ Changelog (`.agents/docs/changelogs/`):**
+    - File `CHANGELOG.md` chỉ lưu trữ tối đa **10 - 15 Plan gần nhất** (hoặc khi dung lượng vượt quá **500 - 600 dòng**).
+    - Khi ghi nhận nhật ký hoàn thành plan (`/act` hoặc DoD), nếu `CHANGELOG.md` vượt quá 600 dòng, Agent **tự động cắt toàn bộ các Plan cũ phía dưới** chuyển vào `.agents/docs/changelogs/CHANGELOG_ARCHIVE_V<N>.md` (đánh số V1, V2, V3... nối tiếp), giữ lại banner/link điều hướng trỏ tới các file archive tương ứng ở đầu/cuối changelog để `CHANGELOG.md` luôn gọn nhẹ (< 600 dòng).
 
 ## 4. Định nghĩa hoàn thành (Definition of Done)
 
+> [!IMPORTANT]
+> **Quy Chuẩn Kích Hoạt Bước Kiểm Thử & Hoàn Tất (DoD Trigger):**
+> - **Khi có Plan (`/act`):** Agent tự động thực hiện liền mạch toàn bộ 10 tiêu chí DoD dưới đây ngay khi hoàn thành code.
+> - **Khi chỉnh sửa lẻ KHÔNG lên Plan (`/fix`, quick edit, tinh chỉnh UI/CSS):** Agent sửa code xong **BẮT BUỘC DỪNG LẠI**, viết báo cáo giải pháp/kết quả để **NGƯỜI DÙNG DUYỆT OK TRƯỚC**. Tuyệt đối không tự ý chạy build, không cập nhật CHANGELOG/SRS_SDD, không commit/push git để tránh lãng phí token. **Chỉ khi người dùng duyệt OK**, Agent mới thực hiện các tiêu chí kiểm thử DoD dưới đây.
+
 Một thay đổi coi là xong khi:
-1. Mọi task trong plan đã hoàn tất và kiểm chứng thực tế.
-2. Lint, typecheck và test pass cho **từng app bị ảnh hưởng**.
+1. Mọi task trong plan (hoặc yêu cầu chỉnh sửa) đã hoàn tất và kiểm chứng thực tế.
+2. Lint, typecheck và test pass cho **từng app bị ảnh hưởng** (`pnpm exec tsc --noEmit`).
 3. Build pass cho từng app bị ảnh hưởng (`pnpm build`).
 4. Thay đổi API contract (DTO, response) ở Backend thì phía gọi (Web, Internal) đã được cập nhật đồng bộ.
 5. **Cập nhật Database Dictionary, Sắp Xếp Thứ Tự & Dọn Dẹp Bảng Đã Xóa:**
@@ -118,3 +138,22 @@ Một thay đổi coi là xong khi:
 - Ở cuối mỗi câu trả lời kỹ thuật hoặc kết thúc mỗi task/turn, Agent chủ động đính kèm 1 dòng thông tin ước lượng:
   > 🧭 *[Context Health: ~Xk tokens | Trạng thái: An toàn / Cần lưu ý / Quá tải | Gõ `/compact` khi cần cô đọng]*
 - **Mức cảnh báo:** Dưới 50k tokens: **An toàn (Xanh)** | 50k - 100k tokens: **Cần lưu ý (Vàng)** | Trên 100k tokens: **Quá tải (Đỏ)**.
+
+## 10. Kỷ Luật Tiết Kiệm Token Tối Đa (Token Optimization Protocols)
+
+Mọi Agent và Subagent phải tuân thủ nghiêm ngặt 5 kỷ luật tiết kiệm token:
+1. **Kiểm soát Output Terminal (Output Clutter Control):**
+   - Tuyệt đối cấm chạy lệnh in cả khối HTML/JSON khổng lồ ra terminal (ví dụ `curl` thô không có cờ lọc). Chỉ dùng `curl -s -I` (lấy HTTP header) hoặc pipe qua grep/jq.
+   - Lệnh `git log` bắt buộc dùng `--oneline -n 5` hoặc `-n 3`.
+   - Lệnh `git diff` dùng `--stat` trước khi diff chi tiết.
+   - Các lệnh tìm kiếm `grep` / `find` phải có cờ thu hẹp hoặc pipe `| head -n 20`.
+2. **Khoanh vùng Đọc File Hẹp (Narrow File Reads):**
+   - Luôn sử dụng `StartLine` và `EndLine` trong công cụ `read_file` để chỉ đọc đúng vùng 25 - 40 dòng cần xử lý.
+   - Tuyệt đối không đọc cả file 200 - 500 dòng khi chỉ cần kiểm tra 1 hàm hay 1 interface.
+3. **Chỉnh sửa File Cục Bộ (Local Diffs Only):**
+   - Tuyệt đối dùng `edit_file` với đoạn `Target` ngắn gọn, chính xác để sửa cục bộ. Không dùng `write_file` ghi đè lại toàn bộ tệp tin nếu chỉ thay đổi vài dòng code.
+4. **Báo Cáo Súc Tích & Cấm Paste Code Dài (No Bloated Code Pasting):**
+   - Câu trả lời báo cáo cho người dùng chỉ nêu: Nguyên nhân gốc rễ $\rightarrow$ File và dòng đã sửa `path:line` $\rightarrow$ Tóm tắt logic thay đổi trong 2-3 gạch đầu dòng $\rightarrow$ Kết quả kiểm chứng.
+   - Tuyệt đối KHÔNG copy-paste lại các khối code dài 50 - 100 dòng vào tin nhắn chat trừ khi người dùng có yêu cầu xem trước cụ thể.
+5. **Cấm Polling Task Nền Thủ Công (Zero Task Polling):**
+   - Hệ thống vận hành cơ chế **Reactive Wakeup** tự động đánh thức Agent khi lệnh build/test nền hoàn tất. Cấm gọi `manage_task(Action='status')` lặp đi lặp lại để thăm dò tiến trình. Sau khi kích hoạt lệnh nền, Agent chỉ cập nhật 1 câu ngắn cho người dùng hoặc dừng turn để hệ thống tự đánh thức.
