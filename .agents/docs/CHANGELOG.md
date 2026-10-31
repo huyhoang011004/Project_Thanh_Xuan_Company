@@ -4,6 +4,39 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
 
 ## 2026-10-31
 
+### Plan 62: Xây Dựng Hệ Thống Quản Trị Cài Đặt CMS Cho Trang Dịch Vụ Vệ Sinh (/admin/settings/vesinh & /vesinh) & Chuẩn Hóa Khối Form Liên Hệ (fe-nextjs-thanhxuan-laundry & be-nestjs-thanhxuan)
+
+- **Bối cảnh & Yêu cầu:**
+  - Sau khi hoàn thành trang đích dịch vụ vệ sinh và tên miền phụ tại Plan 61, khách hàng yêu cầu trang bị module CMS quản trị cài đặt riêng cho trang Vệ Sinh tương tự như trang chủ (`/admin/settings/home`), cho phép Quản trị viên tùy biến nội dung Hero Banner, Tiêu đề, Hotline riêng, Phần giới thiệu, Lý do chọn chúng tôi và câu hỏi thường gặp FAQs trực tiếp từ giao diện Admin.
+  - Đồng thời, phát hiện khối form đăng ký liên hệ tại chân trang `/vesinh` bị thừa một lớp container `div` bọc bên ngoài gây lặp style bo góc và viền thẻ bài, cần dỡ bỏ lớp bọc này.
+- **Chi tiết kỹ thuật thực hiện:**
+  1. **Mở rộng Backend Setting Schema & DTO (`be-nestjs-thanhxuan`):**
+     - Sửa `Setting` schema (`setting.schema.ts`): Bổ sung thuộc tính `vesinhConfig: { heroBannerImage?, heroTitle?, heroSubtitle?, hotline?, introTitle?, introDescription?, whyChooseUsTitle?, whyChooseUsDescription?, whyChooseUsImage?, whyChooseUsItems?, faqs? }` với kiểu dữ liệu `Object` và mặc định `{}`.
+     - Sửa `UpdateSettingsDto` (`update-settings.dto.ts`): Bổ sung trường tùy chọn `vesinhConfig?: Record<string, unknown>` có `@IsOptional()` và `@IsObject()`.
+  2. **Frontend CMS Types & Custom Hook Handlers (`fe-nextjs-thanhxuan-laundry`):**
+     - `admin-settings.types.ts`: Khai báo interface `IVesinhConfig` và nhúng trường `vesinhConfig` vào `IAdminSettingsForm`.
+     - `useAdminSettingsVesinhHandlers.ts`: Tách toàn bộ logic quản lý state của trang cài đặt vệ sinh thành custom hook riêng biệt (< 120 dòng), xử lý cập nhật trường văn bản, thêm/sửa/xóa cam kết lý do chọn và câu hỏi FAQs.
+     - `useAdminSettings.ts`: Tích hợp các handlers của vệ sinh vào hook quản trị settings tổng thể.
+  3. **Xây dựng các Form Sections & Tuyến CMS `/admin/settings/vesinh`:**
+     - Phân rã giao diện thành 3 Form Sections độc lập tuân thủ kỷ luật `< 250 - 300 dòng`:
+       - `VesinhHeroFormSection.tsx` (114 dòng): Biên tập Banner, Tiêu đề, Mô tả phụ và Hotline riêng cho trang Vệ sinh.
+       - `VesinhWhyChooseUsFormSection.tsx` (128 dòng): Biên tập tiêu đề, mô tả và danh sách lý do lựa chọn kèm nút thêm/xóa linh hoạt.
+       - `VesinhFaqFormSection.tsx` (116 dòng): Biên tập danh sách câu hỏi & câu trả lời FAQs accordion.
+     - `SettingEditorVesinhComponent.tsx` (108 dòng): Bố cục tổng thể của trang cài đặt vệ sinh, nhúng 3 sections và nút bấm "Lưu thay đổi" có hiệu ứng spinner lưu dữ liệu.
+     - `src/app/(admin)/admin/settings/vesinh/page.tsx`: Route trang CMS Next.js.
+  4. **Tích hợp Điều Hướng CMS Admin:**
+     - `SettingsPage.tsx`: Thêm thẻ card "Cài đặt Trang Vệ Sinh" với icon `Sparkles`, mô tả rõ ràng và nút liên kết trực tiếp tới `/admin/settings/vesinh`.
+     - `AdminSidebarComponent.tsx`: Thêm mục "Trang vệ sinh" vào danh sách menu con của mục Cài đặt.
+  5. **Dữ Liệu Động Ra Giao Diện Public `/vesinh` & Gỡ Lớp Bọc Thừa Form:**
+     - `src/app/(public)/vesinh/page.tsx`: Fetch dữ liệu `vesinhConfig` từ API `PublicSettingsService.getSettings()`, ưu tiên hotline vệ sinh và truyền dữ liệu xuống component `VesinhHomePage`.
+     - `VesinhHomePage.tsx` và các sub-components (`VesinhHeroSectionComponent`, `VesinhIntroSectionComponent`, `VesinhWhyChooseUsComponent`, `VesinhFaqSectionComponent`): Nhận dynamic props từ CMS và luôn duy trì bộ dữ liệu fallback mặc định tối ưu SEO khi CMS chưa cấu hình.
+     - `VesinhPreFooterCtaComponent.tsx`: Dỡ bỏ thẻ `div className="bg-white ... rounded-3xl ... shadow-xl border"` bọc thừa bên ngoài component `<Contact />`, để `<Contact defaultCategory="dich-vu-ve-sinh" />` tự quản lý khung viền bo cong của mình.
+  6. **Verification & DoD:**
+     - Backend NestJS: `pnpm exec tsc --noEmit` pass 100%, `nest build` pass 100%.
+     - Frontend Next.js: `pnpm exec tsc --noEmit` pass 100%, `next build` biên dịch thành công toàn bộ 15 routes tĩnh/động, sinh route tĩnh `/admin/settings/vesinh` và `/vesinh`.
+     - Đồng bộ 5 trụ cột tài liệu (`DATABASE_DICTIONARY.md`, `CODEBASE_ATLAS.md`, `srs_sdd_fe_laundry.md`, `SRS_SDD.md`, `CHANGELOG.md`, `plan62.md`).
+     - Tự động commit và push lên nhánh `dev`.
+
 ### Plan 61: Thiết Lập Trang Dịch Vụ Vệ Sinh (vesinh.thanhxuanlaundry.com & /vesinh) Tối Ưu SEO B2B Dựa Trên Trang Chủ (fe-nextjs-thanhxuan-laundry & Hạ Tầng Nginx)
 
 - **Bối cảnh & Yêu cầu:**

@@ -193,7 +193,7 @@ Kiến trúc: Next.js App Router, Server Components mặc định cho SEO (`(pub
 | `/admin/email-marketing` | Client / CMS | `src/app/(admin)/admin/email-marketing/page.tsx` | `EmailMarketingPage.tsx`<br>`src/features/admin/email-marketing/` | Modals: `EmailCampaignModal`, `EmailTemplateModal`<br>Hooks: `useAdminEmailMarketing` |
 | `/admin/zalo-marketing` | Client / CMS | `src/app/(admin)/admin/zalo-marketing/page.tsx` | `ZaloMarketingPage.tsx`<br>`src/features/admin/zalo/` | Modals: `ZaloCampaignModal`, `ZaloSequenceModal`<br>`admin-zalo.service.ts` |
 | `/admin/accounts` | Client / CMS | `src/app/(admin)/admin/accounts/page.tsx` | `AccountManagerPage.tsx`<br>`src/features/admin/users/` | Modals: `AccountEditorModal`<br>Hooks: `useAdminUsers` |
-| `/admin/settings/**` | Client / CMS | `src/app/(admin)/admin/settings/**/page.tsx` | `SettingsPage.tsx`<br>`src/features/admin/settings/` | Components: `SettingEditorAboutComponent`, `SettingEditorContactComponent`, `SettingEditorFooterComponent`, `SettingEditorHomeComponent`, `SettingEditorServiceComponent`<br>Hooks: `useAdminSettings` |
+| `/admin/settings/**` | Client / CMS | `src/app/(admin)/admin/settings/**/page.tsx` | `SettingsPage.tsx`<br>`src/features/admin/settings/` | Components: `SettingEditorAboutComponent`, `SettingEditorContactComponent`, `SettingEditorFooterComponent`, `SettingEditorHomeComponent`, `SettingEditorServiceComponent`, `SettingEditorVesinhComponent`<br>Sections: `VesinhHeroFormSection`, `VesinhWhyChooseUsFormSection`, `VesinhFaqFormSection`<br>Hooks: `useAdminSettings`, `useAdminSettingsVesinhHandlers` |
 
 #### 2.2.2. Thành Phần Hạ Tầng & Tiện Ích Dùng Chung Của Phân Hệ Giặt Là (`fe-nextjs-thanhxuan-laundry/src/`)
 
