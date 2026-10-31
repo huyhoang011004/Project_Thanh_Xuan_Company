@@ -4,6 +4,24 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
 
 ## 2026-10-31
 
+### Fix (Branding & Navigation): Chuẩn hóa Favicon & Bỏ nút Nội bộ trên Web Giặt Là, bổ sung nhãn 'NỘI BỘ' chân Icon trang Login Cổng Quản Vận (fe-nextjs-thanhxuan-laundry & fe-react-thanhxuan-internal)
+
+- **Bối cảnh & Yêu cầu:**
+  - Trang web khách hàng công khai `https://thanhxuanlaundry.com/`: Gỡ bỏ khối icon và nhãn "Nội bộ" khỏi thanh điều hướng chính (header) để giữ nguyên nhận diện thương hiệu khách hàng; chuẩn hóa Favicon trang web thành `icon.svg` sắc nét.
+  - Cổng điều hành nội bộ `https://noibo.thanhxuanlaundry.com/login`: Bổ sung nhãn badge `NỘI BỘ` ở chân icon logo vòng tròn trên màn hình Đăng nhập (và Đăng ký) tạo điểm nhấn nhận diện phân hệ nội bộ chuẩn xác theo mẫu thiết kế.
+- **Chi tiết kỹ thuật thực hiện:**
+  1. **Web Giặt Là & CMS (`fe-nextjs-thanhxuan-laundry`):**
+     - `PublicMainNavBarComponent.tsx`: Gỡ bỏ khối liên kết icon SVG kèm badge "Nội bộ", trả về khối Text Logo thương hiệu thuần túy dẫn về trang chủ `/`.
+     - `src/app/layout.tsx`: Bổ sung cấu hình metadata `icons` ưu tiên `icon.svg` (`type: "image/svg+xml"`), shortcut và apple icon.
+     - `src/app/icon.svg`: Sao chép `icon.svg` vào metadata app route Next.js để sinh thẻ `<link rel="icon">` chuẩn xác cho mọi trình duyệt hiện đại.
+  2. **Cổng Vận Hành Nội Bộ (`fe-react-thanhxuan-internal`):**
+     - `AppLogo.tsx`: Bổ sung thuộc tính `badge?: string` và `badgeClassName?: string`. Khi có `badge`, bọc logo vào khung tròn `rounded-full border border-sky-300` với nền trắng `bg-white dark:bg-slate-800` và nhãn `NỘI BỘ` tinh tế ở chân icon (`bg-sky-50 text-sky-600 border-sky-300 font-bold uppercase`).
+     - `LoginPage.tsx` & `RegisterPage.tsx`: Cập nhật `AppLogo` sử dụng `badge="NỘI BỘ"`, căn giữa thẩm mỹ và tối ưu kích thước hiển thị trên cả mobile và desktop.
+  3. **Verification & Deployment:**
+     - Typecheck strict (`tsc --noEmit`) pass 100% trên cả 2 ứng dụng.
+     - Build pass 100% trên cả Next.js 16 (`pnpm build`) và React Vite PWA (`pnpm build`).
+     - Triển khai bundle mới vào `/var/www/noibo/dist/`, gán quyền www-data và reload Nginx thành công.
+
 ### Plan 60: Mở Rộng Đăng Nhập Không Cần Mật Khẩu Bằng Face ID / Vân Tay (WebAuthn / Passkeys) Cho Mọi Tài Khoản (be-nestjs-thanhxuan & fe-react-thanhxuan-internal)
 
 - **Bối cảnh & Mục tiêu:**
