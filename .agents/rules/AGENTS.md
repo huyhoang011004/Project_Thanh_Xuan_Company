@@ -42,16 +42,17 @@ Monorepo gồm 4 app, mỗi app chạy lệnh ở đúng thư mục của nó:
 - **`/review`:** Đánh giá chất lượng sau `/act` hoặc `/fix` -> Ghi nhận tại `.agents/docs/reviews/review<N>.md`.
 - **`/docs-sync`:** Quét đồng bộ khi nghi ngờ tài liệu lệch code -> Cập nhật `.agents/docs/srs_sdd/srs_sdd_<app>.md`, `SRS_SDD.md`, `DATABASE_DICTIONARY.md`, `CODEBASE_ATLAS.md` & `CHANGELOG.md`.
 
-*Quy tắc cập nhật tài liệu Modular SRS/SDD & Harness Data:*
-- `SRS_SDD.md`: Là Living Architecture Specification TỔNG QUAN (System Context, Topology, Master Index liên kết sang 4 file phân hệ, Document History giữ 3-5 dòng mới nhất của toàn hệ sinh thái).
-- `.agents/docs/srs_sdd/srs_sdd_<app>.md`: Đặc tả chi tiết từng phân hệ trong Monorepo. **Quy tắc bắt buộc: Sửa app nào thì cập nhật đúng file phân hệ của app đó, tuyệt đối không viết chéo hay viết nhầm file:**
-  - `be-nestjs-thanhxuan/` $\rightarrow$ [srs_sdd_backend.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_backend.md)
-  - `fe-nextjs-thanhxuan-laundry/` $\rightarrow$ [srs_sdd_fe_laundry.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_laundry.md)
-  - `fe-react-thanhxuan-internal/` $\rightarrow$ [srs_sdd_fe_internal.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_internal.md)
-  - `fe-nextjs-chuyennhatietkiem/` $\rightarrow$ [srs_sdd_fe_moving.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_moving.md)
-- `.agents/docs/DATABASE_DICTIONARY.md`: Từ điển dữ liệu toàn diện (các databases, 34+ collections, chi tiết từng trường, kiểu dữ liệu, index, quan hệ và tác dụng nghiệp vụ).
-- `.agents/docs/CODEBASE_ATLAS.md`: Bản đồ định vị nhanh toàn bộ mã nguồn (Endpoint ↔ Controller ↔ Service ↔ Repository ↔ Schema và Route ↔ Page ↔ Component ↔ Hook) giúp Agent định vị file lập tức không cần grep dò tìm.
-- `CHANGELOG.md`: Lưu trữ toàn bộ bài luận nhật ký chi tiết theo từng Plan/Fix.
+*Quy tắc cập nhật tài liệu Modular SRS/SDD & Harness Data (Conditional Doc Sync - Tiết kiệm Token):*
+- **Nguyên tắc đồng bộ theo phạm vi ảnh hưởng (Conditional Sync):** Tuyệt đối không nạp và sửa tài liệu không liên quan đến phạm vi thay đổi:
+  - `SRS_SDD.md`: Living Architecture Specification TỔNG QUAN. Mọi Plan/Feature hoàn tất chỉ ghi nhận thêm **1 dòng Document History** tóm tắt.
+  - `CHANGELOG.md`: Lưu trữ bài luận nhật ký chi tiết theo từng Plan/Fix. Khi file vượt quá 500-600 dòng, chủ động lưu trữ các Plan cũ vào `.agents/docs/changelogs/CHANGELOG_ARCHIVE_V<N>.md` để giữ file chính luôn gọn nhẹ.
+  - `.agents/docs/srs_sdd/srs_sdd_<app>.md`: **Chỉ cập nhật khi có thay đổi Business Rule / Kiến trúc / Luồng dữ liệu của phân hệ đó.** Tuyệt đối không viết chéo hay viết nhầm file:
+    - `be-nestjs-thanhxuan/` $\rightarrow$ [srs_sdd_backend.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_backend.md)
+    - `fe-nextjs-thanhxuan-laundry/` $\rightarrow$ [srs_sdd_fe_laundry.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_laundry.md)
+    - `fe-react-thanhxuan-internal/` $\rightarrow$ [srs_sdd_fe_internal.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_internal.md)
+    - `fe-nextjs-chuyennhatietkiem/` $\rightarrow$ [srs_sdd_fe_moving.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_moving.md)
+  - `.agents/docs/DATABASE_DICTIONARY.md`: **CHỈ CẬP NHẬT KHI CÓ THAY ĐỔI SCHEMA / COLLECTION / FIELD / INDEX MONGODB.** Nếu thay đổi chỉ thuần túy ở Frontend hoặc logic Controller/Service không đổi bảng CSDL thì **bỏ qua không cập nhật file này** để tiết kiệm token.
+  - `.agents/docs/CODEBASE_ATLAS.md`: **CHỈ CẬP NHẬT KHI THÊM MỚI HOẶC XÓA BỎ ROUTE / ENDPOINT / CONTROLLER / SERVICE / HOOK CHÍNH.** Nếu chỉ chỉnh sửa nội bộ code hiện có thì **bỏ qua không cập nhật file này**.
 
 ## 4. Định nghĩa hoàn thành (Definition of Done)
 
@@ -129,3 +130,22 @@ Một thay đổi coi là xong khi:
 - Ở cuối mỗi câu trả lời kỹ thuật hoặc kết thúc mỗi task/turn, Agent chủ động đính kèm 1 dòng thông tin ước lượng:
   > 🧭 *[Context Health: ~Xk tokens | Trạng thái: An toàn / Cần lưu ý / Quá tải | Gõ `/compact` khi cần cô đọng]*
 - **Mức cảnh báo:** Dưới 50k tokens: **An toàn (Xanh)** | 50k - 100k tokens: **Cần lưu ý (Vàng)** | Trên 100k tokens: **Quá tải (Đỏ)**.
+
+## 10. Kỷ Luật Tiết Kiệm Token Tối Đa (Token Optimization Protocols)
+
+Mọi Agent và Subagent phải tuân thủ nghiêm ngặt 5 kỷ luật tiết kiệm token:
+1. **Kiểm soát Output Terminal (Output Clutter Control):**
+   - Tuyệt đối cấm chạy lệnh in cả khối HTML/JSON khổng lồ ra terminal (ví dụ `curl` thô không có cờ lọc). Chỉ dùng `curl -s -I` (lấy HTTP header) hoặc pipe qua grep/jq.
+   - Lệnh `git log` bắt buộc dùng `--oneline -n 5` hoặc `-n 3`.
+   - Lệnh `git diff` dùng `--stat` trước khi diff chi tiết.
+   - Các lệnh tìm kiếm `grep` / `find` phải có cờ thu hẹp hoặc pipe `| head -n 20`.
+2. **Khoanh vùng Đọc File Hẹp (Narrow File Reads):**
+   - Luôn sử dụng `StartLine` và `EndLine` trong công cụ `read_file` để chỉ đọc đúng vùng 25 - 40 dòng cần xử lý.
+   - Tuyệt đối không đọc cả file 200 - 500 dòng khi chỉ cần kiểm tra 1 hàm hay 1 interface.
+3. **Chỉnh sửa File Cục Bộ (Local Diffs Only):**
+   - Tuyệt đối dùng `edit_file` với đoạn `Target` ngắn gọn, chính xác để sửa cục bộ. Không dùng `write_file` ghi đè lại toàn bộ tệp tin nếu chỉ thay đổi vài dòng code.
+4. **Báo Cáo Súc Tích & Cấm Paste Code Dài (No Bloated Code Pasting):**
+   - Câu trả lời báo cáo cho người dùng chỉ nêu: Nguyên nhân gốc rễ $\rightarrow$ File và dòng đã sửa `path:line` $\rightarrow$ Tóm tắt logic thay đổi trong 2-3 gạch đầu dòng $\rightarrow$ Kết quả kiểm chứng.
+   - Tuyệt đối KHÔNG copy-paste lại các khối code dài 50 - 100 dòng vào tin nhắn chat trừ khi người dùng có yêu cầu xem trước cụ thể.
+5. **Cấm Polling Task Nền Thủ Công (Zero Task Polling):**
+   - Hệ thống vận hành cơ chế **Reactive Wakeup** tự động đánh thức Agent khi lệnh build/test nền hoàn tất. Cấm gọi `manage_task(Action='status')` lặp đi lặp lại để thăm dò tiến trình. Sau khi kích hoạt lệnh nền, Agent chỉ cập nhật 1 câu ngắn cho người dùng hoặc dừng turn để hệ thống tự đánh thức.
