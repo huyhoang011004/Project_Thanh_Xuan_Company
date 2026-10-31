@@ -54,6 +54,14 @@ Monorepo gồm 4 app, mỗi app chạy lệnh ở đúng thư mục của nó:
   - `.agents/docs/DATABASE_DICTIONARY.md`: **CHỈ CẬP NHẬT KHI CÓ THAY ĐỔI SCHEMA / COLLECTION / FIELD / INDEX MONGODB.** Nếu thay đổi chỉ thuần túy ở Frontend hoặc logic Controller/Service không đổi bảng CSDL thì **bỏ qua không cập nhật file này** để tiết kiệm token.
   - `.agents/docs/CODEBASE_ATLAS.md`: **CHỈ CẬP NHẬT KHI THÊM MỚI HOẶC XÓA BỎ ROUTE / ENDPOINT / CONTROLLER / SERVICE / HOOK CHÍNH.** Nếu chỉ chỉnh sửa nội bộ code hiện có thì **bỏ qua không cập nhật file này**.
 
+- **Cơ chế tự động lưu trữ tài liệu (Auto-Archiving Protocols - Chống đầy context & Tiết kiệm token):**
+  - **Tự động lưu trữ Plans (`.agents/docs/plans/archive/`):**
+    - Thư mục hoạt động `.agents/docs/plans/` chỉ duy trì tối đa **10 Plan gần nhất** (ví dụ từ `plan<N-9>.md` đến `plan<N>.md`).
+    - Khi tạo mới plan (`/plan`), Agent tự động quét: nếu số lượng file `plan*.md` trong thư mục `.agents/docs/plans/` (ngoại trừ thư mục `archive/`) vượt quá 10 file, Agent **tự động chuyển (dùng `git mv` hoặc di chuyển file)** tất cả các plan cũ đã có trạng thái `Done` vào `.agents/docs/plans/archive/`. Tuyệt đối không xóa file, không để người dùng phải tự dọn thủ công.
+  - **Tự động lưu trữ Changelog (`.agents/docs/changelogs/`):**
+    - File `CHANGELOG.md` chỉ lưu trữ tối đa **10 - 15 Plan gần nhất** (hoặc khi dung lượng vượt quá **500 - 600 dòng**).
+    - Khi ghi nhận nhật ký hoàn thành plan (`/act` hoặc DoD), nếu `CHANGELOG.md` vượt quá 600 dòng, Agent **tự động cắt toàn bộ các Plan cũ phía dưới** chuyển vào `.agents/docs/changelogs/CHANGELOG_ARCHIVE_V<N>.md` (đánh số V1, V2, V3... nối tiếp), giữ lại banner/link điều hướng trỏ tới các file archive tương ứng ở đầu/cuối changelog để `CHANGELOG.md` luôn gọn nhẹ (< 600 dòng).
+
 ## 4. Định nghĩa hoàn thành (Definition of Done)
 
 > [!IMPORTANT]

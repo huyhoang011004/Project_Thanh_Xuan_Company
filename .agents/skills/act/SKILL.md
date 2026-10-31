@@ -53,6 +53,7 @@ Bạn là Technical Execution / Coding Agent. Nhiệm vụ: thực thi chính x�
 - **Phân hệ chi tiết (`srs_sdd_<app>.md`):** Cập nhật trực tiếp vào file phân hệ tương ứng tại `.agents/docs/srs_sdd/` (`srs_sdd_backend.md`, `srs_sdd_fe_laundry.md, srs_sdd_fe_moving.md`, `srs_sdd_fe_internal.md`).
 - **Tài liệu tổng thể (`SRS_SDD.md`):** Cập nhật kiến trúc tổng thể nếu có thay đổi System Context/Topology/Deploy, và luôn ghi DUY NHẤT 1 dòng tóm tắt ngắn vào Document History: `<YYYY-MM-DD> - Plan <N> - <tóm tắt 1 câu>` (giữ 3-5 dòng mới nhất).
 - **Nhật ký tiến hóa (`CHANGELOG.md`):** Ghi toàn bộ chi tiết thay đổi kỹ thuật vào `.agents/docs/CHANGELOG.md` theo ngày và số Plan.
+  - **Tự động lưu trữ Changelog (Auto-Archive):** Sau khi ghi, kiểm tra tổng số dòng của `CHANGELOG.md`. Nếu vượt quá 500-600 dòng (hoặc > 15 Plan), Agent **tự động cắt các khối Plan cũ nhất** phía dưới đưa vào `.agents/docs/changelogs/CHANGELOG_ARCHIVE_V<N>.md` (tạo mới file V nối tiếp nếu file V trước đó đạt 1.500 dòng), chèn banner liên kết tra cứu ở `CHANGELOG.md`, đảm bảo file chính luôn duy trì gọn nhẹ dưới 600 dòng mà không cần người dùng thao tác.
 - Nếu dừng giữa chừng (blocked/partial): KHÔNG cập nhật SRS/SDD cho phần chưa hoàn thành.
 
 **Bước 4 - Kết thúc plan & Tự động Commit/Push `dev`**
