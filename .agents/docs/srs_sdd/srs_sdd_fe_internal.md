@@ -28,15 +28,19 @@ Phân hệ `fe-react-thanhxuan-internal` là cổng điều hành số hóa toà
 
 ### 1.2. Danh Sách Tính Năng Theo Nhóm Nghiệp Vụ (Functional Requirements)
 
-#### FE-INT-FR-01: Xác Thực, Quản Trị Nhân Sự & Profile Header (`features/auth`, `features/management/auth`, `components/layout/AppHeader`)
+#### FE-INT-FR-01: Xác Thực, Đăng Nhập Không Mật Khẩu (Face ID / Vân Tay), Quản Trị Nhân Sự & Profile Header (`features/auth`, `features/management/auth`, `components/layout/AppHeader`)
 
-- **Đăng nhập & Tài khoản mẫu:** Xác thực Email/Mật khẩu với Backend NestJS. Lưới tài khoản mẫu gồm 8 nút (Admin, Quản lý xưởng, Quản lý kho, Kế toán trưởng, Tài xế, Thợ xưởng, QL Đối Tác, NV Đối Tác) với mật khẩu mặc định `ThanhXuan@2026`, hỗ trợ đăng nhập tức thì.
+- **Đăng nhập truyền thống & Tài khoản mẫu:** Xác thực Email/Mật khẩu với Backend NestJS. Lưới tài khoản mẫu gồm 8 nút (Admin, Quản lý xưởng, Quản lý kho, Kế toán trưởng, Tài xế, Thợ xưởng, QL Đối Tác, NV Đối Tác) với mật khẩu mặc định `ThanhXuan@2026`, hỗ trợ đăng nhập tức thì.
+- **Đăng nhập không mật khẩu bằng Face ID / Vân tay (`PasskeyLoginButton`, Plan 60):**
+  - Tích hợp nút bấm sinh trắc học trực tiếp trên `LoginPage.tsx` cho **MỌI VAI TRÒ** tài khoản nội bộ.
+  - Sử dụng WebAuthn FIDO2 / Passkeys (`startPasskeyLogin`): Lấy challenge từ Backend `POST /auth/webauthn/login-options`, kích hoạt cảm biến khuôn mặt/vân tay trên thiết bị (iOS Touch ID/Face ID, Android Biometrics, Windows Hello, macOS Touch ID) và xác minh qua `POST /auth/webauthn/login-verify` để cấp token đăng nhập tức thì trong 0.5s.
 - **Đăng ký tài khoản công khai (`/register`, `RegisterModal`):** Chỉ cho phép đăng ký 3 vai trò thực thi: **NV Xưởng** (`WORKER`), **NV Giao Hàng** (`SHIPPER`) và **Nhân Viên Đối Tác** (`PARTNER_STAFF`). Bỏ hoàn toàn vai trò Quản lý đối tác khỏi trang đăng ký công khai. Khi chọn Nhân viên đối tác, cascade chọn Thương hiệu (Brand) trước rồi lọc Chi nhánh (Partner).
 - **Header Profile, Avatar & Dropdown Menu:**
   - Góc phải Header hiển thị Avatar tròn (ảnh Cloudinary hoặc ký tự viết tắt), Họ tên và Huy hiệu vai trò.
-  - Dropdown Popover gồm 3 chức năng:
+  - Dropdown Popover gồm 4 chức năng:
     - 👤 **Thông tin cá nhân:** Mở `ProfileEditModal` cho phép sửa họ tên, SĐT và chọn ảnh trực tiếp từ máy tính để upload lên Cloudinary. Cập nhật tức thì avatar trên Header.
     - 🔑 **Đổi mật khẩu:** Mở `ChangePasswordModal` nhập mật khẩu cũ, mật khẩu mới, xác nhận mật khẩu mới.
+    - 📱 **Bảo mật Face ID / Vân tay:** Mở `PasskeyManagementModal` cho phép mọi nhân viên/quản lý tự đăng ký thiết bị mới, xem danh sách khóa bảo mật và hủy liên kết thiết bị cũ.
     - 🚪 **Đăng xuất:** Gọi `logout()` và xóa toàn bộ session storage.
 - **Quản lý nhân sự toàn diện (`StaffManagementPage`):**
   - **Tabs phân loại tài khoản:** 6 nhóm: _Tất Cả_, _Ban Quản Trị & Kế Toán_, _Vận Hành Xưởng & Kho_, _Giao Nhận_, _Khối Đối Tác B2B_, _Tài Khoản Tạm Khóa_.
@@ -90,16 +94,20 @@ Phân hệ `fe-react-thanhxuan-internal` là cổng điều hành số hóa toà
 - Tự động lọc danh sách phiếu cần đếm lại: các phiếu có `isRecount === true` hoặc phiếu có đồ bẩn chưa đếm số lượng mà Shipper đã ký nhận giao về.
 - **Thao tác rạch bao đếm lại:** Thợ xưởng nhập số lượng thực tế từng chiếc đồ (`actualQuantityReceived`), cập nhật trực tiếp vào hệ thống qua endpoint `PATCH /recount-actual`, hoàn tất quy trình kiểm đếm đối chứng.
 
-#### FE-INT-FR-04: Chấm Công Xác Thực Khuôn Mặt AI & Phiên Khâu Công Thợ Theo Thời Gian Thực (Plan 37 & Plan 58)
+#### FE-INT-FR-04: Chấm Công Xác Thực Khuôn Mặt AI, WebAuthn Face ID / Vân Tay & Phiên Khâu Công Thợ (Plan 37, 58 & 59)
 
-- **Chấm công On-Device AI & Liveness Detection (`AttendancePage`, `FaceScannerModal`, `useFaceRecognition`, `useAttendance`, `useWorkshopGeo`):**
+- **Xác thực Sinh trắc học Phần cứng Thiết bị FIDO2 / Passkeys (`useWebAuthn`, `BiometricPromptBanner`):**
+  - Tích hợp chuẩn WebAuthn qua thư viện `@simplewebauthn/browser`, cho phép công nhân kích hoạt Face ID (iOS) hoặc Cảm biến vân tay (Android) của điện thoại cá nhân chỉ với 1 chạm.
+  - Khi check-in / check-out: Trình duyệt tự động mở popup xác thực sinh trắc học phần cứng (tốc độ $< 0.5$s), xác thực danh tính chính chủ 100% chuẩn xác kể cả khi công nhân đeo kính cận dày hoặc đeo khẩu trang chống bụi xưởng.
+  - Tự động fallback linh hoạt sang chụp ảnh selfie camera thông thường nếu thiết bị không có Platform Authenticator.
+- **Chấm công On-Device AI & Tối ưu Camera Hiện Trường (`AttendancePage`, `FaceScannerModal`, `AttendanceTodayShiftCardComponent`, `useFaceRecognition`, `useAttendance`, `useWorkshopGeo`):**
   - **On-Device AI WebAssembly/WebGL (`@vladmandic/face-api`):** Chạy trực tiếp trên trình duyệt PWA của thợ (0đ chi phí, 0 lượt giới hạn API, không phụ thuộc cloud API key, 0% CPU/RAM VPS). Bộ model nén nhẹ (~6.6MB) lưu tĩnh tại `/public/models/` và được Workbox PWA precache offline.
-  - **Khung Oval thông minh & Liveness Blink Detection:** Giao diện camera có khung Oval đổi màu theo trạng thái (Trắng nét đứt khi chưa thấy mặt $\rightarrow$ Vàng nhấp nháy khi đã phát hiện mặt $\rightarrow$ Xanh lá khi phát hiện chớp mắt tự nhiên dựa trên chỉ số Eye Aspect Ratio $\text{EAR} < 0.22$). Khi hoàn thành chớp mắt, hệ thống tự động chụp và trích xuất vector 128 chiều (`faceDescriptor`). Có nút chụp thủ công và fallback tải ảnh thường.
+  - **Khung Oval & Nút Chụp Ảnh Ngay Công Thái Học:** Bỏ ràng buộc ép buộc phải chớp mắt. Hệ thống hiển thị nút "CHỤP ẢNH NGAY" to rõ, sẵn sàng bấm chụp trong mọi điều kiện ánh sáng ngược, đeo kính hay đeo khẩu trang. Nếu phát hiện chớp mắt tự nhiên (EAR < 0.22) camera vẫn tự động chụp thuận tiện.
   - **Geofencing & Chống gian lận:** Quét tọa độ GPS xưởng độ chính xác cao (`enableHighAccuracy: true`), kiểm tra bán kính xưởng $\le 150m$, chống Fake GPS. Sau khi check-in ca tự động kích hoạt mở phiên **khâu mặc định** (`defaultJobType`) cho thợ; khi check-out ca tự động đóng phiên khâu đang mở.
 - **Tự động lưu mẫu khuôn mặt (Auto-Enrollment):** Khi thợ cập nhật Avatar cá nhân trong `ProfileEditModal`, hệ thống tự động trích xuất vector khuôn mặt và lưu vào hồ sơ nhân viên `StaffAccount.faceDescriptor`.
 - **Bảng công toàn xưởng & Rà soát ca (`AttendanceReviewPage`, `AttendanceTableComponent`, `AttendanceReviewModal`):**
-  - Hiển thị huy hiệu AI Face Verification tại từng ca làm việc (`🟢 Khớp 95%` hoặc `🔴 Nghi vấn` nếu lệch mặt $d > 0.50$).
-  - Modal `AttendanceReviewModal` bố trí 3 cột ảnh đối chứng: Mẫu Avatar gốc hồ sơ $\leftrightarrow$ Ảnh selfie vào ca $\leftrightarrow$ Ảnh hết ca kèm chỉ số confidence% và khoảng cách GPS, giúp Quản lý xưởng dễ dàng thẩm định và phê duyệt.
+  - Hiển thị huy hiệu `📱 Passkey` (Face ID / Vân tay máy) song song với điểm tin cậy AI Face Verification tại từng ca làm việc.
+  - Modal `AttendanceReviewModal` bố trí 3 cột ảnh đối chứng: Mẫu Avatar gốc hồ sơ $\leftrightarrow$ Ảnh selfie vào ca $\leftrightarrow$ Ảnh hết ca kèm thông tin xác thực phần cứng điện thoại và khoảng cách GPS, giúp Quản lý xưởng dễ dàng thẩm định và phê duyệt.
 - **Trạm công việc thợ theo phiên (`HourlyWorkStationPage`, `useHourlyWorkStation`):**
   - Hiển thị khâu mặc định được phân công và thẻ phiên đang chạy kèm đồng hồ đếm thời gian thực cập nhật mỗi 30s (`CurrentSegmentCardComponent`).
   - Nút **Checkout khâu**: Đóng phiên hiện tại, tính số phút và tiền công tạm tính. Nếu khâu vừa đóng là khâu phụ (khác khâu mặc định) và ca làm việc vẫn mở, hệ thống **tự động check-in lại khâu mặc định** (`AUTO_RESUME`).
