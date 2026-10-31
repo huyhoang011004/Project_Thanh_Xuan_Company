@@ -4,6 +4,42 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
 
 ## 2026-10-31
 
+### Plan 61: Thiết Lập Trang Dịch Vụ Vệ Sinh (vesinh.thanhxuanlaundry.com & /vesinh) Tối Ưu SEO B2B Dựa Trên Trang Chủ (fe-nextjs-thanhxuan-laundry & Hạ Tầng Nginx)
+
+- **Bối cảnh & Yêu cầu:**
+  - Trang chủ `thanhxuanlaundry.com/` chủ yếu tập trung tối ưu SEO cho dịch vụ giặt là công nghiệp.
+  - Doanh nghiệp mở rộng mạnh mảng Dịch vụ Vệ sinh Công nghiệp & Doanh nghiệp (văn phòng, tòa nhà, nhà hàng, giặt thảm văn phòng, ghế sofa, trường học, sau xây dựng), cần một trang đích chuyên biệt tại `https://thanhxuanlaundry.com/vesinh` và kích hoạt tên miền phụ `https://vesinh.thanhxuanlaundry.com/` để tối ưu SEO Google độc lập và thu hút leads B2B.
+- **Chi tiết kỹ thuật thực hiện:**
+  1. **Next.js Subdomain Rewriting (`src/middleware.ts`):**
+     - Mở rộng matcher trong `middleware.ts` để đón nhận request từ các tên miền phụ (loại trừ static files, API, favicon).
+     - Kiểm tra header `host`: Khi request trỏ tới `vesinh.thanhxuanlaundry.com` tại root path `/`, tự động thực hiện URL rewrite ngầm sang `/vesinh` (`NextResponse.rewrite`), giữ nguyên URL trên trình duyệt khách hàng và công cụ tìm kiếm.
+     - Đồng thời đảm bảo truy cập trực tiếp `https://thanhxuanlaundry.com/vesinh` vẫn hoạt động song song mượt mà.
+  2. **Trang Đích Dịch Vụ Vệ Sinh Chuẩn SEO (`src/app/(public)/vesinh/page.tsx` & `src/features/public/vesinh/`):**
+     - Phân rã mô-đun thành 8 tệp độc lập tuân thủ nghiêm ngặt kỷ luật chia nhỏ file (`< 250 - 300 dòng`, thực tế đều `< 135 dòng`):
+       - `VesinhHomePage.tsx`: Điều phối các section theo bố cục Server Component (RSC).
+       - `VesinhHeroSectionComponent.tsx`: Banner, tiêu đề SEO định vị thương hiệu, hotline tư vấn, 3 cam kết nhanh (Khảo sát 0đ, Hóa đơn VAT, Thi công 24/7) và nút kêu gọi hành động.
+       - `VesinhIntroSectionComponent.tsx`: Giới thiệu năng lực máy móc (máy chà sàn liên hợp, hút bụi 3 motor, phun hút hơi nước nóng 140°C khử khuẩn 99.9%) và hóa chất sinh học đạt chuẩn MSDS.
+       - `VesinhServicesGridComponent.tsx`: Lưới 6 gói dịch vụ trọng điểm B2B (Văn phòng & Tòa nhà, Giặt thảm & Ghế sofa, Nhà hàng & Bếp ăn, Trường học & KTX, Sau xây dựng, Nhà xưởng).
+       - `VesinhProcessSectionComponent.tsx`: Quy trình 5 bước minh bạch (Tiếp nhận $\rightarrow$ Khảo sát thực tế 0đ $\rightarrow$ Báo giá trọn gói $\rightarrow$ Thi công chuyên nghiệp $\rightarrow$ Nghiệm thu & Hóa đơn VAT).
+       - `VesinhWhyChooseUsComponent.tsx`: 6 lý do lựa chọn (Pháp nhân VAT, Bảo hiểm tài sản 100%, Nhân sự xác thực lý lịch, Máy móc hiện đại, Chiết khấu định kỳ tới 25%, Hỗ trợ 24/7).
+       - `VesinhFaqSectionComponent.tsx`: Bảng accordion câu hỏi thường gặp giải đáp chi phí khảo sát, thời gian thi công ngoài giờ, hóa chất, VAT, thời gian khô thảm.
+       - `VesinhPreFooterCtaComponent.tsx`: Khối lead magnet và form đăng ký khảo sát miễn phí tận nơi trong 15 phút.
+  3. **SEO On-Page & Schema Markup Chuyên Sâu:**
+     - Tối ưu Metadata (Title, Description, Keywords, OpenGraph) phủ rộng các từ khóa vệ sinh công nghiệp Hà Nội.
+     - Nhúng dữ liệu có cấu trúc JSON-LD chuẩn `CleaningService` / `LocalBusiness` với thông tin pháp lý, số hotline, giờ mở cửa và địa bàn phục vụ.
+     - Thêm tuyến đường `/vesinh` vào `src/app/sitemap.ts` với `priority: 0.9` và `changeFrequency: 'daily'`.
+  4. **Thanh Điều Hướng & Mobile Navigation:**
+     - `PublicMainNavBarComponent.tsx`: Thêm mục menu "Vệ Sinh" nổi bật kèm biểu tượng `Sparkles` sinh động.
+     - `PublicMobileBottomNavComponent.tsx`: Thêm tab "Vệ Sinh" trên thanh điều hướng di động 5 nút đáy.
+     - `HeaderClientWrapperComponent.tsx`: Nhận diện đường dẫn `/vesinh` để active menu chính xác.
+  5. **Hạ Tầng Nginx Reverse Proxy:**
+     - Cập nhật cấu hình `/etc/nginx/sites-available/thanhxuanlaundry.com` bổ sung `vesinh.thanhxuanlaundry.com` vào `server_name` cho cả khối HTTP port 80 và HTTPS port 443.
+     - Kiểm tra cú pháp `nginx -t` pass 100% và reload Nginx an toàn.
+  6. **Verification:**
+     - TypeScript strict check `pnpm exec tsc --noEmit` pass không lỗi.
+     - Next.js production build (`pnpm build`) biên dịch thành công 15/15 routes tĩnh/động, sinh route tĩnh `/vesinh` và `/sitemap.xml`.
+     - ESLint trên toàn bộ các file mới viết đạt chuẩn 100% (0 errors, 0 warnings).
+
 ### Fix (Branding & Navigation): Chuẩn hóa Favicon & Bỏ nút Nội bộ trên Web Giặt Là, bổ sung nhãn 'NỘI BỘ' chân Icon trang Login Cổng Quản Vận (fe-nextjs-thanhxuan-laundry & fe-react-thanhxuan-internal)
 
 - **Bối cảnh & Yêu cầu:**

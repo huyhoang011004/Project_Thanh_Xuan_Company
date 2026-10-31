@@ -30,6 +30,10 @@ Phân hệ đảm nhiệm 2 vai trò cốt lõi trong mảng dịch vụ giặt 
 #### FE-LAUNDRY-FR-01: Phân Hệ Web Khách Hàng Công Khai (`(public)`)
 
 - **Trang chủ (`/`):** Hero Section chia chéo (Diagonal Split) video reel xưởng giặt công nghiệp + ảnh thành phẩm cao cấp & floating badges, giới thiệu năng lực xưởng giặt là công nghiệp, quy trình giặt sấy tiêu chuẩn, danh sách đối tác lớn, bảng giá tóm tắt và Pre-Footer CTA (cam kết tặng 01 tuần giặt mẫu, giao nhận 24/7, bồi thường 100% kèm form thu thập lead chuyển đổi).
+- **Trang Đích Dịch Vụ Vệ Sinh B2B (`/vesinh` & Subdomain `vesinh.thanhxuanlaundry.com`):**
+  - Trang đích chuyên biệt cho Dịch Vụ Vệ Sinh Doanh Nghiệp & Vệ Sinh Công Nghiệp Hà Nội (văn phòng, tòa nhà, nhà hàng, ký túc xá, giặt thảm văn phòng, ghế sofa, tổng vệ sinh sau xây dựng).
+  - Tích hợp Server Components RSC, Hero banner, giới thiệu máy móc công nghệ cao (máy chà sàn liên hợp, hút bụi 3 motor, phun hút hơi nước nóng 140°C), lưới 6 dịch vụ trọng điểm, quy trình 5 bước khảo sát 0đ, cam kết pháp nhân hóa đơn VAT, bảng FAQ và form nhận báo giá nhanh trong 15 phút.
+  - Tự động kích hoạt cơ chế URL rewrite ngầm trong Next.js `middleware.ts` khi khách hàng truy cập tên miền phụ `https://vesinh.thanhxuanlaundry.com/`.
 - **Giới thiệu (`/gioi-thieu`):** Lịch sử phát triển công ty, quy mô máy móc công nghệ, cam kết chất lượng dịch vụ.
 - **Dịch vụ giặt là (`/dich-vu`, `/dich-vu/[slug]`):**
   - Danh mục dịch vụ chuyên sâu: Giặt ủi nhà hàng, giặt chăn ga khách sạn, giặt đồ spa, giặt sấy công nghiệp, giặt hấp đồ hiệu.

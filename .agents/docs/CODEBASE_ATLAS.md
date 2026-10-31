@@ -177,6 +177,7 @@ Kiến trúc: Next.js App Router, Server Components mặc định cho SEO (`(pub
 | Tuyến URL | Loại Render | File Trang (Page Entry) | Màn Hình / Modals / Subcomponents | Service / Hooks / Actions |
 | :--- | :---: | :--- | :--- | :--- |
 | `/` (Trang chủ) | RSC | `src/app/(public)/page.tsx` | `HomePage.tsx`<br>`src/features/public/home/` | `HeroSectionComponent`, `IntroSectionComponent`, `ServicesGridComponent`, `WhyChooseUsSectionComponent`, `FaqSectionComponent`, `PreFooterCtaComponent` |
+| `/vesinh`<br>(Subdomain: `vesinh.*`) | RSC (SEO) | `src/app/(public)/vesinh/page.tsx` | `VesinhHomePage.tsx`<br>`src/features/public/vesinh/` | `VesinhHeroSectionComponent`, `VesinhIntroSectionComponent`, `VesinhServicesGridComponent`, `VesinhProcessSectionComponent`, `VesinhWhyChooseUsComponent`, `VesinhFaqSectionComponent`, `VesinhPreFooterCtaComponent` |
 | `/dich-vu/[...slug]` | RSC (SEO) | `src/app/(public)/dich-vu/[...slug]/page.tsx` | `ServiceDetailPage.tsx`<br>`src/features/public/services/components/` | `ServiceArticleDetailView`, `ServiceCategoryListView`, `PromoBanner`, `WorkProcess`, `public-services.service.ts` |
 | `/gioi-thieu/[...slug]` | RSC (SEO) | `src/app/(public)/gioi-thieu/[...slug]/page.tsx` | `src/features/public/about/components/` | `AboutArticleDetailView`, `AboutCategoryListView`, `public-services.service.ts` |
 | `/tin-tuc/[...slug]` | RSC (SEO) | `src/app/(public)/tin-tuc/[...slug]/page.tsx` | `src/features/public/articles/components/` | `NewsArticleDetailView`, `NewsCategoryListView`, `public-articles.service.ts` |
@@ -201,7 +202,7 @@ Kiến trúc: Next.js App Router, Server Components mặc định cho SEO (`(pub
 | **Admin Layout Shell** | `src/components/layout/admin/` | `AdminShellComponent.tsx`, `AdminSidebarComponent.tsx`, `AdminHeaderComponent.tsx` (Bố cục CMS quản trị có responsive sidebar). |
 | **Public Layout Shell** | `src/components/layout/public/` | `PublicHeaderComponent.tsx`, `PublicFooterComponent.tsx`, `DraggableFloatingContactComponent.tsx` (Zalo/Hotline widget nổi kéo thả). |
 | **Soạn Thảo WYSIWYG & Media** | `src/components/ui/rich-text-editor/` | `RichTextEditorComponent.tsx`, `RichTextToolbarComponent.tsx`, `MediaInsertModal.tsx` (Soạn thảo bài viết chuẩn SEO, chèn ảnh Cloudinary). |
-| **Bảo Vệ Phiên & Proxy Upload** | `src/middleware.ts`<br>`src/app/api/upload/route.ts` | Next.js Middleware kiểm tra httpOnly cookie `admin_access_token`; Route handler proxy tải lên Cloudinary có xác thực token. |
+| **Subdomain Rewrite, Phiên & Proxy Upload** | `src/middleware.ts`<br>`src/app/api/upload/route.ts` | Next.js Middleware rewrite subdomain `vesinh.thanhxuanlaundry.com` sang `/vesinh` và kiểm tra httpOnly cookie `admin_access_token` cho `/admin/*`; Route handler proxy tải lên Cloudinary có xác thực token. |
 
 ---
 
