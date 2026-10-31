@@ -4,6 +4,25 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
 
 ## 2026-10-31
 
+### Fix (Header UX): Loại Bỏ Hiện Tượng Phóng To / Phình To Header Khi Kéo Lên Trên Mobile (fe-nextjs-thanhxuan-laundry)
+
+- **Bối cảnh & Yêu cầu:**
+  - Người dùng phản ánh khi lướt trên điện thoại (mobile), mỗi khi kéo trang lên trên thì thanh Header bị phóng to ra, chiếm nhiều diện tích màn hình và gây giật cục giao diện.
+- **Nguyên nhân gốc rễ (Root Cause Analysis):**
+  - Trong `PublicTopBarComponent.tsx`, thanh TopBar (chứa marquee và hotline) trước đây hiển thị trên cả mobile. Khi người dùng cuộn xuống thì TopBar co lại `max-h-0`, nhưng khi người dùng vuốt/kéo trang lên trên thì TopBar bung ra `max-h-20 py-2`, cộng thêm vào chiều cao của Header khiến giao diện mobile bị đội lên đột ngột.
+  - Đồng thời, trong `PublicMainNavBarComponent.tsx`, class padding container (`py-4` vs `py-3`) và kích thước font chữ logo (`text-xl sm:text-2xl` vs `text-lg sm:text-xl`) bị phụ thuộc vào cờ `isScrolledDown`, làm cho Header thay đổi kích thước và font chữ nhảy gián đoạn khi cuộn trang.
+- **Chi tiết kỹ thuật thực hiện:**
+  1. **Ẩn thanh TopBar trên Mobile (`PublicTopBarComponent.tsx`):**
+     - Thêm tiền tố `hidden md:flex`, chỉ hiển thị TopBar trên màn hình máy tính (Desktop/Tablet ngang). Trên Mobile, ẩn hoàn toàn TopBar để Header luôn phẳng gọn, không bị phình to khi vuốt kéo lên.
+  2. **Cố định kích thước & Kỷ luật Layout (`PublicMainNavBarComponent.tsx`):**
+     - Cố định padding container ở mức chuẩn `py-2.5 sm:py-3`.
+     - Cố định kích thước logo thương hiệu `text-lg sm:text-xl` và text phụ `text-[10px] sm:text-xs`.
+     - Cố định kích thước nav links `text-sm sm:text-base px-2.5 py-1.5`.
+     - Loại bỏ toàn bộ các điều kiện động làm biến thiên kích thước Header theo thao tác cuộn trên mobile.
+  3. **Verification:**
+     - Typecheck `pnpm exec tsc --noEmit` pass 100%.
+     - Build Next.js `pnpm build` pass 100%.
+
 ### Fix (Routing & Header): Sửa Lỗi Crash 500 Trang Chi Tiết Dịch Vụ /dich-vu/[...slug] & Khôi Phục Header Nguyên Bản (fe-nextjs-thanhxuan-laundry)
 
 - **Bối cảnh & Yêu cầu:**
