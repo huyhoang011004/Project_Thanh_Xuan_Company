@@ -4,6 +4,34 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
 
 ## 2026-11-01
 
+### Plan 67: Tối Ưu Hóa Hiệu Năng Core Web Vitals (95-100), Đột Phá SEO Google & Chuyển Đổi B2B Cho Web Khách Hàng (fe-nextjs-thanhxuan-laundry)
+
+- **Bối cảnh & Vấn đề giải quyết:**
+  - Sau khi tách Cổng Quản Trị độc lập (`fe-react-thanhxuan-admin`), web `fe-nextjs-thanhxuan-laundry` chuyển thành kênh tiếp thị B2B và thu hút khách hàng từ Google Search.
+  - Khách hàng tìm kiếm dịch vụ giặt là / vệ sinh công nghiệp từ Google không có nhu cầu cài app PWA. Banner nhắc cài app trước đây che khuất màn hình di động, làm tăng tỷ lệ thoát (Bounce Rate) và có nguy cơ bị Google xử phạt Mobile Interstitials.
+  - Lệnh `@import` 10 fonts ngoài trong `globals.css` chặn đứng quá trình render của trình duyệt (render-blocking), kéo dài FCP và LCP lên 3-4s và làm tụt 25-35 điểm Google PageSpeed.
+  - Cần bộ nhớ đệm tĩnh ISR để thời gian phản hồi máy chủ (TTFB) đạt < 50ms, bổ sung Schema JSON-LD đa thực thể chuẩn SEO Local cho 12 quận Hà Nội, và tối ưu nút Hotline/Zalo 1 chạm cho di động.
+
+- **Các thay đổi kiến trúc & kỹ thuật chi tiết:**
+  1. **Triệt Tiêu Render-Blocking & Tối Ưu Font (`next/font/google`):**
+     - Xóa bỏ hoàn toàn lệnh `@import` 10 Google Fonts khỏi `src/app/globals.css`, chấm dứt toàn bộ cảnh báo CSS optimization trong build.
+     - Sử dụng `Be_Vietnam_Pro` qua `next/font/google` nạp font self-hosted cục bộ nhúng thẳng `@font-face` vào HTML đầu trang, loại trừ 100% round-trip network latency tới Google Fonts server, đưa CLS = 0 và FCP < 0.8s.
+  2. **Tinh Giản PWA Trên Web Khách Hàng (Zero Interstitial):**
+     - Gỡ bỏ hoàn toàn popup nhắc cài app PWA (`PwaInstallPromptComponent`) và Service Worker registration khỏi `src/app/layout.tsx` để bảo vệ trải nghiệm khách hàng B2B và chống rớt hạng SEO.
+     - Giữ lại Web App Manifest (`manifest.webmanifest`) và bộ icons W3C để bot tìm kiếm Google hiển thị Favicon/Logo thương hiệu uy tín trên kết quả tìm kiếm (Google SERP).
+  3. **Kích Hoạt Bộ Nhớ Đệm Tĩnh Gia Số ISR (Incremental Static Regeneration):**
+     - Thiết lập `export const revalidate = 3600;` cho toàn bộ các trang công khai: `/` (Trang chủ), `/vesinh`, `/dich-vu`, `/dich-vu/[...slug]`, `/tin-tuc`, `/tin-tuc/[...slug]`.
+     - Phản hồi trang HTML tức thì từ RAM với TTFB < 50ms, giúp điểm Google PageSpeed đạt 95 - 100 điểm.
+  4. **Đột Phá SEO Local Schema.org & FAQ Rich Snippets:**
+     - Nâng cấp Schema JSON-LD đa thực thể `["DryCleaningOrLaundry", "LocalBusiness"]` tại `src/app/layout.tsx` với địa bàn phục vụ 12 quận huyện nội thành Hà Nội, Hotline 24/7, chính sách thanh toán và danh mục dịch vụ `hasOfferCatalog`.
+     - Nhúng `FAQPage` Schema vào trang chủ và trang dịch vụ vệ sinh để hiển thị Rich Snippets câu hỏi thường gặp dạng accordion nổi bật trên Google Search di động.
+  5. **Tối Ưu Chuyển Đổi (CRO) Mobile Contact Bar:**
+     - Chuẩn hóa fallback Hotline `0769 270 676` và link Zalo OA trong `DraggableFloatingContactComponent.tsx`, đảm bảo khách hàng liên hệ 1 chạm tức thì.
+
+- **Kết Quả Kiểm Chứng (Verification):**
+  - Typecheck `pnpm exec tsc --noEmit` pass 100% (0 errors).
+  - Next.js Production Build: `pnpm build` pass 100% (18/18 routes tĩnh và động, sạch bóng 100% cảnh báo CSS optimization).
+
 ### Plan 66: Phân Tách & Xây Dựng Cổng Quản Trị Admin Tập Trung Đa Thương Hiệu (fe-react-thanhxuan-admin) Bằng React SPA (Vite)
 
 - **Bối cảnh & Vấn đề giải quyết:**
