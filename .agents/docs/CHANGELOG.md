@@ -4,6 +4,31 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
 
 ## 2026-11-01
 
+### Plan 68: Triển Khai Hệ Thống Cinematic Living Motion Đa Phân Hệ & Chuẩn Hóa Mobile Header (fe-nextjs-thanhxuan-laundry)
+
+- **Bối cảnh & Vấn đề giải quyết:**
+  - **Lỗi Header trên Mobile:** `PublicMainNavBarComponent` dùng `flex-wrap` kèm ô input tìm kiếm cố định `w-full min-w-[200px]` khiến trên màn hình di động, khối tìm kiếm bị rớt xuống hàng thứ hai, Logo trơ trọi một mình, cộng thêm thanh TopBar đen khuyết marquee dính sát đỉnh màn hình. Header cao hơn 140px làm ngợp và che mất 1/4 diện tích màn hình điện thoại.
+  - **Trang web dạng ảnh tĩnh thiếu sức sống:** Khách hàng phản ánh các hiệu ứng xuất hiện quá nhanh (0.4s-0.6s) rồi biến mất, tải lại trang không thấy lại, toàn bộ giao diện đứng im như brochure in giấy, không truyền tải được quy mô và nhịp đập 24/7 của xưởng giặt là công nghiệp 5+ tấn/ngày.
+- **Các giải pháp kỹ thuật đã triển khai:**
+  1. **Chuẩn Hóa Mobile Single-Row Header (54px):**
+     - Ẩn dải TopBar đen khuyết marquee trên mobile (`hidden md:flex`), tiết kiệm 35px diện tích.
+     - Tái cấu trúc Header di động thành 1 hàng cố định: Logo bên trái, cụm 3 nút Quick-Action bên phải gồm Gọi Hotline nhanh 1-chạm (📞), Bật/tắt thanh tìm kiếm trượt xuống linh hoạt (🔍), và Nút ThemeToggle (☀️/🌙).
+  2. **Cinematic Ambient Motion (Ken Burns Slow-Motion & Vi Hạt Bọt Khí Nano):**
+     - Bổ sung `@keyframes kenBurnsSlow` (chuyển động Pan & Zoom 25s loop mượt mà, GPU-accelerated) áp dụng cho ảnh nền Hero Banner ở Trang Chủ, Vệ Sinh Công Nghiệp, Dịch Vụ.
+     - Phát triển `FloatingCleanParticlesComponent` hiển thị các hạt bọt khí và hơi nước nano lơ lửng, tạo cảm giác vô trùng, tươi mát.
+  3. **Dải Băng Chuyền Năng Lực Vô Tận 24/7 (`InfiniteProductionMarqueeComponent`):**
+     - Thiết lập dải băng tải trôi ngang vô tận 60 FPS dưới chân Hero: `5+ TẤN / NGÀY ✦ 100% ECOLAB ✦ ĐỘI XE 12 QUẬN ✦ CAM KẾT 100% ✦ ĐÚNG CA 24H ✦ HÓA ĐƠN VAT ✦ 500+ ĐỐI TÁC`.
+  4. **Dây Chuyền Vận Hành Sản Xuất Tự Động Hóa 5 Bước (`AutomatedConveyorWorkflowComponent`):**
+     - Mô hình hóa dây chuyền khép kín 5 trạm: Tiếp nhận & Phân loại $\rightarrow$ Giặt khử khuẩn Ecolab $\rightarrow$ Sấy lồng công nghiệp $\rightarrow$ Là hơi & Gấp tự động $\rightarrow$ Đóng gói niêm phong & Giao trả.
+     - Tích hợp tia sáng laser quang học (`shimmerLaser`) chạy liên tục giữa các trạm máy móc.
+  5. **Bộ Đếm Số Nhảy Tự Động (`AnimatedCounterComponent`) & Video Modal 4K:**
+     - Tích hợp bộ đếm số động sử dụng `requestAnimationFrame` + `IntersectionObserver` tại `IntroSectionComponent` (5+ Tấn/ngày, 500+ Doanh nghiệp, 99.8% Sạch chuẩn, 24/7 Giao nhận), tự kích hoạt lại nhịp nhàng mỗi lần lướt tới.
+     - Nút xem video xưởng thực tế với hiệu ứng sóng âm (Radar Ripple) mở popup video 4K sắc nét (`HeroVideoModalComponent`).
+- **Kết quả kiểm chứng:**
+  - Typecheck `pnpm exec tsc --noEmit` pass 100% (0 errors).
+  - Next.js Turbopack build `pnpm build` pass 100% (18/18 static pages rendered).
+  - Giao diện mobile và desktop đạt chuẩn 60 FPS, không gây giật lag và không tăng thời gian tải trang.
+
 ### Bugfix & UI/UX Restore: Phục Hồi Toàn Diện Ngôn Ngữ Thiết Kế & Hiệu Ứng Web Cũ Cho Cổng Quản Trị (fe-react-thanhxuan-admin)
 
 - **Bối cảnh & Vấn đề giải quyết:**

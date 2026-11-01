@@ -243,5 +243,25 @@ sequenceDiagram
 5. **Tối Ưu Chuyển Đổi (CRO) Mobile Contact Bar:**
    - Chuẩn hóa fallback Hotline `0769 270 676` và link Zalo OA trong `DraggableFloatingContactComponent.tsx`, đảm bảo khách hàng liên hệ 1 chạm tức thì.
 
+---
+
+### 2.7. Hệ Thống Chuyển Động Điện Ảnh Sống Động (Cinematic Living Motion) & Tinh Gọn Mobile Header (Plan 68)
+
+1. **Chuẩn Hóa Single-Row Mobile Header (54px):**
+   - Ẩn dải TopBar đen khuyết marquee trên mobile (`hidden md:flex`), tiết kiệm 35px không gian hiển thị trên màn hình điện thoại.
+   - Thay thế `flex-wrap` bằng thanh Header 1 hàng duy nhất: Logo thương hiệu bên trái, cụm 3 nút Quick-Action tinh gọn bên phải gồm Nút gọi hotline 1-chạm (📞), Nút bật/tắt thanh tìm kiếm trượt xuống (🔍), và Nút ThemeToggle (☀️/🌙).
+2. **Cinematic Ambient Motion (Ken Burns & Vi Hạt Bọt Khí Nano):**
+   - Áp dụng hiệu ứng máy quay điện ảnh Ken Burns Slow-Motion 25s loop mượt mà cho ảnh nền máy giặt công nghiệp ở Hero Banner (`animate-kenBurns`), triệt tiêu cảm giác brochure ảnh tĩnh.
+   - Nhúng `FloatingCleanParticlesComponent` tạo luồng bọt khí nano và hơi nước lơ lửng trong suốt, truyền tải cảm giác vô trùng, tươi mới của xưởng giặt hiện đại.
+3. **Dải Băng Chuyền Năng Lực Vô Tận 24/7 (`InfiniteProductionMarqueeComponent`):**
+   - Tích hợp dải băng tải vô tận trôi ngang liên tục 60 FPS dưới chân Hero, hiển thị công suất 5+ tấn/ngày, 100% hóa chất Ecolab, đội xe 12 quận, cam kết đền bù 100% và hóa đơn VAT.
+4. **Dây Chuyền Vận Hành Sản Xuất Tự Động Hóa 5 Bước (`AutomatedConveyorWorkflowComponent`):**
+   - Mô hình hóa dây chuyền khép kín từ tiếp nhận xe tải $\rightarrow$ giặt khử khuẩn $\rightarrow$ sấy lồng $\rightarrow$ là hơi & gấp $\rightarrow$ đóng gói niêm phong.
+   - Tích hợp tia sáng laser quang học (`shimmerLaser`) chạy liên tục giữa các trạm máy móc.
+5. **Bộ Đếm Số Nhảy Tự Động (`AnimatedCounterComponent`) & Video Modal 4K:**
+   - Sử dụng `requestAnimationFrame` kết hợp `IntersectionObserver` kích hoạt đếm số mượt mà khi cuộn tới các khối năng lực (5+ Tấn/ngày, 500+ Doanh nghiệp, 99.8% Sạch chuẩn, 24/7 Giao nhận). Kích hoạt lại nhịp nhàng mỗi lần lướt qua.
+   - Nút xem video xưởng thực tế với hiệu ứng sóng âm (Radar Ripple) mở popup video 4K sắc nét (`HeroVideoModalComponent`).
+
+
 
 
