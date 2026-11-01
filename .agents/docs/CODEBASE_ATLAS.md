@@ -185,6 +185,7 @@ Kiến trúc: Next.js App Router, Server Components mặc định cho SEO (`(pub
 | `/lien-he` | Client Form | `src/app/(public)/lien-he/page.tsx` | `ContactPage.tsx`<br>`src/features/public/contacts/` | `public-contacts.service.ts`, `public-contacts.action.ts` |
 | `/offline` | Client / PWA | `src/app/offline/page.tsx` | `OfflinePage` màn hình ngoại tuyến khi mất mạng Internet (Wifi/4G), nút tải lại và gọi hotline khẩn cấp | Fallback tự động bởi Service Worker |
 | `/manifest.webmanifest` | Metadata Route | `src/app/manifest.ts` | Web App Manifest PWA chuẩn hóa (192, 512, maskable icons, shortcuts B2B) | Native Next.js 16 MetadataRoute |
+| `/api/manifest/admin`<br>(Subdomain: `quantri.*`) | Route Handler | `src/app/api/manifest/admin/route.ts` | Web App Manifest PWA độc lập cho Quản trị CMS ("Quản trị Thanh Xuân", short_name: "Quản trị Thanh Xuân", start_url: "/") | JSON Manifest Route |
 | `/admin/login` | Client / Auth | `src/app/(admin)/admin/login/page.tsx` | `LoginFormComponent.tsx`<br>`src/features/admin/auth/` | `admin-auth.service.ts` (quản lý phiên qua httpOnly cookies) |
 | `/admin/dashboard` | Client / CMS | `src/app/(admin)/admin/dashboard/page.tsx` | `DashboardPage.tsx`<br>`src/features/admin/dashboard/` | `admin-dashboard.service.ts` |
 | `/admin/articles` | Client / CMS | `src/app/(admin)/admin/articles/page.tsx` | `ArticleManagerPage.tsx`<br>`src/features/admin/articles/` | Modals: `ArticleEditorModal`, `ArticleTrashModal`<br>Components: `ArticleManagerTableComponent`, `ArticleManagerToolbarComponent`<br>Editor: `RichTextEditorComponent`<br>Hooks: `useAdminArticles` |
@@ -204,8 +205,9 @@ Kiến trúc: Next.js App Router, Server Components mặc định cho SEO (`(pub
 | **Admin Layout Shell** | `src/components/layout/admin/` | `AdminShellComponent.tsx`, `AdminSidebarComponent.tsx`, `AdminHeaderComponent.tsx` (Bố cục CMS quản trị có responsive sidebar). |
 | **Public Layout Shell** | `src/components/layout/public/` | `PublicHeaderComponent.tsx`, `PublicFooterComponent.tsx`, `DraggableFloatingContactComponent.tsx` (Zalo/Hotline widget nổi kéo thả). |
 | **Soạn Thảo WYSIWYG & Canva Styler** | `src/components/ui/rich-text-editor/` | `RichTextEditorComponent.tsx`, `RichTextToolbarComponent.tsx`, `RichTextFormattingButtons.tsx`, `RichTextAlignHeadingsButtons.tsx` (Soạn thảo chuẩn SEO, 10+ Google Fonts tiếng Việt, Canva Color Swatches, Line/Letter Spacing, Callout Cards & SEO CTA Button Builder). |
-| **PWA Native & Cài Đặt Ứng Dụng** | `src/components/pwa/`<br>`public/sw.js` | `PwaRegisterComponent.tsx` (đăng ký SW), `PwaInstallPromptComponent.tsx` (Banner cài đặt Chromium & hướng dẫn iOS Safari), Service Worker Network-First + Cache-First. |
-| **Subdomain Rewrite, Phiên & Proxy Upload** | `src/middleware.ts`<br>`src/app/api/upload/route.ts` | Next.js Middleware rewrite subdomain `vesinh.thanhxuanlaundry.com` sang `/vesinh` và kiểm tra httpOnly cookie `admin_access_token` cho `/admin/*`; Route handler proxy tải lên Cloudinary có xác thực token. |
+| **PWA Native & Cài Đặt Ứng Dụng** | `src/components/pwa/`<br>`public/sw.js` | `PwaRegisterComponent.tsx` (đăng ký SW), `PwaInstallPromptComponent.tsx` (Banner cài đặt Chromium & hướng dẫn iOS Safari cho cả Web Khách và Subdomain Quản Trị), `IosInstallGuideModal.tsx` (Modal hướng dẫn cài PWA iOS Safari), Service Worker Network-First + Cache-First (bypass subdomain `quantri.*`). |
+| **Subdomain Rewrite, Phiên & Proxy Upload** | `src/middleware.ts`<br>`src/app/api/upload/route.ts` | Next.js Middleware rewrite subdomain `vesinh.thanhxuanlaundry.com` sang `/vesinh`, subdomain `quantri.thanhxuanlaundry.com` sang `/admin` & manifest riêng; kiểm tra httpOnly cookie `admin_access_token` cho `/admin/*`; Route handler proxy tải lên Cloudinary có xác thực token. |
+| **Native Mobile Back Handler** | `src/components/ui/dialog.tsx` | Tích hợp cơ chế History Popstate tự động đóng Dialog/Modal khi người dùng bấm nút Back điện thoại hoặc vuốt cạnh màn hình di động. |
 
 ---
 

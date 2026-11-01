@@ -207,3 +207,21 @@ sequenceDiagram
    - **Line & Letter Spacing:** Tùy biến khoảng cách dòng (1.2 -> 2.0) và độ giãn chữ (-0.02em -> 0.1em).
    - **Canva Callout Cards & CTA Builder:** Nút chèn khối điểm nhấn SEO (thông tin, lưu ý, cam kết) và nút kêu gọi hành động CTA (gọi hotline, nhận báo giá) trực quan vào nội dung bài viết.
 
+---
+
+### 2.5. Tên Miền Phụ Quản Trị (quantri.thanhxuanlaundry.com) & Native Mobile Back Handler
+
+1. **Subdomain quantri.thanhxuanlaundry.com:**
+   - Ánh xạ trực tiếp vào phân hệ Quản trị CMS (`/admin`), tách biệt hoàn toàn môi trường PWA của Ban Quản trị khỏi Web Khách Hàng.
+   - **Next.js Middleware Routing:** Tự động nhận diện hostname `quantri.`:
+     - Truy cập gốc `/` rewrite nội bộ sang `/admin` (tự động điều hướng `/login` hoặc `/dashboard` theo trạng thái đăng nhập).
+     - Truy cập các đường dẫn chức năng CMS (`/dashboard`, `/posts`, `/customers`, `/login`...) rewrite nội bộ sang `/admin/...`, duy trì URL sạch đẹp trên thanh địa chỉ.
+     - Yêu cầu Web App Manifest `/manifest.webmanifest` được rewrite về Route Handler riêng `/api/manifest/admin`.
+   - **Quản Trị Web App Manifest (`/api/manifest/admin`):** Khai báo tên app chính thức **"Quản trị Thanh Xuân"** (short_name: **"Quản trị Thanh Xuân"**), `start_url: "/"`, `display: "standalone"`, cho phép cài đặt app độc lập lên điện thoại.
+   - **Chủ Động Nhắc Cài Đặt PWA (`PwaInstallPromptComponent`):** Phát hiện thiết bị di động chưa cài app, tự động hiển thị banner "Cài Đặt App Quản trị Thanh Xuân" sau 2.5s với nút "Cài đặt ngay" (hỗ trợ native prompt Chromium và modal hướng dẫn Safari iOS qua `IosInstallGuideModal`).
+2. **Xử Lý Nút Back Mobile Cho Popup / Modal (Native App Back Button):**
+   - Tích hợp bộ xử lý History Popstate vào component cốt lõi `Dialog` ([dialog.tsx](file:///root/Project_Thanh_Xuan_Company/fe-nextjs-thanhxuan-laundry/src/components/ui/dialog.tsx)): Khi mở bất kỳ Dialog/Modal nào, đẩy state ảo vào `history.pushState({ modalOpen: true }, '')`.
+   - Khi người dùng bấm nút Back vật lý hoặc vuốt cạnh mép màn hình điện thoại, sự kiện `popstate` kích hoạt đóng modal mà không làm thoát trang hay nhảy về màn hình chính.
+   - Khi đóng modal bằng nút X hoặc backdrop, tự động rút lui state ảo qua `history.back()`, giữ history stack luôn đồng bộ.
+
+

@@ -494,3 +494,17 @@ sequenceDiagram
   - Bổ sung tab **"Xin Nghỉ"** vào thanh Bottom Nav trên Mobile cho Shipper.
   - Bổ sung mục **"Duyệt Nghỉ Giao Nhận"** vào nhóm ĐIỀU HÀNH & KINH DOANH cho Admin, Manager và Accountant.
 
+---
+
+### 2.12. Chủ Động Nhắc Cài Đặt App PWA & Native Mobile Back Handler (Plan 65)
+
+- **Chủ Động Nhắc Cài Đặt App PWA (`PwaInstallPromptComponent` & `IosInstallGuideModal`):**
+  - Nhúng trực tiếp tại [`RootLayout.tsx`](file:///root/Project_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/app/RootLayout.tsx).
+  - Tự động nhận diện thiết bị di động (Smartphones/Tablets) và trạng thái chưa cài app (`!display-mode: standalone`).
+  - Hiển thị banner nổi bật **"Cài Đặt App Nội Bộ Thanh Xuân"** sau 2.5 giây truy cập; hỗ trợ cài đặt 1 chạm qua native prompt Chromium/Android và modal hướng dẫn trực quan 2 bước (Share -> Thêm vào MH chính) cho iOS Safari. Tự động ghi nhớ trạng thái từ chối trong 7 ngày qua `localStorage`.
+- **Xử Lý Nút Back Mobile Cho Toàn Bộ Popup / Modal (Native App Back Button):**
+  - Tích hợp cơ chế History Popstate vào component dùng chung [`Dialog`](file:///root/Project_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/components/ui/dialog.tsx).
+  - Tự động bao phủ toàn bộ 25+ modal của hệ thống (chấm công selfie, giao nhận, chi phí xăng xe, đối soát, nghỉ phép, phân quyền...).
+  - Khi mở modal, tự động đẩy state ảo vào History Stack; khi bấm nút Back điện thoại hoặc vuốt cạnh mép màn hình, modal tự động đóng mượt mà và giữ nguyên màn hình làm việc phía sau, ngăn chặn việc văng ứng dụng hoặc nhảy lùi trang ngoài ý muốn.
+
+

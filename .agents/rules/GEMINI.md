@@ -17,33 +17,16 @@ Công ty Thanh Xuân vận hành hệ sinh thái dịch vụ đa ngành kết h�
 
 ---
 
-## 2. 6 Phân Hệ Vận Hành Nội Bộ Cốt Lõi (Internal Operations)
+## 2. 6 Phân Hệ Vận Hành Nội Bộ Cốt Lõi (Chi tiết tại `srs_sdd_fe_internal.md`)
 
-1. **Phiếu Giao Nhận Kép (`handover`):**
-   - Lập & sửa phiếu giao nhận đồ sạch (`PrepOrderModal`) xuất xưởng với mã chuẩn `GN-YYYYMMDD-NNN`.
-   - Quy trình giao nhận 2 chiều giữa xưởng và đối tác: Thủ kho soạn đồ sạch $\rightarrow$ Tài xế giao đồ sạch, nhận đồ bẩn $\rightarrow$ Quản lý đối tác ký số xác nhận $\rightarrow$ Về xưởng trạm rạch bao đếm lại (`RecountStationPage`).
-   - Thư viện ảnh phiếu (`HandoverSlipGalleryComponent`) lọc linh hoạt từ đầu tháng đến ngày mai, hỗ trợ kiểm nhận sớm ca đêm 21h-24h.
-2. **Công Thợ Theo Giờ (HourlyWork):**
-   - Chuyển đổi toàn diện từ khoán sản lượng cũ sang mô hình tính tiền công theo giờ: $\text{thành tiền} = (\text{phút} / 60) \times \text{đơn giá cơ sở} \times \text{hệ số khâu}$.
-   - 7 khâu công việc chuẩn: Rũ đồ (x1.2), Giặt & Sấy (x1.3), Gấp (x1.0), Đếm/Phân loại (x1.1), Là/Ủi (x1.2), Đóng gói (x1.0), Khác (x1.0).
-   - Ràng buộc ca làm việc đang mở (`OPEN` trong `AttendanceRecord`).
-   - Màn hình trạm thợ trực quan: [HourlyWorkStationPage.tsx](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/operations/piecework/HourlyWorkStationPage.tsx).
-   - Màn hình quản lý xét duyệt: [HourlyWorkReviewPage.tsx](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/management/piecework/HourlyWorkReviewPage.tsx).
-3. **Điểm Danh Chấm Công (`attendance`):**
-   - Thợ xưởng chấm công chụp ảnh camera selfie xác thực ca làm việc.
-   - Tự động check-in ca làm việc cho Tài xế xe tải khi ký xác nhận phiếu giao nhận đầu tiên trong ngày.
-   - Màn hình quản lý xem xét và chốt công thợ: `AttendanceReviewPage.tsx`.
-4. **Chi Phí Nhiên Liệu Xe Tải (`fuel`):**
-   - Tài xế gửi đề xuất đổ xăng kèm chụp ảnh đồng hồ công-tơ-mét (ODO) và hóa đơn: [ShipperFuelPage.tsx](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/operations/fuel/ShipperFuelPage.tsx).
-   - Quản lý và Kế toán thẩm định, phê duyệt và thanh toán chi phí: `FuelReviewPage.tsx`.
-5. **Quản Trị Đối Tác & Bảng Giá B2B (`partners`):**
-   - Quản lý hồ sơ đối tác doanh nghiệp, chuỗi nhà hàng, khách sạn lớn và mạng lưới chi nhánh.
-   - Danh mục bảng giá đồ giặt [item_catalogs](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/DATABASE_DICTIONARY.md) chuẩn hóa 8 trường cốt lõi (`priceToCustomer`, không còn rate thợ cũ).
-   - Màn hình quản trị: [PartnersManagementPage.tsx](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/features/management/partners/PartnersManagementPage.tsx).
-6. **Lương Chu Kỳ & Báo Cáo Tối Ưu VPS (`payroll` & `reports`):**
-   - Tự động tổng hợp bảng lương nhân viên từ giờ công thợ, ngày công điểm danh và phụ cấp.
-   - Bảo mật tài chính đa tầng: Interceptor bóc tách trường lương với user thiếu quyền `pay.view`.
-   - Streaming Excel/PDF tối ưu bộ nhớ VPS (< 512MB RAM), hàng đợi concurrency = 1.
+| Phân hệ | Nghiệp vụ cốt lõi | Màn hình / Component chính |
+| :--- | :--- | :--- |
+| **1. Giao nhận kép (`handover`)** | Mã `GN-YYYYMMDD-NNN`, quy trình 2 chiều xưởng - đối tác, ký số Canvas, trạm rạch bao đếm lại. | `PrepOrderModal.tsx`, `RecountStationPage.tsx`, `HandoverSlipGalleryComponent.tsx` |
+| **2. Công thợ giờ (`piecework`)** | Tiền công = $(\text{phút} / 60) \times \text{đơn giá} \times \text{hệ số khâu}$ (7 khâu chuẩn: x1.0 - x1.3), ca làm việc `OPEN`. | `HourlyWorkStationPage.tsx`, `HourlyWorkReviewPage.tsx` |
+| **3. Chấm công (`attendance`)** | Chụp selfie ca làm việc, tự động check-in tài xế xe tải khi ký phiếu đầu ngày. | `AttendanceStationPage.tsx`, `AttendanceReviewPage.tsx` |
+| **4. Xăng xe (`fuel`)** | Đề xuất đổ xăng kèm ảnh ODO + hóa đơn, Quản lý/Kế toán duyệt và chi trả. | `ShipperFuelPage.tsx`, `FuelReviewPage.tsx` |
+| **5. Đối tác B2B (`partners`)** | Quản lý đối tác/chi nhánh, bảng giá đồ giặt `priceToCustomer` chuẩn 8 trường. | `PartnersManagementPage.tsx` |
+| **6. Lương & Báo cáo (`payroll`)** | Tổng hợp lương chu kỳ từ giờ công + ngày công, bảo mật `pay.view`, streaming Excel/PDF VPS. | `PayrollReviewPage.tsx`, `ReportsPage.tsx` |
 
 ---
 
