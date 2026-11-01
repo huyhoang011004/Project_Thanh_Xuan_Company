@@ -112,8 +112,11 @@ export function getErrorMessage(error: unknown): string {
       }
       return String(data.message);
     }
+    if (data?.error && typeof data.error === 'string') {
+      return data.error;
+    }
     if (error.response?.status === 401) {
-      return 'Tài khoản chưa đăng nhập hoặc phiên làm việc đã hết hạn.';
+      return 'Tài khoản hoặc mật khẩu không chính xác.';
     }
     if (error.response?.status === 403) {
       return 'Bạn không có quyền thực hiện thao tác này.';

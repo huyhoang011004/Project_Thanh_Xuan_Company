@@ -3,10 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useAuth } from './useAuth';
 import { useTenant } from '@/app/TenantContext';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Lock, User, AlertCircle, ArrowRightLeft } from 'lucide-react';
+import { getErrorMessage } from '@/lib/api-client';
+import {
+  Eye,
+  EyeOff,
+  Lock,
+  User,
+  AlertCircle,
+  Loader2,
+  ShieldCheck,
+  ArrowRightLeft,
+} from 'lucide-react';
 
 export function LoginPage() {
   const { login } = useAuth();
@@ -15,6 +22,7 @@ export function LoginPage() {
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -23,8 +31,9 @@ export function LoginPage() {
     setError(null);
 
     if (!username.trim() || !password.trim()) {
-      setError('Vui lòng điền đầy đủ tên đăng nhập và mật khẩu.');
-      toast.error('Vui lòng điền đầy đủ tên đăng nhập và mật khẩu.');
+      const msg = 'Vui lòng điền đầy đủ tên đăng nhập và mật khẩu.';
+      setError(msg);
+      toast.error(msg);
       return;
     }
 
@@ -34,7 +43,7 @@ export function LoginPage() {
       toast.success('Đăng nhập thành công!');
       navigate('/dashboard', { replace: true });
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Đăng nhập không thành công.';
+      const msg = getErrorMessage(err);
       setError(msg);
       toast.error(msg);
     } finally {
@@ -46,13 +55,25 @@ export function LoginPage() {
     switchTenant(tenant === 'laundry' ? 'moving' : 'laundry');
   };
 
+  const isLaundry = tenant === 'laundry';
+
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-slate-50 p-4">
-      <div className="w-full max-w-md space-y-6">
-        {/* Switch Tenant Banner */}
-        <div className="flex items-center justify-between rounded-xl bg-white p-3 shadow-xs border border-slate-200">
+    <main className="relative min-h-screen w-full flex items-center justify-center isolate p-4 bg-slate-50 overflow-hidden">
+      {/* Light Mode Canvas Background from original Laundry Admin */}
+      <img
+        src="https://tailkits.com/ui/iframe/assets/img/bg-5.png"
+        alt="Background Light"
+        className="absolute inset-0 -z-10 h-full w-full object-cover select-none pointer-events-none"
+      />
+
+      {/* Dark Mode Radial Gradient Fallback */}
+      <div className="absolute inset-0 -z-10 h-full w-full hidden dark:block [background:radial-gradient(125%_125%_at_50%_10%,#000_40%,#63e_100%)]" />
+
+      <div className="w-full max-w-md space-y-4">
+        {/* Switch Tenant Pill */}
+        <div className="flex items-center justify-between rounded-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-md px-4 py-2.5 shadow-sm border border-white/60 dark:border-slate-800">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Hệ Thống:</span>
+            <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Hệ Thống:</span>
             <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${config.bgLightClass}`}>
               {config.brandName}
             </span>
@@ -60,88 +81,112 @@ export function LoginPage() {
           <button
             type="button"
             onClick={handleToggleTenant}
-            className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-white/90 hover:bg-white px-3 py-1 rounded-xl shadow-xs border border-slate-200/80 transition-all cursor-pointer"
           >
             <ArrowRightLeft className="h-3.5 w-3.5" />
-            Đổi sang {tenant === 'laundry' ? 'Chuyển Nhà' : 'Giặt Là'}
+            Đổi sang {isLaundry ? 'Chuyển Nhà' : 'Giặt Là'}
           </button>
         </div>
 
-        <Card className="border-slate-200/80 shadow-md">
-          <CardHeader className="space-y-2 text-center pb-4">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-              <Lock className="h-7 w-7" />
+        {/* Glassmorphism Card */}
+        <div className="w-full bg-white/90 dark:bg-black/40 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-gray-100 dark:border-slate-800">
+          <div className="text-center mb-8">
+            <div
+              className={`mx-auto w-14 h-14 ${
+                isLaundry ? 'bg-blue-100 text-blue-600' : 'bg-amber-100 text-amber-600'
+              } rounded-2xl flex items-center justify-center mb-4 shadow-inner`}
+            >
+              <ShieldCheck className="w-8 h-8" />
             </div>
-            <CardTitle className="text-2xl font-bold tracking-tight text-slate-900">
-              Đăng Nhập Quản Trị
-            </CardTitle>
-            <CardDescription className="text-sm text-slate-500">
-              {config.portalTitle}
-            </CardDescription>
-          </CardHeader>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">
+              Quản Trị Viên
+            </h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              Đăng nhập để vào hệ thống {config.brandName}
+            </p>
+          </div>
 
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {error && (
-                <div className="flex items-start gap-2.5 rounded-lg bg-rose-50 p-3 text-sm text-rose-700 border border-rose-200">
-                  <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
-                  <span>{error}</span>
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm flex items-start space-x-3">
+              <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+              <span className="leading-relaxed">{error}</span>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1.5">
+                Tài khoản Admin
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+                  <User className="w-5 h-5" />
                 </div>
+                <input
+                  type="text"
+                  autoComplete="username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="w-full pl-11 pr-4 py-2.5 bg-gray-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700 rounded-xl focus:bg-white dark:bg-slate-900/50 backdrop-blur-md focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900 dark:text-gray-100 text-sm"
+                  placeholder="Nhập tên đăng nhập"
+                  disabled={isSubmitting}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1.5">
+                Mật khẩu
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+                  <Lock className="w-5 h-5" />
+                </div>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full pl-11 pr-11 py-2.5 bg-gray-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700 rounded-xl focus:bg-white dark:bg-slate-900/50 backdrop-blur-md focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900 dark:text-gray-100 text-sm"
+                  placeholder="••••••••"
+                  disabled={isSubmitting}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  tabIndex={-1}
+                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-gray-600 dark:text-gray-300 focus:outline-none transition-colors cursor-pointer"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5 text-blue-600" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className={`w-full mt-2 text-white font-semibold py-2.5 px-4 rounded-xl shadow-md hover:shadow-lg transition-all transform active:scale-[0.99] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center space-x-2 cursor-pointer ${
+                isLaundry
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700'
+                  : 'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700'
+              }`}
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span>Đang kết nối...</span>
+                </>
+              ) : (
+                <span>Đăng Nhập</span>
               )}
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-700" htmlFor="username">
-                  Tên đăng nhập
-                </label>
-                <div className="relative">
-                  <User className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-                  <Input
-                    id="username"
-                    type="text"
-                    autoComplete="username"
-                    placeholder="Nhập username quản trị"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    className="pl-9"
-                    disabled={isSubmitting}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-700" htmlFor="password">
-                  Mật khẩu
-                </label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-                  <Input
-                    id="password"
-                    type="password"
-                    autoComplete="current-password"
-                    placeholder="Nhập mật khẩu"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="pl-9"
-                    disabled={isSubmitting}
-                  />
-                </div>
-              </div>
-
-              <Button
-                type="submit"
-                className="w-full font-semibold shadow-xs"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? 'Đang xác thực...' : 'Đăng Nhập'}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+            </button>
+          </form>
+        </div>
 
         <p className="text-center text-xs text-slate-400">
           Hệ sinh thái dịch vụ Thanh Xuân Company &bull; Bảo mật đa lớp
         </p>
       </div>
-    </div>
+    </main>
   );
 }
