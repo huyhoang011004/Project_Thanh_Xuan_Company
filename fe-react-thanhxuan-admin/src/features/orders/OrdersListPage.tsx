@@ -18,8 +18,41 @@ export function OrdersListPage() {
     queryKey: ['orders', tenant, search],
     queryFn: async () => {
       try {
-        const endpoint = tenant === 'laundry' ? '/orders' : '/moving/orders';
-        const res = await apiClient.get<OrderItem[] | { data: OrderItem[] }>(endpoint, {
+        if (tenant === 'moving') {
+          const res = await apiClient.get<{
+            items?: unknown[];
+            data?: unknown[];
+          } | unknown[]>('/v1/moving/quotes', {
+            params: { limit: '50' },
+          });
+          const raw = res.data;
+          const list = Array.isArray(raw)
+            ? raw
+            : (raw as { items?: unknown[]; data?: unknown[] })?.items ||
+              (raw as { data?: unknown[] })?.data ||
+              [];
+
+          return (list as Record<string, unknown>[]).map((q) => {
+            const pickup = q.pickup as { address?: string } | undefined;
+            const dest = q.destination as { address?: string } | undefined;
+            const id = String(q._id || '');
+            return {
+              _id: id,
+              orderCode: (q.code as string) || `BG-${id.slice(-6).toUpperCase()}`,
+              customerName: (q.customerName as string) || 'Khách vãng lai',
+              phone: (q.phoneNumber as string) || (q.phone as string) || 'Chưa có SĐT',
+              truckType: (q.serviceType as string) || 'Chuyển nhà trọn gói',
+              pickupAddress: pickup?.address || '',
+              deliveryAddress: dest?.address || '',
+              movingDate: (q.movingDate as string) || undefined,
+              totalAmount: Number(q.quotedPrice || q.estimatedPrice || 0),
+              status: (q.status as string) || 'PENDING',
+              createdAt: (q.createdAt as string) || new Date().toISOString(),
+            } as OrderItem;
+          });
+        }
+
+        const res = await apiClient.get<OrderItem[] | { data: OrderItem[] }>('/orders', {
           params: { search: search || undefined },
         });
         const d = res.data;

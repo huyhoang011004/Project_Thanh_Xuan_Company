@@ -2,6 +2,7 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import {
   getStoredToken,
   getStoredRefreshToken,
+  getStoredUser,
   saveAuthTokens,
   clearAuthSession,
 } from './auth-storage';
@@ -57,7 +58,10 @@ apiClient.interceptors.response.use(
       }
 
       const refreshToken = getStoredRefreshToken();
-      if (!refreshToken) {
+      const currentUser = getStoredUser();
+      const userId = currentUser?.id;
+
+      if (!refreshToken || !userId) {
         clearAuthSession();
         if (window.location.pathname !== '/login') {
           window.location.href = '/login';
@@ -69,16 +73,19 @@ apiClient.interceptors.response.use(
       try {
         const refreshResponse = await axios.post<{
           success?: boolean;
-          data?: { accessToken: string; refreshToken?: string };
+          data?: { access_token?: string; refresh_token?: string; accessToken?: string; refreshToken?: string };
+          access_token?: string;
+          refresh_token?: string;
           accessToken?: string;
           refreshToken?: string;
-        }>(`${API_BASE}/api/admin/auth/refresh`, {
+        }>(`${API_BASE}/api/auth/refresh`, {
+          userId,
           refreshToken,
         });
 
         const resData = refreshResponse.data?.data || refreshResponse.data;
-        const newAccessToken = resData?.accessToken;
-        const newRefreshToken = resData?.refreshToken || refreshToken;
+        const newAccessToken = resData?.access_token || resData?.accessToken;
+        const newRefreshToken = resData?.refresh_token || resData?.refreshToken || refreshToken;
 
         if (newAccessToken) {
           saveAuthTokens(newAccessToken, newRefreshToken);

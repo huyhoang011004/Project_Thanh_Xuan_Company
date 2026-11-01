@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { usersService } from './users.service';
 import { UserAccount, UserAccountPayload } from './users.types';
 import { UserModal } from './UserModal';
@@ -7,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ShieldCheck, Plus, Edit2, Trash2, RefreshCw } from 'lucide-react';
+import { getErrorMessage } from '@/lib/api-client';
 
 export function UsersListPage() {
   const queryClient = useQueryClient();
@@ -20,18 +22,36 @@ export function UsersListPage() {
 
   const createMutation = useMutation({
     mutationFn: (payload: UserAccountPayload) => usersService.create(payload),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin_users'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin_users'] });
+      toast.success('Tạo tài khoản quản trị thành công!');
+    },
+    onError: (err: unknown) => {
+      toast.error(`Lỗi tạo tài khoản: ${getErrorMessage(err)}`);
+    },
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, payload }: { id: string; payload: Partial<UserAccountPayload> }) =>
       usersService.update(id, payload),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin_users'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin_users'] });
+      toast.success('Cập nhật tài khoản thành công!');
+    },
+    onError: (err: unknown) => {
+      toast.error(`Lỗi cập nhật tài khoản: ${getErrorMessage(err)}`);
+    },
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => usersService.delete(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin_users'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin_users'] });
+      toast.success('Đã xóa tài khoản thành công!');
+    },
+    onError: (err: unknown) => {
+      toast.error(`Lỗi xóa tài khoản: ${getErrorMessage(err)}`);
+    },
   });
 
   const handleOpenCreate = () => {

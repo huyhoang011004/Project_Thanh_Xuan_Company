@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { settingsService } from './settings.service';
 import { WebsiteSettings } from './settings.types';
 import { useTenant } from '@/app/TenantContext';
@@ -8,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Settings, Save, RefreshCw } from 'lucide-react';
+import { getErrorMessage } from '@/lib/api-client';
 
 export function GeneralSettingsPage() {
   const { tenant, config } = useTenant();
@@ -51,7 +53,11 @@ export function GeneralSettingsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['settings', tenant] });
       setIsSavedSuccess(true);
+      toast.success('Lưu cài đặt website thành công!');
       setTimeout(() => setIsSavedSuccess(false), 3000);
+    },
+    onError: (err: unknown) => {
+      toast.error(`Lỗi lưu cài đặt: ${getErrorMessage(err)}`);
     },
   });
 

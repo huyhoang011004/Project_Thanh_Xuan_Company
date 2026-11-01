@@ -1,7 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { useTenant } from '@/app/TenantContext';
 import { articlesService } from './articles.service';
 import { ArticlePayload } from './articles.types';
+import { getErrorMessage } from '@/lib/api-client';
 
 export function useArticles(search?: string, categoryId?: string) {
   const queryClient = useQueryClient();
@@ -18,6 +20,10 @@ export function useArticles(search?: string, categoryId?: string) {
     mutationFn: (payload: ArticlePayload) => articlesService.create(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['articles', tenant] });
+      toast.success('Tạo bài viết thành công!');
+    },
+    onError: (err: unknown) => {
+      toast.error(`Lỗi tạo bài viết: ${getErrorMessage(err)}`);
     },
   });
 
@@ -26,6 +32,10 @@ export function useArticles(search?: string, categoryId?: string) {
       articlesService.update(id, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['articles', tenant] });
+      toast.success('Cập nhật bài viết thành công!');
+    },
+    onError: (err: unknown) => {
+      toast.error(`Lỗi cập nhật: ${getErrorMessage(err)}`);
     },
   });
 
@@ -33,6 +43,10 @@ export function useArticles(search?: string, categoryId?: string) {
     mutationFn: (id: string) => articlesService.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['articles', tenant] });
+      toast.success('Đã xóa bài viết thành công!');
+    },
+    onError: (err: unknown) => {
+      toast.error(`Lỗi xóa bài viết: ${getErrorMessage(err)}`);
     },
   });
 

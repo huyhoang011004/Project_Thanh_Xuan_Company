@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import { useAuth } from './useAuth';
 import { useTenant } from '@/app/TenantContext';
 import { Button } from '@/components/ui/button';
@@ -23,15 +24,19 @@ export function LoginPage() {
 
     if (!username.trim() || !password.trim()) {
       setError('Vui lòng điền đầy đủ tên đăng nhập và mật khẩu.');
+      toast.error('Vui lòng điền đầy đủ tên đăng nhập và mật khẩu.');
       return;
     }
 
     try {
       setIsSubmitting(true);
       await login(username.trim(), password);
+      toast.success('Đăng nhập thành công!');
       navigate('/dashboard', { replace: true });
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Đăng nhập không thành công.');
+      const msg = err instanceof Error ? err.message : 'Đăng nhập không thành công.';
+      setError(msg);
+      toast.error(msg);
     } finally {
       setIsSubmitting(false);
     }

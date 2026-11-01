@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { toast } from 'sonner';
 import { articlesService } from './articles.service';
 import { useCategories } from '@/features/categories/useCategories';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Save, UploadCloud } from 'lucide-react';
+import { getErrorMessage } from '@/lib/api-client';
 
 export function ArticleEditorPage() {
   const navigate = useNavigate();
@@ -51,22 +53,12 @@ export function ArticleEditorPage() {
     }
   }, [id, isEditing]);
 
-  const generateSlug = (val: string) => {
-    return val
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/đ/g, 'd')
-      .replace(/[^a-z0-9\s-]/g, '')
-      .trim()
-      .replace(/\s+/g, '-');
-  };
+  const generateSlug = (val: string) =>
+    val.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-');
 
   const handleTitleChange = (val: string) => {
     setTitle(val);
-    if (!isEditing) {
-      setSlug(generateSlug(val));
-    }
+    if (!isEditing) setSlug(generateSlug(val));
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -74,9 +66,12 @@ export function ArticleEditorPage() {
     if (!file) return;
     try {
       const res = await articlesService.uploadImage(file);
-      if (res.url) setThumbnail(res.url);
-    } catch {
-      alert('Không thể tải ảnh lên. Vui lòng thử lại hoặc điền trực tiếp URL.');
+      if (res.url) {
+        setThumbnail(res.url);
+        toast.success('Tải ảnh đại diện thành công!');
+      }
+    } catch (err: unknown) {
+      toast.error(`Không thể tải ảnh: ${getErrorMessage(err)}`);
     }
   };
 
@@ -84,6 +79,7 @@ export function ArticleEditorPage() {
     e.preventDefault();
     if (!title.trim() || !content.trim()) {
       setError('Vui lòng điền đầy đủ tiêu đề và nội dung bài viết.');
+      toast.error('Vui lòng điền đầy đủ tiêu đề và nội dung bài viết.');
       return;
     }
 
@@ -106,12 +102,16 @@ export function ArticleEditorPage() {
 
       if (isEditing && id) {
         await articlesService.update(id, payload);
+        toast.success('Cập nhật bài viết thành công!');
       } else {
         await articlesService.create(payload);
+        toast.success('Tạo bài viết mới thành công!');
       }
       navigate('/articles');
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Lỗi khi lưu bài viết.');
+      const msg = getErrorMessage(err);
+      setError(msg);
+      toast.error(msg);
     } finally {
       setIsSaving(false);
     }
