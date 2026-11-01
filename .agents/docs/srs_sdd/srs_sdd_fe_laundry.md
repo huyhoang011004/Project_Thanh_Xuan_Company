@@ -63,9 +63,10 @@ Phân hệ đảm nhiệm 2 vai trò cốt lõi trong mảng dịch vụ giặt 
 
 - **Tối ưu hóa SEO 100%:**
   - 100% các trang `(public)` sử dụng **React Server Components (RSC)** để HTML được render hoàn toàn tại server (SSR/SSG), tối đa hóa điểm Google Core Web Vitals.
-  - Cung cấp Metadata động (`generateMetadata`) cho từng bài viết và dịch vụ (Title, Description, Canonical URL, OpenGraph, Twitter Card).
-  - Tự động phát sinh `sitemap.xml` qua `src/app/sitemap.ts` và `robots.txt` qua `src/app/robots.ts`.
-  - Nhúng dữ liệu có cấu trúc Schema.org JSON-LD (`LocalBusiness`, `Organization`, `Article`, `Service`).
+  - Cung cấp Metadata động (`generateMetadata`) cho từng bài viết và dịch vụ (Title, Description, Canonical URL, OpenGraph, Twitter Card) chuẩn hóa từ khóa hạt nhân có search volume cao (`dịch vụ giặt là`, `giặt sấy công nghiệp`, `dịch vụ vệ sinh công nghiệp hà nội`, `vệ sinh văn phòng`).
+  - Tự động phát sinh `sitemap.xml` qua `src/app/sitemap.ts` với priority cao (0.85 - 0.9) cho các trang dịch vụ và `robots.txt` qua `src/app/robots.ts`.
+  - Nhúng dữ liệu có cấu trúc Schema.org JSON-LD đa thực thể (`DryCleaningOrLaundry`, `LaundryService`, `CleaningService`, `FAQPage` Rich Snippets và `BreadcrumbList`).
+  - Vận hành mô hình cụm chủ đề (Topic Cluster) liên kết nội bộ theo ngữ cảnh từ các bài viết cẩm nang (`/tin-tuc/*`) trỏ sức mạnh về 2 trang trụ cột dịch vụ (`/` & `/vesinh`).
 - **Tối ưu hình ảnh:** Dùng `next/image` kết hợp Cloudinary Loader hoặc Next.js Image Optimization, định dạng WebP/AVIF, lazy loading ảnh ngoài màn hình.
 
 ---
@@ -182,3 +183,65 @@ sequenceDiagram
    - Thư mục `components/`: Chứa các subcomponent hiển thị `[Tên]Component.tsx` kèm `components/index.ts`.
    - Shared components: Phân tách rõ ràng `components/layout/` (`admin/`, `public/`), `components/common/`, `components/ui/`.
    - Giới hạn kích thước file 250 - 300 dòng; bóc tách modal và subcomponents kịp thời, không dồn hàng nghìn dòng vào 1 file.
+
+---
+
+### 2.4. Kiến Trúc PWA (Progressive Web App) & Soạn Thảo Visual Phong Cách Canva
+
+1. **Chuẩn PWA Native (Next.js 16 + React 19):**
+   - **Web App Manifest (`src/app/manifest.ts`):** Khai báo Metadata Route tự động sinh `/manifest.webmanifest`. Đầy đủ cấu hình `standalone`, `theme_color: #1e40af`, bộ icons chuẩn PWA (192, 512, maskable, apple-touch-icon) và App Shortcuts điều hướng nhanh tới Bảng giá Giặt Sấy (`/dich-vu`), Dịch vụ Vệ Sinh (`/vesinh`), và Liên hệ Báo giá (`/lien-he`).
+   - **Vanilla Service Worker (`public/sw.js`):** Xử lý vòng đời caching:
+     - **Network-First cho Navigation HTML:** Đảm bảo khách hàng luôn xem được thông tin giá và bài viết cập nhật tức thì; tự động fallback về trang ngoại tuyến [`/offline`](file:///root/Project_Thanh_Xuan_Company/fe-nextjs-thanhxuan-laundry/src/app/offline/page.tsx) khi mất kết nối mạng.
+     - **Stale-While-Revalidate / Cache-First:** Caching static assets (icons, images, fonts, css, js).
+     - **Dynamic API Bypass:** Tuyệt đối không cache `/api/*` và CMS admin để đảm bảo an toàn dữ liệu.
+   - **PWA Prompt Engine:** Component lá [`PwaRegisterComponent.tsx`](file:///root/Project_Thanh_Xuan_Company/fe-nextjs-thanhxuan-laundry/src/components/pwa/PwaRegisterComponent.tsx) đăng ký Service Worker và [`PwaInstallPromptComponent.tsx`](file:///root/Project_Thanh_Xuan_Company/fe-nextjs-thanhxuan-laundry/src/components/pwa/PwaInstallPromptComponent.tsx) hiển thị banner cài đặt thông minh cho Chromium và hướng dẫn thêm vào màn hình chính cho iOS Safari (tự động ẩn khi ở chế độ Standalone).
+2. **Tối Ưu Hóa Giao Diện Mobile (Mobile Polish):**
+   - **iOS Safe Area Inset:** Utility classes `@supports (padding-bottom: env(safe-area-inset-bottom))` bảo vệ thanh điều hướng đáy [`PublicMobileBottomNavComponent`](file:///root/Project_Thanh_Xuan_Company/fe-nextjs-thanhxuan-laundry/src/components/layout/public/header/PublicMobileBottomNavComponent.tsx) khỏi bị che bởi Home Bar iPhone.
+   - **Chống Auto-Zoom:** Chuẩn hóa `text-base md:text-sm` trên `<Input />` để ngăn iOS Safari phóng to màn hình khi nhập liệu.
+   - **Đệm Đáy:** Bổ sung `pb-16 md:pb-0` cho `<main>` tránh nội dung chân trang bị thanh Bottom Nav đè lên.
+   - **Vị Trí Speed Dial:** Điều chỉnh vị trí nổi [`DraggableFloatingContactComponent`](file:///root/Project_Thanh_Xuan_Company/fe-nextjs-thanhxuan-laundry/src/components/layout/public/DraggableFloatingContactComponent.tsx) thành `bottom-20 md:bottom-8` gọn gàng.
+3. **Trình Soạn Thảo Rich Text Phong Cách Canva Cho Các Trang SEO:**
+   - **Canva Font Family Selector:** Bộ font Google Fonts tiếng Việt hiện đại (`Inter`, `Be Vietnam Pro`, `Montserrat`, `Roboto`, `Plus Jakarta Sans`, `Playfair Display`, `Merriweather`, `Lora`, `Oswald`) có Visual Preview trực quan trong dropdown.
+   - **Canva Font Size Presets:** Danh sách chọn nhanh từ 12px đến 48px Hero.
+   - **Canva Curated Color Palette & Highlight:** Popover bảng màu chọn sẵn chuẩn thương hiệu và pastel highlight, kèm HEX color picker tùy biến.
+   - **Line & Letter Spacing:** Tùy biến khoảng cách dòng (1.2 -> 2.0) và độ giãn chữ (-0.02em -> 0.1em).
+   - **Canva Callout Cards & CTA Builder:** Nút chèn khối điểm nhấn SEO (thông tin, lưu ý, cam kết) và nút kêu gọi hành động CTA (gọi hotline, nhận báo giá) trực quan vào nội dung bài viết.
+
+---
+
+### 2.5. Tên Miền Phụ Quản Trị (quantri.thanhxuanlaundry.com) & Native Mobile Back Handler
+
+1. **Subdomain quantri.thanhxuanlaundry.com:**
+   - Ánh xạ trực tiếp vào phân hệ Quản trị CMS (`/admin`), tách biệt hoàn toàn môi trường PWA của Ban Quản trị khỏi Web Khách Hàng.
+   - **Next.js Middleware Routing:** Tự động nhận diện hostname `quantri.`:
+     - Truy cập gốc `/` rewrite nội bộ sang `/admin` (tự động điều hướng `/login` hoặc `/dashboard` theo trạng thái đăng nhập).
+     - Truy cập các đường dẫn chức năng CMS (`/dashboard`, `/posts`, `/customers`, `/login`...) rewrite nội bộ sang `/admin/...`, duy trì URL sạch đẹp trên thanh địa chỉ.
+     - Yêu cầu Web App Manifest `/manifest.webmanifest` được rewrite về Route Handler riêng `/api/manifest/admin`.
+   - **Quản Trị Web App Manifest (`/api/manifest/admin`):** Khai báo tên app chính thức **"Quản trị Thanh Xuân"** (short_name: **"Quản trị Thanh Xuân"**), `start_url: "/"`, `display: "standalone"`, cho phép cài đặt app độc lập lên điện thoại.
+   - **Chủ Động Nhắc Cài Đặt PWA (`PwaInstallPromptComponent`):** Phát hiện thiết bị di động chưa cài app, tự động hiển thị banner "Cài Đặt App Quản trị Thanh Xuân" sau 2.5s với nút "Cài đặt ngay" (hỗ trợ native prompt Chromium và modal hướng dẫn Safari iOS qua `IosInstallGuideModal`).
+2. **Xử Lý Nút Back Mobile Cho Popup / Modal (Native App Back Button):**
+   - Tích hợp bộ xử lý History Popstate vào component cốt lõi `Dialog` ([dialog.tsx](file:///root/Project_Thanh_Xuan_Company/fe-nextjs-thanhxuan-laundry/src/components/ui/dialog.tsx)): Khi mở bất kỳ Dialog/Modal nào, đẩy state ảo vào `history.pushState({ modalOpen: true }, '')`.
+   - Khi người dùng bấm nút Back vật lý hoặc vuốt cạnh mép màn hình điện thoại, sự kiện `popstate` kích hoạt đóng modal mà không làm thoát trang hay nhảy về màn hình chính.
+   - Khi đóng modal bằng nút X hoặc backdrop, tự động rút lui state ảo qua `history.back()`, giữ history stack luôn đồng bộ.
+
+---
+
+### 2.6. Tối Ưu Hóa Core Web Vitals (95-100), Triệt Tiêu Render-Blocking & Đột Phá SEO Local (Plan 67)
+
+1. **Triệt Tiêu Render-Blocking & Tối Ưu Font (`next/font/google`):**
+   - Loại bỏ hoàn toàn `@import` 10 fonts khỏi `globals.css` để xóa sạch cảnh báo CSS optimization và triệt tiêu render-blocking resource.
+   - Sử dụng `Be_Vietnam_Pro` qua `next/font/google` tự động self-host nhúng thẳng `@font-face` vào HTML đầu trang, loại bỏ 100% round-trip latency tới máy chủ Google Fonts bên ngoài, đưa CLS = 0 và FCP < 0.8s.
+2. **Tinh Giản PWA Trên Web Khách Hàng (Zero Interstitial):**
+   - Gỡ bỏ hoàn toàn popup nhắc cài app PWA (`PwaInstallPromptComponent`) và Service Worker registration khỏi web khách hàng để bảo vệ trải nghiệm người dùng B2B, loại bỏ nguy cơ bị Google xử phạt Mobile Interstitials.
+   - Giữ lại Web App Manifest (`manifest.webmanifest`) và icons W3C để bot tìm kiếm Google hiển thị Favicon/Logo thương hiệu uy tín trên kết quả tìm kiếm (Google SERP).
+3. **Bộ Nhớ Đệm Tĩnh Gia Số ISR (Incremental Static Regeneration):**
+   - Thiết lập `export const revalidate = 3600;` cho toàn bộ các trang công khai: `/`, `/vesinh`, `/dich-vu`, `/dich-vu/[...slug]`, `/tin-tuc`, `/tin-tuc/[...slug]`.
+   - Trang web phản hồi tức thì từ bộ nhớ đệm RAM với TTFB < 50ms, giúp điểm Google PageSpeed đạt 95 - 100 điểm.
+4. **Đột Phá SEO Local Schema.org & FAQ Rich Snippets:**
+   - Nâng cấp Schema JSON-LD đa thực thể `["DryCleaningOrLaundry", "LocalBusiness"]` tại `src/app/layout.tsx` với địa bàn phục vụ 12 quận huyện nội thành Hà Nội, Hotline 24/7, chính sách thanh toán và bảng dịch vụ `hasOfferCatalog`.
+   - Nhúng `FAQPage` Schema vào trang chủ và trang dịch vụ vệ sinh để hiển thị Rich Snippets câu hỏi thường gặp dạng accordion nổi bật trên Google Search di động.
+5. **Tối Ưu Chuyển Đổi (CRO) Mobile Contact Bar:**
+   - Chuẩn hóa fallback Hotline `0769 270 676` và link Zalo OA trong `DraggableFloatingContactComponent.tsx`, đảm bảo khách hàng liên hệ 1 chạm tức thì.
+
+
+

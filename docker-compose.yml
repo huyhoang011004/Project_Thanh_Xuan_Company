@@ -117,6 +117,27 @@ services:
     networks:
       - laundry_network
 
+  # ==========================================
+  # Frontend Cổng Quản Trị Đa Thương Hiệu: React SPA (quantri.thanhxuanlaundry.com & quantri.chuyennhatietkiem.vn)
+  # ==========================================
+  admin_frontend:
+    image: ghcr.io/${GITHUB_REPOSITORY_OWNER:-huyhoang011004}/thanhxuan-admin-frontend:latest
+    # build:
+    #   context: ./fe-react-thanhxuan-admin
+    #   dockerfile: Dockerfile
+    container_name: admin_frontend
+    restart: always
+    mem_limit: 512m
+    ports:
+      - "${PORT_FE_ADMIN:-3003}:3003"
+    environment:
+      - PORT=3003
+      - VITE_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:5001}
+    depends_on:
+      - backend
+    networks:
+      - laundry_network
+
 # ==========================================
 # Volumes & Networks
 # ==========================================

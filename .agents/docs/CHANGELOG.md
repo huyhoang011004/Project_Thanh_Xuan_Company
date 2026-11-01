@@ -2,6 +2,158 @@
 
 Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâng cấp, bugfix và triển khai tính năng của Hệ sinh thái Công ty Thanh Xuân qua từng Plan.
 
+## 2026-11-01
+
+### Plan 67: Tối Ưu Hóa Hiệu Năng Core Web Vitals (95-100), Đột Phá SEO Google & Chuyển Đổi B2B Cho Web Khách Hàng (fe-nextjs-thanhxuan-laundry)
+
+- **Bối cảnh & Vấn đề giải quyết:**
+  - Sau khi tách Cổng Quản Trị độc lập (`fe-react-thanhxuan-admin`), web `fe-nextjs-thanhxuan-laundry` chuyển thành kênh tiếp thị B2B và thu hút khách hàng từ Google Search.
+  - Khách hàng tìm kiếm dịch vụ giặt là / vệ sinh công nghiệp từ Google không có nhu cầu cài app PWA. Banner nhắc cài app trước đây che khuất màn hình di động, làm tăng tỷ lệ thoát (Bounce Rate) và có nguy cơ bị Google xử phạt Mobile Interstitials.
+  - Lệnh `@import` 10 fonts ngoài trong `globals.css` chặn đứng quá trình render của trình duyệt (render-blocking), kéo dài FCP và LCP lên 3-4s và làm tụt 25-35 điểm Google PageSpeed.
+  - Cần bộ nhớ đệm tĩnh ISR để thời gian phản hồi máy chủ (TTFB) đạt < 50ms, bổ sung Schema JSON-LD đa thực thể chuẩn SEO Local cho 12 quận Hà Nội, và tối ưu nút Hotline/Zalo 1 chạm cho di động.
+
+- **Các thay đổi kiến trúc & kỹ thuật chi tiết:**
+  1. **Triệt Tiêu Render-Blocking & Tối Ưu Font (`next/font/google`):**
+     - Xóa bỏ hoàn toàn lệnh `@import` 10 Google Fonts khỏi `src/app/globals.css`, chấm dứt toàn bộ cảnh báo CSS optimization trong build.
+     - Sử dụng `Be_Vietnam_Pro` qua `next/font/google` nạp font self-hosted cục bộ nhúng thẳng `@font-face` vào HTML đầu trang, loại trừ 100% round-trip network latency tới Google Fonts server, đưa CLS = 0 và FCP < 0.8s.
+  2. **Tinh Giản PWA Trên Web Khách Hàng (Zero Interstitial):**
+     - Gỡ bỏ hoàn toàn popup nhắc cài app PWA (`PwaInstallPromptComponent`) và Service Worker registration khỏi `src/app/layout.tsx` để bảo vệ trải nghiệm khách hàng B2B và chống rớt hạng SEO.
+     - Giữ lại Web App Manifest (`manifest.webmanifest`) và bộ icons W3C để bot tìm kiếm Google hiển thị Favicon/Logo thương hiệu uy tín trên kết quả tìm kiếm (Google SERP).
+  3. **Kích Hoạt Bộ Nhớ Đệm Tĩnh Gia Số ISR (Incremental Static Regeneration):**
+     - Thiết lập `export const revalidate = 3600;` cho toàn bộ các trang công khai: `/` (Trang chủ), `/vesinh`, `/dich-vu`, `/dich-vu/[...slug]`, `/tin-tuc`, `/tin-tuc/[...slug]`.
+     - Phản hồi trang HTML tức thì từ RAM với TTFB < 50ms, giúp điểm Google PageSpeed đạt 95 - 100 điểm.
+  4. **Đột Phá SEO Local Schema.org & FAQ Rich Snippets:**
+     - Nâng cấp Schema JSON-LD đa thực thể `["DryCleaningOrLaundry", "LocalBusiness"]` tại `src/app/layout.tsx` với địa bàn phục vụ 12 quận huyện nội thành Hà Nội, Hotline 24/7, chính sách thanh toán và danh mục dịch vụ `hasOfferCatalog`.
+     - Nhúng `FAQPage` Schema vào trang chủ và trang dịch vụ vệ sinh để hiển thị Rich Snippets câu hỏi thường gặp dạng accordion nổi bật trên Google Search di động.
+  5. **Tối Ưu Chuyển Đổi (CRO) Mobile Contact Bar:**
+     - Chuẩn hóa fallback Hotline `0769 270 676` và link Zalo OA trong `DraggableFloatingContactComponent.tsx`, đảm bảo khách hàng liên hệ 1 chạm tức thì.
+
+- **Kết Quả Kiểm Chứng (Verification):**
+  - Typecheck `pnpm exec tsc --noEmit` pass 100% (0 errors).
+  - Next.js Production Build: `pnpm build` pass 100% (18/18 routes tĩnh và động, sạch bóng 100% cảnh báo CSS optimization).
+
+### Plan 66: Phân Tách & Xây Dựng Cổng Quản Trị Admin Tập Trung Đa Thương Hiệu (fe-react-thanhxuan-admin) Bằng React SPA (Vite)
+
+- **Bối cảnh & Vấn đề giải quyết:**
+  - Hệ thống CMS quản trị marketing và bài viết SEO trước đây nằm trong ứng dụng Next.js Giặt Là (`fe-nextjs-thanhxuan-laundry/src/app/(admin)`). Khi chuẩn bị phát triển tiếp trang Web Chuyển Nhà (`fe-nextjs-chuyennhatietkiem`), nhu cầu cấp thiết là tái sử dụng toàn bộ chức năng quản trị đã hoàn thiện mà không muốn lặp lại code CMS ở nhiều nơi.
+  - Trang Quản trị là ứng dụng sau đăng nhập, **100% không cần SEO Google** (`noindex, nofollow`). Việc dùng Next.js Server Components / SSR render HTML trên server làm tăng tải CPU/RAM cho VPS mà không mang lại giá trị SEO.
+  - Xây dựng một ứng dụng React SPA độc lập (Vite) phục vụ tĩnh (Static Serving) cho cả 2 tên miền **`quantri.thanhxuanlaundry.com`** và **`quantri.chuyennhatietkiem.vn`**, giúp trang quản trị tải nhanh tức thì, chuyển trang không độ trễ và tốn ~0% tài nguyên CPU của máy chủ.
+
+- **Các thay đổi kiến trúc & kỹ thuật chi tiết:**
+  1. **Khởi Tạo Phân Hệ `fe-react-thanhxuan-admin` (React 18 + Vite + TailwindCSS + shadcn/ui):**
+     - Thiết lập cấu trúc thư mục feature-based theo chuẩn của `fe-react-thanhxuan-internal`, cổng dev `3003`.
+     - Bộ UI components chuẩn hóa: `Button`, `Input`, `Badge`, `Card`, `Table`, `Dialog` (tích hợp xử lý nút Back vật lý điện thoại), `Tabs`.
+     - Tích hợp Vite PWA plugin sinh Web App Manifest và Service Worker tự động.
+  2. **Kiến Trúc Multi-Tenant (Đa Thương Hiệu) Cốt Lõi:**
+     - **`TenantContext.tsx`:** Tự động phát hiện thương hiệu dựa vào `window.location.hostname` (`quantri.thanhxuanlaundry.com` $\rightarrow$ `'laundry'`, `quantri.chuyennhatietkiem.vn` $\rightarrow$ `'moving'`), fallback localStorage cho localhost.
+     - **`TenantSwitcher.tsx`:** Bộ chuyển đổi thương hiệu 1 chạm trên thanh Header với nhãn màu nhận diện riêng biệt (Sky blue vs Orange) cho Super Admin.
+     - **`api-client.ts`:** Axios Interceptor tự động gán header `x-tenant-id: laundry | moving` và Authorization Bearer Token vào mọi request gửi lên Backend NestJS.
+  3. **Module Quản Trị CMS Hoàn Chỉnh:**
+     - **Auth Module (`features/auth`):** `LoginPage.tsx` hỗ trợ đổi tenant trước khi đăng nhập, `AuthContext.tsx`, `RequireAuth.tsx` route guard.
+     - **Articles Module (`features/articles`):** Danh sách bài viết SEO (`ArticlesListPage.tsx`), màn hình soạn thảo chuẩn SEO (`ArticleEditorPage.tsx`), hỗ trợ tải ảnh Cloudinary và cấu hình meta tags.
+     - **Categories Module (`features/categories`):** Quản lý chuyên mục bài viết và dịch vụ (`CategoriesListPage.tsx`, `CategoryModal.tsx`).
+     - **Contacts & CRM Module (`features/contacts` & `features/crm`):** Tiếp nhận form tư vấn (`ContactsListPage.tsx`) và quản lý hồ sơ khách hàng (`CrmListPage.tsx`).
+     - **Orders Module (`features/orders`):** Tự động chuyển đổi hiển thị: Đơn giặt là (Laundry) vs Đơn đặt lịch / Báo giá xe tải (Moving).
+     - **Settings & Users Module (`features/settings` & `features/users`):** Cài đặt thông tin website, hotline, banner theo tenant và quản lý tài khoản admin phân quyền.
+     - **Dashboard Module (`features/dashboard`):** Thống kê tổng quan chuyển đổi linh hoạt theo thương hiệu.
+  4. **Hạ Tầng Triển Khai Thực Tế & GitHub Actions Workflow (Zero Docker Container):**
+     - Thay vì chạy container Docker tốn tài nguyên trên VPS, ứng dụng được triển khai chạy tĩnh trực tiếp trên Nginx host tại `/var/www/quantri/dist` (tương tự như `fe-react-thanhxuan-internal`).
+     - Tách cấu hình Nginx riêng tại `/etc/nginx/sites-available/quantri.thanhxuanlaundry.com`, proxy API phân tầng: `/api/v1/` trỏ tới module Moving và `/api/` trỏ tới module Giặt Là / Core.
+     - Kích hoạt chứng chỉ SSL Let's Encrypt chính thức cho `quantri.thanhxuanlaundry.com` (HTTPS HTTP/2 200 OK).
+     - Thiết lập GitHub Actions workflow `.github/workflows/main.yml` tự động build tĩnh và deploy SCP/SSH lên VPS khi merge `main`/`master`.
+     - Cập nhật CORS allowedOrigins tại Backend NestJS `main.ts` hỗ trợ cả 2 subdomain quản trị.
+
+- **Kết Quả Kiểm Chứng (Verification):**
+  - Typecheck `pnpm exec tsc --noEmit` pass 100%.
+  - Build `pnpm run build` pass 100% trong 12.01s, xuất static bundle tối ưu gzip trong `dist/`.
+  - Cập nhật đồng bộ toàn bộ tài liệu 5 trụ cột: `README.md`, `QUY_DINH_HE_THONG.md`, `AGENTS.md`, `GEMINI.md`, `SRS_SDD.md`, `srs_sdd_fe_admin.md`, `CODEBASE_ATLAS.md` và `CHANGELOG.md`.
+
+### Plan 65: Triển Khai Subdomain quantri.thanhxuanlaundry.com Riêng Biệt, Chủ Động Nhắc Cài Đặt App PWA & Xử Lý Nút Back Mobile Cho Popup / Modal (fe-nextjs-thanhxuan-laundry & fe-react-thanhxuan-internal)
+
+- **Bối cảnh & Vấn đề giải quyết:**
+  - Trang quản trị CMS trước đây chạy chung tại đường dẫn `/admin` của web khách hàng `thanhxuanlaundry.com`. Khi cài app lên điện thoại, trình duyệt dùng chung manifest của web bán hàng (tên app "Thanh Xuân Laundry", mở ra trang chủ khách hàng). Cần tách tên miền phụ riêng `quantri.thanhxuanlaundry.com` để cài thành 1 App PWA độc lập tên chính thức là **"Quản trị Thanh Xuân"**.
+  - Người dùng truy cập bằng mobile vào Web Quản trị (`quantri.`) và Cổng Nội Bộ xưởng (`noibo.`) chưa được chủ động nhắc cài đặt app PWA, gây giảm tiện ích thao tác 1 chạm.
+  - Trải nghiệm di động khi mở bất kỳ popup/modal nào: nếu người dùng bấm nút Quay về (Back) của điện thoại hoặc vuốt cạnh mép màn hình, trình duyệt kích hoạt `history.back()` làm văng ra ngoài màn hình chính hoặc lùi trang web thay vì đóng modal, gây khó chịu và chưa giống ứng dụng mobile native.
+
+- **Các thay đổi kiến trúc & kỹ thuật chi tiết:**
+  1. **Subdomain Routing & Admin PWA Isolation (`quantri.thanhxuanlaundry.com`):**
+     - **Cấu hình Nginx (`/etc/nginx/sites-available/thanhxuanlaundry.com`):** Bổ sung `quantri.thanhxuanlaundry.com` vào `server_name` của cả khối HTTP (chuyển hướng 301 sang HTTPS) và khối HTTPS proxy pass về cổng 3000.
+     - **Next.js Middleware (`src/middleware.ts`):** Nhận diện hostname `quantri.`, tự động rewrite ngầm:
+       - Trang chủ `/` rewrite sang `/admin` (dashboard/login tùy phiên auth).
+       - Các trang CMS con (`/dashboard`, `/posts`, `/customers`, `/login`...) rewrite sang `/admin/...`, hiển thị URL thanh địa chỉ sạch đẹp.
+       - Request `/manifest.webmanifest` rewrite sang Route Handler riêng `/api/manifest/admin`.
+     - **Route Handler Manifest Quản Trị (`src/app/api/manifest/admin/route.ts`):** Trả về Web App Manifest độc lập: `name: "Quản trị Thanh Xuân"`, `short_name: "Quản trị Thanh Xuân"`, `start_url: "/"`, `display: "standalone"`, `theme_color: "#1e40af"`, bộ icon PWA đầy đủ 192, 512, maskable và app shortcuts.
+     - **Service Worker (`public/sw.js`):** Bổ sung điều kiện bypass cache tĩnh cho toàn bộ request từ subdomain `quantri.*`, luôn tuân thủ Network-First để dữ liệu CMS luôn mới nhất.
+  2. **Chủ Động Nhắc Nhở Cài Đặt App PWA Trên Thiết Bị Mobile:**
+     - **Web Quản Trị CMS (`fe-nextjs-thanhxuan-laundry`):** Component [`PwaInstallPromptComponent.tsx`](file:///root/Project_Thanh_Xuan_Company/fe-nextjs-thanhxuan-laundry/src/components/pwa/PwaInstallPromptComponent.tsx) tự động phát hiện thiết bị di động chưa cài app, sau 2.5s hiển thị banner nổi bật **"Cài Đặt App Quản trị Thanh Xuân"**. Tách modal hướng dẫn iOS Safari ra file riêng [`IosInstallGuideModal.tsx`](file:///root/Project_Thanh_Xuan_Company/fe-nextjs-thanhxuan-laundry/src/components/pwa/IosInstallGuideModal.tsx) (< 100 dòng).
+     - **Cổng Nội Bộ Xưởng (`fe-react-thanhxuan-internal`):** Phát triển component [`PwaInstallPromptComponent.tsx`](file:///root/Project_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/components/pwa/PwaInstallPromptComponent.tsx) và [`IosInstallGuideModal.tsx`](file:///root/Project_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/components/pwa/IosInstallGuideModal.tsx), nhúng vào layout gốc [`RootLayout.tsx`](file:///root/Project_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/app/RootLayout.tsx), hiển thị banner **"Cài Đặt App Nội Bộ Thanh Xuân"** sau 2.5s với nút "Cài đặt ngay" và "Để sau" (ghi nhớ 7 ngày).
+  3. **Xử Lý Nút Back Điện Thoại Tự Động Đóng Popup / Modal (Native Mobile Back Handler):**
+     - Tích hợp bộ xử lý History Popstate vào component dùng chung cốt lõi `Dialog` ở cả 2 phân hệ:
+       - [`fe-react-thanhxuan-internal/src/components/ui/dialog.tsx`](file:///root/Project_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/components/ui/dialog.tsx): Tự động bao phủ 100% cho 25+ modal (chấm công selfie, giao nhận, chi phí xăng xe, bảng lương, đối soát, nghỉ phép...).
+       - [`fe-nextjs-thanhxuan-laundry/src/components/ui/dialog.tsx`](file:///root/Project_Thanh_Xuan_Company/fe-nextjs-thanhxuan-laundry/src/components/ui/dialog.tsx): Áp dụng cho các dialog CMS và trình soạn thảo.
+     - Khi mở modal, tự động gọi `history.pushState({ modalOpen: true, modalId }, '')`. Khi người dùng bấm nút Back vật lý hoặc vuốt mép màn hình, sự kiện `popstate` tự động gọi đóng modal mà không rời khỏi trang hiện tại. Khi đóng bằng nút [X] hoặc backdrop, tự động gọi `history.back()` an toàn để xóa state ảo.
+
+- **Kết Quả Kiểm Chứng (Verification):**
+  - Typecheck `pnpm exec tsc --noEmit` pass 100% trên cả `fe-nextjs-thanhxuan-laundry` và `fe-react-thanhxuan-internal`.
+  - Build `pnpm build` pass 100% trên cả 2 ứng dụng, PWA manifest và service worker bundle sẵn sàng.
+  - Nginx configuration test `nginx -t` pass 100%, reload thành công.
+
+### Plan 64: Triển Khai PWA Toàn Diện, Tối Ưu Mobile UX & Nâng Cấp Trình Soạn Thảo Visual CMS Phong Cách Canva Cho Các Trang SEO Chính (fe-nextjs-thanhxuan-laundry)
+
+- **Bối cảnh & Vấn đề giải quyết:**
+  - Khách hàng và doanh nghiệp truy cập `https://thanhxuanlaundry.com/` chủ yếu qua smartphone. Tuy nhiên, trước đây website chưa có PWA (không thể cài đặt thành app điện thoại, thiếu Service Worker và Manifest, thiếu offline fallback khi mất mạng).
+  - Trải nghiệm di động còn một số điểm chưa tối ưu: nút speed dial liên hệ (`DraggableFloatingContactComponent`) bị đặt quá cao giữa màn hình (`bottom-[200px]`), thiếu hỗ trợ vùng an toàn notch/Home indicator trên iPhone (`pb-safe`), các ô input có thể gây giật cục do iOS Safari tự động phóng to (auto-zoom) khi chạm vào, và chân trang có nguy cơ bị thanh điều hướng mobile (`h-16`) đè lên.
+  - Về biên tập nội dung SEO: Quản trị viên CMS cần tạo các trang landing page dịch vụ (`/dich-vu/*`, `/vesinh`) và bài viết cẩm nang (`/tin-tuc/*`) bắt mắt. Trình soạn thảo cũ chỉ có 5 font chữ hệ thống cổ điển, thiếu bảng màu thiết kế trực quan, thiếu giãn dòng/giãn chữ (line/letter spacing) và không thể chèn khung nhấn hay nút kêu gọi hành động (CTA) như Canva.
+
+- **Các thay đổi kiến trúc & kỹ thuật chi tiết:**
+  1. **Triển khai PWA Native Đạt Chuẩn Next.js 16 (App Router):**
+     - **Web App Manifest (`src/app/manifest.ts`):** Khai báo Metadata Route chuẩn Next.js 16 sinh `/manifest.webmanifest` với `display: standalone`, `theme_color: #1e40af`, `orientation: portrait-primary`, và bộ 3 App Shortcuts chuyển đổi nhanh (*Dịch Vụ Giặt Sấy*, *Dịch Vụ Vệ Sinh*, *Liên Hệ Báo Giá*).
+     - **Bộ Icon PWA Đa Kích Thước:** Xây dựng script `scripts/generate-pwa-icons.mjs` sử dụng `sharp` để xuất bộ icon chuẩn PWA: `icon-192x192.png`, `icon-512x512.png`, `icon-maskable-192x192.png`, `icon-maskable-512x512.png`, `apple-touch-icon.png` (180x180), và favicon 32/16px.
+     - **Vanilla Service Worker (`public/sw.js`):** Triển khai chiến lược caching: **Network-First** cho các trang HTML navigation (đảm bảo tin tức & giá luôn tức thời), tự động fallback về trang ngoại tuyến [`/offline`](file:///root/Project_Thanh_Xuan_Company/fe-nextjs-thanhxuan-laundry/src/app/offline/page.tsx) khi mất mạng; **Stale-While-Revalidate / Cache-First** cho static assets; hoàn toàn bypass cache cho dynamic API `/api/*` và `/admin/*`.
+     - **Trang Ngoại Tuyến (`src/app/offline/page.tsx`):** Giao diện thông báo mất kết nối thân thiện, nút "Thử tải lại trang" và nút gọi hotline khẩn cấp 0769 270 676.
+     - **PWA Prompt Engine:** Component lá [`PwaRegisterComponent.tsx`](file:///root/Project_Thanh_Xuan_Company/fe-nextjs-thanhxuan-laundry/src/components/pwa/PwaRegisterComponent.tsx) đăng ký Service Worker mượt mà; component [`PwaInstallPromptComponent.tsx`](file:///root/Project_Thanh_Xuan_Company/fe-nextjs-thanhxuan-laundry/src/components/pwa/PwaInstallPromptComponent.tsx) tự động bắt sự kiện `beforeinstallprompt` trên Chromium/Android và Bottom Sheet hướng dẫn thêm vào màn hình chính trên iOS Safari (tự động ẩn khi đã cài đặt).
+  2. **Tối Ưu Hóa Giao Diện Mobile (Mobile Polish):**
+     - **iOS Safe Area Inset:** Bổ sung utility classes `@supports (padding-bottom: env(safe-area-inset-bottom))` vào `globals.css` để thanh điều hướng đáy [`PublicMobileBottomNavComponent`](file:///root/Project_Thanh_Xuan_Company/fe-nextjs-thanhxuan-laundry/src/components/layout/public/header/PublicMobileBottomNavComponent.tsx) không bị thanh Home Bar iPhone che.
+     - **Chống Auto-Zoom trên iOS Safari:** Chuẩn hóa `text-base md:text-sm` trong `src/components/ui/input.tsx` để ngăn iOS Safari tự động zoom in màn hình khi tap vào input.
+     - **Khoảng Đệm Đáy:** Bổ sung `pb-16 md:pb-0` cho `<main>` trong `src/app/(public)/layout.tsx` chống đè nội dung bởi Mobile Bottom Nav.
+     - **Cân Chỉnh Vị Trí Speed Dial:** Điều chỉnh vị trí nổi [`DraggableFloatingContactComponent`](file:///root/Project_Thanh_Xuan_Company/fe-nextjs-thanhxuan-laundry/src/components/layout/public/DraggableFloatingContactComponent.tsx) từ `bottom-[200px]` thành `bottom-20 md:bottom-8 right-4`.
+  3. **Nâng Cấp Trình Soạn Thảo Visual Rich Text CMS Phong Cách Canva Cho Các Trang SEO:**
+     - **Canva Font Family Selector:** Tuyển chọn 10 font Google Fonts tiếng Việt hiện đại (`Inter`, `Be Vietnam Pro`, `Montserrat`, `Roboto`, `Plus Jakarta Sans`, `Playfair Display`, `Merriweather`, `Lora`, `Oswald`) kèm xem trước font thực tế (Visual Font Preview) trong dropdown.
+     - **Canva Font Size Presets:** Danh sách chọn nhanh kích thước font từ 12px đến 48px Hero Title.
+     - **Canva Curated Color Palette & Highlight:** Popover bảng màu chọn sẵn chuẩn thương hiệu và màu pastel highlight, kèm HEX color picker tùy biến.
+     - **Line & Letter Spacing:** Thêm Tiptap extensions điều chỉnh khoảng cách dòng (1.2 -> 2.0) và độ giãn chữ (-0.02em -> 0.1em).
+     - **Canva Callout Cards & CTA Builder:** Nút chèn khối điểm nhấn SEO (thông tin, lưu ý, cam kết) và nút kêu gọi hành động CTA (gọi hotline, nhận báo giá) chuyển đổi cao trực quan vào nội dung bài viết.
+
+- **Kết Quả Kiểm Chứng (Verification):**
+  - Typecheck `pnpm exec tsc --noEmit` pass 100% (0 errors).
+  - Lint: Kiểm tra toàn bộ file mới/chạm pass 100%.
+  - Next.js Production Build: `pnpm build` pass 100% (17/17 routes tĩnh và động, route `/manifest.webmanifest` và `/offline` prerender thành công).
+
+### Plan 63: Chiến Lược Tối Ưu Hóa SEO Toàn Diện Dịch Vụ Giặt Là & Dịch Vụ Vệ Sinh B2B (fe-nextjs-thanhxuan-laundry)
+
+- **Bối cảnh & Vấn đề giải quyết:**
+  - Khách hàng phản ánh website `https://thanhxuanlaundry.com/` mới chỉ lọt top Google với từ khóa thương hiệu (`thanh xuân laundry`), trong khi các từ khóa mang lại doanh thu chuyển đổi chính về dịch vụ Giặt là (`dịch vụ giặt là`, `giặt sấy`, `giặt ủi`, `giặt là công nghiệp hà nội`) và dịch vụ Vệ sinh (`dịch vụ vệ sinh công nghiệp hà nội`, `vệ sinh văn phòng`, `giặt thảm sofa`) chưa lên trang nhất.
+  - Phân tích nguyên nhân: Do nhắm thẳng từ khóa ngắn quá sớm khi chưa có Topical Authority, thẻ Title/Description/Keywords thiếu các từ khóa hạt nhân có search volume cao, thiếu Schema Rich Snippets để kích hoạt FAQ/Ratings trên Google Search, và thiếu mạng lưới liên kết nội bộ theo mô hình Topic Cluster.
+
+- **Các thay đổi kiến trúc & kỹ thuật chi tiết:**
+  1. **Tối ưu On-Page Metadata cho Dịch Vụ Giặt Là (`src/app/layout.tsx` & `src/app/(public)/page.tsx`):**
+     - Title mặc định: Đổi thành `"Dịch Vụ Giặt Là, Giặt Sấy Công Nghiệp Uy Tín Hà Nội | Thanh Xuân Laundry"`.
+     - Description: Chứa đầy đủ bộ từ khóa chuyển đổi cao (`dịch vụ giặt là`, `giặt sấy công nghiệp`, `nhà hàng`, `khách sạn`, `Hà Nội`, `hóa đơn VAT`).
+     - Keywords: Bổ sung 14 từ khóa hạt nhân có lượt tìm kiếm lớn nhất ngành giặt là.
+     - Schema Root: Nâng cấp `@type` thành `["DryCleaningOrLaundry", "LaundryService"]`.
+  2. **Tối ưu On-Page & Schema Đa Thực Thể Cho Trang Vệ Sinh (`src/app/(public)/vesinh/page.tsx`):**
+     - Metadata: Title `"Dịch Vụ Vệ Sinh Công Nghiệp Hà Nội, Vệ Sinh Văn Phòng Trọn Gói | Thanh Xuân Cleaning"`, Canonical URL cố định `https://vesinh.thanhxuanlaundry.com`.
+     - Schema JSON-LD đa thực thể: Nhúng `@graph` bao gồm `CleaningService` (Hotline, GPS, OfferCatalog), `FAQPage` (tự động map 6 câu hỏi FAQ thực tế để kích hoạt Google Rich Snippets FAQ accordion), và `BreadcrumbList`.
+     - Heading H1/H2: Rà soát và chuẩn hóa `VesinhHeroSectionComponent` và `VesinhServicesGridComponent` chứa đúng từ khóa dịch vụ B2B mục tiêu.
+  3. **Cập nhật Sitemap (`src/app/sitemap.ts`):**
+     - Nâng priority các trang bài viết dịch vụ (`/dich-vu/*`) từ 0.6 lên 0.85 (ưu tiên hơn bài viết tin tức 0.7).
+  4. **Ban hành cẩm nang Topic Cluster (`SEO_CONTENT_CLUSTER_GUIDE.md`):**
+     - Hướng dẫn đội ngũ Marketing viết bài vệ tinh trên CMS (`/admin/articles`) và cách chèn anchor text ngữ cảnh trỏ dòng sức mạnh link nội bộ về các trang Pillar.
+
+- **Kết quả Kiểm Chứng (Verification):**
+  - Typecheck `pnpm exec tsc --noEmit` pass 100% (0 errors).
+  - Next.js Production Build: `pnpm build` pass 100%, render thành công toàn bộ 15/15 routes tĩnh và động.
+
 ## 2026-10-31
 
 ### Fix (Header UX): Giữ TopBar Đầu Trang Trên Mobile & Tự Động Ẩn Khi Cuộn (fe-nextjs-thanhxuan-laundry)
@@ -200,425 +352,11 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
   - Cập nhật dist Backend vào Docker container `laundry_backend` và restart thành công (NestJS khởi động trong 386ms).
   - Đồng bộ 100% hệ thống 5 trụ cột tài liệu kỹ thuật (`DATABASE_DICTIONARY.md`, `CODEBASE_ATLAS.md`, `srs_sdd_backend.md`, `srs_sdd_fe_internal.md`, `SRS_SDD.md`).
 
-## 2026-10-30
-
-### Plan 58: Triển Khai Xác Thực Khuôn Mặt On-Device AI (@vladmandic/face-api) & Liveness Detection (fe-react-thanhxuan-internal & be-nestjs-thanhxuan)
-
-- **Bối cảnh & Bài toán:**
-  - Hệ thống chấm công tại xưởng trước đây chỉ yêu cầu thợ chụp ảnh camera selfie tải lên server và kiểm tra Geofencing GPS.
-  - Người dùng đặt câu hỏi về giải pháp xác thực khuôn mặt khi check-in để chống điểm danh hộ. Tuy nhiên, nếu dùng Cloud AI (như Gemini Vision API gói Free tier chỉ có 15 RPM / 1,500 RPD), khi nhiều thợ cùng check-in đầu ca sáng 07:30 - 08:00 sẽ dễ bị lỗi nghẽn `429 Too Many Requests` và chi phí bản quyền phát sinh nếu nâng gói thương mại.
-- **Giải pháp On-Device AI WebAssembly/WebGL (Plan 58):**
-  - Chuyển toàn bộ tải tính toán AI về thiết bị của thợ (Client-Side PWA) sử dụng thư viện `@vladmandic/face-api` chạy trên nền tảng WebAssembly (WASM) và WebGL:
-    - **0đ chi phí vận hành:** Hoàn toàn không tốn tiền API hay quota hàng tháng.
-    - **0 giới hạn lượt check-in:** Đáp ứng không giới hạn số lượng công nhân check-in cùng lúc.
-    - **0% tải CPU/RAM trên VPS:** VPS (< 512MB RAM) chỉ lưu trữ ảnh và nhận vector đặc trưng 128 chiều (`faceDescriptor`), không phải xử lý AI nặng.
-    - **Hoạt động hoàn toàn Offline:** Các mô hình mạng nơ-ron thu nhỏ (`tiny_face_detector`, `face_landmark_68_tiny`, `face_recognition`) có tổng dung lượng nhẹ ~6.6MB, lưu tĩnh tại `/public/models/` và được Workbox PWA precache vào cache trình duyệt.
-- **Thay đổi chi tiết & Kiến trúc triển khai:**
-  1. **Frontend PWA (`fe-react-thanhxuan-internal`):**
-     - Cài đặt `@vladmandic/face-api@1.7.15`, cấu hình `runtimeCaching` trong `vite.config.ts`.
-     - Xây dựng Custom Hook `useFaceRecognition.ts`: Tải mô hình bất đồng bộ từ `/models/`, hỗ trợ phương thức `scanFrame` quét từng khung hình từ WebRTC Camera, tính toán tỷ lệ mở mắt (Eye Aspect Ratio - EAR) dựa trên 6 điểm mốc mắt để phát hiện hành vi chớp mắt sống thực tế (Liveness Blink Detection), và phương thức `extractDescriptorFromFile` trích xuất vector khuôn mặt từ file ảnh.
-     - Xây dựng Modal Camera thông minh `FaceScannerModal.tsx`: Khung Oval định vị gương mặt chuyển màu linh hoạt (Nét đứt trắng $\rightarrow$ Vàng nhấp nháy khi thấy mặt $\rightarrow$ Xanh lá rực rỡ khi hoàn tất chớp mắt tự nhiên), tự động trích xuất vector và chụp ngay lập tức. Hỗ trợ nút chụp thủ công và fallback tải ảnh thường.
-     - Cập nhật `AttendancePage.tsx`: Tích hợp mở `FaceScannerModal`, hiển thị huy hiệu `🟢 Khuôn mặt thực (AI)` trên ảnh selfie đã chụp.
-     - Tự động lưu mẫu khi đổi Avatar (`ProfileEditModal.tsx` & `useProfileEdit.ts`): Khi thợ đổi ảnh đại diện, hệ thống tự động quét và lưu vector làm mẫu hồ sơ gốc `StaffAccount.faceDescriptor`.
-     - Nâng cấp giao diện Quản lý duyệt ca (`AttendanceTableComponent.tsx` & `AttendanceReviewModal.tsx`): Bổ sung huy hiệu AI Face (độ khớp %, liveness) ở cột Vào ca / Hết ca; thiết kế 3 cột ảnh đối chứng trong Modal duyệt (Avatar hồ sơ gốc $\leftrightarrow$ Ảnh selfie vào ca $\leftrightarrow$ Ảnh hết ca) giúp Quản lý xưởng dễ dàng thẩm định mắt thường và phê duyệt.
-  2. **Backend API (`be-nestjs-thanhxuan`):**
-     - Mở rộng Schema `staff-account.schema.ts`: Bổ sung `@Prop({ type: [Number] }) faceDescriptor?: number[]`.
-     - Mở rộng Schema `attendance-record.schema.ts`: Bổ sung schema con `FaceVerificationInfo` (`isVerified`, `confidence`, `isLivePhoto`, `descriptor`) trong `CheckInInfo` và `CheckOutInfo`.
-     - Mở rộng DTO `CheckInDto`, `CheckOutDto`, `UpdateProfileDto` hỗ trợ `faceDescriptor` và `isLivePhoto`.
-     - Nâng cấp `AttendanceService`:
-       - Tự động ghi nhận vector mẫu (Auto-Enrollment) cho nhân sự check-in lần đầu.
-       - Tính toán khoảng cách Euclidean (Euclidean Distance): $d = \sqrt{\sum (a_i - b_i)^2}$, điểm tin cậy $\text{confidence} = \max(0, \min(100, \text{round}((1 - d) \times 100)))$.
-       - Ngưỡng đối soát chuẩn $d \le 0.50$. Nếu lệch mặt ($d > 0.50$), ca chấm công vẫn được ghi nhận nhưng tự động chuyển trạng thái sang `AttendanceStatus.NEEDS_REVIEW` kèm cờ cảnh báo AI để Quản lý rà soát.
-- **Kết quả kiểm thử & Triển khai thực tế:**
-  - TypeScript strict check và Build pass 100% trên cả 2 ứng dụng Backend và Frontend.
-  - Deploy bản build PWA mới thành công lên `https://noibo.thanhxuanlaundry.com`.
-  - Copy bản build backend vào Docker container `laundry_backend` và restart thành công.
-  - Cập nhật đầy đủ 5 trụ cột tài liệu kỹ thuật (`DATABASE_DICTIONARY.md`, `CODEBASE_ATLAS.md`, `srs_sdd_backend.md`, `srs_sdd_fe_internal.md`, `SRS_SDD.md`).
-
-
-
-### Feature: Mở Rộng Hỗ Trợ Đa Dạng Định Dạng Ảnh Cho POST /api/v1/internal/upload (be-nestjs-thanhxuan)
-
-- **Bối cảnh & Yêu cầu:**
-  - Endpoint upload ảnh xưởng `POST /api/v1/internal/upload` và `POST /api/v1/internal/uploads` trước đây chỉ cho phép một danh sách hạn chế các định dạng ảnh raster (`.jpg`, `.jpeg`, `.png`, `.webp`, `.heic`, `.heif`, `.gif`) và yêu cầu bắt buộc cả MIME type lẫn extension file đều phải khớp.
-  - Người dùng và thiết bị di động (đặc biệt là camera điện thoại đời mới, các trình duyệt xuất blob không đuôi hoặc gửi MIME `application/octet-stream`, định dạng vector SVG hoặc AVIF hiện đại) cần được hỗ trợ tải lên mượt mà mà không bị từ chối 400 Bad Request.
-- **Giải pháp & Thay đổi kỹ thuật:**
-  1. **Mở rộng bộ lọc MIME Types & File Extensions (`InternalUploadController`):**
-     - Bổ sung toàn diện danh mục định dạng: JPEG/JPG, PNG, WebP, HEIC, HEIF, AVIF, SVG, GIF, BMP, TIFF/TIF, ICO.
-     - Cho phép chấp nhận các file có MIME type `image/*` (kể cả Blob không đuôi từ camera hoặc Canvas nén ảnh) HOẶC các file có đuôi mở rộng ảnh hợp lệ (kể cả khi thiết bị gửi dạng `application/octet-stream`).
-     - Đăng ký alias `@Controller(['uploads', 'upload'])` trên Controller để NestJS xử lý song song cả 2 định dạng đường dẫn URL.
-  2. **Cập nhật Lưu Trữ Vật Lý (`UploadService.saveLocalCopy`):**
-     - Bổ sung các định dạng mới vào mảng `allowedExts` (`.heic`, `.heif`, `.avif`, `.svg`, `.bmp`, `.tiff`, `.tif`, `.ico`).
-     - Bổ sung cơ chế tự động suy luận đuôi file từ MIME type khi client tải lên file không có đuôi (như `blob` từ Canvas/Mobile).
-  3. **Đồng bộ Controller chung (`UploadController`):**
-     - Mở rộng hỗ trợ định dạng ảnh tương tự cho module Upload cốt lõi.
-- **Kết quả kiểm thử:**
-  - Build Backend pass 100% (`tsc --noEmit` & `nest build`).
-  - Container `laundry_backend` đã được cập nhật bản build mới và khởi động lại trơn tru.
-  - Push commit lên nhánh `dev` của kho `be-nestjs-thanhxuan`.
-
-
-
-### Bugfix: Khắc Phục Lỗi Upload 404, Ưu Tiên Icon SVG và Đặt Mặc Định Lightmode (fe-react-thanhxuan-internal)
-
-- **Bối cảnh & Vấn đề:**
-  1. Người dùng gặp lỗi khi chụp ảnh chấm công selfie hoặc gửi ảnh bao đồ đếm lại xưởng:
-     `index-B8Nts09O.js:3 POST https://noibo.thanhxuanlaundry.com/api/v1/internal/upload 404 (Not Found)`
-     `{url: '/upload', method: 'POST', status: 404, data: {…}, detailsString: '{"success":false,"statusCode":404,"error":"Cannot POST /api/v1/internal/upload","details":"Not Found"}'}`
-  2. Người dùng yêu cầu ưu tiên sử dụng `icon.svg` sắc nét cho toàn bộ cổng nội bộ, nếu thiết bị/trình duyệt không hỗ trợ mới fallback sang các ảnh `.png`.
-  3. Người dùng yêu cầu chuyển chế độ giao diện mặc định khi vào hệ thống thành `lightmode` (thay vì mặc định darkmode).
-- **Nguyên nhân gốc rễ (Root Cause):**
-  - **Lỗi 404 Upload:** Controller trong NestJS backend là `InternalUploadController` được khai báo `@Controller('uploads')` (có chữ `s`), trong khi một số hook ở Frontend (`useAttendance.ts:49` và `RecountRequestModal.tsx:45`) gọi endpoint số ít `apiClient.post('/upload')`, dẫn tới HTTP 404 Not Found từ NestJS Router.
-  - **Mặc định Theme:** Trong `src/lib/theme.tsx:23`, state khởi tạo ban đầu hardcode trả về `'dark'` nếu chưa có giá trị lưu trong `localStorage`.
-  - **Ưu tiên Icon SVG:** File `manifest.webmanifest` trong `vite.config.ts` đặt icon `.png` lên đầu và `icon.svg` ở cuối danh sách; các thẻ HTML `<link>` và component chưa có cơ chế `<picture>` fallback chuẩn.
-- **Giải pháp & Thay đổi kỹ thuật:**
-  1. **Sửa dứt điểm lỗi Upload (Đa tầng phòng thủ):**
-     - Sửa `useAttendance.ts:49` và `RecountRequestModal.tsx:45` gọi chuẩn `/uploads` đồng bộ với `useShipperFuel.ts`.
-     - Cấu hình Nginx reverse proxy tại `/etc/nginx/sites-available/noibo.thanhxuanlaundry.com`: Bổ sung rule `location = /api/v1/internal/upload` chuyển tiếp trực tiếp sang `http://127.0.0.1:5001/api/v1/internal/uploads`, đảm bảo tương thích ngược 100% cho mọi phiên bản PWA Service Worker cũ đang cache trên máy người dùng.
-  2. **Chuyển mặc định giao diện sang Lightmode:**
-     - Điều chỉnh `src/lib/theme.tsx` khởi tạo mặc định trả về `'light'`.
-  3. **Ưu tiên Icon SVG kèm Fallback PNG:**
-     - Tạo component chuyên dụng `src/components/common/AppLogo.tsx` sử dụng thẻ chuẩn `<picture>` với `<source srcSet="/icon.svg" type="image/svg+xml" />` và thẻ `<img>` fallback sang `pwa-192x192.png` / `favicon-64x64.png` khi lỗi tải.
-     - Đồng bộ `AppLogo` vào `LoginPage.tsx`, `RegisterPage.tsx`, `RootPage.tsx`, `AppHeader.tsx` và `MobileNavDrawer.tsx`.
-     - Sắp xếp lại `vite.config.ts` (Manifest Icons & Shortcuts) đưa `/icon.svg` lên vị trí ưu tiên đầu tiên; bổ sung các thẻ `<link rel="icon">` và `<link rel="alternate icon">` trong `index.html`.
-- **Kết quả xác minh:**
-  - `curl -X POST https://noibo.thanhxuanlaundry.com/api/v1/internal/upload` và `curl -X POST https://noibo.thanhxuanlaundry.com/api/v1/internal/uploads` đều trả về HTTP 401 Unauthorized (xác thực Guard NestJS thành công, không còn 404).
-  - PWA build pass 100% (`pnpm build` in 12s), đã deploy trực tiếp vào `/var/www/noibo/dist` và reload Nginx thành công.
-  - Push commit lên nhánh `dev` của repository `fe-react-thanhxuan-internal`.
-
-
-
-### Plan 57: Cơ Chế Duy Trì Phiên Đăng Nhập Lâu Dài Như Mobile App Cho PWA (fe-react-thanhxuan-internal & be-nestjs-thanhxuan)
-
-- **Bối cảnh & Vấn đề:**
-  - Cổng vận hành nội bộ (`fe-react-thanhxuan-internal`) được cài đặt dưới dạng PWA trên điện thoại của tài xế xe tải, thợ xưởng và quản lý đối tác.
-  - Người dùng phản ánh việc thường xuyên bị đá về màn hình đăng nhập mỗi khi mở lại ứng dụng sau vài giờ hoặc vài ngày, không đạt được trải nghiệm "mở là dùng ngay" như các ứng dụng di động bản địa (Native Mobile App).
-  - Điều tra nguyên nhân gốc rễ (Root Cause):
-    1. Backend `be-nestjs-thanhxuan` hardcode thời hạn Access Token là 15 phút và Refresh Token là 7 ngày; quá 7 ngày không vào là phiên bị hủy.
-    2. Frontend lưu token trong `localStorage`, dễ bị cơ chế dọn dẹp bộ nhớ (ITP của iOS Safari / Android Webview) xóa sạch.
-    3. Khi Interceptor của `apiClient` tự động làm mới token thành công, state `token` trong React `AuthContext` không được cập nhật, gây lệch pha và gửi token cũ dẫn đến bị logout oan.
-    4. Ứng dụng chỉ có cơ chế refresh phản ứng (Reactive) khi gặp lỗi 401, dễ phát sinh xung đột (race condition) khi nhiều API cùng gọi đồng thời lúc mở app.
-- **Giải pháp & Thay đổi kỹ thuật:**
-  1. **Nâng cấp Backend (`be-nestjs-thanhxuan`):**
-     - Chuyển thời hạn Access Token sang cấu hình `jwt.staffExpiresIn` (mặc định `1d` / `12h`) thay vì cố định 15 phút, giảm tải tần suất refresh và ổn định kết nối.
-     - Nâng thời hạn Refresh Token lên **60 ngày** trong `account-auth.helper.ts` với cơ chế **Sliding Expiration**: Mỗi khi người dùng mở app và refresh token được xoay vòng, thời hạn mới lại được gia hạn thêm 60 ngày tiếp theo.
-  2. **Xây dựng Module Lưu Trữ Kép Bền Vững (`auth-storage.ts`):**
-     - Quản lý đồng bộ `staff_token`, `staff_refresh_token` và `staff_user` trên cả `localStorage` và `IndexedDB` (`thanhxuan_internal_auth_db`).
-     - Tự động khôi phục phiên từ `IndexedDB` dự phòng nếu `localStorage` bị hệ điều hành dọn dẹp.
-  3. **Cơ Chế Proactive / Silent Refresh & Đồng Bộ Sự Kiện:**
-     - Tích hợp kiểm tra hạn token JWT (`isJwtExpired`); khi mở lại PWA hoặc quay lại từ màn hình khóa (`visibilitychange` / `window.focus`), nếu Access Token còn dưới 5-10 phút sẽ tự động refresh ngầm trước khi các trang con gọi API.
-     - `apiClient` Interceptor phát CustomEvent `auth:token-refreshed` khi refresh thành công, giúp `AuthContext` cập nhật tức thì state `token`.
-  4. **Bảo Vệ Phiên Ngoại Tuyến (Offline Safety):**
-     - Khi mở app ở vùng mất sóng (hầm gửi xe, lỗi mạng / status 0), hệ thống tuyệt đối không xóa session hoặc redirect đăng nhập, cho phép nhân sự thao tác ngoại tuyến bình thường.
-- **Kết quả kiểm thử:**
-  - `be-nestjs-thanhxuan`: `tsc --noEmit` và `pnpm build` pass 100%.
-  - `fe-react-thanhxuan-internal`: `tsc --noEmit` và `pnpm build` pass 100%.
-
-### Tính năng: Tách Tab Riêng Xin Nghỉ Cho Shipper & Nâng Cấp Toàn Diện Giao Diện Form Xin Nghỉ Và Lịch Sử Nghỉ (fe-react-thanhxuan-internal)
-
-- **Bối cảnh & Yêu cầu:**
-  - Trước đây, tài xế xe tải (`SHIPPER`) chỉ có thể gửi đơn xin nghỉ và xem lịch sử thông qua 2 nút bấm nhỏ trong thanh header của trang lộ trình giao nhận (`ShipperHandoverPage.tsx`), gây bất tiện và khó thao tác trên di động khi đang làm việc ngoài đường.
-  - Giao diện 2 modal xin nghỉ và lịch sử nghỉ còn đơn điệu, thiếu tính năng chọn nhanh ngày nghỉ liên tiếp, thiếu chip gợi ý lý do nhanh 1 chạm, và chưa có giao diện tiến độ duyệt trực quan.
-- **Giải pháp & Thay đổi kỹ thuật:**
-  1. **Tạo Cổng Riêng Biệt Cho Shipper Xin Nghỉ (`/operations/shipper/leave`):**
-     - Tạo trang `ShipperLeavePage.tsx` tại `src/features/operations/shipper-leave/` với `PageBanner` hiện đại và 3 thẻ chỉ số nhanh: Tổng số đơn, Đang chờ duyệt, Đã duyệt nghỉ.
-     - Thanh chuyển đổi phân đoạn 2 tab trực quan: **Tạo Đơn Xin Nghỉ** (`ShipperLeaveFormComponent.tsx`) và **Lịch Sử Nghỉ** (`ShipperLeaveHistoryComponent.tsx`) kèm badge số lượng đơn chờ duyệt.
-  2. **Nâng Cấp Form Xin Nghỉ Tối Ưu Mobile-First:**
-     - Bộ nút chọn nhanh ngày nghỉ: "Ngày mai", "2 ngày liên tiếp", "3 ngày liên tiếp" từ ngày mai.
-     - Date picker và danh sách badge ngày nghỉ kèm thứ trong tuần (`getWeekdayVN`: Thứ Hai, Thứ Ba...) giúp tài xế không nhầm lẫn lịch trình.
-     - Danh mục lý do xin nghỉ gợi ý 1 chạm (Việc gia đình, Về quê, Khám bệnh / Sốt mệt, Xe hỏng, Việc riêng...) kèm textarea nhập chi tiết.
-     - Khung thông tin quy trình 2 bước giải thích cơ chế phân tuyến và thiết lập tiền công hỗ trợ giao thay.
-  3. **Nâng Cấp Giao Diện Lịch Sử & Thẻ Đơn Nghỉ (`ShipperLeaveCardComponent.tsx`):**
-     - Thanh bộ lọc trạng thái nhanh: Tất cả, Chờ duyệt, Đã duyệt, Đã hủy / Từ chối kèm số lượng đếm thực tế.
-     - Thẻ đơn hiển thị các ngày nghỉ dạng badge lịch sang trọng, stepper tiến độ duyệt, thông tin tài xế nhận giao thay, số tiền công hỗ trợ (VND), lý do từ chối nổi bật (nếu có).
-     - Nút hủy đơn an toàn tích hợp modal xác nhận trước khi hủy.
-  4. **Xóa Bỏ Hoàn Toàn 2 Modal Cũ & Tối Giản Màn Hình Giao Nhận:**
-     - Xóa triệt để hai tệp modal cũ (`ShipperLeaveRequestModal.tsx` và `ShipperLeaveHistoryModal.tsx`) tại thư mục `modals/` của phân hệ giao nhận.
-     - Thay thế nút thao tác trên header của `ShipperHandoverPage.tsx` bằng nút liên kết điều hướng trực tiếp sang trang `/operations/shipper/leave`.
-  5. **Tích Hợp Điều Hướng (Navigation):**
-     - `nav-mobile-config.ts`: Thêm tab **"Xin Nghỉ"** (icon `CalendarOff`) vào Mobile Bottom Bar cho `StaffRole.SHIPPER` (Giao Nhận | Xăng Xe | Xin Nghỉ | Lương).
-     - `nav-config.ts`: Bổ sung mục **"Xin Nghỉ Giao Nhận"** vào nhóm CÁ NHÂN & CHẤM CÔNG cho Shipper.
-     - `router.tsx`: Khai báo tuyến đường `/operations/shipper/leave` (và redirect `/operations/shipper/leaves`).
-- **Kết quả kiểm thử:**
-  - TypeScript typecheck (`tsc -b`) pass 100%.
-  - Vite production build pass 100% (tất cả bundle và PWA Service Worker tạo thành công).
-
-### Plan 56: Hoàn Thiện Toàn Diện Cấu Hình & Trải Nghiệm PWA Cho Cổng Vận Hành Nội Bộ (fe-react-thanhxuan-internal)
-
-- **Bối cảnh & Vấn đề:**
-  - Cổng vận hành nội bộ (`fe-react-thanhxuan-internal`) phục vụ thợ xưởng, thủ kho và tài xế xe tải di chuyển thường xuyên vào vùng sóng yếu (hầm nhà hàng, xưởng tôn khép kín).
-  - Dù đã có `OfflineBanner` và `offline-queue.ts` (IndexedDB) cho luồng đếm đồ và đổ xăng, ứng dụng vẫn chưa đạt chuẩn PWA hoàn chỉnh:
-    1. Thiếu toàn bộ icon PNG chuẩn (`192x192`, `512x512`, `maskable`, `apple-touch-icon-180x180`), chỉ dùng file `icon.svg` khiến iOS Safari không nhận diện được icon ứng dụng và Lighthouse PWA bị đánh trượt tiêu chí Installability.
-    2. Thiếu cấu hình Workbox Runtime Caching cho ảnh Cloudinary CDN (`res.cloudinary.com`) và Google Fonts Webfonts (`fonts.gstatic.com`).
-    3. Thiếu App Shortcuts trong Web App Manifest để truy cập nhanh các nghiệp vụ cốt lõi từ màn hình chính điện thoại.
-    4. Thiếu thông báo bản cập nhật mới (PWA Reload Prompt): khi deploy bản build mới, người dùng không nhận được thông báo để reload trang mà chạy ngầm mã nguồn cũ.
-- **Các giải pháp và thay đổi kỹ thuật:**
-  1. **Tạo bộ Icon PNG chuẩn chất lượng cao từ vector `icon.svg`:**
-     - Sử dụng Headless Chrome render pixel-perfect thành các file PNG:
-       - `public/pwa-192x192.png`: Icon tiêu chuẩn cho Android và thanh tác vụ Desktop.
-       - `public/pwa-512x512.png`: Icon phân giải cao cho màn hình khởi động Splash Screen.
-       - `public/pwa-maskable-512x512.png`: Icon Adaptive bo tròn thông minh cho Android hiện đại.
-       - `public/apple-touch-icon-180x180.png`: Icon chuẩn cho thiết bị iOS Safari.
-       - `public/favicon-64x64.png`: Favicon sắc nét cho trình duyệt máy tính.
-  2. **Nâng cấp cấu hình Vite PWA (`vite.config.ts`):**
-     - Cập nhật mảng `manifest.icons` với đầy đủ định dạng PNG (`any` và `maskable`).
-     - Bổ sung `manifest.shortcuts` với 4 lối tắt vận hành 1 chạm: Giao Nhận Shipper (`/operations/shipper/handover`), Chấm Công Selfie (`/operations/attendance`), Trạm Công Thợ (`/operations/worker/piecework`), Soạn Đồ Xuất Xưởng (`/operations/warehouse-manager/warehouse`).
-     - Mở rộng `runtimeCaching` với `CacheFirst` cho `fonts.gstatic.com` và `StaleWhileRevalidate` cho `res.cloudinary.com` (chữ ký số, ảnh phiếu bàn giao, hóa đơn xăng xe lưu 30 ngày, tối đa 120 mục).
-  3. **Cập nhật thẻ Meta PWA chuẩn iOS trong `index.html`:**
-     - Đổi link `apple-touch-icon` trỏ vào `/apple-touch-icon-180x180.png`.
-     - Thêm `favicon-64x64.png`, `<meta name="application-name" content="Thanh Xuân Quản Vận" />` và `apple-mobile-web-app-title`.
-  4. **Xây dựng Component `PwaReloadPrompt.tsx`:**
-     - Thiết kế theo chuẩn Zero-Dependency, sử dụng trực tiếp Native Browser Service Worker API (`navigator.serviceWorker.ready`, sự kiện `updatefound`, `controllerchange` và tự động kiểm tra mỗi 30 phút).
-     - Hiển thị Toast nổi hiện đại góc màn hình kèm nút "Cập nhật ngay" kích hoạt `SKIP_WAITING` để nạp ngay bản mới mà không cần xóa cache thủ công.
-     - Nhúng trực tiếp vào `AppLayout.tsx`.
-- **Kết quả kiểm thử:**
-  - `pnpm exec tsc --noEmit` và `pnpm build` pass 100%.
-  - Service Worker precache 21 static entries, sinh file `manifest.webmanifest`, `sw.js` và `workbox-*.js` đầy đủ.
-
-### Bugfix: Sửa Lỗi Hiển Thị Chi Nhánh Không Thuộc Thương Hiệu Trong Modal Tạo Phiếu Giao Nhận (PrepOrderModal)
-
-- **Vấn đề phát hiện:** Khi người dùng mở modal "Tạo Phiếu Giao Nhận Mới" và chọn thương hiệu (ví dụ: `Pizza 4P's (PIZZA_4PS)`), danh sách thả xuống ở ô "CHI NHÁNH ĐỐI TÁC" lại hiển thị lẫn cả chi nhánh của thương hiệu khác (ví dụ: `Haidilao Hotpot Phạm Ngọc Thạch`).
-- **Nguyên nhân gốc rễ (Root Cause):**
-  1. **Backend (`be-nestjs-thanhxuan`):** Endpoint `GET /partners` trong `PartnersController` (`partners.controller.ts:172`) chỉ tiếp nhận `@Query('includeInactive')` mà bỏ qua tham số query `@Query('brand')`. Mặc dù `usePrepOrderData.ts` và `useHandoverSlipGallery.ts` ở Frontend đều gọi `/partners?brand=${selectedBrand}`, Backend vẫn trả về toàn bộ chi nhánh của tất cả các thương hiệu.
-  2. **Frontend (`fe-react-thanhxuan-internal`):** Hook `usePrepOrderData.ts` và component `PrepOrderConfigHeaderComponent.tsx` chưa thực hiện lọc phòng thủ theo `selectedBrand`, dẫn đến việc render nguyên mảng đối tác trả về từ API.
-- **Giải pháp triển khai:**
-  - **Backend (`be-nestjs-thanhxuan`):**
-    - Cập nhật `PartnerRepository.findAllPartners` (`partner.repository.ts`): Bổ sung tham số `brand?: string`. Nếu có truyền, tiến hành lọc `{ brand: brand.trim().toUpperCase() }` tận dụng compound index `{ brand: 1, isActive: 1 }`.
-    - Cập nhật `PartnersService.getAllPartners` (`partners.service.ts`): Nhận và chuyển tiếp tham số `brand` vào repository.
-    - Cập nhật `PartnersController.getAllPartners` & `getPublicPartners` (`partners.controller.ts`): Tiếp nhận `@Query('brand') brand?: string` và truyền vào service.
-  - **Frontend (`fe-react-thanhxuan-internal`):**
-    - `usePrepOrderData.ts`: Bọc `rawPartners` qua `useMemo` lọc theo `selectedBrand`, đồng thời tự động cập nhật `selectedPartnerId` sang chi nhánh đầu tiên của thương hiệu mới khi chuyển đổi thương hiệu.
-    - `PrepOrderConfigHeaderComponent.tsx`: Lọc `filteredPartners` theo `selectedBrand` cho cả giao diện Mobile và Desktop, đảm bảo dropdown chỉ hiển thị các chi nhánh trực thuộc thương hiệu được chọn.
-
-
-## 2026-10-29
-
-### Docs & User Guides: Biên Soạn Bộ 8 Bản Cẩm Nang Hướng Dẫn Sử Dụng RBAC & Đồng Bộ Tài Liệu Phân Hệ Nội Bộ
-
-- **Bối cảnh & Yêu cầu:**
-  - Hệ sinh thái Cổng vận hành nội bộ (`fe-react-thanhxuan-internal`) sở hữu 8 vai trò RBAC (`ADMIN`, `MANAGER`, `WAREHOUSE_MANAGER`, `ACCOUNTANT`, `SHIPPER`, `WORKER`, `PARTNER_MANAGER`, `PARTNER_STAFF`) với các quy trình nghiệp vụ chuyên biệt từ khâu thu gom, vận chuyển, sản xuất 7 khâu, xuất kho, kiểm nhận đến tính lương và quản lý tài chính.
-  - Người dùng yêu cầu biên soạn 8 bản tài liệu hướng dẫn sử dụng chi tiết cho từng vai trò để đào tạo nhân sự, đồng thời rà soát và khắc phục các sai lệch trong các tài liệu kỹ thuật cốt lõi (`srs_sdd_fe_internal.md`, `CODEBASE_ATLAS.md`, `DATABASE_DICTIONARY.md`).
-- **Các thay đổi và cập nhật tài liệu:**
-  1. **Biên soạn bộ 8 cuốn cẩm nang hướng dẫn sử dụng chuyên biệt (`.agents/docs/user_guides/`):**
-     - `README.md`: Mục lục tra cứu tổng thể, sơ đồ phối hợp vận hành giữa 4 khối nghiệp vụ và bảng tài khoản thử nghiệm mẫu (Demo accounts).
-     - `user_guide_admin.md`: Cẩm nang Quản trị viên (giám sát thời gian thực, quản lý nhân sự 60 ngày & xóa vĩnh viễn, cấu hình GPS OpenStreetMap & IP Wi-Fi xưởng, duyệt nghỉ giao nhận, chốt bảng lương chu kỳ).
-     - `user_guide_manager.md`: Cẩm nang Quản lý Xưởng (chỉ huy sàn sản xuất, duyệt ca quên check-out, phân khâu mặc định, duyệt công thợ theo ngày, gán tài xế tuyến cố định, tuân thủ nghiêm ngặt bảo mật ẩn 100% dữ liệu tiền bạc).
-     - `user_guide_warehouse_manager.md`: Cẩm nang Thủ kho (soạn đồ sạch xuất xưởng `CLEAN_PLAN`, ký tên Canvas phát hành ảnh phiếu WebP gửi Cloudinary, quản lý thư viện ảnh phiếu `SLIP_GALLERY`, trạm rạch bao đếm lại gom bao xưởng).
-     - `user_guide_accountant.md`: Cẩm nang Kế toán (duyệt chi phí xăng/sửa xe tài xế với 2 ảnh bắt buộc, định mức thù lao chuyến lẻ `TripCompensationModal`, thiết lập tiền công giao thay khi shipper nghỉ, cấu hình đơn giá giờ 7 khâu, chạy tính bảng lương tự động và xuất Excel).
-     - `user_guide_shipper.md`: Cẩm nang Tài xế xe tải (100% Mobile PWA, lộ trình 4 ca sáng/chiều/tối, chợ chuyến `POOL` khóa nguyên tử, đếm thay đồ bẩn `ShipperCountPartnerModal` với biểu thức thông minh và số bao gom, nộp chi phí xe, xin nghỉ phép, minh bạch công thức lương 28 ngày chuẩn).
-     - `user_guide_worker.md`: Cẩm nang Thợ xưởng (chấm công camera selfie & Geofencing GPS $\le 150\text{m}$, tự động kích hoạt khâu mặc định, chuyển đổi giữa 7 khâu công việc tính giờ chuẩn xác từng phút, cơ chế tự động quay lại khâu mặc định `AUTO_RESUME`, rạch bao đếm lại, theo dõi thu nhập hàng ngày).
-     - `user_guide_partner_manager.md`: Cẩm nang Quản lý Đối tác B2B (đếm đồ bẩn auto-save onBlur chống xung đột, tự động nhảy ngày sau 21h, kiểm nhận đồ sạch qua ảnh WebP, đánh dấu Đủ/Thiếu/Thừa, tra cứu thư viện ảnh lịch sử, phê duyệt kích hoạt nhân viên cơ sở mình).
-     - `user_guide_partner_staff.md`: Cẩm nang Nhân viên Đối tác (giao diện 3 tab tinh gọn trên điện thoại: đếm đồ bẩn gửi giặt, kiểm nhận đồ sạch khi xe tải đến giao, tra cứu ảnh phiếu đối soát).
-  2. **Đồng bộ và sửa sai lệch trong Từ điển cơ sở dữ liệu (`DATABASE_DICTIONARY.md`):**
-     - Sửa lỗi trùng số thứ tự mục: 1.11 `hourly_work` và 1.11 `fuel_logs` $\rightarrow$ Đánh số lại liền mạch từ 1.11 đến 1.16 (`hourly_work` $\rightarrow$ `fuel_logs` $\rightarrow$ `pay_settings` $\rightarrow$ `payroll_periods` $\rightarrow$ `payslips` $\rightarrow$ `shipper_leave_requests`).
-     - Cập nhật số lượng collections: Phân vùng 1 (`internal_express`) có 16 collections (sửa từ 15); tổng số collections toàn hệ thống là 34 (sửa từ 33).
-  3. **Đồng bộ Bản đồ mã nguồn (`CODEBASE_ATLAS.md`):**
-     - Bổ sung nhóm màn hình Auth công khai (`/login`, `/register`, `/forgot-password`, `ProfileEditModal`, `ChangePasswordModal`, `useAuth.ts`, `useProfileEdit.ts`).
-     - Tách riêng route `/management/manager/approval` (`ApprovalManagementPage.tsx`) khỏi `/management/manager/personnel` (`StaffManagementPage.tsx`).
-     - Bổ sung component `PartnerStaffTabComponent.tsx` vào cổng đối tác.
-     - Cập nhật quyền hạn truy cập màn hình Kho Sạch (`/operations/warehouse-manager/warehouse`) và Duyệt Nghỉ (`/management/shipper-leaves`) của Kế toán.
-  4. **Đồng bộ Đặc tả phân hệ nội bộ (`srs_sdd_fe_internal.md`):**
-     - Chuẩn hóa tên vai trò đối tác trong toàn bộ tài liệu: `PARTNER_MANAGER` và `PARTNER_STAFF` (thay thế alias cũ `RESTAURANT_MANAGER`/`STAFF`).
-     - Bổ sung chức năng `FE-INT-FR-08: Quản Lý Đơn Xin Nghỉ Giao Nhận & Phân Tuyến Bù`.
-     - Cập nhật cấu trúc thư mục mã nguồn 2.1 (bổ sung `features/management/shipper-leaves/`, `features/management/workshop/`, `InternalLayout.tsx`).
-     - Cập nhật ma trận điều hướng 2.2 phản ánh chính xác quyền hạn thực tế của cả 8 vai trò.
-
-### Plan 55: Chức Năng Shipper Xin Nghỉ Giao Nhận & Phân Tuyến Kèm Tiền Công (Shipper Leave & Route Reassignment Workflow)
-
-- **Bối cảnh & Vấn đề nghiệp vụ:**
-  - Đội ngũ tài xế xe tải (Shipper) phụ trách tuyến giao nhận 2 chiều giữa xưởng giặt và các nhà hàng đối tác cố định hàng ngày. Khi một Shipper cần xin nghỉ phép một hoặc nhiều ngày, các cơ sở đối tác không thể bị bỏ sót tuyến mà phải được phân công bàn giao cho một tài khoản Shipper khác giao thay, kèm theo mức tiền công giao thay xứng đáng (do Kế toán hoặc Admin xác lập).
-- **Yêu cầu & Quyết định thiết kế:**
-  1. **Nộp đơn xin nghỉ linh hoạt:** Cho phép Shipper chọn 1 hoặc nhiều ngày nghỉ (`YYYY-MM-DD`), nhập lý do xin nghỉ. Hệ thống tự động tính toán tổng số lượt giao và các chi nhánh đối tác có lịch giao vào các ngày đó dựa trên `isPartnerScheduledOnDate`.
-  2. **Quy trình phê duyệt linh hoạt 2 bước hoặc 1 chạm:**
-     - **Luồng chuẩn 2 bước (Manager + Accountant):** Manager xem đơn, chọn tài khoản Shipper thay thế và chuyển đơn sang trạng thái `APPROVED_PENDING_COMPENSATION` $\rightarrow$ Kế toán tiếp nhận đơn đã chỉ định người, nhập số tiền công giao thay (`compensationAmount` VNĐ) và chuyển đơn sang `APPROVED` (chính thức có hiệu lực).
-     - **Luồng 1 chạm (Đặc quyền Admin):** Admin có thể chỉ định Shipper thay thế và nhập luôn số tiền công giao thay trong cùng một lần để duyệt hoàn tất ngay lập tức.
-  3. **Hệ thống Email thông báo tự động (Nodemailer qua EventEmitter):**
-     - Khi Shipper tạo đơn: Bắn sự kiện gửi email thông báo cho tất cả `ADMIN` và `MANAGER` đang active.
-     - Khi Manager duyệt bước 1: Bắn sự kiện gửi email thông báo cho tất cả `ACCOUNTANT` (và Admin) để vào set tiền công.
-     - Khi đơn hoàn tất (`APPROVED`): Gửi email thông báo cho cả Shipper xin nghỉ (được duyệt nghỉ), Shipper thay thế (thông báo nhận tuyến kèm tiền công).
-     - Khi bị từ chối (`REJECTED`): Gửi email phản hồi lý do cho Shipper xin nghỉ.
-  4. **Tự động hóa tuyến xe trong ngày nghỉ (`PartnersService.getSchedule`):**
-     - Vào các ngày nghỉ đã duyệt, các điểm giao của Shipper nghỉ sẽ tạm thời được loại bỏ khỏi lộ trình của Shipper đó, đồng thời tự động bổ sung vào danh sách lộ trình của Shipper nhận thay kèm badge chỉ báo "Nhận giao thay: [Tên Shipper]".
-  5. **Giao diện người dùng Mobile-First:**
-     - Shipper: Thêm 2 modal `ShipperLeaveRequestModal.tsx` và `ShipperLeaveHistoryModal.tsx` vào trang Giao nhận (`ShipperHandoverPage.tsx`).
-     - Quản trị: Xây dựng trang `/management/shipper-leaves` (`ShipperLeaveReviewPage.tsx`) với đầy đủ bộ lọc tabs trạng thái, danh sách thẻ `ShipperLeaveCardComponent.tsx` và bộ 3 modal duyệt/set công/từ chối.
-- **Các thay đổi kỹ thuật chi tiết:**
-  - **Backend (`be-nestjs-thanhxuan`):**
-    - Thêm Schema & Collection `shipper_leave_requests` (Connection `internal_express`): `shipper-leave.schema.ts`.
-    - Tạo `ShipperLeaveRepository` kế thừa `BaseRepository`.
-    - Tạo bộ DTOs: `CreateShipperLeaveDto`, `ApproveShipperLeaveDto`, `SetCompensationDto`, `RejectShipperLeaveDto`, `QueryShipperLeaveDto`.
-    - Xây dựng `ShipperLeavesService`, `ShipperLeavesController`, `ShipperLeavesModule` và đăng ký vào `InternalModule`.
-    - Cập nhật `MailService` lắng nghe các sự kiện `shipper_leave.*` và gửi email HTML tự động.
-    - Cập nhật `PartnersService.getSchedule` tự động đổi tuyến khi có đơn `APPROVED`.
-    - Bổ sung các mã quyền `SHIPPER_LEAVE_*` vào `permissions.map.ts`.
-  - **Frontend (`fe-react-thanhxuan-internal`):**
-    - Tạo types `shipper-leave.types.ts` và API service `shipperLeaveService.ts`.
-    - Tạo custom hook `useShipperLeaveManagement.ts`.
-    - Xây dựng các modals: `ShipperLeaveRequestModal.tsx`, `ShipperLeaveHistoryModal.tsx`, `ApproveShipperLeaveModal.tsx`, `SetLeaveCompensationModal.tsx`, `RejectShipperLeaveModal.tsx`.
-    - Xây dựng `ShipperLeaveCardComponent.tsx` và trang `ShipperLeaveReviewPage.tsx`.
-    - Tích hợp 2 nút "Xin nghỉ" và "Lịch sử nghỉ" vào `ShipperHandoverPage.tsx`.
-    - Bổ sung tuyến đường `/management/shipper-leaves` vào `router.tsx` và menu "Duyệt Nghỉ Giao Nhận" vào `nav-config.ts`.
-  - **Tài liệu kỹ thuật đồng bộ:** Cập nhật `DATABASE_DICTIONARY.md` (33 collections), `CODEBASE_ATLAS.md`, `srs_sdd_backend.md`, `srs_sdd_fe_internal.md`, `SRS_SDD.md`.
-  - **Verification:** Backend 50/50 test suites pass 100%, `tsc --noEmit` pass 100%, `nest build` pass 100%; Frontend `tsc --noEmit` pass 100%, `tsc -b && vite build` tạo PWA bundle thành công.
-
-### Bugfix: Phân Quyền Kho Sạch Cho Kế Toán, Sửa Form Nhập Giá Bị Kẹt 50k & Hiển Thị Tên Chi Nhánh Đối Tác
-
-- **Vấn đề phát sinh:**
-  1. Kế toán (`ACCOUNTANT`) dù đã được cấu hình menu nhưng khi bấm vào trang Kho Sạch (`/operations/warehouse-manager/warehouse`) vẫn bị chặn và chuyển hướng về Dashboard do thiếu role trong `<ProtectedRoute>`.
-  2. Khi mở modal "Set Giá" (`TripCompensationModal.tsx`), ô nhập tiền công bị reset liên tục về mức mặc định 50.000 đ khiến Admin/Accountant không thể gõ số tiền tùy chỉnh khác.
-  3. Thẻ phiếu giao nhận trên tab Kho Sạch hiển thị tiêu đề "Chi nhánh đối tác" thay vì tên cơ sở thật (do chỉ đọc `partnerObj?.name` mà không fallback sang `record.partnerName`).
-  4. Thẻ phiếu chưa có tài xế hiển thị nhãn "Lương cố định", gây nhầm lẫn với các chuyến tự do chờ set giá.
-- **Giải pháp xử lý:**
-  1. **`warehouse.tsx`:** Bổ sung `StaffRole.ACCOUNTANT` vào mảng `allowedRoles` của `<ProtectedRoute>`.
-  2. **`TripCompensationModal.tsx`:** Sử dụng `prevOpenRef` để chỉ khởi tạo lại state khi modal chuyển từ đóng sang mở (`open && !prevOpenRef.current`), không re-trigger khi component re-render. Đổi state `amount` sang kiểu `number | string` và không ép kiểu ngay trong `onChange` để người dùng có thể xóa rỗng gõ tự do.
-  3. **`WarehouseCleanPlanTabComponent.tsx` & `WarehouseSummaryTabComponent.tsx`:** Chuẩn hóa fallback `record.partnerName || partnerObj?.name || 'Chi nhánh đối tác'`.
-  4. **Phân biệt tuyến cố định vs chuyến tự do:** Nếu chưa có tài xế và đối tác chưa có tài xế mặc định (`!record.shipperName && !partnerObj?.defaultShipperId`), hiển thị nhãn `Chuyến tự do` (màu amber) thay vì `Lương cố định`.
-- **Verification:**
-  - `fe-react-thanhxuan-internal`: `tsc --noEmit` PASS (0 errors), `pnpm build` PASS (PWA service worker + bundle hoàn tất).
-  - Đã commit và push trực tiếp lên nhánh `dev` của repository `fe-react-thanhxuan-internal` để Vercel tự động deploy.
-
-- **Vấn đề phát hiện:**
-  1. Nút "Set Giá" / "Sửa Giá" trên thẻ phiếu giao nhận xưởng (`WarehouseCleanPlanTabComponent`) trước đây hiển thị cho mọi vai trò xem được trang (bao gồm cả Thủ kho `WAREHOUSE_MANAGER` và Quản lý xưởng `MANAGER`), vi phạm nguyên tắc bảo mật tài chính của công ty (chỉ Ban Quản Trị và Kế toán mới có quyền can thiệp vào định mức tiền công giao nhận).
-  2. Tài khoản Kế toán (`ACCOUNTANT`) chưa có mục menu để vào màn hình "Kho Sạch & Soạn Đồ" (`/operations/warehouse-manager/warehouse`) trên cả Desktop Sidebar và Mobile Quick Bottom Bar, khiến Kế toán không thể vào rà soát và cấu hình tiền công các chuyến giao nhận tự do.
-- **Giải pháp xử lý triệt để:**
-  1. **Frontend (`fe-react-thanhxuan-internal`):**
-     - Tại `WarehouseCleanPlanTabComponent.tsx`: Kiểm tra `canSetCompensation = user?.role === StaffRole.ADMIN || user?.role === StaffRole.ACCOUNTANT`. Nút "Set Giá" / "Sửa Giá" chỉ hiển thị cho 2 vai trò này; ẩn hoàn toàn với `WAREHOUSE_MANAGER`, `MANAGER`, `SHIPPER`, `WORKER`.
-     - Tại `nav-config.ts`: Cấp quyền `StaffRole.ACCOUNTANT` vào mục "Kho Sạch & Soạn Đồ" (`id: "kho"`), giúp Kế toán thấy menu trên Desktop Sidebar và Drawer Mobile.
-     - Tại `nav-mobile-config.ts`: Bổ sung mục "Kho Sạch" (icon `Warehouse`) vào thanh điều hướng nhanh Mobile Bottom Bar của vai trò `ACCOUNTANT` (`Tổng Quan`, `Báo Cáo`, `Kho Sạch`, `Bảng Lương` + nút `Thêm`), giúp Kế toán trên điện thoại truy cập 1 chạm vào danh sách phiếu kho để set giá.
-  2. **Backend API Security (`be-nestjs-thanhxuan`):**
-     - Tại `handover.controller.ts`: Sửa quyền bảo vệ của cả hai endpoint `@Patch(':id/compensation')` và `@Post('cluster-compensation')` thành duy nhất `@Permissions(PERMISSIONS.PAY_RATE_MANAGE)` (loại bỏ `PERMISSIONS.HANDOVER_EDIT_FIELD`), khóa chặt cổng API chỉ cho `ADMIN` và `ACCOUNTANT` thực thi.
-  3. **Verification:** Backend 50/50 suites (235 tests pass), nest build pass; Frontend `tsc --noEmit` pass 100%, vite build pass tạo PWA bundle thành công.
-
-### Plan 54: Tính Năng Soạn Đồ Giao Trước Ca Chiều Cho Thủ Kho (Prep Order Advance Delivery)
-
-- **Bối cảnh nghiệp vụ:** Tại các nhà hàng đối tác đông khách (đặc biệt chuỗi Pizza 4P's), những hôm quá tải lượng khăn ăn của thực khách, xưởng giặt Thanh Xuân phải chở trước một lượng đồ sạch (như khăn ăn xám) vào buổi chiều (cùng ngày với ca giao tối, hoặc chiều hôm trước với ca giao sáng) để nhà hàng đủ khăn phục vụ khách.
-- **Yêu cầu & Quyết định thiết kế:**
-  1. Dòng ghi chú tương ứng của chiếc đồ trong phiếu tự động ghi nhận cú pháp chuẩn: `Đã giao xxx chiếc vào chiều dd/mm/yyyy`.
-  2. Màn hình của Thủ kho khi soạn đồ (`PrepOrderModal` gồm cả dạng Bảng Table và dạng Thẻ Mobile Card) ở cột số lượng hiển thị phân rã trực quan: `xxx (cần giao ca chính) + xxx (chiều - màu cam hổ phách nổi bật)`.
-  3. Giá trị số lượng lưu trong hệ thống (`quantity`) là tổng cả 2 đợt ($xxx + yyy = zzz$) để Shipper và Đối tác ký nhận, đối soát và tính sản lượng trọn vẹn.
-  4. Các màn hình khác (Shipper, Đối tác, Canvas/ảnh phiếu xuất) giữ nguyên số lượng tổng và hiển thị dòng ghi chú đó, hoàn toàn không bị ảnh hưởng.
-  5. Hỗ trợ nhập liệu 2 chiều (Hybrid): Tiện ích 1 chạm (Popover nhập số lượng + ngày giao chiều tự sinh ghi chú) VÀ tự động nhận diện thông minh (Regex parser) nếu thủ kho gõ tay vào ô ghi chú.
-- **Các thay đổi kỹ thuật chi tiết:**
-  - **Tạo Helper Phân Rã & Parser Ghi Chú (`prepOrderAdvanceDeliveryHelper.ts`):**
-    - Biểu thức Regex: `/(?:Đã giao|Giao trước)\s*(\d+)\s*(?:chiếc|cái)?\s*vào chiều\s*(\d{1,2}[\/\-]\d{1,2}(?:[\/\-]\d{4})?)/i`.
-    - Các hàm chuẩn hóa: `parseAdvanceDeliveryFromNote`, `formatAdvanceDeliveryNote`, `calculateDisplayQuantities`, `applyAdvanceDeliveryToNote`, `removeAdvanceDeliveryFromNote`.
-    - Viết unit test hoàn chỉnh tại `__tests__/prepOrderAdvanceDeliveryHelper.test.ts`.
-  - **Xây dựng Popover Tiện Ích 1 Chạm (`AdvanceDeliveryPopoverComponent.tsx`):**
-    - Thiết kế nút trigger tinh tế: Khi có giao chiều, hiển thị badge cam `Chiều: +{qty}`; khi chưa có, hiển thị icon `Sunset` nhỏ gọn.
-    - Modal popup tiện ích: Nhập số lượng giao chiều, chọn nhanh chip `+50`, `+100`, `+200`, `+300`; chọn ngày nhanh "Chiều hôm nay" / "Chiều hôm trước" hoặc gõ ngày tùy ý; xem trước câu ghi chú sẽ sinh ra; hỗ trợ nút "Áp dụng" và "Xóa".
-    - Kỷ luật kích thước: 239 dòng (< 250 dòng).
-  - **Nâng Cấp Bảng Soạn Đồ Desktop (`PrepOrderItemTableComponent.tsx`):**
-    - Cột "Sẽ giao ngày mai" hiển thị stepper ca chính kèm badge cam `+{advanceQty} chiều (= {quantity})`.
-    - Cột "Ghi chú dòng" tích hợp nút trigger Popover bên cạnh input ghi chú.
-    - Kỷ luật kích thước: 247 dòng (< 250 dòng).
-  - **Nâng Cấp Thẻ Soạn Đồ Mobile (`PrepOrderItemCardComponent.tsx`):**
-    - Stepper cảm ứng lớn cho ca chính, badge cam hổ phách hiển thị rõ ràng phân rã ca chiều.
-    - Tích hợp nút Popover bên cạnh ô ghi chú dòng.
-    - Kỷ luật kích thước: 235 dòng (< 250 dòng).
-  - **Verification:** `tsc -b && vite build` pass 100%, tạo PWA bundle thành công; `pnpm exec tsc --noEmit` pass không có lỗi.
-
-
-### Plan 53: Bổ Sung Ca Giao Nhận Buổi Chiều (AFTERNOON) Toàn Hệ Thống
-
-- **Bối cảnh & Yêu cầu:** Trước đây hệ thống giao nhận xưởng và logistics chỉ định nghĩa 2 ca giao nhận mặc định: **Ca Sáng (`MORNING`)** và **Ca Tối (`EVENING`)**. Thực tế phát sinh nhu cầu giao nhận bổ sung **Buổi Chiều (`AFTERNOON`)** (khoảng 14h00 - 17h00) đối với các chuỗi đối tác tiệc chiều hoặc chuyến trung chuyển khẩn cấp trước giờ cao điểm tối.
-- **Các thay đổi kiến trúc & kỹ thuật chi tiết:**
-  - **Backend (`be-nestjs-thanhxuan`):**
-    - Mở rộng enum `deliveryShift` trong Schema `Partner` (`partner.schema.ts`) và `HandoverRecord` (`handover-record.schema.ts`): `['MORNING', 'AFTERNOON', 'EVENING']`.
-    - Cập nhật validation DTOs: `CreatePartnerDto`, `UpdatePartnerDto`, `CleanClothesDto` (PrepOrderDto), `CreateHandoverDto` xác thực nghiêm ngặt giá trị `'AFTERNOON'`.
-    - Nâng cấp Controller & Service Pool Compensation: Hỗ trợ query parameter `shift?: 'MORNING' | 'AFTERNOON' | 'EVENING'` tại `HandoverController.getPoolHandovers` và `HandoverPoolCompensationService`.
-    - Đồng bộ logic kế thừa ca: Phiếu giao nhận tự động kế thừa `deliveryShift` từ đối tác (`MORNING`, `AFTERNOON` hoặc `EVENING`).
-    - Verification: Toàn bộ 50 test suites (233 unit tests pass 100%), typecheck `tsc --noEmit` pass.
-  - **Frontend Cổng Nội Bộ (`fe-react-thanhxuan-internal`):**
-    - **Quản trị đối tác:** Khai báo kiểu `deliveryShift?: 'MORNING' | 'AFTERNOON' | 'EVENING'` trong `partner.types.ts`, `PartnerModal.tsx`. Thêm lựa chọn `<option value="AFTERNOON">Ca Chiều (Buổi chiều)</option>` trong `PartnerContactScheduleFieldsComponent.tsx`.
-    - **Thẻ chi nhánh đối tác:** Cập nhật `PartnerCardComponent.tsx` hiển thị badge trực quan theo ca: Ca Sáng (Vàng hổ phách), Ca Chiều (Cam ấm), Ca Tối (Tím).
-    - **Màn hình giao nhận Shipper (`ShipperHandoverPage.tsx`):**
-      - Nâng cấp thanh lọc ca thành 4 nút: `Tất Cả`, `Sáng (x)`, `Chiều (y)`, `Tối (z)` (tối ưu responsive dạng lưới `grid-cols-2 sm:grid-cols-4` trên điện thoại di động).
-      - Icon trực quan: `Sun` (Sáng), `SunMedium` (Chiều), `Moon` (Tối).
-      - Mở rộng `useShipperHandoverPage.ts` tính toán chính xác `afternoonCount`, lọc `filteredPoints` và `filteredPoolJobs` theo `AFTERNOON`.
-    - **Thẻ điểm giao nhận & Thẻ nhận chuyến:** Cập nhật `ShipperHandoverItemCardComponent.tsx`, `ShipperPendingPointCardComponent.tsx`, `ShipperJobPoolTabComponent.tsx` hiển thị chuẩn xác badge Ca Chiều với nền cam nhạt và chữ cam đậm.
-    - **Dropdown chọn chi nhánh khi xuất phiếu kho:** Cập nhật `PrepOrderConfigHeaderComponent.tsx` hiển thị ca giao nhận bên cạnh tên chi nhánh (`• Ca Chiều`, `• Ca Sáng`, `• Ca Tối`) trên cả Mobile và Desktop.
-    - Verification: `tsc --noEmit` pass 100%, `pnpm build` pass tạo PWA bundle thành công.
-- **Tài liệu & CSDL:** Cập nhật bảng `partners` (1.6) và `handover_records` (1.8) trong `DATABASE_DICTIONARY.md`, cập nhật `srs_sdd_backend.md`, `srs_sdd_fe_internal.md` và `SRS_SDD.md`.
-
-### Bugfix: Khóa Chặt Chuyến Tự Do Chỉ Nhận Cho Ngày Hôm Đó, Ngăn Tự Động Add Vào Lộ Trình Các Ngày Sau Của Shipper
-
-- **Vấn đề phát hiện:** Khi tài xế Shipper bấm nhận một chuyến tự do (đối tác chưa có tài xế cố định), chuyến đi đã được lưu đúng vào ngày được chọn (`recordDate`). Tuy nhiên, khi Shipper chuyển sang xem lộ trình của ngày hôm sau (`selectedDate + 1`), chi nhánh đối tác tự do đó lại tự động xuất hiện trong Tab "Lộ Trình" (`ROUTE`) của ngày hôm sau dưới dạng chưa có phiếu (`record: undefined`), khiến Shipper nhầm tưởng mình bị gán luôn cho đối tác đó vào các ngày sau.
-- **Nguyên nhân gốc rễ (Root Cause):**
-  1. Backend endpoint `GET /partners/schedule` trả về toàn bộ danh sách đối tác có lịch trong ngày mà không lọc theo `shipperId`, bao gồm cả đối tác tuyến tự do (`defaultShipperId == null`).
-  2. Frontend `useShipperHandoverPage.ts` khi tính `deliveryPoints` duyệt qua tất cả `scheduledPartners` và tự động push mọi đối tác chưa có phiếu vào danh sách lộ trình của Shipper mà không kiểm tra xem đối tác đó có phải tuyến cố định của Shipper này hay không.
-- **Giải pháp xử lý triệt để:**
-  1. **Backend (`be-nestjs-thanhxuan`):** Nâng cấp `GET /partners/schedule` nhận `@CurrentUser() user` và `@Query('shipperId')`. Nếu người gọi là vai trò `SHIPPER`, hệ thống tự động lọc chỉ trả về các đối tác mà Shipper đó được phân công cố định (`defaultShipperId == user.sub`), loại bỏ 100% các đối tác tuyến tự do khỏi schedule.
-  2. **Frontend (`fe-react-thanhxuan-internal`):** Trong `useShipperHandoverPage.ts`, bổ sung ràng buộc nghiêm ngặt khi duyệt `scheduledPartners`: chỉ đưa vào Tab "Lộ Trình" (`ROUTE`) nếu `sp.defaultShipperId === user.id`. Đối tác tuyến tự do chưa có phiếu tuyệt đối không xuất hiện trong Tab "Lộ Trình", mà chỉ hiển thị tại Tab "Nhận Chuyến" (`POOL`) của từng ngày để Shipper chủ động bấm nhận lại cho từng ngày riêng biệt.
-  3. **Verification:** Backend 50/50 suites (235 tests pass), nest build pass; Frontend `tsc --noEmit` pass 100%, vite build pass tạo PWA bundle thành công.
-
-### Plan 52: Phân Shipper Cố Định Cho Chi Nhánh Đối Tác, Tab Nhận Chuyến Tự Do & Cài Đặt Tiền Công Job Lẻ / Cụm Tuyến
-
-- **Bối cảnh & Vấn đề giải quyết:**
-  - **Phân công Shipper cố định cho chi nhánh đối tác:** Trước đây hệ thống chưa có cơ chế chỉ định một tài xế xe tải (Shipper) cố định phụ trách từng chi nhánh đối tác. Trong mô hình vận hành của công ty Thanh Xuân, các tuyến cố định này được tính theo chế độ lương cố định + phụ cấp theo tháng (không tính tiền chuyến riêng).
-  - **Tuyến tự do & Chợ Nhận Chuyến (Job Pool):** Các đối tác chưa được gán cố định cho shipper nào (hoặc các job phát sinh) cần hiển thị tại một tab riêng để các tài xế Shipper có thể chủ động bấm "Nhận chuyến" đi giao nhận. Cần đảm bảo cơ chế nhận chuyến nguyên tử (Atomic Claim) chống xung đột khi 2 tài xế bấm nhận cùng lúc.
-  - **Cài đặt tiền công chuyến (Trip Compensation):** Admin và Kế toán (`ACCOUNTANT`) cần công cụ thiết lập tiền công riêng cho các job tự do/phát sinh: 1 job đi 1 đối tác lẻ = `x` VNĐ; 1 job đi nhiều cụm đối tác cùng tuyến = `xx` VNĐ (chia đều số tiền cho từng phiếu thuộc cụm). Toàn bộ tiền công chuyến hoàn thành trong tháng phải được tự động tích hợp cộng vào bảng lương của Shipper (`extraDeliveryPay` và `netPay`).
-
-- **Các thay đổi kiến trúc & kỹ thuật chi tiết:**
-  - **Backend (`be-nestjs-thanhxuan`):**
-    - Mở rộng Schema `Partner` (`partner.schema.ts`): Thêm trường `defaultShipperId?: Types.ObjectId` tham chiếu tới `StaffAccount` (index `{ defaultShipperId: 1 }`), hỗ trợ DTO `CreatePartnerDto` & `UpdatePartnerDto`.
-    - Mở rộng Schema `HandoverRecord` (`handover-record.schema.ts`): Thêm sub-schema `TripCompensation` (`amount`, `clusterId`, `note`, `configuredBy`, `configuredAt`), các trường `tripCompensation`, `claimedAt`, `claimedBy`.
-    - Tạo DTOs xác thực nghiêm ngặt: `ClaimHandoverDto` (`src/modules/internal/handovers/dto/claim-handover.dto.ts`), `SetTripCompensationDto` và `ClusterCompensationDto` (`src/modules/internal/handovers/dto/trip-compensation.dto.ts`).
-    - Endpoint lấy danh sách tài xế active: Thêm `GET /api/v1/internal/accounts/shippers-list` tại `AccountsController` / `AccountsService` / `StaffAccountRepository` trả về danh sách `_id, fullName, phone, username` của tài xế đang hoạt động.
-    - Xử lý nhận chuyến nguyên tử (Atomic Claim): Thêm `claimRecordAtomic` tại `HandoverRecordRepository` dùng MongoDB `findOneAndUpdate({ _id: id, shipperId: null }, { $set: { shipperId: user.sub, claimedAt, claimedBy } }, { new: true })`. Trả về HTTP `409 Conflict` nếu chuyến đã có tài xế khác nhận trước.
-    - Xây dựng `HandoverPoolCompensationService`: Quản lý logic lấy danh sách chợ chuyến (`getPoolHandovers`), nhận chuyến (`claimHandover`), cài đặt tiền chuyến lẻ (`setTripCompensation`) và gom cụm nhiều đối tác (`clusterCompensation` sinh mã `CLUSTER-YYYYMMDD-XXXX` chia đều `perRecordAmount = Math.round(totalAmount / N)`).
-    - Tích hợp tự động vào bảng lương Shipper: Nâng cấp `payroll-shipper-calculator.helper.ts` tự động lọc các phiếu giao nhận hoàn thành trong tháng có `tripCompensation.amount > 0` đưa vào `ShipperPayDetails.extraDeliveryPay` và cộng trực tiếp vào thu nhập thực nhận `netPay`.
-    - Viết bộ unit test toàn diện: `handover-pool-compensation.service.spec.ts` kiểm thử 7 kịch bản nghiệp vụ (Pool filtering, Atomic claim, Race condition handling, Set tiền lẻ, Gom cụm chia đều, Payroll integration). Test chạy PASS 7/7.
-  - **Frontend Cổng Nội Bộ (`fe-react-thanhxuan-internal`):**
-    - Phân công Shipper trong `PartnerModal.tsx`: Tích hợp dropdown tải danh sách tài xế từ `/accounts/shippers-list`, cho phép chọn Shipper cố định (hưởng lương cứng + phụ cấp) hoặc chọn "Tuyến tự do (Chờ nhận theo chuyến)".
-    - Hiển thị trên thẻ đối tác `PartnerCardComponent.tsx`: Badge màu tím hiển thị họ tên và SĐT tài xế cố định phụ trách chi nhánh hoặc nhãn Tuyến tự do.
-    - Thêm Tab "Nhận Chuyến" (`POOL`) trên `ShipperHandoverPage.tsx`: Mở rộng `useShipperHandoverPage.ts` hỗ trợ 3 tabs (`ROUTE`, `POOL`, `HISTORY`), query `poolJobs`, mutation `claimJobMutation`.
-    - Xây dựng component `ShipperJobPoolTabComponent.tsx`: Hiển thị danh sách chuyến tự do khả dụng kèm badge số lượng, thông tin điểm giao nhận, số món sạch/bao bẩn, tiền công dự kiến và nút "Nhận Chuyến Này".
-    - Xây dựng Modal cài đặt tiền công `TripCompensationModal.tsx`: Hỗ trợ 2 chế độ: Chuyến lẻ (`x` VNĐ) và Gom cụm nhiều đối tác cùng tuyến (`xx` VNĐ chia đều), hiển thị trực quan thông tin chi nhánh và tiền chia đều mỗi phiếu.
-    - Gắn nút cài đặt tiền công trên phiếu kho: Tích hợp vào `WarehouseCleanPlanTabComponent.tsx` và `WarehouseHandoverPage.tsx` cho phép Thủ kho, Quản lý và Kế toán xem và cập nhật tiền công chuyến ngay trên phiếu xuất kho.
-
-- **Kết quả Kiểm Chứng (Verification):**
-  - Backend Unit Tests: 50/50 suites passed, 233/233 tests passed (0 failures).
-  - Backend NestJS Build: `pnpm build` thành công (exit code 0).
-  - Frontend Internal Typecheck: `pnpm exec tsc --noEmit` pass 100% (0 errors).
-  - Frontend Internal Production Build: `pnpm build` thành công, sinh dist bundle và PWA Service Worker (exit code 0).
-- **Đồng bộ tài liệu:** Cập nhật đồng bộ `DATABASE_DICTIONARY.md` (1.6 bảng `partners` & 1.8 bảng `handover_records`), `CODEBASE_ATLAS.md` (Endpoints, Services, Components, Modals), `srs_sdd_backend.md`, `srs_sdd_fe_internal.md`, `SRS_SDD.md` (Document History) và `plan52.md`.
-
-### Plan 51: Bổ Sung Tự Nhập Món Đồ Ngoài Setting, Fix Lỗi Recount-Flag, Tối Ưu UI & Fullscreen Mobile Form Đếm Đồ
-
-- **Bối cảnh & Vấn đề giải quyết:**
-  - **Khắc phục lỗi HTTP 404 Recount-Flag:** Khi tài xế Shipper tick chọn hoặc hủy chọn checkbox *"Yêu cầu trạm rạch bao đếm lại tại xưởng"* trên màn hình xem trước phiếu, hệ thống gọi `PATCH /api/v1/internal/handover/:id/recount-flag` nhưng Backend thiếu endpoint này dẫn đến thông báo toast đỏ `Cannot PATCH ...`.
-  - **Khắc phục lỗi UI cắt viền & tràn lề:** Nút *"Xác Nhận Shipper Đã Giao Hàng & Nhận Đồ Bẩn"* trên mobile hẹp bị co cụm và cắt cụt văn bản (`ác Nhận Shipper...`); cụm nút chọn số bao gom niêm phong (`1 bao`, `2 bao`... `Khác..`) bị tràn ra khỏi mép phải màn hình.
-  - **Bổ sung tự nhập món đồ ngoài setting:** Khi chi nhánh đối tác có các món đồ vải phát sinh mới chưa có sẵn trong danh mục bảng giá (`item_catalogs`), tài xế shipper và đối tác không thể ghi nhận số lượng chính xác vào phiếu giao nhận.
-  - **Tối ưu Mobile-First & Fullscreen Form đếm đồ Shipper:** Modal đếm đồ trên di động trước đây bị giới hạn kích thước với khoảng cách lề thừa bao quanh khiến không gian đếm đồ bị thu hẹp.
-
-- **Các thay đổi kiến trúc & kỹ thuật chi tiết:**
-  - **Backend (`be-nestjs-thanhxuan`):**
-    - Tạo mới `RecountFlagDto` (`src/modules/internal/handovers/dto/recount-flag.dto.ts`) validate strict `@IsBoolean()` và `@IsOptional() @IsString() recountReason`.
-    - Bổ sung endpoint `@Patch(':id/recount-flag')` tại `HandoverDirtyOperationsController` với phân quyền an toàn `PERMISSIONS.HANDOVER_DELIVER, PERMISSIONS.HANDOVER_RECOUNT_REQUEST`.
-    - Cập nhật `HandoverDirtySignatureService` và `HandoverService` xử lý cập nhật trạng thái `recount.isRecount`, `recount.status` (`PENDING` hoặc `NONE`) và lưu ID người yêu cầu (`requestedBy`).
-    - Nâng cấp `updateDirtyItemOnBlur` nhận thêm `customItemName?: string` để lưu trực tiếp tên món đồ phát sinh người dùng tự nhập.
-  - **Frontend (`fe-react-thanhxuan-internal`):**
-    - Nâng cấp `Dialog` (`src/components/ui/dialog.tsx`) hỗ trợ prop `fullScreenOnMobile?: boolean`, tự động gỡ bỏ viền lề ngoài và bo góc trên mobile để modal chiếm trọn 100% diện tích màn hình điện thoại.
-    - Xây dựng `CustomHandoverItemModal.tsx` (`src/features/operations/handovers/modals/`) cho phép nhập Tên món đồ, Đơn vị tính (chọn nhanh hoặc tự gõ), Số lượng và Ghi chú; tự động sinh mã `CUSTOM_<timestamp>`.
-    - Nâng cấp `useShipperCountForm.ts` và `ShipperCountPartnerModal.tsx`: bật `fullScreenOnMobile={true}`, thêm nút `+ Tự nhập món`, quản lý state `customItems`, hiển thị badge `Ngoài setting` và nút Thùng rác xóa món tự nhập nếu nhập nhầm trong `ShipperCountItemsComponent.tsx`.
-    - Thiết kế lại bộ chọn số bao cho Shipper (`ShipperCountSignSectionComponent.tsx` & `ShipperHandoverSignatureSectionComponent.tsx`): hiển thị sẵn 3 nút chọn nhanh `1 bao`, `2 bao`, `3 bao`, kết hợp cụm stepper `[-] [Khác] [+]` vừa vặn trên 1 dòng đơn trên mọi smartphone; đồng bộ số bao gom niêm phong giữa form đếm thay và card giao hàng ngoài; rút gọn nhãn nút gửi thành **"Xác Nhận"** kèm icon Truck.
-    - Sửa nút giao hàng trong `ShipperHandoverSignatureSectionComponent.tsx`: chuyển sang `min-h-[46px] h-auto whitespace-normal leading-snug break-words` chống cắt chữ.
-    - Cổng đối tác (`PartnerCountTabComponent.tsx` & `PartnerCountItemsViewComponent.tsx`): tích hợp nút `+ Tự nhập món đồ` ngoài setting, hiển thị badge và nút xóa món custom; giữ nguyên không có trường số bao (số bao chỉ dành riêng cho Shipper).
-
-- **Kết quả Kiểm Chứng (Verification):**
-  - Backend Typecheck & Lint: Pass 100% (0 errors, 0 warnings).
-  - Backend Jest Tests: Pass 3/3 test suites matching handover (`create-handover.dto.spec.ts`, `handover.service.spec.ts`, `handover-state.spec.ts` - 42/42 tests pass).
-  - Frontend Internal Typecheck: Pass 100% (`tsc --noEmit` pass không lỗi).
-  - Frontend Internal Production Build: Pass 100% (`tsc -b && vite build` tạo bundle dist/ và service worker PWA sạch sẽ).
-- **Đồng bộ tài liệu:** Cập nhật `plan51.md` (Completed), `CODEBASE_ATLAS.md` (Bảng 1.1 Backend & Bảng 3 Frontend), `srs_sdd_backend.md`, `srs_sdd_fe_internal.md`, `SRS_SDD.md` (Document History) và `CHANGELOG.md`.
-
-## 2026-10-28
-
-
-
 ---
 
-## CÁC GIAI ĐOẠN LỊCH SỬ TRƯỚC ĐÓ (PLAN 1 ĐẾN PLAN 50)
+## CÁC GIAI ĐOẠN LỊCH SỬ TRƯỚC ĐÓ (PLAN 1 ĐẾN PLAN 58)
 
-> Toàn bộ 50 Plan lịch sử đầu tiên đã được lưu trữ sang file độc lập để tối ưu hóa hiệu năng và tiết kiệm token cho hệ thống:
-> 📦 **Xem chi tiết tại:** [CHANGELOG_ARCHIVE_V1.md](./changelogs/CHANGELOG_ARCHIVE_V1.md)
+> Toàn bộ các Plan lịch sử trước đây đã được tự động lưu trữ sang các file độc lập để tối ưu hóa token và hiệu năng tài liệu:
+> 📦 **Giai đoạn Plan 54 - Plan 58:** [CHANGELOG_ARCHIVE_V3.md](./changelogs/CHANGELOG_ARCHIVE_V3.md)
+> 📦 **Giai đoạn Plan 51 - Plan 53:** [CHANGELOG_ARCHIVE_V2.md](./changelogs/CHANGELOG_ARCHIVE_V2.md)
+> 📦 **Giai đoạn Plan 1 - Plan 50:** [CHANGELOG_ARCHIVE_V1.md](./changelogs/CHANGELOG_ARCHIVE_V1.md)

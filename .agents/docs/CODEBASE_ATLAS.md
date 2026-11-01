@@ -183,6 +183,9 @@ Kiến trúc: Next.js App Router, Server Components mặc định cho SEO (`(pub
 | `/tin-tuc/[...slug]` | RSC (SEO) | `src/app/(public)/tin-tuc/[...slug]/page.tsx` | `src/features/public/articles/components/` | `NewsArticleDetailView`, `NewsCategoryListView`, `public-articles.service.ts` |
 | `/tin-tuc` | RSC | `src/app/(public)/tin-tuc/page.tsx` | `ArticleListPage.tsx`<br>`src/features/public/articles/` | `ArticleListComponent`, `ArticleSortFilterComponent` |
 | `/lien-he` | Client Form | `src/app/(public)/lien-he/page.tsx` | `ContactPage.tsx`<br>`src/features/public/contacts/` | `public-contacts.service.ts`, `public-contacts.action.ts` |
+| `/offline` | Client / PWA | `src/app/offline/page.tsx` | `OfflinePage` màn hình ngoại tuyến khi mất mạng Internet (Wifi/4G), nút tải lại và gọi hotline khẩn cấp | Fallback tự động bởi Service Worker |
+| `/manifest.webmanifest` | Metadata Route | `src/app/manifest.ts` | Web App Manifest PWA chuẩn hóa (192, 512, maskable icons, shortcuts B2B) | Native Next.js 16 MetadataRoute |
+| `/api/manifest/admin`<br>(Subdomain: `quantri.*`) | Route Handler | `src/app/api/manifest/admin/route.ts` | Web App Manifest PWA độc lập cho Quản trị CMS ("Quản trị Thanh Xuân", short_name: "Quản trị Thanh Xuân", start_url: "/") | JSON Manifest Route |
 | `/admin/login` | Client / Auth | `src/app/(admin)/admin/login/page.tsx` | `LoginFormComponent.tsx`<br>`src/features/admin/auth/` | `admin-auth.service.ts` (quản lý phiên qua httpOnly cookies) |
 | `/admin/dashboard` | Client / CMS | `src/app/(admin)/admin/dashboard/page.tsx` | `DashboardPage.tsx`<br>`src/features/admin/dashboard/` | `admin-dashboard.service.ts` |
 | `/admin/articles` | Client / CMS | `src/app/(admin)/admin/articles/page.tsx` | `ArticleManagerPage.tsx`<br>`src/features/admin/articles/` | Modals: `ArticleEditorModal`, `ArticleTrashModal`<br>Components: `ArticleManagerTableComponent`, `ArticleManagerToolbarComponent`<br>Editor: `RichTextEditorComponent`<br>Hooks: `useAdminArticles` |
@@ -201,8 +204,11 @@ Kiến trúc: Next.js App Router, Server Components mặc định cho SEO (`(pub
 | :--- | :--- | :--- |
 | **Admin Layout Shell** | `src/components/layout/admin/` | `AdminShellComponent.tsx`, `AdminSidebarComponent.tsx`, `AdminHeaderComponent.tsx` (Bố cục CMS quản trị có responsive sidebar). |
 | **Public Layout Shell** | `src/components/layout/public/` | `PublicHeaderComponent.tsx`, `PublicFooterComponent.tsx`, `DraggableFloatingContactComponent.tsx` (Zalo/Hotline widget nổi kéo thả). |
-| **Soạn Thảo WYSIWYG & Media** | `src/components/ui/rich-text-editor/` | `RichTextEditorComponent.tsx`, `RichTextToolbarComponent.tsx`, `MediaInsertModal.tsx` (Soạn thảo bài viết chuẩn SEO, chèn ảnh Cloudinary). |
-| **Subdomain Rewrite, Phiên & Proxy Upload** | `src/middleware.ts`<br>`src/app/api/upload/route.ts` | Next.js Middleware rewrite subdomain `vesinh.thanhxuanlaundry.com` sang `/vesinh` và kiểm tra httpOnly cookie `admin_access_token` cho `/admin/*`; Route handler proxy tải lên Cloudinary có xác thực token. |
+| **Soạn Thảo WYSIWYG & Canva Styler** | `src/components/ui/rich-text-editor/` | `RichTextEditorComponent.tsx`, `RichTextToolbarComponent.tsx`, `RichTextFormattingButtons.tsx`, `RichTextAlignHeadingsButtons.tsx` (Soạn thảo chuẩn SEO, 10+ Google Fonts tiếng Việt, Canva Color Swatches, Line/Letter Spacing, Callout Cards & SEO CTA Button Builder). |
+| **PWA & Web Manifest SEO** | `src/app/manifest.ts`<br>`public/icons/` | Web App Manifest chuẩn W3C phục vụ hiển thị Logo/Favicon thương hiệu trên Google SERP. Gỡ bỏ popup cài đặt trên web khách để tối ưu Core Web Vitals và tỷ lệ chuyển đổi. |
+| **Self-Hosted Font & Core Web Vitals** | `src/app/layout.tsx`<br>`src/app/globals.css` | Tích hợp `next/font/google` nạp `Be_Vietnam_Pro`, xóa bỏ 100% `@import` ngoài, đưa FCP < 0.8s, CLS = 0. Cấu hình ISR (`revalidate = 3600`) cho toàn bộ trang công khai. |
+| **Subdomain Rewrite, Phiên & Proxy Upload** | `src/middleware.ts`<br>`src/app/api/upload/route.ts` | Next.js Middleware rewrite subdomain `vesinh.thanhxuanlaundry.com` sang `/vesinh`, subdomain `quantri.thanhxuanlaundry.com` sang `/admin` & manifest riêng; kiểm tra httpOnly cookie `admin_access_token` cho `/admin/*`; Route handler proxy tải lên Cloudinary có xác thực token. |
+| **Native Mobile Back Handler** | `src/components/ui/dialog.tsx` | Tích hợp cơ chế History Popstate tự động đóng Dialog/Modal khi người dùng bấm nút Back điện thoại hoặc vuốt cạnh màn hình di động. |
 
 ---
 
@@ -238,7 +244,27 @@ Kiến trúc: Next.js 16 App Router, React 19, TailwindCSS. Mô hình Asset-Ligh
 
 ---
 
-### 2.4. Quy Chuẩn & Hạ Tầng Dùng Chung Của Toàn Bộ Frontend (Cả 3 Apps)
+### 2.4. Phân Hệ Cổng Quản Trị Đa Thương Hiệu (`fe-react-thanhxuan-admin`)
+
+Phân hệ quản trị tập trung (React SPA + Vite, Port 3003) phục vụ cả 2 tên miền `quantri.thanhxuanlaundry.com` và `quantri.chuyennhatietkiem.vn`:
+
+| Tuyến URL | Màn Hình / Page Component | Hook / Service Liên Quan | Chức Năng Nghiệp Vụ & Quyền Hạn |
+| :--- | :--- | :--- | :--- |
+| `/login` | `LoginPage.tsx` | `useAuth`, `TenantContext` | Đăng nhập tài khoản quản trị, hỗ trợ đổi thương hiệu trước khi đăng nhập. |
+| `/dashboard` | `DashboardPage.tsx` | `apiClient` (`/dashboard/overview`) | Thống kê số lượng bài viết, đơn hàng, khách hàng CRM theo tenant đang chọn. |
+| `/articles` | `ArticlesListPage.tsx` | `useArticles`, `useCategories` | Danh sách bài viết SEO, lọc theo chuyên mục và tìm kiếm tiêu đề. |
+| `/articles/new` | `ArticleEditorPage.tsx` | `articlesService` | Soạn bài viết blog mới, tải ảnh Cloudinary, cấu hình thẻ SEO metadata. |
+| `/articles/edit/:id` | `ArticleEditorPage.tsx` | `articlesService` | Chỉnh sửa nội dung bài viết hiện có. |
+| `/categories` | `CategoriesListPage.tsx` | `useCategories`, `CategoryModal` | Quản lý cây chuyên mục bài viết & dịch vụ phân theo tenant. |
+| `/contacts` | `ContactsListPage.tsx` | `useContacts` | Tiếp nhận và xử lý trạng thái yêu cầu tư vấn (NEW, PROCESSING, RESOLVED). |
+| `/crm` | `CrmListPage.tsx` | TanStack Query (`/crm/customers`) | Hồ sơ khách hàng, số điện thoại, tổng chi tiêu dịch vụ. |
+| `/orders` | `OrdersListPage.tsx` | TanStack Query (`/orders` & `/moving/orders`) | Đơn giặt là (Laundry) hoặc Đơn đặt lịch / Báo giá xe tải (Moving). |
+| `/settings` | `GeneralSettingsPage.tsx` | `settingsService` (`/settings`) | Cài đặt hotline, banner, header, footer và mạng xã hội theo từng tenant. |
+| `/users` | `UsersListPage.tsx` | `usersService`, `UserModal` | Quản lý tài khoản quản trị viên và phân quyền vai trò (ADMIN, MANAGER, OPERATOR). |
+
+---
+
+### 2.5. Quy Chuẩn & Hạ Tầng Dùng Chung Của Toàn Bộ Frontend (Cả 4 Apps)
 
 Chỉ bao gồm các quy chuẩn kiến trúc, design tokens và giao thức kỹ thuật bắt buộc áp dụng **đồng nhất trên cả 3 ứng dụng client**:
 

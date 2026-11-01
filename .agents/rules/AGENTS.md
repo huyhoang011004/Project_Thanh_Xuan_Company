@@ -23,15 +23,15 @@ Tài liệu này là nguồn quy ước chung cho mọi agent và workflow trong
 
 ## 2. Thông tin dự án & Lệnh kiểm thử
 
-Monorepo gồm 4 app, mỗi app chạy lệnh ở đúng thư mục của nó:
+Monorepo gồm 5 app, mỗi app chạy lệnh ở đúng thư mục của nó:
 
-| Mục | Backend (`be-nestjs-thanhxuan/`) | Web Giặt Là & CMS (`fe-nextjs-thanhxuan-laundry/`) | Cổng Nội Bộ (`fe-react-thanhxuan-internal/`) | Web Chuyển Nhà (`fe-nextjs-chuyennhatietkiem/`) |
-| :--- | :--- | :--- | :--- | :--- |
-| **Port dev** | `5001` (`pnpm start:dev`) | `3000` (`pnpm dev`) | `3001` (`pnpm dev`) | `3002` (`pnpm dev`) |
-| **Lint** | `pnpm lint` | `pnpm lint` | `pnpm lint` | `pnpm lint` |
-| **Typecheck** | `pnpm exec tsc --noEmit` | `pnpm exec tsc --noEmit` | `pnpm exec tsc --noEmit` | `pnpm exec tsc --noEmit` |
-| **Test** | `pnpm test` | `pnpm test` | `pnpm test` | `pnpm test` |
-| **Build** | `pnpm build` | `pnpm build` | `pnpm build` | `pnpm build` |
+| Mục | Backend (`be-nestjs-thanhxuan/`) | Web Giặt Là (`fe-nextjs-thanhxuan-laundry/`) | Cổng Nội Bộ (`fe-react-thanhxuan-internal/`) | Web Chuyển Nhà (`fe-nextjs-chuyennhatietkiem/`) | Cổng Admin (`fe-react-thanhxuan-admin/`) |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Port dev** | `5001` (`pnpm start:dev`) | `3000` (`pnpm dev`) | `3001` (`pnpm dev`) | `3002` (`pnpm dev`) | `3003` (`pnpm dev`) |
+| **Lint** | `pnpm lint` | `pnpm lint` | `pnpm lint` | `pnpm lint` | `pnpm lint` |
+| **Typecheck** | `pnpm exec tsc --noEmit` | `pnpm exec tsc --noEmit` | `pnpm exec tsc --noEmit` | `pnpm exec tsc --noEmit` | `pnpm exec tsc --noEmit` |
+| **Test** | `pnpm test` | `pnpm test` | `pnpm test` | `pnpm test` | `pnpm test` |
+| **Build** | `pnpm build` | `pnpm build` | `pnpm build` | `pnpm build` | `pnpm build` |
 
 ## 3. Quy trình làm việc & Tài liệu
 
@@ -51,6 +51,7 @@ Monorepo gồm 4 app, mỗi app chạy lệnh ở đúng thư mục của nó:
     - `fe-nextjs-thanhxuan-laundry/` $\rightarrow$ [srs_sdd_fe_laundry.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_laundry.md)
     - `fe-react-thanhxuan-internal/` $\rightarrow$ [srs_sdd_fe_internal.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_internal.md)
     - `fe-nextjs-chuyennhatietkiem/` $\rightarrow$ [srs_sdd_fe_moving.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_moving.md)
+    - `fe-react-thanhxuan-admin/` $\rightarrow$ [srs_sdd_fe_admin.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_admin.md)
   - `.agents/docs/DATABASE_DICTIONARY.md`: **CHỈ CẬP NHẬT KHI CÓ THAY ĐỔI SCHEMA / COLLECTION / FIELD / INDEX MONGODB.** Nếu thay đổi chỉ thuần túy ở Frontend hoặc logic Controller/Service không đổi bảng CSDL thì **bỏ qua không cập nhật file này** để tiết kiệm token.
   - `.agents/docs/CODEBASE_ATLAS.md`: **CHỈ CẬP NHẬT KHI THÊM MỚI HOẶC XÓA BỎ ROUTE / ENDPOINT / CONTROLLER / SERVICE / HOOK CHÍNH.** Nếu chỉ chỉnh sửa nội bộ code hiện có thì **bỏ qua không cập nhật file này**.
 
@@ -120,10 +121,11 @@ Một thay đổi coi là xong khi:
 | *"chống phèn / nâng tầm thẩm mỹ / landing page có gu / bỏ kiểu AI generic"* | `design-taste-frontend` | Bỏ gradient tím/xanh nhạt nhẽo, áp dụng ngôn ngữ thiết kế độc bản, sang trọng. |
 | *"chọn bảng màu / phối màu / phong cách UI / theme chuẩn"* | `ui-ux-pro-max` | Gợi ý bảng màu HSL, typography tokens, hơn 50+ phong cách UI chuẩn chỉ. |
 | *"viết code đầy đủ / không viết tắt / cấm TODO / code chạy luôn"* | `full-output-enforcement` | Xuất code trọn vẹn 100%, không bỏ lửng, không placeholder. |
-| *"tìm nguyên nhân gốc / tại sao bị lỗi này / truy vết bug"* | `systematic-debugging` | Điều tra nguyên nhân gốc rễ (root cause) bằng chứng cớ, không đoán mò. |
+| *"tìm nguyên nhân gốc / tại sao bị lỗi này / truy vết bug"* | `fix` | Điều tra nguyên nhân gốc rễ (root cause) bằng chứng cớ, không đoán mò, sửa tối thiểu. |
 | *"tạo module backend / thêm bảng DB / viết API NestJS"* | `create-nestjs-module` | Chuẩn Repository Pattern, Multi-Database, Class DTO, strict validation. |
 | *"làm trang web mới / thêm tính năng CMS / form liên hệ"* | `create-nextjs-feature` | Server Components SEO, Feature-based colocation, shadcn + Zod. |
 | *"làm màn hình vận hành / phiếu giao nhận / chấm công xưởng"* | `create-react-feature` | Mobile-first, Vite SPA, TanStack Query, offline queue, ký số Canvas. |
+| *"cô đọng ngữ cảnh / compact / tóm tắt phiên / giải phóng token"* | `compact` | Tổng hợp trạng thái phiên, ghi nhớ quyết định cốt lõi và reset ngữ cảnh. |
 
 ## 8. Kỷ luật hoàn thiện mã nguồn (Senior Engineering & Anti-AI Slop)
 

@@ -38,8 +38,9 @@ Hệ thống tài liệu kỹ thuật được module hóa thành 4 phân hệ c
 | **02** | **Web Giặt Là & CMS**                 | `fe-nextjs-thanhxuan-laundry/` | [srs_sdd_fe_laundry.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_laundry.md)     | Next.js App Router, Server Components SEO (RSC), Metadata động, Lead Capture CTA, CMS Quản trị bài viết, chiến dịch Zalo OA/Email.                                |
 | **03** | **Web Chuyển Nhà Tiết Kiệm**          | `fe-nextjs-chuyennhatietkiem/` | [srs_sdd_fe_moving.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_moving.md)       | Next.js 16 App Router, React 19, Estimator Cước Xe Tải tức thì, Wizard Báo Giá Đa Bước (/dat-lich), Bảng Giá Niêm Yết, Mô hình Asset-Light Thợ Kiêm Mộc/Điện Lạnh. |
 | **04** | **Cổng Vận Hành Xưởng & Đối Tác**     | `fe-react-thanhxuan-internal/` | [srs_sdd_fe_internal.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_internal.md) | React Router v7, Centralized Routes (`van-hanh/` & `quan-ly/`), Mobile-First PWA, Canvas Signature, Offline Queue IndexedDB, phân quyền giao diện 8 vai trò RBAC. |
-| **05** | **Từ Điển Dữ Liệu (Data Dictionary)** | `be-nestjs-thanhxuan/`         | [DATABASE_DICTIONARY.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/DATABASE_DICTIONARY.md)         | Từ điển 34+ collections thuộc 3 MongoDB độc lập, chi tiết từng thuộc tính, kiểu dữ liệu, index, quan hệ và ý nghĩa nghiệp vụ.                                     |
-| **06** | **Bản Đồ Mã Nguồn (Codebase Atlas)**  | Monorepo (4 apps)              | [CODEBASE_ATLAS.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/CODEBASE_ATLAS.md)                   | Chỉ mục truy xuất tức thì: Endpoint ↔ Controller ↔ Service ↔ Repository ↔ Schema và Route ↔ Page ↔ Modal ↔ Hooks ↔ Service.                                       |
+| **05** | **Cổng Quản Trị Đa Thương Hiệu**      | `fe-react-thanhxuan-admin/`    | [srs_sdd_fe_admin.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_admin.md)       | React SPA + Vite, Multi-Tenant Context (`quantri.thanhxuanlaundry.com` & `quantri.chuyennhatietkiem.vn`), Quản trị CMS bài viết SEO, leads CRM, cài đặt website và phân quyền. |
+| **06** | **Từ Điển Dữ Liệu (Data Dictionary)** | `be-nestjs-thanhxuan/`         | [DATABASE_DICTIONARY.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/DATABASE_DICTIONARY.md)         | Từ điển 34+ collections thuộc 3 MongoDB độc lập, chi tiết từng thuộc tính, kiểu dữ liệu, index, quan hệ và ý nghĩa nghiệp vụ.                                     |
+| **07** | **Bản Đồ Mã Nguồn (Codebase Atlas)**  | Monorepo (5 apps)              | [CODEBASE_ATLAS.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/CODEBASE_ATLAS.md)                   | Chỉ mục truy xuất tức thì: Endpoint ↔ Controller ↔ Service ↔ Repository ↔ Schema và Route ↔ Page ↔ Modal ↔ Hooks ↔ Service.                                       |
 
 ---
 
@@ -50,18 +51,19 @@ Hệ thống tài liệu kỹ thuật được module hóa thành 4 phân hệ c
 ```mermaid
 graph TD
     subgraph Client_Layer ["Lớp Ứng Dụng Client (Frontend)"]
-        WebPublic["Web Khách Hàng & SEO<br/>(Next.js App Router - Port 3000)"]
-        CMSAdmin["CMS Quản Trị Marketing<br/>(Next.js /admin)"]
+        WebPublic["Web Giặt Là B2B & SEO<br/>(Next.js App Router - Port 3000)"]
+        WebMoving["Web Chuyển Nhà Tiết Kiệm<br/>(Next.js App Router - Port 3002)"]
         InternalPWA["Cổng Vận Hành Xưởng & Quản Vận<br/>(React + Vite PWA - Port 3001)"]
+        AdminSPA["Cổng Quản Trị Đa Thương Hiệu<br/>(React SPA Vite - Port 3003)"]
     end
 
     subgraph API_Gateway ["Lớp Backend API (NestJS - Port 5001)"]
         RouterModule["RouterModule Register (/api/v1)"]
 
-        Mod_Laundry["Module Giặt Là (Default)<br/>/articles, /orders, /contacts"]
-        Mod_Moving["Module Chuyển Nhà (/moving)<br/>/quotes, /services, /articles"]
-        Mod_Internal["Module Vận Hành Nội Bộ (/internal)<br/>/auth, /partners, /handover, /piecework,<br/>/attendance, /fuel, /payroll, /reports"]
-        Mod_Core["Module Core Hạ Tầng Chia Sẻ<br/>/audit, /media, /notifications, idempotency"]
+        Mod_Laundry["Module Giặt Là (Default)<br/>/articles, /orders, /contacts, /categories"]
+        Mod_Moving["Module Chuyển Nhà (/api/v1/moving)<br/>/quotes, /services, /articles"]
+        Mod_Internal["Module Vận Hành Nội Bộ (/api/v1/internal)<br/>/auth, /partners, /handover, /piecework,<br/>/attendance, /fuel, /payroll, /reports"]
+        Mod_Core["Module Core Hạ Tầng Chia Sẻ<br/>/upload, /audit, /media, /notifications, idempotency"]
 
         RouterModule --> Mod_Laundry
         RouterModule --> Mod_Moving
@@ -77,9 +79,10 @@ graph TD
     end
 
     WebPublic -->|Public API| Mod_Laundry
-    CMSAdmin -->|Admin JWT| Mod_Laundry
-    WebPublic -->|Public Quotes| Mod_Moving
+    WebMoving -->|Public Quotes/Services| Mod_Moving
     InternalPWA -->|"Internal JWT (aud: internal)"| Mod_Internal
+    AdminSPA -->|"Admin JWT Bearer & Multi-Tenant"| Mod_Laundry
+    AdminSPA -->|"Admin Moving Quotes/Articles"| Mod_Moving
 
     Mod_Laundry --> DB_Laundry
     Mod_Moving --> DB_Moving
@@ -104,9 +107,28 @@ Website_Thanh_Xuan_Company/
 │   │       ├── moving/                  # DB: moving_express
 │   │       └── internal/                # DB: internal_express
 │
-├── fe-nextjs-thanhxuan-laundry/          # Web Khách Hàng thanhxuanlaundry.com & CMS (Port 3000)
+├── fe-nextjs-thanhxuan-laundry/          # Web Khách Hàng thanhxuanlaundry.com (Port 3000)
 │   ├── src/app/(public)/                # Server Components SEO công khai
-│   ├── src/app/(admin)/admin/           # Quản trị CMS bài viết, đơn hàng, CRM leads
+│   └── src/features/                    # Feature colocation (bài viết, dịch vụ, báo giá)
+│
+├── fe-nextjs-chuyennhatietkiem/          # Web Dịch Vụ Chuyển Nhà chuyennhatietkiem.vn (Port 3002)
+│   ├── src/app/                         # Next.js 16 App Router RSC
+│   └── src/features/                    # Estimator cước xe tải, Wizard đặt lịch khảo sát
+│
+├── fe-react-thanhxuan-internal/          # Cổng Vận Hành Xưởng & Quản Vận noibo.thanhxuanlaundry.com (Port 3001)
+│   ├── src/features/operations/         # Phiếu giao nhận kép, Trạm rạch bao đếm lại
+│   └── src/features/management/         # Công thợ theo giờ, Chấm công, Xăng xe, Lương chu kỳ
+│
+├── fe-react-thanhxuan-admin/             # Cổng Quản Trị Đa Thương Hiệu quantri.thanhxuanlaundry.com & quantri.chuyennhatietkiem.vn (Port 3003)
+│   ├── src/app/TenantContext.tsx        # Nhận diện hostname & Tenant Switcher (laundry / moving)
+│   ├── src/features/articles/           # Quản lý bài viết SEO, upload ảnh media
+│   ├── src/features/categories/         # Quản lý chuyên mục bài viết & dịch vụ
+│   ├── src/features/contacts/           # Tiếp nhận liên hệ tư vấn
+│   ├── src/features/orders/             # Quản trị đơn giặt là & đơn đặt xe chuyển nhà
+│   ├── src/features/settings/           # Cài đặt website, hotline, banner, SEO metadata
+│   └── src/features/users/              # Quản lý tài khoản quản trị
+│
+└── .agents/                              # Living Architecture Docs, Rules & CI/CD Hooks
 │   └── src/features/                    # Colocation logic bài viết, form liên hệ
 │
 ├── fe-react-thanhxuan-internal/          # Cổng Vận Hành Xưởng & Quản Vận noibo.thanhxuanlaundry.com (Port 3001)
@@ -188,13 +210,18 @@ Website_Thanh_Xuan_Company/
 
 - **2026-10-28 - Plan 48 - Chuẩn Hóa Khoảng Cách Spacing Mobile Toàn Diện & Tối Ưu Giao Diện Phân Hệ Điều Hành, Kinh Doanh, Bảng Công và Bảng Lương (fe-react-thanhxuan-internal):** Thay thế toàn bộ `sm:space-y-3` (bị 0px trên mobile < 640px) và `space-y-6` thành `space-y-3` (~12px) trên tất cả các trang; tách độc lập `AttendanceDateHeaderComponent` và `PayrollMonthHeaderComponent` ra ngoài `PageBanner` (vốn bị `hideOnMobile = true` ẩn mất trên điện thoại); chuyển toàn bộ StatCard KPI sang lưới 2 cột mobile (`grid-cols-2 lg:grid-cols-4`); chuẩn hóa tab bar cuộn ngang không thanh cuộn và tối ưu các nút duyệt công, chốt lương, duyệt xăng xe, cài đặt xưởng và quản lý nhân sự touch-friendly.
 
+- **2026-11-01 - Plan 67 - Tối Ưu Hóa Hiệu Năng Core Web Vitals (95-100), Đột Phá SEO Google & Chuyển Đổi B2B Cho Web Khách Hàng (fe-nextjs-thanhxuan-laundry):** Triệt tiêu 100% render-blocking font nhờ chuyển sang `next/font/google` self-hosted (`Be_Vietnam_Pro`), xóa cảnh báo CSS `@import`; gỡ bỏ banner popup PWA và service worker client để loại trừ rủi ro stale cache và vi phạm Google Mobile Interstitials; kích hoạt bộ nhớ đệm tĩnh gia số ISR (`revalidate = 3600`) đưa TTFB < 50ms; nâng cấp Schema JSON-LD đa thực thể `LocalBusiness` 12 quận Hà Nội kèm `FAQPage` Rich Snippets; tối ưu hóa thanh liên hệ nhanh Hotline/Zalo di động; 100% typecheck và build pass.
+- **2026-11-01 - Plan 65 - Triển Khai Subdomain quantri.thanhxuanlaundry.com Riêng Biệt, Chủ Động Nhắc Cài Đặt App PWA & Xử Lý Nút Back Mobile Cho Popup / Modal (fe-nextjs-thanhxuan-laundry & fe-react-thanhxuan-internal):** Cấu hình Nginx reverse proxy và Next.js Middleware định tuyến tên miền phụ quantri.thanhxuanlaundry.com vào CMS /admin; cung cấp Web App Manifest độc lập "Quản trị Thanh Xuân" (start_url: /); phát triển banner chủ động nhắc cài đặt PWA trên mobile cho cả Web Quản Trị và Cổng Nội Bộ xưởng; tích hợp cơ chế History Popstate vào component dùng chung Dialog giúp nút Back điện thoại và cử chỉ vuốt tự động đóng popup/modal thay vì văng ứng dụng.
 - **2026-10-30 - Feature - Mở Rộng Hỗ Trợ Đa Dạng Định Dạng Ảnh POST /api/v1/internal/upload (be-nestjs-thanhxuan):** Bổ sung hỗ trợ đầy đủ các định dạng ảnh (JPEG, PNG, WebP, HEIC, HEIF, AVIF, SVG, GIF, BMP, TIFF, ICO); hỗ trợ chấp nhận MIME image/* hoặc extension hợp lệ và tự động suy luận đuôi file cho blob từ thiết bị di động; đăng ký alias song song ['uploads', 'upload'].
 - **2026-10-30 - Bugfix - Ưu Tiên Icon SVG, Đặt Mặc Định Lightmode & Sửa Lỗi Upload 404 (fe-react-thanhxuan-internal):** Ưu tiên vector icon.svg qua component AppLogo (<picture> fallback PNG) và Manifest PWA; đổi mặc định khởi tạo giao diện sang Lightmode; sửa triệt để lỗi upload 404 bằng cách đồng bộ /uploads ở Frontend và cấu hình chuyển tiếp Nginx reverse proxy.
 - **2026-10-30 - Plan 57 - Cơ Chế Duy Trì Phiên Đăng Nhập Lâu Dài Như Mobile App Cho PWA (fe-react-thanhxuan-internal & be-nestjs-thanhxuan):** Phân rã toàn bộ 14 tệp vượt ngưỡng 300 dòng trong phân hệ Laundry xuống < 250-300 dòng (Rich Text Editor, ServiceDetailPage, useAdminSettings, các SettingEditor sections, AdminHeader, ZaloMarketing, useAdminContacts, articles.service, các dynamic routes); xây dựng DTO và Repository Pattern chuẩn cho EmailMarketing và ZaloMarketing, xóa sạch 293 cảnh báo ESLint type-safety Backend; loại bỏ localStorage token và chuẩn hóa HTTP-only cookies trên Frontend; 100% tệp tin đạt chuẩn kích thước và verify build/test pass.
 
+- **2026-11-01 - Plan 66 - Phân Tách & Xây Dựng Cổng Quản Trị Admin Tập Trung Đa Thương Hiệu (fe-react-thanhxuan-admin) Bằng React SPA (Vite):** Xây dựng ứng dụng `fe-react-thanhxuan-admin` (Port 3003) phục vụ cả `quantri.thanhxuanlaundry.com` và `quantri.chuyennhatietkiem.vn`; tích hợp Multi-Tenant Context (nhận diện domain tự động và Header Switcher), di chuyển toàn bộ module CMS (bài viết SEO, chuyên mục, leads, CRM, cài đặt website, phân quyền) sang React SPA giúp trang quản trị siêu nhẹ, phản hồi tức thì và không phụ thuộc SSR của Next.js; 100% typecheck và build pass.
+- **2026-11-01 - Plan 63 - Chiến Lược Tối Ưu Hóa SEO Toàn Diện Dịch Vụ Giặt Là & Dịch Vụ Vệ Sinh B2B (fe-nextjs-thanhxuan-laundry):** Chuẩn hóa thẻ Title, Meta Description và Keywords nhắm trúng từ khóa hạt nhân có search volume cao (Dịch Vụ Giặt Là, Giặt Sấy Công Nghiệp, Vệ Sinh Công Nghiệp Hà Nội); nâng cấp Schema JSON-LD đa thực thể (DryCleaningOrLaundry, CleaningService, FAQPage Rich Snippets, BreadcrumbList); tối ưu sitemap.xml priority cao cho các trang dịch vụ và ban hành cẩm nang Topic Cluster cho CMS; 100% build và typecheck pass.
 - **2026-10-31 - Bugfix - Giữ TopBar Đầu Trang Trên Mobile & Tự Động Ẩn Khi Cuộn (fe-nextjs-thanhxuan-laundry):** TopBar hiển thị bình thường ở đầu trang trên cả di động và máy tính; chuẩn hóa logic scroll theo ngưỡng cố định (window.scrollY > 40) tự động ẩn TopBar khi cuộn trang và không phình to header gián đoạn khi vuốt giữa trang.
 - **2026-10-31 - Bugfix & Refactor - Khắc Phục Lỗi 500 /dich-vu/[...slug] & Khôi Phục Header Nguyên Bản (fe-nextjs-thanhxuan-laundry):** Sửa lỗi crash runtime 500 do unwrap sai cấu trúc dữ liệu ApiResponse bằng cách chuẩn hóa qua PublicCategoriesService & PublicArticlesService; khôi phục thanh điều hướng Header nguyên bản 4 tab tinh gọn (bỏ gộp vệ sinh, hiển thị lại submenu giặt gốc), tối ưu SEO trang vệ sinh qua subdomain riêng vesinh.thanhxuanlaundry.com và route /vesinh.
 - **2026-10-31 - Plan 62 - Xây Dựng Trang Cài Đặt CMS Cho Dịch Vụ Vệ Sinh (/admin/settings/vesinh) & Chuẩn Hóa Khối Form Liên Hệ (fe-nextjs-thanhxuan-laundry & be-nestjs-thanhxuan):** Bổ sung trường vesinhConfig vào Setting Schema và UpdateSettingsDto Backend; phát triển giao diện quản trị CMS /admin/settings/vesinh với 3 Form Section (Hero Banner/Tiêu đề/Hotline, Lý do chọn chúng tôi, FAQs); nhúng dữ liệu cấu hình động vào trang công khai /vesinh và vesinh.thanhxuanlaundry.com (kèm fallback mặc định); gỡ bỏ container bọc thừa bên ngoài form liên hệ Pre-Footer; 100% typecheck và build pass.
+- **2026-11-01 - Plan 64 - Triển Khai PWA Native, Tối Ưu Mobile UX & Nâng Cấp Rich Text CMS Canva-Style Cho thanhxuanlaundry.com:** Tích hợp Web App Manifest metadata route, Service Worker Network-First + Cache-First, trang ngoại tuyến /offline, bộ icon PWA chuẩn hóa (192, 512, maskable, apple-touch-icon) và banner cài đặt ứng dụng cho Android/iOS; tối ưu Safe Area Inset, chống auto-zoom iOS Safari, đệm đáy chống che Bottom Nav; nâng cấp trình soạn thảo Rich Text CMS với bộ font Google Fonts tiếng Việt trực quan, font size presets, bảng màu Canva curated palette & highlight, line/letter spacing và khối Callout Card / CTA Button chuẩn SEO.
 - **2026-10-31 - Plan 61 - Thiết Lập Trang Dịch Vụ Vệ Sinh (vesinh.thanhxuanlaundry.com & /vesinh) Tối Ưu SEO B2B Dựa Trên Trang Chủ (fe-nextjs-thanhxuan-laundry):** Xây dựng route Server Component /vesinh và module features/public/vesinh (Hero, Intro máy móc hóa chất, Lưới 6 gói dịch vụ, Quy trình 5 bước khảo sát 0đ, Lý do chọn VAT, FAQ, Pre-Footer CTA); tích hợp Next.js Middleware subdomain rewrite ngầm cho vesinh.thanhxuanlaundry.com; nhúng dữ liệu có cấu trúc JSON-LD CleaningService; bổ sung nút Vệ Sinh trên Navigation Header & Mobile Bottom Nav, cập nhật sitemap và Nginx reverse proxy.
 - **2026-10-31 - Fix - Chuẩn Hóa Favicon icon.svg & Bỏ Nút Nội Bộ Web Giặt Là, Bổ Sung Nhãn 'NỘI BỘ' Chân Icon Login PWA:** Gỡ bỏ khối nút/nhãn "Nội bộ" khỏi Header thanhxuanlaundry.com, chuyển favicon sang icon.svg sắc nét; nâng cấp AppLogo trên noibo.thanhxuanlaundry.com/login hỗ trợ nhãn 'NỘI BỘ' chân khung icon tròn chuẩn nhận diện.
 - **2026-10-31 - Plan 60 - Mở Rộng Đăng Nhập Không Cần Mật Khẩu Bằng Face ID / Vân Tay (WebAuthn / Passkeys) Cho Mọi Tài Khoản:** Bổ sung 2 public endpoints `POST /auth/webauthn/login-options` và `POST /auth/webauthn/login-verify` cấp Access & Refresh Tokens không cần mật khẩu; phát triển `PasskeyLoginButton` trên `LoginPage` và `PasskeyManagementModal` trong Dropdown Profile Header trên PWA, hỗ trợ mọi vai trò đăng nhập 1 chạm trong 0.5s.
