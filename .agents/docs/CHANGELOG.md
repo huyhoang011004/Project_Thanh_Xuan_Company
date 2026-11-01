@@ -4,6 +4,40 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
 
 ## 2026-11-01
 
+### Plan 66: Phân Tách & Xây Dựng Cổng Quản Trị Admin Tập Trung Đa Thương Hiệu (fe-react-thanhxuan-admin) Bằng React SPA (Vite)
+
+- **Bối cảnh & Vấn đề giải quyết:**
+  - Hệ thống CMS quản trị marketing và bài viết SEO trước đây nằm trong ứng dụng Next.js Giặt Là (`fe-nextjs-thanhxuan-laundry/src/app/(admin)`). Khi chuẩn bị phát triển tiếp trang Web Chuyển Nhà (`fe-nextjs-chuyennhatietkiem`), nhu cầu cấp thiết là tái sử dụng toàn bộ chức năng quản trị đã hoàn thiện mà không muốn lặp lại code CMS ở nhiều nơi.
+  - Trang Quản trị là ứng dụng sau đăng nhập, **100% không cần SEO Google** (`noindex, nofollow`). Việc dùng Next.js Server Components / SSR render HTML trên server làm tăng tải CPU/RAM cho VPS mà không mang lại giá trị SEO.
+  - Xây dựng một ứng dụng React SPA độc lập (Vite) phục vụ tĩnh (Static Serving) cho cả 2 tên miền **`quantri.thanhxuanlaundry.com`** và **`quantri.chuyennhatietkiem.vn`**, giúp trang quản trị tải nhanh tức thì, chuyển trang không độ trễ và tốn ~0% tài nguyên CPU của máy chủ.
+
+- **Các thay đổi kiến trúc & kỹ thuật chi tiết:**
+  1. **Khởi Tạo Phân Hệ `fe-react-thanhxuan-admin` (React 18 + Vite + TailwindCSS + shadcn/ui):**
+     - Thiết lập cấu trúc thư mục feature-based theo chuẩn của `fe-react-thanhxuan-internal`, cổng dev `3003`.
+     - Bộ UI components chuẩn hóa: `Button`, `Input`, `Badge`, `Card`, `Table`, `Dialog` (tích hợp xử lý nút Back vật lý điện thoại), `Tabs`.
+     - Tích hợp Vite PWA plugin sinh Web App Manifest và Service Worker tự động.
+  2. **Kiến Trúc Multi-Tenant (Đa Thương Hiệu) Cốt Lõi:**
+     - **`TenantContext.tsx`:** Tự động phát hiện thương hiệu dựa vào `window.location.hostname` (`quantri.thanhxuanlaundry.com` $\rightarrow$ `'laundry'`, `quantri.chuyennhatietkiem.vn` $\rightarrow$ `'moving'`), fallback localStorage cho localhost.
+     - **`TenantSwitcher.tsx`:** Bộ chuyển đổi thương hiệu 1 chạm trên thanh Header với nhãn màu nhận diện riêng biệt (Sky blue vs Orange) cho Super Admin.
+     - **`api-client.ts`:** Axios Interceptor tự động gán header `x-tenant-id: laundry | moving` và Authorization Bearer Token vào mọi request gửi lên Backend NestJS.
+  3. **Module Quản Trị CMS Hoàn Chỉnh:**
+     - **Auth Module (`features/auth`):** `LoginPage.tsx` hỗ trợ đổi tenant trước khi đăng nhập, `AuthContext.tsx`, `RequireAuth.tsx` route guard.
+     - **Articles Module (`features/articles`):** Danh sách bài viết SEO (`ArticlesListPage.tsx`), màn hình soạn thảo chuẩn SEO (`ArticleEditorPage.tsx`), hỗ trợ tải ảnh Cloudinary và cấu hình meta tags.
+     - **Categories Module (`features/categories`):** Quản lý chuyên mục bài viết và dịch vụ (`CategoriesListPage.tsx`, `CategoryModal.tsx`).
+     - **Contacts & CRM Module (`features/contacts` & `features/crm`):** Tiếp nhận form tư vấn (`ContactsListPage.tsx`) và quản lý hồ sơ khách hàng (`CrmListPage.tsx`).
+     - **Orders Module (`features/orders`):** Tự động chuyển đổi hiển thị: Đơn giặt là (Laundry) vs Đơn đặt lịch / Báo giá xe tải (Moving).
+     - **Settings & Users Module (`features/settings` & `features/users`):** Cài đặt thông tin website, hotline, banner theo tenant và quản lý tài khoản admin phân quyền.
+     - **Dashboard Module (`features/dashboard`):** Thống kê tổng quan chuyển đổi linh hoạt theo thương hiệu.
+  4. **Hạ Tầng Docker & Cấu Hình Mẫu Nginx:**
+     - `Dockerfile` 2 tầng (Node Alpine build $\rightarrow$ Nginx Alpine serve static bundle).
+     - `docker-compose.yml`: Bổ sung service `admin_frontend` chạy cổng `3003`.
+     - `nginx-vps-subdomain.conf`: File mẫu cấu hình Nginx Reverse Proxy trên VPS cho cả 2 tên miền `quantri.thanhxuanlaundry.com` và `quantri.chuyennhatietkiem.vn`.
+
+- **Kết Quả Kiểm Chứng (Verification):**
+  - Typecheck `pnpm exec tsc --noEmit` pass 100%.
+  - Build `pnpm run build` pass 100% trong 12.47s, xuất static bundle tối ưu gzip trong `dist/`.
+  - Toàn bộ 20 task hoàn thành, cập nhật tài liệu SRS/SDD, Codebase Atlas và Changelog.
+
 ### Plan 65: Triển Khai Subdomain quantri.thanhxuanlaundry.com Riêng Biệt, Chủ Động Nhắc Cài Đặt App PWA & Xử Lý Nút Back Mobile Cho Popup / Modal (fe-nextjs-thanhxuan-laundry & fe-react-thanhxuan-internal)
 
 - **Bối cảnh & Vấn đề giải quyết:**

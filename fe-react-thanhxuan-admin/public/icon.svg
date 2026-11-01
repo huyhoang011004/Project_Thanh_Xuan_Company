@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Gradient Xanh Dương Nhạt (Nước giặt & Aqua Clean) -->
+    <linearGradient id="sky-water-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0284C7" />
+      <stop offset="50%" stop-color="#0EA5E9" />
+      <stop offset="100%" stop-color="#38BDF8" />
+    </linearGradient>
+
+    <!-- Gradient Xanh Lá Nhạt (Hương thơm & Vải mềm Eco Mint) -->
+    <linearGradient id="mint-fresh-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#059669" />
+      <stop offset="50%" stop-color="#10B981" />
+      <stop offset="100%" stop-color="#34D399" />
+    </linearGradient>
+
+    <!-- Gradient Nước tinh khiết cho giọt nước và bọt khí -->
+    <linearGradient id="bubble-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#67E8F9" stop-opacity="0.3" />
+    </linearGradient>
+  </defs>
+
+  <!-- NỀN TRẮNG PHẲNG TRÀN VIỀN 100% (KHÔNG BO GÓC, KHÔNG VIỀN NGOÀI ĐỂ HỆ ĐIỀU HÀNH TỰ CẮT THEO MỌI SHAPE MOBILE) -->
+  <rect width="512" height="512" fill="#FFFFFF" />
+
+  <!-- NỘI DUNG LOGO CO GIÃN CHUẨN SAFE ZONE CHO MỌI HÌNH DÁNG ICON (CIRCLE / SQUIRCLE / TEARDROP) -->
+  <g transform="translate(256, 256) scale(0.92) translate(-256, -256)">
+    <!-- VÒNG TRÒN NƯỚC MỜ (WATER RIPPLE - TẠO CHIỀU SÂU LỒNG GIẶT) -->
+    <circle cx="256" cy="256" r="195" fill="none" stroke="#F0F9FF" stroke-width="18" stroke-dasharray="16 12" />
+
+    <!-- BỌT XÀ PHÒNG / BỌT TUYẾT VỆ SINH CÔNG NGHIỆP (BUBBLES) -->
+    <circle cx="106" cy="116" r="16" fill="url(#bubble-grad)" />
+    <circle cx="98" cy="110" r="5" fill="#FFFFFF" opacity="0.8" />
+
+    <circle cx="210" cy="92" r="24" fill="url(#bubble-grad)" />
+    <circle cx="198" cy="84" r="7" fill="#FFFFFF" opacity="0.8" />
+
+    <!-- NGÔI SAO SÁNG BÓNG SẠCH TINH TƯƠM (CLEAN SPARKLE) -->
+    <path
+      d="M 416 88
+         C 416 99, 407 108, 396 108
+         C 407 108, 416 117, 416 128
+         C 416 117, 425 108, 436 108
+         C 425 108, 416 99, 416 88 Z"
+      fill="#38BDF8"
+    />
+
+    <!-- CHỮ T (XANH DƯƠNG NHẠT - LƯỢN SÓNG DÒNG NƯỚC & GIỌT NƯỚC) -->
+    <!-- Thân dọc chữ T -->
+    <rect
+      x="132"
+      y="204"
+      width="54"
+      height="172"
+      rx="27"
+      fill="url(#sky-water-grad)"
+    />
+
+    <!-- Thanh ngang chữ T cách điệu dòng nước sạch & giọt nước bên trái -->
+    <path
+      d="M 80 186
+         C 68 186, 60 174, 66 162
+         C 75 144, 94 136, 114 140
+         L 232 140
+         C 246 140, 256 150, 256 164
+         C 256 178, 246 188, 232 188
+         H 80 Z"
+      fill="url(#sky-water-grad)"
+    />
+
+    <!-- CHỮ X (XANH LÁ NHẠT - LUỒNG SẤY & CÔNG NGHỆ ECO FRESH) -->
+    <!-- Nét chéo chính từ trên-phải xuống dưới-trái (\) lượn nhẹ như cánh gió sấy -->
+    <path
+      d="M 284 144
+         C 292 136, 304 136, 312 144
+         L 444 350
+         C 452 360, 446 376, 432 376
+         H 392
+         C 382 376, 374 370, 368 360
+         L 248 168
+         C 244 158, 248 148, 258 144
+         Z"
+      fill="url(#mint-fresh-grad)"
+    />
+
+    <!-- Nét chéo phụ (/) đan xen với bo góc mềm mại -->
+    <path
+      d="M 420 144
+         C 428 136, 440 138, 446 146
+         C 452 154, 450 166, 442 174
+         L 282 360
+         C 276 370, 266 376, 254 376
+         H 218
+         C 206 376, 202 362, 208 352
+         L 344 164
+         C 350 154, 360 144, 372 144
+         Z"
+      fill="url(#mint-fresh-grad)"
+      opacity="0.92"
+    />
+
+    <!-- Tâm điểm giao thoa xanh ngọc biểu trưng giặt sạch lấp lánh -->
+    <circle cx="345" cy="258" r="16" fill="#6EE7B7" opacity="0.6" />
+  </g>
+</svg>

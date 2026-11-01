@@ -9,6 +9,7 @@ const APPS = [
   'fe-nextjs-thanhxuan-laundry',
   'fe-react-thanhxuan-internal',
   'fe-nextjs-chuyennhatietkiem',
+  'fe-react-thanhxuan-admin',
 ];
 const TYPECHECK_CMD = 'pnpm exec tsc --noEmit';
 const MAX_EXECUTIONS = 2; // chống lặp vô hạn nếu lỗi baseline có sẵn
@@ -67,9 +68,11 @@ const allowStop = () => {
   for (const app of APPS) {
     const appDir = path.join(root, app);
     if (!fs.existsSync(appDir)) continue;
+    if (!fs.existsSync(path.join(appDir, 'package.json'))) continue;
+    if (!fs.existsSync(path.join(appDir, 'node_modules'))) continue;
 
     // Kiểm tra thay đổi trong từng sub-repository
-    const git = spawnSync('git', ['status', '--porcelain'], { cwd: appDir, encoding: 'utf8' });
+    const git = spawnSync('git', ['status', '--porcelain', '.'], { cwd: appDir, encoding: 'utf8' });
     if (git.status !== 0 || !git.stdout) continue;
 
     const hasTsChanges = git.stdout

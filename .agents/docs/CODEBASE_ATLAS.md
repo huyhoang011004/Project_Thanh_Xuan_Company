@@ -243,7 +243,27 @@ Kiến trúc: Next.js 16 App Router, React 19, TailwindCSS. Mô hình Asset-Ligh
 
 ---
 
-### 2.4. Quy Chuẩn & Hạ Tầng Dùng Chung Của Toàn Bộ Frontend (Cả 3 Apps)
+### 2.4. Phân Hệ Cổng Quản Trị Đa Thương Hiệu (`fe-react-thanhxuan-admin`)
+
+Phân hệ quản trị tập trung (React SPA + Vite, Port 3003) phục vụ cả 2 tên miền `quantri.thanhxuanlaundry.com` và `quantri.chuyennhatietkiem.vn`:
+
+| Tuyến URL | Màn Hình / Page Component | Hook / Service Liên Quan | Chức Năng Nghiệp Vụ & Quyền Hạn |
+| :--- | :--- | :--- | :--- |
+| `/login` | `LoginPage.tsx` | `useAuth`, `TenantContext` | Đăng nhập tài khoản quản trị, hỗ trợ đổi thương hiệu trước khi đăng nhập. |
+| `/dashboard` | `DashboardPage.tsx` | `apiClient` (`/dashboard/overview`) | Thống kê số lượng bài viết, đơn hàng, khách hàng CRM theo tenant đang chọn. |
+| `/articles` | `ArticlesListPage.tsx` | `useArticles`, `useCategories` | Danh sách bài viết SEO, lọc theo chuyên mục và tìm kiếm tiêu đề. |
+| `/articles/new` | `ArticleEditorPage.tsx` | `articlesService` | Soạn bài viết blog mới, tải ảnh Cloudinary, cấu hình thẻ SEO metadata. |
+| `/articles/edit/:id` | `ArticleEditorPage.tsx` | `articlesService` | Chỉnh sửa nội dung bài viết hiện có. |
+| `/categories` | `CategoriesListPage.tsx` | `useCategories`, `CategoryModal` | Quản lý cây chuyên mục bài viết & dịch vụ phân theo tenant. |
+| `/contacts` | `ContactsListPage.tsx` | `useContacts` | Tiếp nhận và xử lý trạng thái yêu cầu tư vấn (NEW, PROCESSING, RESOLVED). |
+| `/crm` | `CrmListPage.tsx` | TanStack Query (`/crm/customers`) | Hồ sơ khách hàng, số điện thoại, tổng chi tiêu dịch vụ. |
+| `/orders` | `OrdersListPage.tsx` | TanStack Query (`/orders` & `/moving/orders`) | Đơn giặt là (Laundry) hoặc Đơn đặt lịch / Báo giá xe tải (Moving). |
+| `/settings` | `GeneralSettingsPage.tsx` | `settingsService` (`/settings`) | Cài đặt hotline, banner, header, footer và mạng xã hội theo từng tenant. |
+| `/users` | `UsersListPage.tsx` | `usersService`, `UserModal` | Quản lý tài khoản quản trị viên và phân quyền vai trò (ADMIN, MANAGER, OPERATOR). |
+
+---
+
+### 2.5. Quy Chuẩn & Hạ Tầng Dùng Chung Của Toàn Bộ Frontend (Cả 4 Apps)
 
 Chỉ bao gồm các quy chuẩn kiến trúc, design tokens và giao thức kỹ thuật bắt buộc áp dụng **đồng nhất trên cả 3 ứng dụng client**:
 
