@@ -9,17 +9,19 @@
 
 ## 1. Bản Đồ Ánh Xạ Giữa Quy Định Monorepo & Môi Trường Runtime VPS
 
-Hệ sinh thái gồm 1 Backend tập trung và 3 Frontend độc lập được cấu hình đồng bộ:
+Hệ sinh thái gồm 1 Backend tập trung và 4 Frontend độc lập được cấu hình đồng bộ:
 
 | STT | Ứng Dụng | Đường Dẫn Chuẩn | Đường Dẫn Runtime VPS | Port | Container / Web Server | Domain Production | Trọng Tâm Nghiệp Vụ |
 | :---: | :--- | :--- | :--- | :---: | :--- | :--- | :--- |
 | **01** | **Backend API Server** | `be-nestjs-thanhxuan/` | `/root/services/thanhxuan/backend-thanhxuan/` | `5001` | Docker `laundry_backend` | `api.thanhxuanlaundry.com` | API Gateway, Multi-DB MongoDB, RBAC 8 vai trò, Zalo OA, Gemini AI |
-| **02** | **Web Giặt Là & CMS** | `fe-nextjs-thanhxuan-laundry/` | `/root/services/thanhxuan/thanhxuan-laundry/` | `3000` | Docker `laundry_frontend` | `thanhxuanlaundry.com` | Next.js 15 App Router RSC, SEO Google, Lead B2B, CMS Marketing |
+| **02** | **Web Giặt Là & SEO** | `fe-nextjs-thanhxuan-laundry/` | `/root/services/thanhxuan/thanhxuan-laundry/` | `3000` | Docker `laundry_frontend` | `thanhxuanlaundry.com` | Next.js 15 App Router RSC, SEO Google, Lead B2B |
 | **03** | **Cổng Vận Hành Xưởng** | `fe-react-thanhxuan-internal/` | `/root/services/thanhxuan/thanhxuan-internal/` | `3001` | Nginx Static `/var/www/noibo/dist` | `noibo.thanhxuanlaundry.com` | PWA Mobile-First, Phiếu giao nhận kép, Ký số Canvas, Công thợ theo giờ |
-| **04** | **Cơ Sở Dữ Liệu** | MongoDB 7.0 | Volume `mongodb_data` | `27017` | Docker `laundry_mongodb` | Localhost | 3 DB độc lập: `laundry_express`, `internal_express`, `moving_express` |
+| **04** | **Cổng Quản Trị Admin Tập Trung** | `fe-react-thanhxuan-admin/` | `/root/services/thanhxuan/fe-react-thanhxuan-admin/` | `3003` | Nginx Static `/var/www/quantri/dist` | `quantri.thanhxuanlaundry.com` & `quantri.chuyennhatietkiem.vn` | React SPA đa thương hiệu, quản trị bài viết SEO, chuyên mục, đơn giặt/đặt xe, cài đặt website |
+| **05** | **Web Chuyển Nhà** | `fe-nextjs-chuyennhatietkiem/` | `/root/services/thanhxuan/thanhxuan-moving/` | `3002` | Docker (chờ deploy) | `chuyennhatietkiem.vn` | Next.js 16 App Router RSC, tính cước taxi tải tự động, đặt lịch khảo sát |
+| **06** | **Cơ Sở Dữ Liệu** | MongoDB 7.0 | Volume `mongodb_data` | `27017` | Docker `laundry_mongodb` | Localhost | 3 DB độc lập: `laundry_express`, `internal_express`, `moving_express` |
 
 > [!NOTE]
-> Để tương thích hoàn toàn giữa cấu trúc Monorepo trong quy định (`be-nestjs-thanhxuan`, `fe-nextjs-thanhxuan-laundry`, `fe-react-thanhxuan-internal`) và tên thư mục chạy thực tế (`backend-thanhxuan`, `thanhxuan-laundry`, `thanhxuan-internal`), các liên kết mềm (symlink) 2 chiều đã được thiết lập sẵn sàng. Bạn có thể dùng bất kỳ tên gọi nào.
+> Để tương thích hoàn toàn giữa cấu trúc Monorepo trong quy định (`be-nestjs-thanhxuan`, `fe-nextjs-thanhxuan-laundry`, `fe-react-thanhxuan-internal`, `fe-react-thanhxuan-admin`) và tên thư mục chạy thực tế (`backend-thanhxuan`, `thanhxuan-laundry`, `thanhxuan-internal`, `fe-react-thanhxuan-admin`), các liên kết mềm (symlink) 2 chiều đã được thiết lập sẵn sàng. Bạn có thể dùng bất kỳ tên gọi nào.
 
 ---
 

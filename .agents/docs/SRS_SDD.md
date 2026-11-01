@@ -51,18 +51,19 @@ Hệ thống tài liệu kỹ thuật được module hóa thành 4 phân hệ c
 ```mermaid
 graph TD
     subgraph Client_Layer ["Lớp Ứng Dụng Client (Frontend)"]
-        WebPublic["Web Khách Hàng & SEO<br/>(Next.js App Router - Port 3000)"]
-        CMSAdmin["CMS Quản Trị Marketing<br/>(Next.js /admin)"]
+        WebPublic["Web Giặt Là B2B & SEO<br/>(Next.js App Router - Port 3000)"]
+        WebMoving["Web Chuyển Nhà Tiết Kiệm<br/>(Next.js App Router - Port 3002)"]
         InternalPWA["Cổng Vận Hành Xưởng & Quản Vận<br/>(React + Vite PWA - Port 3001)"]
+        AdminSPA["Cổng Quản Trị Đa Thương Hiệu<br/>(React SPA Vite - Port 3003)"]
     end
 
     subgraph API_Gateway ["Lớp Backend API (NestJS - Port 5001)"]
         RouterModule["RouterModule Register (/api/v1)"]
 
-        Mod_Laundry["Module Giặt Là (Default)<br/>/articles, /orders, /contacts"]
-        Mod_Moving["Module Chuyển Nhà (/moving)<br/>/quotes, /services, /articles"]
-        Mod_Internal["Module Vận Hành Nội Bộ (/internal)<br/>/auth, /partners, /handover, /piecework,<br/>/attendance, /fuel, /payroll, /reports"]
-        Mod_Core["Module Core Hạ Tầng Chia Sẻ<br/>/audit, /media, /notifications, idempotency"]
+        Mod_Laundry["Module Giặt Là (Default)<br/>/articles, /orders, /contacts, /categories"]
+        Mod_Moving["Module Chuyển Nhà (/api/v1/moving)<br/>/quotes, /services, /articles"]
+        Mod_Internal["Module Vận Hành Nội Bộ (/api/v1/internal)<br/>/auth, /partners, /handover, /piecework,<br/>/attendance, /fuel, /payroll, /reports"]
+        Mod_Core["Module Core Hạ Tầng Chia Sẻ<br/>/upload, /audit, /media, /notifications, idempotency"]
 
         RouterModule --> Mod_Laundry
         RouterModule --> Mod_Moving
@@ -78,9 +79,10 @@ graph TD
     end
 
     WebPublic -->|Public API| Mod_Laundry
-    CMSAdmin -->|Admin JWT| Mod_Laundry
-    WebPublic -->|Public Quotes| Mod_Moving
+    WebMoving -->|Public Quotes/Services| Mod_Moving
     InternalPWA -->|"Internal JWT (aud: internal)"| Mod_Internal
+    AdminSPA -->|"Admin JWT Bearer & Multi-Tenant"| Mod_Laundry
+    AdminSPA -->|"Admin Moving Quotes/Articles"| Mod_Moving
 
     Mod_Laundry --> DB_Laundry
     Mod_Moving --> DB_Moving
@@ -105,9 +107,28 @@ Website_Thanh_Xuan_Company/
 │   │       ├── moving/                  # DB: moving_express
 │   │       └── internal/                # DB: internal_express
 │
-├── fe-nextjs-thanhxuan-laundry/          # Web Khách Hàng thanhxuanlaundry.com & CMS (Port 3000)
+├── fe-nextjs-thanhxuan-laundry/          # Web Khách Hàng thanhxuanlaundry.com (Port 3000)
 │   ├── src/app/(public)/                # Server Components SEO công khai
-│   ├── src/app/(admin)/admin/           # Quản trị CMS bài viết, đơn hàng, CRM leads
+│   └── src/features/                    # Feature colocation (bài viết, dịch vụ, báo giá)
+│
+├── fe-nextjs-chuyennhatietkiem/          # Web Dịch Vụ Chuyển Nhà chuyennhatietkiem.vn (Port 3002)
+│   ├── src/app/                         # Next.js 16 App Router RSC
+│   └── src/features/                    # Estimator cước xe tải, Wizard đặt lịch khảo sát
+│
+├── fe-react-thanhxuan-internal/          # Cổng Vận Hành Xưởng & Quản Vận noibo.thanhxuanlaundry.com (Port 3001)
+│   ├── src/features/operations/         # Phiếu giao nhận kép, Trạm rạch bao đếm lại
+│   └── src/features/management/         # Công thợ theo giờ, Chấm công, Xăng xe, Lương chu kỳ
+│
+├── fe-react-thanhxuan-admin/             # Cổng Quản Trị Đa Thương Hiệu quantri.thanhxuanlaundry.com & quantri.chuyennhatietkiem.vn (Port 3003)
+│   ├── src/app/TenantContext.tsx        # Nhận diện hostname & Tenant Switcher (laundry / moving)
+│   ├── src/features/articles/           # Quản lý bài viết SEO, upload ảnh media
+│   ├── src/features/categories/         # Quản lý chuyên mục bài viết & dịch vụ
+│   ├── src/features/contacts/           # Tiếp nhận liên hệ tư vấn
+│   ├── src/features/orders/             # Quản trị đơn giặt là & đơn đặt xe chuyển nhà
+│   ├── src/features/settings/           # Cài đặt website, hotline, banner, SEO metadata
+│   └── src/features/users/              # Quản lý tài khoản quản trị
+│
+└── .agents/                              # Living Architecture Docs, Rules & CI/CD Hooks
 │   └── src/features/                    # Colocation logic bài viết, form liên hệ
 │
 ├── fe-react-thanhxuan-internal/          # Cổng Vận Hành Xưởng & Quản Vận noibo.thanhxuanlaundry.com (Port 3001)

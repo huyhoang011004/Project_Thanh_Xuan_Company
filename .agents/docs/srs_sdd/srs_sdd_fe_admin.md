@@ -71,3 +71,27 @@ fe-react-thanhxuan-admin/
 | `/orders` | Đơn hàng | `OrdersListPage.tsx` | Đơn giặt (Laundry) / Đơn chuyển nhà (Moving) |
 | `/settings` | Cấu hình | `GeneralSettingsPage.tsx` | Cài đặt hotline, banner, header, footer |
 | `/users` | Phân quyền | `UsersListPage.tsx` | Quản trị tài khoản admin |
+
+---
+
+## 4. Kiến Trúc Triển Khai Thực Tế Trên VPS & CI/CD (Zero Docker Container)
+
+1. **Triển khai Tĩnh Trực Tiếp Trên Nginx Host (Zero Server Load):**
+   - Không chạy thêm container Docker trên VPS để tiết kiệm tối đa CPU/RAM (< 512MB RAM).
+   - Thư mục phục vụ web tĩnh: `/var/www/quantri/dist` (sở hữu bởi `www-data:www-data`).
+   - Cấu hình Nginx host: `/etc/nginx/sites-available/quantri.thanhxuanlaundry.com`
+     - Phục vụ SPA: `try_files $uri $uri/ /index.html;`
+     - Cache tĩnh immutable cho assets: 6 tháng (`max-age=15552000`).
+     - Tắt cache cho PWA manifest và service worker (`sw.js`, `manifest.webmanifest`).
+     - Proxy API:
+       - `/api/v1/` $\rightarrow$ `http://127.0.0.1:5001/api/v1/` (Module Chuyển Nhà).
+       - `/api/` $\rightarrow$ `http://127.0.0.1:5001/` (Module Giặt Là & Core CMS).
+   - Chứng chỉ SSL Let's Encrypt: Tự động gia hạn qua Certbot, HTTPS 200 OK trên `quantri.thanhxuanlaundry.com`.
+
+2. **Quy Trình CI/CD Tự Động (GitHub Actions):**
+   - File workflow: `.github/workflows/main.yml` trong repo `fe-react-thanhxuan-admin`.
+   - Khi merge code vào nhánh `main` hoặc `master`:
+     - GitHub Runner cài đặt Node.js 22 + pnpm, build bundle tĩnh `pnpm run build`.
+     - Dùng Action `appleboy/scp-action` đồng bộ file `dist/*` lên VPS tại `/var/www/quantri/dist`.
+     - Dùng Action `appleboy/ssh-action` phân quyền `www-data:www-data` và chạy `nginx -t && systemctl reload nginx`.
+   - Kết quả: Triển khai tức thì (Zero-Downtime), không tiêu tốn tài nguyên build trên VPS.

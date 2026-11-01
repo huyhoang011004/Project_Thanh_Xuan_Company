@@ -12,16 +12,17 @@ Hệ thống công nghệ đa ngành kết hợp giữa tiếp thị trực tuy�
 
 ---
 
-## 🏗️ Kiến Trúc Monorepo & 4 Ứng Dụng Thành Phần
+## 🏗️ Kiến Trúc Monorepo & 5 Ứng Dụng Thành Phần
 
-Hệ sinh thái được tổ chức dưới dạng Monorepo thống nhất, bao gồm 1 Backend API tập trung và 3 Frontend độc lập:
+Hệ sinh thái được tổ chức dưới dạng Monorepo thống nhất, bao gồm 1 Backend API tập trung và 4 Frontend độc lập:
 
 ```text
 Website_Thanh_Xuan_Company/
 ├── be-nestjs-thanhxuan/            # [Port 5001] Backend API Server tập trung (NestJS, 3 MongoDB độc lập)
-├── fe-nextjs-thanhxuan-laundry/    # [Port 3000] Web Khách Hàng B2B & CMS Marketing Giặt Là (Next.js 15)
+├── fe-nextjs-thanhxuan-laundry/    # [Port 3000] Web Khách Hàng B2B & SEO Google Giặt Là (Next.js 15)
 ├── fe-react-thanhxuan-internal/    # [Port 3001] Cổng Vận Hành Xưởng & Quản Vận PWA (React + Vite)
 ├── fe-nextjs-chuyennhatietkiem/    # [Port 3002] Web Dịch Vụ Chuyển Nhà Trọn Gói (Next.js 16)
+├── fe-react-thanhxuan-admin/       # [Port 3003] Cổng Quản Trị Admin Tập Trung Đa Thương Hiệu (React SPA)
 ├── .agents/                        # Hệ thống tài liệu kiến trúc, AI rules, skills và hooks
 │   ├── docs/                       # SRS/SDD, Database Dictionary, Codebase Atlas, Changelog, Plans
 │   ├── rules/                      # Quy tắc kỹ thuật bắt buộc (AGENTS.md, GEMINI.md, backend, frontend, readme)
@@ -33,12 +34,13 @@ Website_Thanh_Xuan_Company/
 
 ## 📊 Bảng Tra Cứu Thông Tin Các Ứng Dụng
 
-| STT | Ứng Dụng | Thư Mục | Port Dev | Port Container | Domain Production | Trọng Tâm Nghiệp Vụ |
+| STT | Ứng Dụng | Thư Mục | Port Dev | Port Runtime / Serving | Domain Production | Trọng Tâm Nghiệp Vụ |
 | :---: | :--- | :--- | :---: | :---: | :--- | :--- |
-| **01** | **Backend API Server** | [`be-nestjs-thanhxuan/`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/README.md) | `5001` | `5001` | `api.thanhxuanlaundry.com` | API Gateway, 3 MongoDB độc lập, RBAC 8 vai trò, Streaming Excel/PDF |
-| **02** | **Web Giặt Là & CMS** | [`fe-nextjs-thanhxuan-laundry/`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-nextjs-thanhxuan-laundry/README.md) | `3000` | `3000` | `thanhxuanlaundry.com` | Tiếp thị B2B SEO Google, Lead Capture CRM, CMS bài viết AI & Zalo OA |
-| **03** | **Cổng Vận Hành Xưởng** | [`fe-react-thanhxuan-internal/`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/README.md) | `3001` | `3001` | `noibo.thanhxuanlaundry.com` | PWA Mobile-First, Phiếu giao nhận kép, Ký số Canvas, Công thợ HourlyWork, Bảng công & Lương 4 tầng |
-| **04** | **Web Chuyển Nhà** | [`fe-nextjs-chuyennhatietkiem/`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-nextjs-chuyennhatietkiem/README.md) | `3002` | `3002` | `chuyennhatietkiem.vn` | Tính cước taxi tải tự động theo Km, đặt lịch khảo sát chuyển nhà 24/7 |
+| **01** | **Backend API Server** | [`be-nestjs-thanhxuan/`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/be-nestjs-thanhxuan/README.md) | `5001` | `5001` (Docker) | `api.thanhxuanlaundry.com` | API Gateway, 3 MongoDB độc lập, RBAC 8 vai trò, Streaming Excel/PDF |
+| **02** | **Web Giặt Là B2B** | [`fe-nextjs-thanhxuan-laundry/`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-nextjs-thanhxuan-laundry/README.md) | `3000` | `3000` (Docker) | `thanhxuanlaundry.com` | Tiếp thị B2B SEO Google, Lead Capture CRM, form tư vấn giặt ủi công nghiệp |
+| **03** | **Cổng Vận Hành Xưởng** | [`fe-react-thanhxuan-internal/`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/README.md) | `3001` | Static Nginx (`/var/www/noibo/dist`) | `noibo.thanhxuanlaundry.com` | PWA Mobile-First, Phiếu giao nhận kép, Ký số Canvas, Công thợ HourlyWork, Bảng công & Lương 4 tầng |
+| **04** | **Web Chuyển Nhà** | [`fe-nextjs-chuyennhatietkiem/`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-nextjs-chuyennhatietkiem/README.md) | `3002` | `3002` (Docker) | `chuyennhatietkiem.vn` | Tính cước taxi tải tự động theo Km, đặt lịch khảo sát chuyển nhà 24/7 |
+| **05** | **Cổng Quản Trị Admin Tập Trung** | [`fe-react-thanhxuan-admin/`](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-admin/README.md) | `3003` | Static Nginx (`/var/www/quantri/dist`) | `quantri.thanhxuanlaundry.com` & `quantri.chuyennhatietkiem.vn` | React SPA đa thương hiệu, quản trị bài viết blog SEO, chuyên mục, đơn hàng giặt/chuyển nhà, cài đặt website |
 
 ---
 
@@ -87,6 +89,13 @@ pnpm install
 pnpm dev
 ```
 
+### 5. Khởi chạy Cổng Quản Trị Admin Tập Trung (Port 3003)
+```bash
+cd fe-react-thanhxuan-admin
+pnpm install
+pnpm dev
+```
+
 ---
 
 ## 🛳️ Quy Chuẩn Triển Khai (CI/CD & Deployment)
@@ -109,8 +118,10 @@ Hệ thống tài liệu kỹ thuật được duy trì và đồng bộ liên t
 | :--- | :--- | :--- |
 | **Kiến Trúc Tổng Thể** | [.agents/docs/SRS_SDD.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/SRS_SDD.md) | Topology kết nối, System Context, Quy chuẩn dùng chung toàn hệ thống |
 | **Phân Hệ Backend API** | [.agents/docs/srs_sdd/srs_sdd_backend.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_backend.md) | 3 CSDL, API Contracts, RBAC Guards, Streaming Service |
-| **Phân Hệ Web & CMS** | [.agents/docs/srs_sdd/srs_sdd_fe_nextjs.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_nextjs.md) | RSC SEO, Leads Capture, Quản trị CMS Marketing |
+| **Phân Hệ Web Giặt Là** | [.agents/docs/srs_sdd/srs_sdd_fe_laundry.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_laundry.md) | RSC SEO, Leads Capture B2B, form tư vấn |
 | **Phân Hệ Vận Hành Xưởng** | [.agents/docs/srs_sdd/srs_sdd_fe_internal.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_internal.md) | PWA Mobile-First, Phiếu giao nhận 2 chiều, HourlyWork, Bảng công & Lương 4 tầng |
+| **Phân Hệ Web Chuyển Nhà** | [.agents/docs/srs_sdd/srs_sdd_fe_moving.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_moving.md) | RSC SEO, tính cước taxi tải tự động theo Km, đặt lịch chuyển nhà |
+| **Phân Hệ Quản Trị Admin Tập Trung** | [.agents/docs/srs_sdd/srs_sdd_fe_admin.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_admin.md) | React SPA đa thương hiệu, quản trị bài viết blog SEO, chuyên mục, đơn hàng, cài đặt website |
 | **Từ Điển Dữ Liệu (34+ Bảng)** | [.agents/docs/DATABASE_DICTIONARY.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/DATABASE_DICTIONARY.md) | Chi tiết từng trường dữ liệu, kiểu, index và quan hệ CSDL |
 | **Bản Đồ Định Vị Mã Nguồn** | [.agents/docs/CODEBASE_ATLAS.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/CODEBASE_ATLAS.md) | Tra cứu tức thì: Endpoint $\leftrightarrow$ Controller $\leftrightarrow$ Service $\leftrightarrow$ Schema $\leftrightarrow$ Page |
 | **Nhật Ký Tiến Hóa Kỹ Thuật** | [.agents/docs/CHANGELOG.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/CHANGELOG.md) | Lưu trữ chi tiết bài luận kỹ thuật theo từng Plan và Bugfix |

@@ -28,15 +28,17 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
      - **Orders Module (`features/orders`):** Tự động chuyển đổi hiển thị: Đơn giặt là (Laundry) vs Đơn đặt lịch / Báo giá xe tải (Moving).
      - **Settings & Users Module (`features/settings` & `features/users`):** Cài đặt thông tin website, hotline, banner theo tenant và quản lý tài khoản admin phân quyền.
      - **Dashboard Module (`features/dashboard`):** Thống kê tổng quan chuyển đổi linh hoạt theo thương hiệu.
-  4. **Hạ Tầng Docker & Cấu Hình Mẫu Nginx:**
-     - `Dockerfile` 2 tầng (Node Alpine build $\rightarrow$ Nginx Alpine serve static bundle).
-     - `docker-compose.yml`: Bổ sung service `admin_frontend` chạy cổng `3003`.
-     - `nginx-vps-subdomain.conf`: File mẫu cấu hình Nginx Reverse Proxy trên VPS cho cả 2 tên miền `quantri.thanhxuanlaundry.com` và `quantri.chuyennhatietkiem.vn`.
+  4. **Hạ Tầng Triển Khai Thực Tế & GitHub Actions Workflow (Zero Docker Container):**
+     - Thay vì chạy container Docker tốn tài nguyên trên VPS, ứng dụng được triển khai chạy tĩnh trực tiếp trên Nginx host tại `/var/www/quantri/dist` (tương tự như `fe-react-thanhxuan-internal`).
+     - Tách cấu hình Nginx riêng tại `/etc/nginx/sites-available/quantri.thanhxuanlaundry.com`, proxy API phân tầng: `/api/v1/` trỏ tới module Moving và `/api/` trỏ tới module Giặt Là / Core.
+     - Kích hoạt chứng chỉ SSL Let's Encrypt chính thức cho `quantri.thanhxuanlaundry.com` (HTTPS HTTP/2 200 OK).
+     - Thiết lập GitHub Actions workflow `.github/workflows/main.yml` tự động build tĩnh và deploy SCP/SSH lên VPS khi merge `main`/`master`.
+     - Cập nhật CORS allowedOrigins tại Backend NestJS `main.ts` hỗ trợ cả 2 subdomain quản trị.
 
 - **Kết Quả Kiểm Chứng (Verification):**
   - Typecheck `pnpm exec tsc --noEmit` pass 100%.
-  - Build `pnpm run build` pass 100% trong 12.47s, xuất static bundle tối ưu gzip trong `dist/`.
-  - Toàn bộ 20 task hoàn thành, cập nhật tài liệu SRS/SDD, Codebase Atlas và Changelog.
+  - Build `pnpm run build` pass 100% trong 12.01s, xuất static bundle tối ưu gzip trong `dist/`.
+  - Cập nhật đồng bộ toàn bộ tài liệu 5 trụ cột: `README.md`, `QUY_DINH_HE_THONG.md`, `AGENTS.md`, `GEMINI.md`, `SRS_SDD.md`, `srs_sdd_fe_admin.md`, `CODEBASE_ATLAS.md` và `CHANGELOG.md`.
 
 ### Plan 65: Triển Khai Subdomain quantri.thanhxuanlaundry.com Riêng Biệt, Chủ Động Nhắc Cài Đặt App PWA & Xử Lý Nút Back Mobile Cho Popup / Modal (fe-nextjs-thanhxuan-laundry & fe-react-thanhxuan-internal)
 
