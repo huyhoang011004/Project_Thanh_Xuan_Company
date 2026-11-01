@@ -12,6 +12,8 @@ import { CrmListPage } from '@/features/crm/CrmListPage';
 import { OrdersListPage } from '@/features/orders/OrdersListPage';
 import { GeneralSettingsPage } from '@/features/settings/GeneralSettingsPage';
 import { UsersListPage } from '@/features/users/UsersListPage';
+import { ZaloMarketingPage } from '@/features/zalo/ZaloMarketingPage';
+import { EmailMarketingPage } from '@/features/email-marketing/EmailMarketingPage';
 
 export const router = createBrowserRouter([
   {
@@ -65,6 +67,14 @@ export const router = createBrowserRouter([
           {
             path: 'orders',
             element: <OrdersListPage />,
+          },
+          {
+            path: 'zalo-marketing',
+            element: <ZaloMarketingPage />,
+          },
+          {
+            path: 'email-marketing',
+            element: <EmailMarketingPage />,
           },
           {
             path: 'settings',

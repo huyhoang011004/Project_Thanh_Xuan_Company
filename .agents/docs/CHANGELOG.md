@@ -4,6 +4,27 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
 
 ## 2026-11-01
 
+### Bugfix & UI/UX Restore: Phục Hồi Toàn Diện Ngôn Ngữ Thiết Kế & Hiệu Ứng Web Cũ Cho Cổng Quản Trị (fe-react-thanhxuan-admin)
+
+- **Bối cảnh & Vấn đề giải quyết:**
+  - Sau khi chuyển đổi từ Next.js `/admin` sang React SPA độc lập `fe-react-thanhxuan-admin`, giao diện quản trị bị thiếu các lớp nền Canvas & Radial gradient, thiếu nút chuyển Theme Sáng/Tối, và cấu trúc menu sidebar bị lệch so với phiên bản web cũ.
+  - Ngoài ra, Nginx upstream proxy trước đó gửi nguyên `Origin: https://quantri.thanhxuanlaundry.com` vào Backend NestJS gây lỗi CORS policy 500 do biến `CORS_ORIGINS` của container backend cũ chưa nạp tên miền mới.
+
+- **Các thay đổi chi tiết:**
+  1. **Khắc Phục Lỗi CORS Nginx Upstream:**
+     - Bổ sung `proxy_set_header Origin "";` trong cả 2 khối proxy upstream Nginx (`location /api/` và `location /api/v1/`) tại `/etc/nginx/sites-available/quantri.thanhxuanlaundry.com`. NestJS nhận diện cuộc gọi same-origin reverse proxy nội bộ và cho phép đăng nhập thành công 100%.
+  2. **Phục Hồi Lớp Nền & Hiệu Ứng Thẩm Mỹ Chuẩn Web Cũ:**
+     - Khôi phục ảnh nền Canvas `bg-5.png` (chế độ Sáng) và radial gradient sâu (chế độ Tối) tại `LoginPage.tsx` và `AdminShellComponent.tsx`.
+     - Bổ sung component `ThemeToggle.tsx` chuyển đổi Dark / Light mode linh hoạt với icon Mặt trời / Mặt trăng và lưu trạng thái vào `localStorage`.
+  3. **Đồng Bộ Hoá 100% Cấu Trúc Menu & Drawer Mobile:**
+     - Thiết kế lại `Sidebar.tsx` chuẩn theo giao diện gốc: Logo TX gradient phát sáng, các mục menu Dashboard, Đơn hàng, Khách hàng (CRM), Zalo Marketing, Email Marketing, Danh mục, Bài viết, Liên hệ, Tài khoản, và Cấu hình có accordion mở rộng (Header, Footer, Trang chủ, Trang vệ sinh, Trang dịch vụ, Trang giới thiệu, Trang liên hệ, Tích hợp Zalo OA).
+     - Bổ sung các trang chuyên môn `ZaloMarketingPage.tsx`, `EmailMarketingPage.tsx` và liên kết query param `?tab=...` trong `GeneralSettingsPage.tsx`.
+     - Phục hồi nút Đăng xuất đỏ nhạt bo cong góc dưới cùng.
+  4. **Kiểm Chứng & Xuất Bản Thực Tế:**
+     - Typecheck `tsc --noEmit` pass 100% (0 errors).
+     - Build gói tĩnh `pnpm build` pass 100% (12.05s).
+     - Deploy trực tiếp vào `/var/www/quantri/dist` và tải lại Nginx, vận hành trơn tru trên `https://quantri.thanhxuanlaundry.com`.
+
 ### Plan 67: Tối Ưu Hóa Hiệu Năng Core Web Vitals (95-100), Đột Phá SEO Google & Chuyển Đổi B2B Cho Web Khách Hàng (fe-nextjs-thanhxuan-laundry)
 
 - **Bối cảnh & Vấn đề giải quyết:**

@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { useAuth } from './useAuth';
 import { useTenant } from '@/app/TenantContext';
 import { getErrorMessage } from '@/lib/api-client';
+import { ThemeToggle } from '@/components/common/ThemeToggle';
 import {
   Eye,
   EyeOff,
@@ -58,16 +59,21 @@ export function LoginPage() {
   const isLaundry = tenant === 'laundry';
 
   return (
-    <main className="relative min-h-screen w-full flex items-center justify-center isolate p-4 bg-slate-50 overflow-hidden">
-      {/* Light Mode Canvas Background from original Laundry Admin */}
+    <main className="relative min-h-screen w-full flex items-center justify-center isolate p-4 selection:bg-blue-200 dark:selection:bg-blue-900">
+      {/* Light Mode Background Image */}
       <img
         src="https://tailkits.com/ui/iframe/assets/img/bg-5.png"
         alt="Background Light"
-        className="absolute inset-0 -z-10 h-full w-full object-cover select-none pointer-events-none"
+        className="absolute inset-0 -z-10 h-full w-full object-cover dark:hidden select-none pointer-events-none"
       />
 
-      {/* Dark Mode Radial Gradient Fallback */}
+      {/* Dark Mode Radial Background */}
       <div className="absolute inset-0 -z-10 h-full w-full hidden dark:block [background:radial-gradient(125%_125%_at_50%_10%,#000_40%,#63e_100%)]" />
+
+      {/* Top-Right Theme Toggle */}
+      <div className="absolute top-4 right-4 z-50">
+        <ThemeToggle />
+      </div>
 
       <div className="w-full max-w-md space-y-4">
         {/* Switch Tenant Pill */}
@@ -81,7 +87,7 @@ export function LoginPage() {
           <button
             type="button"
             onClick={handleToggleTenant}
-            className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-white/90 hover:bg-white px-3 py-1 rounded-xl shadow-xs border border-slate-200/80 transition-all cursor-pointer"
+            className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-white/90 dark:bg-slate-800 px-3 py-1 rounded-xl shadow-xs border border-slate-200/80 dark:border-slate-700 transition-all cursor-pointer"
           >
             <ArrowRightLeft className="h-3.5 w-3.5" />
             Đổi sang {isLaundry ? 'Chuyển Nhà' : 'Giặt Là'}
@@ -89,13 +95,9 @@ export function LoginPage() {
         </div>
 
         {/* Glassmorphism Card */}
-        <div className="w-full bg-white/90 dark:bg-black/40 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-gray-100 dark:border-slate-800">
+        <div className="w-full bg-white/90 dark:bg-black/20 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-gray-100 dark:border-slate-800">
           <div className="text-center mb-8">
-            <div
-              className={`mx-auto w-14 h-14 ${
-                isLaundry ? 'bg-blue-100 text-blue-600' : 'bg-amber-100 text-amber-600'
-              } rounded-2xl flex items-center justify-center mb-4 shadow-inner`}
-            >
+            <div className="mx-auto w-14 h-14 bg-blue-100 dark:bg-blue-900/40 rounded-2xl flex items-center justify-center mb-4 text-blue-600 dark:text-blue-400 shadow-inner">
               <ShieldCheck className="w-8 h-8" />
             </div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">
@@ -107,7 +109,7 @@ export function LoginPage() {
           </div>
 
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm flex items-start space-x-3">
+            <div className="mb-6 p-4 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 text-red-700 dark:text-red-300 rounded-xl text-sm flex items-start space-x-3">
               <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
               <span className="leading-relaxed">{error}</span>
             </div>
@@ -119,7 +121,7 @@ export function LoginPage() {
                 Tài khoản Admin
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400 dark:text-gray-500">
                   <User className="w-5 h-5" />
                 </div>
                 <input
@@ -127,7 +129,7 @@ export function LoginPage() {
                   autoComplete="username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full pl-11 pr-4 py-2.5 bg-gray-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700 rounded-xl focus:bg-white dark:bg-slate-900/50 backdrop-blur-md focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900 dark:text-gray-100 text-sm"
+                  className="w-full pl-11 pr-4 py-2.5 bg-gray-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-900/60 backdrop-blur-md focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900 dark:text-gray-100 text-sm"
                   placeholder="Nhập tên đăng nhập"
                   disabled={isSubmitting}
                 />
@@ -139,7 +141,7 @@ export function LoginPage() {
                 Mật khẩu
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400 dark:text-gray-500">
                   <Lock className="w-5 h-5" />
                 </div>
                 <input
@@ -147,7 +149,7 @@ export function LoginPage() {
                   autoComplete="current-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-11 pr-11 py-2.5 bg-gray-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700 rounded-xl focus:bg-white dark:bg-slate-900/50 backdrop-blur-md focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900 dark:text-gray-100 text-sm"
+                  className="w-full pl-11 pr-11 py-2.5 bg-gray-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-900/60 backdrop-blur-md focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900 dark:text-gray-100 text-sm"
                   placeholder="••••••••"
                   disabled={isSubmitting}
                 />
@@ -165,11 +167,7 @@ export function LoginPage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`w-full mt-2 text-white font-semibold py-2.5 px-4 rounded-xl shadow-md hover:shadow-lg transition-all transform active:scale-[0.99] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center space-x-2 cursor-pointer ${
-                isLaundry
-                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700'
-                  : 'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700'
-              }`}
+              className="w-full mt-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 px-4 rounded-xl shadow-lg shadow-blue-500/25 transition-all transform active:scale-[0.99] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center space-x-2 cursor-pointer"
             >
               {isSubmitting ? (
                 <>
@@ -183,7 +181,7 @@ export function LoginPage() {
           </form>
         </div>
 
-        <p className="text-center text-xs text-slate-400">
+        <p className="text-center text-xs text-slate-400 dark:text-slate-500">
           Hệ sinh thái dịch vụ Thanh Xuân Company &bull; Bảo mật đa lớp
         </p>
       </div>

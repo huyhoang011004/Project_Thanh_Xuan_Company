@@ -1,5 +1,4 @@
 import { useTenant, TENANT_CONFIGS } from '@/app/TenantContext';
-import { ArrowRightLeft } from 'lucide-react';
 import { TenantType } from '@/lib/tenant-storage';
 
 export function TenantSwitcher() {
@@ -12,7 +11,7 @@ export function TenantSwitcher() {
   };
 
   return (
-    <div className="flex items-center gap-1 rounded-xl bg-slate-100 p-1 border border-slate-200">
+    <div className="flex items-center gap-1 rounded-xl bg-slate-100 dark:bg-slate-800 p-1 border border-slate-200 dark:border-slate-700">
       {(['laundry', 'moving'] as TenantType[]).map((t) => {
         const cfg = TENANT_CONFIGS[t];
         const isActive = tenant === t;
@@ -21,23 +20,21 @@ export function TenantSwitcher() {
             key={t}
             type="button"
             onClick={() => handleSelect(t)}
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
               isActive
-                ? 'bg-white text-slate-900 shadow-xs'
-                : 'text-slate-500 hover:text-slate-900'
+                ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
             }`}
           >
             <span
               className="h-2 w-2 rounded-full"
               style={{ backgroundColor: cfg.colorHex }}
             />
-            {cfg.shortName}
+            <span className="hidden sm:inline">{cfg.shortName}</span>
+            <span className="sm:hidden">{t === 'laundry' ? 'Giặt' : 'Chuyển'}</span>
           </button>
         );
       })}
-      <div className="px-1 text-slate-300">
-        <ArrowRightLeft className="h-3 w-3" />
-      </div>
     </div>
   );
 }
