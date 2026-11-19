@@ -1,6 +1,6 @@
 # Plan 71: Giai Đoạn 3 - Xây Dựng Phân Hệ Giao Ngoài Cho Shipper & Quản Lý Lịch Làm Việc / Nghỉ Phép Thợ Xưởng (Yêu Cầu 5b & 6)
 
-> Status: Draft | Created: 2026-11-19 | Hệ thống: be-nestjs-thanhxuan & fe-react-thanhxuan-internal
+> Status: Done | Created: 2026-11-19 | Hệ thống: be-nestjs-thanhxuan & fe-react-thanhxuan-internal
 
 ---
 
@@ -138,27 +138,27 @@ export class WorkerLeaveRequest {
 ## 3. Implementation Tasks (Checklist)
 
 ### Phần A: Phân Hệ Giao Ngoài Cho Shipper (Mục 5b)
-- [ ] T1: Xây dựng Module `external-deliveries` trong backend: Schema, Repository, Service và Controller (`POST /`, `GET /`) kèm guard Shipper - Depends on: none
-- [ ] T2: Tạo modal `ExternalDeliveryModal.tsx` (< 200 dòng): Chọn ngày (mặc định hôm nay), nhập/chọn điểm giao (Haidilao, Cầu Gỗ, KTX...), camera chụp/upload ảnh giao nhận lên Cloudinary - Depends on: T1
-- [ ] T3: Tạo sub-component `ExternalDeliveryListTabComponent.tsx` (< 200 dòng): hiển thị lưới ảnh các chuyến giao ngoài trong ngày - Depends on: T1
-- [ ] T4: Tích hợp nút "Giao Ngoài" và tab danh sách giao ngoài vào `ShipperHandoverPage.tsx` - Depends on: T2, T3
+- [x] T1: Xây dựng Module `external-deliveries` trong backend: Schema, Repository, Service và Controller (`POST /`, `GET /`) kèm guard Shipper - Depends on: none
+- [x] T2: Tạo modal `ExternalDeliveryModal.tsx` (< 200 dòng): Chọn ngày (mặc định hôm nay), nhập/chọn điểm giao (Haidilao, Cầu Gỗ, KTX...), camera chụp/upload ảnh giao nhận lên Cloudinary - Depends on: T1
+- [x] T3: Tạo sub-component `ExternalDeliveryListTabComponent.tsx` (< 200 dòng): hiển thị lưới ảnh các chuyến giao ngoài trong ngày - Depends on: T1
+- [x] T4: Tích hợp nút "Giao Ngoài" và tab danh sách giao ngoài vào `ShipperHandoverPage.tsx` - Depends on: T2, T3
 
 ### Phần B: Phân Hệ Lịch Làm Việc & Nghỉ Phép Thợ Xưởng (Mục 6)
-- [ ] T5: Xây dựng Module `worker-schedules` trong backend: Schema `WorkerWeeklySchedule` và `WorkerLeaveRequest`, Repository, Service và Controller - Depends on: none
-- [ ] T6: Cài đặt logic ràng buộc đổi lịch trong Service: nếu đổi 1 ca sang nghỉ, bắt buộc `makeupShift` phải hợp lệ trong cùng tuần mới cho phép lưu - Depends on: T5
-- [ ] T7: Viết Cron Job trong `schedule-task.service.ts`: kích hoạt lúc 20:00 tối Chủ Nhật (`0 20 * * 0`), quét tất cả tài khoản `WORKER` đang `ACTIVE` và gửi Notification nhắc đăng ký lịch tuần mới - Depends on: T5
-- [ ] T8: Tạo modal `WeeklyScheduleRegisterModal.tsx` (< 250 dòng): Form đăng ký 7 ngày từ Thứ 2 đến CN, toggle chọn 3 ca Sáng/Chiều/Tối, 2 input giờ bắt đầu và kết thúc - Depends on: T5
-- [ ] T9: Tạo modal `ScheduleChangeMakeupModal.tsx` (< 220 dòng): Giao diện đổi lịch làm bù trực quan, chọn ca nghỉ và ca bù tương ứng - Depends on: T6
-- [ ] T10: Tạo modal `WorkerEmergencyLeaveModal.tsx` (< 220 dòng): Chọn ngày nghỉ, số ngày, lý do và khung camera chụp/tải ảnh đính kèm - Depends on: T5
-- [ ] T11: Xây dựng màn hình `WorkerSchedulePage.tsx` (< 250 dòng) và custom hook `useWorkerSchedule.ts` (< 220 dòng): hiển thị lịch tuần cá nhân, trạng thái duyệt và nút mở các modal - Depends on: T8, T9, T10
-- [ ] T12: Thêm giao diện duyệt đơn xin nghỉ và quản lý lịch thợ cho Quản lý xưởng (`MANAGER`) - Depends on: T11
-- [ ] T13: Đăng ký route và sidebar menu cho `WorkerSchedulePage` trong `router.tsx` và `Sidebar.tsx` - Depends on: T11
+- [x] T5: Xây dựng Module `worker-schedules` trong backend: Schema `WorkerWeeklySchedule` và `WorkerLeaveRequest`, Repository, Service và Controller - Depends on: none
+- [x] T6: Cài đặt logic ràng buộc đổi lịch trong Service: nếu đổi 1 ca sang nghỉ, bắt buộc `makeupShift` phải hợp lệ trong cùng tuần mới cho phép lưu - Depends on: T5
+- [x] T7: Viết Cron Job trong `schedule-task.service.ts`: kích hoạt lúc 20:00 tối Chủ Nhật (`0 20 * * 0`), quét tất cả tài khoản `WORKER` đang `ACTIVE` và gửi Notification nhắc đăng ký lịch tuần mới - Depends on: T5
+- [x] T8: Tạo modal `WeeklyScheduleRegisterModal.tsx` (< 250 dòng): Form đăng ký 7 ngày từ Thứ 2 đến CN, toggle chọn 3 ca Sáng/Chiều/Tối, 2 input giờ bắt đầu và kết thúc - Depends on: T5
+- [x] T9: Tạo modal `ScheduleChangeMakeupModal.tsx` (< 220 dòng): Giao diện đổi lịch làm bù trực quan, chọn ca nghỉ và ca bù tương ứng - Depends on: T6
+- [x] T10: Tạo modal `WorkerEmergencyLeaveModal.tsx` (< 220 dòng): Chọn ngày nghỉ, số ngày, lý do và khung camera chụp/tải ảnh đính kèm - Depends on: T5
+- [x] T11: Xây dựng màn hình `WorkerSchedulePage.tsx` (< 250 dòng) và custom hook `useWorkerSchedule.ts` (< 220 dòng): hiển thị lịch tuần cá nhân, trạng thái duyệt và nút mở các modal - Depends on: T8, T9, T10
+- [x] T12: Thêm giao diện duyệt đơn xin nghỉ và quản lý lịch thợ cho Quản lý xưởng (`MANAGER`) - Depends on: T11
+- [x] T13: Đăng ký route và sidebar menu cho `WorkerSchedulePage` trong `router.tsx` và `Sidebar.tsx` - Depends on: T11
 
 ### Phần C: Kiểm Thử & Đồng Bộ Tài Liệu
-- [ ] T14: Viết unit test backend cho `external-deliveries.service.spec.ts` và `worker-schedules.service.spec.ts` - Depends on: T1, T5, T6
-- [ ] T15: Kiểm thử luồng Shipper giao ngoài: chụp ảnh $\rightarrow$ lưu thành công $\rightarrow$ hiển thị thẻ ảnh trên di động - Depends on: T4
-- [ ] T16: Kiểm thử luồng Thợ xưởng: nhận thông báo 20h CN $\rightarrow$ đăng ký 3 ca $\rightarrow$ đổi ca nghỉ có chọn ca bù $\rightarrow$ nộp đơn xin nghỉ kèm ảnh - Depends on: T13
-- [ ] T17: Đồng bộ 5 trụ cột tài liệu: `DATABASE_DICTIONARY.md`, `CODEBASE_ATLAS.md`, `srs_sdd_backend.md`, `srs_sdd_fe_internal.md`, `CHANGELOG.md` - Depends on: T15, T16
+- [x] T14: Viết unit test backend cho `external-deliveries.service.spec.ts` và `worker-schedules.service.spec.ts` - Depends on: T1, T5, T6
+- [x] T15: Kiểm thử luồng Shipper giao ngoài: chụp ảnh $\rightarrow$ lưu thành công $\rightarrow$ hiển thị thẻ ảnh trên di động - Depends on: T4
+- [x] T16: Kiểm thử luồng Thợ xưởng: nhận thông báo 20h CN $\rightarrow$ đăng ký 3 ca $\rightarrow$ đổi ca nghỉ có chọn ca bù $\rightarrow$ nộp đơn xin nghỉ kèm ảnh - Depends on: T13
+- [x] T17: Đồng bộ 5 trụ cột tài liệu: `DATABASE_DICTIONARY.md`, `CODEBASE_ATLAS.md`, `srs_sdd_backend.md`, `srs_sdd_fe_internal.md`, `CHANGELOG.md` - Depends on: T15, T16
 
 ---
 

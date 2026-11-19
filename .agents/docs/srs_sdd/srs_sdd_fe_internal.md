@@ -172,6 +172,27 @@ Phân hệ `fe-react-thanhxuan-internal` là cổng điều hành số hóa toà
 - **Tùy chỉnh Geofencing & Sai số GPS (±350m):** Hỗ trợ cấu hình bán kính xưởng (`radiusMeters`) và mở rộng ngưỡng sai số tối đa (`maxAccuracyMeters: ±350m`) để thích ứng với tín hiệu GPS yếu trong xưởng có trần tôn hoặc nhà kho khép kín.
 - **Quản lý dải IP Wi-Fi Router:** Nhận diện IP Public hiện tại của mạng quản trị, thêm/xóa danh sách IP modem Wi-Fi hợp lệ và công tắc ép buộc kết nối Wi-Fi khi chấm công.
 
+#### FE-INT-FR-10: Phân Hệ Giao Ngoài Cho Shipper (`features/operations/handovers` - Plan 71)
+
+- **Màn hình & Tab Giao Ngoài (`ShipperHandoverPage?tab=EXTERNAL`, `ExternalDeliveryListTabComponent`):**
+  - Bổ sung nút "Giao Ngoài" và tab chuyên biệt hiển thị lưới các chuyến giao ngoài đã thực hiện trong ngày.
+  - Modal `ExternalDeliveryModal`: Cho phép Shipper chọn ngày giao, nhập/chọn nhanh các điểm đến quen thuộc (Haidilao Landmark, Cầu Gỗ, KTX...) và chụp ảnh bàn giao trực tiếp từ camera.
+  - Tự động nén ảnh qua `browser-image-compression` trước khi upload Cloudinary folder `internal/external-deliveries`, hiển thị thumbnail và cho phép bấm xem phóng to toàn màn hình (`SlipFullscreenViewerModal`).
+
+#### FE-INT-FR-11: Quản Lý Lịch Làm Việc & Nghỉ Phép Thợ Xưởng (`features/operations/worker-schedule` - Plan 71)
+
+- **Màn hình Điều hành & Lịch Tuần (`WorkerSchedulePage`):**
+  - Hỗ trợ chuyển đổi mượt mà giữa "Lịch Tuần Này" và "Đơn Nghỉ Phép", thanh điều hướng tuần trước/tuần sau/tuần hiện tại.
+  - Lưới hiển thị 7 ngày (`WorkerScheduleGridComponent`): Liệt kê trực quan 3 ca (Sáng, Chiều, Tối), khung giờ làm việc và thẻ đánh dấu ca làm bù.
+- **Đăng ký lịch tuần mới (`WeeklyScheduleRegisterModal`):**
+  - Đăng ký lịch 7 ngày cho tuần mới trước 20:00 tối Chủ Nhật.
+  - Bật/tắt ca làm việc, tùy chỉnh khung giờ bắt đầu và kết thúc (mặc định Sáng: 07:00-11:30, Chiều: 13:00-17:30, Tối: 18:00-22:30).
+- **Đổi lịch nghỉ có ca làm bù (`ScheduleChangeMakeupModal`):**
+  - Giao diện chọn ca muốn xin nghỉ trong tuần và bắt buộc chọn ngày + ca làm bù trong cùng tuần đó, chặn trùng lặp ca đã có lịch.
+- **Đơn xin nghỉ đột xuất & Xét duyệt (`WorkerEmergencyLeaveModal`, `WorkerLeaveReviewModal`):**
+  - Thợ xưởng chọn ngày nghỉ, số ngày công (min 0.5), nhập lý do và bắt buộc chụp/tải ảnh chứng từ / giấy khám bệnh.
+  - Quản lý xưởng (`MANAGER`, `ADMIN`) xem danh sách đơn (`WorkerLeaveListTabComponent`), duyệt đơn (`APPROVED`) hoặc từ chối (`REJECTED`) kèm ghi chú phản hồi.
+
 ---
 
 ## 2. THIẾT KẾ KIẾN TRÚC & HỆ THỐNG (SDD)

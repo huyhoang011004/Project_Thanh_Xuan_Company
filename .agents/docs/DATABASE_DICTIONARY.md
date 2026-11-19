@@ -1,9 +1,9 @@
 # TỪ ĐIỂN CƠ SỞ DỮ LIỆU TOÀN HỆ THỐNG (DATABASE DATA DICTIONARY)
 
 > **Hệ sinh thái:** Công ty Giặt Sấy Thanh Xuân (Thanh Xuan Laundry & Moving Company)
-> **Phiên bản:** 2.3 | **Ngày cập nhật:** 2026-10-29
+> **Phiên bản:** 2.4 | **Ngày cập nhật:** 2026-11-19
 > **Kiến trúc dữ liệu:** Multi-Database Isolation trên MongoDB (4 Databases độc lập)
-> **Tổng số bảng (Collections):** 34 Collections
+> **Tổng số bảng (Collections):** 37 Collections
 > **Quy chuẩn duy trì:** Mọi thay đổi Schema trong Backend NestJS bắt buộc cập nhật đồng bộ file này theo Definition of Done trong [AGENTS.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/rules/AGENTS.md). Xóa bỏ hoàn toàn bảng đã xóa khỏi tài liệu và chạy script dọn dẹp DB thực tế.
 
 ---
@@ -13,7 +13,7 @@
 ```mermaid
 graph TD
     subgraph Multi_Database_Topology ["Hạ Tầng 4 MongoDB Độc Lập"]
-        DB_Internal[("1. internal_express<br/>16 Collections - Vận hành, Đối tác, Lương")]
+        DB_Internal[("1. internal_express<br/>19 Collections - Vận hành, Đối tác, Lương")]
         DB_Laundry[("2. laundry_express<br/>11 Collections - Website B2B, SEO, CRM")]
         DB_Moving[("3. moving_express<br/>3 Collections - Khảo sát chuyển nhà")]
         DB_Core[("4. core_express<br/>4 Collections - Audit, Media, Idempotency, Notifications")]
@@ -22,7 +22,7 @@ graph TD
 
 | Phân Vùng CSDL  | Tên Database MongoDB | Số Collections | Trọng Tâm Nghiệp Vụ                                                                                                                                            |
 | :-------------- | :------------------- | :------------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Phân Vùng 1** | `internal_express`   |     **16**     | Tài khoản nội bộ, thương hiệu & đối tác, danh mục đồ, phiếu giao nhận kép, chấm công selfie, công thợ theo giờ (`hourly_work`), chi phí xe, bảng lương chu kỳ, đơn xin nghỉ giao nhận & phân tuyến (`shipper_leave_requests`). |
+| **Phân Vùng 1** | `internal_express`   |     **19**     | Tài khoản nội bộ, thương hiệu & đối tác, danh mục đồ, phiếu giao nhận kép, chấm công selfie, công thợ theo giờ (`hourly_work`), chi phí xe, bảng lương chu kỳ, đơn xin nghỉ giao nhận (`shipper_leave_requests`), giao ngoài shipper (`external_deliveries`), lịch tuần thợ (`worker_weekly_schedules`), nghỉ phép đột xuất thợ (`worker_leave_requests`). |
 | **Phân Vùng 2** | `laundry_express`    |     **11**     | Website khách hàng`thanhxuanlaundry.com`, CMS bài viết chuẩn SEO, đơn hàng giặt ủi, CRM khách hàng, chiến dịch Email & Zalo OA Marketing.                      |
 | **Phân Vùng 3** | `moving_express`     |     **3**      | Website dịch vụ chuyển nhà`chuyennhatietkiem.vn`, khảo sát báo giá cước vận tải xe tải, danh mục xe tải & cẩm nang chuyển nhà.                                 |
 | **Phân Vùng 4** | `core_express`       |     **4**      | Kết nối qua`CORE_CONNECTION`: Nhật ký kiểm toán bảo mật (Audit Log), file media Cloudinary, khóa chống trùng lặp (Idempotency), thông báo in-app.              |
@@ -390,6 +390,63 @@ erDiagram
 | `rejectedByName`         | `String`             |                 Tùy chọn                  |             -              | Snapshot họ tên người từ chối.                                                                                 |
 | `rejectedAt`             | `Date`               |                 Tùy chọn                  |             -              | Thời điểm từ chối đơn.                                                                                         |
 | `rejectionReason`        | `String`             |                 Tùy chọn                  |             -              | Lý do từ chối đơn xin nghỉ.                                                                                    |
+
+---
+
+### 1.17. Bảng `external_deliveries` (ExternalDelivery - Giao Ngoài Shipper)
+
+- **Mã nguồn:** [`external-delivery.schema.ts`](file:///root/services/thanhxuan/backend-thanhxuan/src/modules/internal/external-deliveries/schemas/external-delivery.schema.ts)
+- **Mục đích nghiệp vụ:** Quản lý các chuyến giao nhận đồ vải tại các điểm ngoài đối tác cố định (Haidilao, Cầu Gỗ, KTX...) với quy trình siêu tinh gọn: ngày giao, tên điểm giao, tài xế phụ trách và ảnh chụp bàn giao.
+
+| Tên Trường     | Kiểu Dữ Liệu | Ràng Buộc / Mặc Định | Index / Ref | Ý Nghĩa & Tác Dụng Nghiệp Vụ |
+| :--- | :--- | :---: | :---: | :--- |
+| `deliveryDate` | `String` | Bắt buộc, `YYYY-MM-DD` | Index | Ngày giao nhận ngoài (Asia/Ho_Chi_Minh). |
+| `spotName` | `String` | Bắt buộc, trim | Index | Tên điểm giao (Haidilao Landmark, Cầu Gỗ, KTX...). |
+| `shipperId` | `ObjectId` | Bắt buộc | Ref: `StaffAccount`, Index | Tài khoản Shipper thực hiện giao đồ. |
+| `shipperName` | `String` | Bắt buộc | - | Snapshot họ tên tài xế. |
+| `photoUrl` | `String` | Bắt buộc | - | URL ảnh chụp bàn giao hàng lưu trữ Cloudinary. |
+| `note` | `String` | Tùy chọn | - | Ghi chú thêm về hàng hóa / giao nhận. |
+| `status` | `String (Enum)` | Mặc định: `COMPLETED` | - | Trạng thái hoàn thành giao nhận. |
+
+---
+
+### 1.18. Bảng `worker_weekly_schedules` (WorkerWeeklySchedule - Lịch Đăng Ký Tuần Thợ Xưởng)
+
+- **Mã nguồn:** [`worker-schedule.schema.ts`](file:///root/services/thanhxuan/backend-thanhxuan/src/modules/internal/worker-schedules/schemas/worker-schedule.schema.ts)
+- **Mục đích nghiệp vụ:** Lưu trữ lịch đăng ký làm việc 7 ngày trong tuần (Thứ 2 đến CN) theo 3 ca (Sáng, Chiều, Tối) và khung giờ tùy chỉnh của Thợ xưởng. Hỗ trợ ghi nhận ca làm bù khi xin đổi lịch trong tuần.
+
+| Tên Trường | Kiểu Dữ Liệu | Ràng Buộc / Mặc Định | Index / Ref | Ý Nghĩa & Tác Dụng Nghiệp Vụ |
+| :--- | :--- | :---: | :---: | :--- |
+| `workerId` | `ObjectId` | Bắt buộc | Ref: `StaffAccount`, Compound Index | Tài khoản Thợ xưởng đăng ký lịch. |
+| `workerName` | `String` | Bắt buộc | - | Snapshot họ tên thợ xưởng. |
+| `year` | `Number` | Bắt buộc | Compound Index | Năm theo lịch ISO. |
+| `weekNumber` | `Number` | Bắt buộc | Compound Index | Tuần thứ mấy trong năm (1 - 52). |
+| `startDate` | `String` | Bắt buộc, `YYYY-MM-DD` | - | Ngày Thứ 2 đầu tuần. |
+| `endDate` | `String` | Bắt buộc, `YYYY-MM-DD` | - | Ngày Chủ Nhật cuối tuần. |
+| `days` | `Array of DaySchedule` | Bắt buộc | - | Mảng 7 ngày kèm danh sách 3 ca (`shiftType`, `isWorking`, `startTime`, `endTime`, `isMakeupShift`, `makeupForDate`). |
+| `status` | `String (Enum)` | Mặc định: `SUBMITTED` | - | Trạng thái lịch: `DRAFT`, `SUBMITTED`, `APPROVED`. |
+
+---
+
+### 1.19. Bảng `worker_leave_requests` (WorkerLeaveRequest - Đơn Xin Nghỉ Đột Xuất Thợ Xưởng)
+
+- **Mã nguồn:** [`worker-leave.schema.ts`](file:///root/services/thanhxuan/backend-thanhxuan/src/modules/internal/worker-schedules/schemas/worker-leave.schema.ts)
+- **Mục đích nghiệp vụ:** Quản lý đơn xin nghỉ đột xuất của thợ xưởng: thời gian nghỉ, số ngày công, lý do và bắt buộc ảnh chụp chứng từ / giấy khám bệnh / đơn viết tay đính kèm để Quản lý xưởng xét duyệt.
+
+| Tên Trường | Kiểu Dữ Liệu | Ràng Buộc / Mặc Định | Index / Ref | Ý Nghĩa & Tác Dụng Nghiệp Vụ |
+| :--- | :--- | :---: | :---: | :--- |
+| `workerId` | `ObjectId` | Bắt buộc | Ref: `StaffAccount`, Index | Tài khoản Thợ xưởng nộp đơn. |
+| `workerName` | `String` | Bắt buộc | - | Snapshot họ tên thợ xưởng. |
+| `startDate` | `String` | Bắt buộc, `YYYY-MM-DD` | Index | Ngày bắt đầu nghỉ. |
+| `endDate` | `String` | Bắt buộc, `YYYY-MM-DD` | Index | Ngày kết thúc nghỉ. |
+| `totalDays` | `Number` | Bắt buộc, min: 0.5 | - | Tổng số ngày công xin nghỉ (0.5, 1, 2...). |
+| `reason` | `String` | Bắt buộc | - | Lý do xin nghỉ đột xuất. |
+| `photoUrl` | `String` | Bắt buộc | - | URL ảnh chứng từ khám bệnh hoặc đơn phép có chữ ký. |
+| `status` | `String (Enum)` | Mặc định: `PENDING` | Index | Trạng thái đơn: `PENDING`, `APPROVED`, `REJECTED`. |
+| `reviewerId` | `ObjectId` | Tùy chọn | Ref: `StaffAccount` | Tài khoản Quản lý xưởng xét duyệt. |
+| `reviewerName` | `String` | Tùy chọn | - | Họ tên Quản lý xưởng xét duyệt. |
+| `reviewNote` | `String` | Tùy chọn | - | Ghi chú phản hồi khi duyệt hoặc từ chối đơn. |
+| `reviewedAt` | `Date` | Tùy chọn | - | Thời điểm xét duyệt đơn. |
 
 ---
 

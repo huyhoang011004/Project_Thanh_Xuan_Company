@@ -4,6 +4,33 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
 
 ## 2026-11-19
 
+### Plan 71: Xây Dựng Phân Hệ Giao Ngoài Cho Shipper & Quản Lý Lịch Làm Việc / Nghỉ Phép Thợ Xưởng (fe-react-thanhxuan-internal & be-nestjs-thanhxuan)
+
+- **Bối cảnh & Vấn đề giải quyết:**
+  - Nhằm hoàn thiện toàn diện giai đoạn 3 của yêu cầu vận hành xưởng và logistics thực tế:
+    1. *(Yêu cầu 5b)*: Các chuyến giao nhận đồ vải tại các điểm ngoài đối tác cố định (Haidilao Landmark, Cầu Gỗ Restaurant, KTX sinh viên/công nhân...) phát sinh đều đặn hàng ngày, đội ngũ tài xế xe tải cần một quy trình ghi nhận siêu tinh gọn: chỉ cần chọn ngày, tên điểm giao và chụp ảnh giao nhận hoàn tất để lưu trữ đối soát.
+    2. *(Yêu cầu 6)*: Quản lý lịch làm việc thợ xưởng: Cần có phân hệ đăng ký lịch làm việc hàng tuần vào 20:00 tối Chủ Nhật hàng tuần (có thông báo đẩy tự động nhảy); mỗi ngày chọn ca (Sáng, Chiều, Tối) và khung giờ làm việc linh hoạt; ràng buộc nguyên tắc kỷ luật: hôm nào xin nghỉ đổi lịch phải đăng ký làm bù một ca khác trong cùng tuần; nộp đơn xin nghỉ đột xuất: số ngày, lý do và bắt buộc ảnh chứng từ / giấy khám bệnh để Quản lý xưởng xét duyệt.
+- **Các giải pháp kỹ thuật đã triển khai:**
+  1. **Backend NestJS (`be-nestjs-thanhxuan`):**
+     - Module `external-deliveries`: Schema `ExternalDelivery` (collection `external_deliveries`), Repository, Service và Controller (`POST /external-deliveries`, `GET /external-deliveries`). Phân quyền tài xế chỉ xem chuyến của mình, Quản lý/Admin xem toàn bộ.
+     - Module `worker-schedules`: Schema `WorkerWeeklySchedule` (collection `worker_weekly_schedules`), Schema `WorkerLeaveRequest` (collection `worker_leave_requests`), Repositories, Service và Controller. Ràng buộc logic chặt chẽ: ca làm bù phải nằm trong tuần đăng ký và không trùng với ca đã có lịch; đơn xin nghỉ đột xuất bắt buộc phải có `photoUrl` ảnh chứng từ mới cho phép lưu.
+     - Cron Job Thông Báo 20h Chủ Nhật: Cài đặt `@Cron('0 20 * * 0')` trong `schedule-task.service.ts` quét các tài khoản thợ xưởng (`WORKER`) đang hoạt động và phát in-app notification nhắc đăng ký lịch tuần mới.
+  2. **Frontend React PWA (`fe-react-thanhxuan-internal`):**
+     - Xây dựng client services: `externalDeliveryService.ts` và `workerScheduleService.ts`.
+     - Phân hệ Giao Ngoài Shipper: Modal `ExternalDeliveryModal` (chọn ngày, chọn/nhập điểm giao, nén ảnh bằng `browser-image-compression`, upload Cloudinary), sub-component `ExternalDeliveryListTabComponent`, tích hợp tab "Giao Ngoài" và nút mở modal trong `ShipperHandoverPage`.
+     - Phân hệ Lịch Thợ Xưởng:
+       - `WeeklyScheduleRegisterModal`: Đăng ký lịch 7 ngày (Thứ 2 đến CN), toggle 3 ca (Sáng/Chiều/Tối), tùy chỉnh giờ bắt đầu - kết thúc.
+       - `ScheduleChangeMakeupModal`: Giao diện đổi lịch nghỉ trực quan, bắt buộc chọn ca làm bù trong cùng tuần.
+       - `WorkerEmergencyLeaveModal`: Chọn ngày nghỉ, số ngày công (min 0.5), nhập lý do và khung camera chụp/tải ảnh chứng từ giấy khám bệnh.
+       - `WorkerLeaveReviewModal`: Quản lý xưởng (`MANAGER`, `ADMIN`) xem ảnh chứng từ gốc và xét duyệt (`APPROVED`) hoặc từ chối (`REJECTED`) đơn.
+       - `WorkerScheduleGridComponent` & `WorkerLeaveListTabComponent`: Hiển thị lưới lịch 7 ngày và danh sách đơn nghỉ kèm badge trạng thái.
+       - Hook `useWorkerSchedule.ts` & Trang `WorkerSchedulePage.tsx`: Màn hình điều hành tập trung cho thợ xưởng và quản lý.
+     - Đăng ký route `operations/worker/schedule` trong `router.tsx` và menu "Lịch Làm & Nghỉ Phép" trong `nav-config.ts`.
+- **Kết quả kiểm chứng:**
+  - Backend Unit Tests: 3/3 tests `external-deliveries.service.spec.ts` pass, 6/6 tests `worker-schedules.service.spec.ts` pass 100%.
+  - Backend Typecheck `tsc --noEmit` & Build `nest build` pass 100% (0 errors).
+  - Frontend Typecheck `tsc -b` & Build `vite build` pass 100% (0 errors, 40.20s).
+
 ### Plan 70: Xuất Báo Cáo Bảng Kê Nhận Khăn Ma Trận Ngày (Chu Kỳ 26 Đến 25) Chuẩn Google Sheet (fe-react-thanhxuan-internal & be-nestjs-thanhxuan)
 
 - **Bối cảnh & Vấn đề giải quyết:**

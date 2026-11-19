@@ -146,6 +146,17 @@ Backend API tập trung phục vụ toàn bộ các kênh tương tác của Cô
 - **Dọn dẹp ảnh phụ 90 ngày (03:00 sáng mùng 1 mỗi quý):** Dọn dẹp ảnh chấm công camera và ảnh đổ xăng xe tải cũ hơn 90 ngày.
 - **Kiểm soát dung lượng Google Drive 5GB (04:00 sáng Chủ nhật hàng tuần):** Quét dung lượng Drive qua `rclone about`. Khi dung lượng $\ge 80\%$ (hoặc trống $< 1$ GB), tự động dọn dẹp các bản sao lưu cũ nhất theo FIFO và gửi email cảnh báo cho Admin.
 
+#### BE-FR-10: Phân Hệ Giao Ngoài Cho Shipper (`/api/v1/internal/external-deliveries` - Plan 71)
+- **Mục tiêu:** Đáp ứng các chuyến giao nhận đồ vải tại các điểm đối tác không cố định (Haidilao Landmark, Cầu Gỗ, KTX...).
+- **Cơ chế ghi nhận:** Thu thập thông tin tinh gọn: `deliveryDate` (ngày giao), `spotName` (tên điểm giao), `photoUrl` (bắt buộc ảnh chụp bàn giao tải lên Cloudinary), `note` (ghi chú bổ sung).
+- **Phân quyền truy vấn:** Shipper chỉ xem các chuyến của chính mình trong ngày; Quản lý/Kế toán/Admin xem toàn bộ chuyến hoặc lọc theo tài xế.
+
+#### BE-FR-11: Quản Lý Lịch Làm Việc & Nghỉ Phép Thợ Xưởng (`/api/v1/internal/worker-schedules` - Plan 71)
+- **Đăng ký lịch tuần:** Mỗi tuần thợ xưởng đăng ký trước 20:00 tối Chủ Nhật. Khung 7 ngày (Thứ 2 đến CN), 3 ca chuẩn (Sáng 07:00-11:30, Chiều 13:00-17:30, Tối 18:00-22:30) kèm khung giờ bắt đầu/kết thúc tùy chỉnh.
+- **Ràng buộc đổi lịch làm bù:** Khi thợ đổi một ca sang nghỉ (`offDate`, `offShiftType`), hệ thống bắt buộc thợ phải đăng ký một ca làm bù (`makeupDate`, `makeupShiftType`, `makeupStartTime`, `makeupEndTime`) trong cùng tuần đó, không được trùng với ca đã có lịch làm.
+- **Đơn xin nghỉ đột xuất:** Thợ xưởng nộp đơn kèm bắt buộc ảnh chứng từ / giấy khám bệnh / đơn viết tay (`photoUrl`). Quản lý xưởng (`MANAGER`, `ADMIN`) xét duyệt qua `PATCH /leaves/:id/review` (`APPROVED` / `REJECTED`).
+- **Thông báo nhắc nhở tự động:** Cron Job chạy lúc 20:00 tối Chủ Nhật hàng tuần (`0 20 * * 0`) tự động phát in-app notification nhắc toàn thể thợ xưởng đăng ký lịch tuần mới.
+
 ---
 
 ## 2. THIẾT KẾ KIẾN TRÚC BACKEND (SDD)
