@@ -2,7 +2,40 @@
 
 Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâng cấp, bugfix và triển khai tính năng của Hệ sinh thái Công ty Thanh Xuân qua từng Plan.
 
-## 2026-11-01
+## 2026-11-19
+
+### Plan 69: Nâng Cấp Nghiệp Vụ Giao Nhận Khăn, Kiểm Nhận Đồ Sạch & Đối Soát Vận Hành (fe-react-thanhxuan-internal & be-nestjs-thanhxuan)
+
+- **Bối cảnh & Vấn đề giải quyết:**
+  - Theo phản hồi từ thực tế vận hành giữa xưởng và các chuỗi nhà hàng (Pizza 4P's, Haidilao...):
+    1. Khi nhân viên xưởng kiểm đếm lại khăn tại trạm rạch bao và phát hiện chênh lệch với số nhà hàng đếm đêm hôm trước, việc âm thầm sửa số liệu khiến nhà hàng không nắm được thông tin, dẫn tới tranh cãi khi đối soát cuối tháng.
+    2. Nhân viên nhà hàng khi đếm đồ bẩn cần ghi chú các đặc điểm riêng biệt của từng loại đồ (như tạp dề trẻ em vs nhân viên, rèm cửa màu gì, bọc xe lớn hay nhỏ...).
+    3. Khi đối tác kiểm nhận đồ sạch giao đến, họ cần một ô ghi nhận số lượng thiếu/dư thực tế hôm nay so với số nhân viên xưởng ghi sổ xuất xưởng (`deliveryQuantity`), khác biệt hoàn toàn với số lượng khăn chưa giao trả từ hôm trước.
+    4. Tài xế Shipper cần có nút "Đếm lại" màu sắc nổi bật khi phát hiện số khăn gom tại quán có sự chênh lệch so với số quán đã ghi sổ.
+    5. Tại khâu soạn đồ sạch, thủ kho cần lưu lại ghi chú về hàng tồn kho nội bộ xưởng mà không được phép in/vẽ lên phiếu gửi khách hàng.
+- **Các giải pháp kỹ thuật đã triển khai:**
+  1. **Cơ Sở Dữ Liệu & Schema (Backend):**
+     - Bổ sung `actualReceivedQuantity?: number` và `varianceQuantity?: number` vào `CleanItemLine` schema.
+     - Bổ sung trường `note?: string` vào `DirtyItemLine` schema để lưu ghi chú đặc tính món đồ bẩn.
+     - Bổ sung trường `internalInventoryNote?: string` vào `HandoverRecord` schema.
+  2. **API & Logic Bàn Giao - Đối Soát:**
+     - Nâng cấp endpoint nguyên tử `PATCH /handover/:id/dirty-item-onblur` nhận trường `note`, cập nhật trực tiếp vào cả `items` và `partnerCount.items`.
+     - Cập nhật hàm `receiptCheck` trong `handover-flow.service.ts` tính toán và lưu `actualReceivedQuantity` và `varianceQuantity` (`expected - actualReceived`). Cung cấp alias `@Post([':id/receipt', ':id/confirm-receipt'])` tương thích ngược hoàn hảo.
+     - Bổ sung `internalInventoryNote` trong DTO `PrepOrderDto` và `HandoverCleanPrepHelper` để lưu trữ ghi chú hàng tồn mà không ảnh hưởng đến hình ảnh phiếu Canvas.
+  3. **Hệ Thống Thông Báo Thời Gian Thực Cho Nhà Hàng:**
+     - Nâng cấp `NotificationsService` hỗ trợ định tuyến thông báo theo kênh `partner_${partnerId}`.
+     - Tích hợp phát thông báo tự động `HANDOVER_RECOUNT_UPDATED` tại `completeRecount` (`handover-recount.service.ts`) và `updateRecountActual` (`handover-dirty-signature.service.ts`), gửi tới toàn bộ nhân sự nhà hàng khi xưởng điều chỉnh số liệu khăn nhận.
+  4. **Giao Diện Đếm Đồ Bẩn & Kiểm Nhận Đồ Sạch (Frontend PWA):**
+     - Mở rộng `usePartnerCountTab.ts` và `PartnerCountItemsViewComponent.tsx`: Thêm ô nhập ghi chú từng dòng cho cả Card view và Table view, kích hoạt cơ chế auto-save onblur.
+     - Tái cấu trúc bảng kiểm nhận đồ sạch `PartnerReceiptItemsTableComponent.tsx` và `usePartnerReceiptFlow.ts`: Cho phép nhập số lượng thực nhận trực tiếp hoặc điều chỉnh bằng `+/-`, tự động tính toán thiếu/dư so với số ghi sổ của phiếu hôm nay, kèm banner chỉ dẫn nghiệp vụ rõ ràng.
+     - Bổ sung nút "Đếm lại" màu đỏ rose (icon `RefreshCw`) trong `ShipperHandoverSlipPreviewComponent.tsx` khi nhà hàng đã có số liệu đếm; giữ nút "Đếm thay" khi chưa có số liệu.
+     - Bổ sung ô nhập "Ghi chú hàng tồn nội bộ xưởng" trong `PrepOrderModal.tsx`, quản lý qua `usePrepOrderForm.ts` và `prepOrderSlipHelper.ts`.
+- **Kết quả kiểm chứng:**
+  - Backend Typecheck `tsc --noEmit` pass 100% (0 errors).
+  - Backend Jest Unit Tests `pnpm test -- src/modules/internal/handovers`: 4/4 test suites passed, 49/49 tests passed.
+  - Backend Build `nest build` pass 100%.
+  - Frontend Typecheck `tsc -b` pass 100% (0 errors).
+  - Frontend Build `vite build` pass 100% (41.33s).
 
 ### Plan 68: Triển Khai Hệ Thống Cinematic Living Motion Đa Phân Hệ & Chuẩn Hóa Mobile Header (fe-nextjs-thanhxuan-laundry)
 
