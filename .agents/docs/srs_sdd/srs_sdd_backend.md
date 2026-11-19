@@ -127,6 +127,12 @@ Backend API tập trung phục vụ toàn bộ các kênh tương tác của Cô
   5. `variance-incidents`: Báo cáo chênh lệch số lượng đếm lại, đồ rách hỏng và sửa đổi sau ký.
   6. `fuel-summary`: Báo cáo tiêu hao và chi phí xăng xe toàn đội.
 - Giới hạn khoảng thời gian truy vấn tối đa 31 ngày.
+- **Xuất Bảng kê nhận khăn ma trận ngày (`GET /reports/partner/:partnerId/towel-matrix-export`):**
+  - Xuất file Excel chuẩn theo form Google Sheet khách hàng yêu cầu, chu kỳ tính cước mặc định từ ngày 26 tháng trước đến ngày 25 tháng này.
+  - Bảng chính gồm 9 danh mục khăn cố định mỗi ngày (Khăn ăn xám, Khăn trắng lau ly, Khăn trắng bếp, Khăn lau bát/navi/nâu/hồng, Khăn che xe/phủ xe, Tạp dề, Chăn bay, Rèm, Bọc giỏ) kèm số lượng cái và phân loại chi tiết (ví dụ: tạp dề kid/nhân viên).
+  - Bảng phụ bên phải tự động phân loại các hạng mục bổ sung ngoài 9 danh mục kèm đơn giá theo bảng giá hợp đồng và thành tiền.
+  - Dòng cuối cùng tính tổng cộng số lượng khăn toàn kỳ bằng công thức Excel tự động (`=SUM(...)`).
+  - Phân quyền: Đại diện nhà hàng (chỉ xuất đúng chi nhánh của mình) hoặc Nhân viên nội bộ (Admin, Manager, Accountant, WarehouseManager).
 - Streaming Export bảo vệ VPS (< 512MB RAM): Xuất file Excel XLSX bằng `exceljs` ghi dòng stream và PDF bằng `pdfmake`. Hàng đợi concurrency = 1 chống tràn RAM.
 
 #### BE-FR-08: Dịch Vụ Khảo Sát Báo Giá Chuyển Nhà (`/api/v1/moving`)

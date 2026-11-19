@@ -4,6 +4,35 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
 
 ## 2026-11-19
 
+### Plan 70: Xuất Báo Cáo Bảng Kê Nhận Khăn Ma Trận Ngày (Chu Kỳ 26 Đến 25) Chuẩn Google Sheet (fe-react-thanhxuan-internal & be-nestjs-thanhxuan)
+
+- **Bối cảnh & Vấn đề giải quyết:**
+  - Khách hàng chuỗi nhà hàng (như Pizza 4P's, Haidilao...) yêu cầu báo cáo nhận khăn hàng tháng phải tuân theo form biểu mẫu Excel ma trận ngày cố định (theo mẫu Google Sheet `GID: 1192612866`), chu kỳ tính cước chốt từ ngày 26 tháng trước đến ngày 25 tháng này.
+  - Bảng báo cáo cần hiển thị:
+    1. Bảng chính bên trái gồm 9 danh mục khăn chuẩn cố định mỗi ngày (Khăn ăn xám, Khăn trắng lau ly, Khăn trắng bếp, Khăn lau bát/navi/nâu/hồng, Khăn che xe/phủ xe, Tạp dề, Chăn bay, Rèm, Bọc giỏ), cột số lượng cái, và cột ghi chú phân loại chi tiết (ví dụ: tạp dề kid/nhân viên). Cột Ngày merge 9 dòng/ngày.
+    2. Bảng phụ bên phải `HẠNG MỤC BỔ SUNG`: tự động nhận diện và bóc tách các món đồ phát sinh ngoài 9 danh mục cố định, hiển thị số lượng, đơn giá hợp đồng và thành tiền.
+    3. Dòng tổng cộng cuối kỳ tính tự động bằng công thức Excel (`=SUM(...)`).
+    4. Cho phép đại diện nhà hàng tự xuất trực tiếp từ Cổng Đối Tác (`PartnerHandoverPage`) và Kế toán / Quản lý xuất từ Trung Tâm Báo Cáo (`ReportsPage` / `PartnerReconciliationViewComponent`).
+- **Các giải pháp kỹ thuật đã triển khai:**
+  1. **Helper & Thuật Toán Phân Loại Danh Mục (Backend):**
+     - Xây dựng `daily-towel-matrix.helper.ts` với dictionary regex thông minh phân loại chính xác các biến thể tên và mã đồ vào 9 danh mục chuẩn, các món khác tự động chuyển sang hạng mục bổ sung.
+     - Hàm `resolveDefaultTowelBillingCycle` tự động xác định chu kỳ 26 - 25 theo ngày hiện tại của múi giờ Việt Nam (`Asia/Ho_Chi_Minh`).
+     - Hàm `renderDailyTowelMatrixToWorksheet` định dạng layout Excel chuyên nghiệp bằng `exceljs`: merge cell, border thin, fill màu header, font Arial, định dạng số `#,#00`, công thức `=SUM(...)`.
+  2. **Aggregation Service & Endpoint (Backend):**
+     - Xây dựng `PartnerReportService.getDailyTowelMatrixData(partnerId, from, to)`: truy vấn handovers, ưu tiên số lượng xưởng kiểm đếm thực tế (`actualQuantityReceived`), fallback sang số shipper/quán đếm (`quantityReceived`), gộp subnotes từ ghi chú từng món.
+     - Mở rộng `ExcelExportService`, `ReportExportService` (hàng đợi concurrency = 1, ghi Audit Log) và `ReportsService`.
+     - Thêm endpoint `GET /reports/partner/:partnerId/towel-matrix-export` trong `ReportsController`: phân quyền bảo mật chặt chẽ (đại diện đối tác chỉ được xuất chi nhánh của mình, nhân sự nội bộ xem được toàn bộ).
+  3. **Tích Hợp Giao Diện Xuất File (Frontend PWA):**
+     - Thêm hàm `downloadTowelMatrixReport` và `exportTowelMatrixFile` trong `reports.service.ts`.
+     - Thêm nút "Xuất Bảng Kê Nhận Khăn" trên thanh `PageActionBar` của `PartnerHandoverPage` (hiển thị trên cả mobile và desktop).
+     - Thêm nút xuất nhanh Excel ma trận khăn cho từng đối tác trên bảng tổng hợp và nút xuất lớn ở CardHeader chi tiết đối tác trong `PartnerReconciliationViewComponent`.
+- **Kết quả kiểm chứng:**
+  - Backend Typecheck `tsc --noEmit` pass 100% (0 errors).
+  - Backend Unit Tests: `daily-towel-matrix.spec.ts` 7/7 passed, toàn bộ reports module 33/33 passed.
+  - Backend Build `nest build` pass 100%.
+  - Frontend Typecheck `tsc -b` pass 100% (0 errors).
+  - Frontend Build `vite build` pass 100% (39.44s).
+
 ### Plan 69: Nâng Cấp Nghiệp Vụ Giao Nhận Khăn, Kiểm Nhận Đồ Sạch & Đối Soát Vận Hành (fe-react-thanhxuan-internal & be-nestjs-thanhxuan)
 
 - **Bối cảnh & Vấn đề giải quyết:**
