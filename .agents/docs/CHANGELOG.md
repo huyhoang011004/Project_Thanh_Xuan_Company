@@ -2,6 +2,23 @@
 
 Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâng cấp, bugfix và triển khai tính năng của Hệ sinh thái Công ty Thanh Xuân qua từng Plan.
 
+## 2026-11-24
+
+### Quick Edit: Tối Ưu UI/UX Mobile Cổng Nội Bộ & Sửa Lỗi Popup Thông Báo (fe-react-thanhxuan-internal)
+
+- **Bối cảnh & Vấn đề giải quyết:**
+  - Trên giao diện di động của Cổng Vận Hành Nội Bộ (`fe-react-thanhxuan-internal`), thanh tab chuyển phân hệ tại trang Cổng Đối tác (`PartnerHandoverPage`) bị lặp lại với thanh điều hướng đáy (Mobile Bottom Bar), chiếm dụng không gian hiển thị.
+  - Header mobile tồn tại nút Menu hamburger ở góc trên bên trái trong khi thanh đáy đã có sẵn nút "Thêm" mở danh mục quản lý.
+  - Modal "Tự Nhập Món Đồ Ngoài Setting" mang tông màu cam/amber lệch khỏi phong cách thiết kế xanh dương nhạt (Sky Blue) của toàn hệ sinh thái.
+  - Popup chuông thông báo (`NotificationBell`) trên thiết bị di động bị tràn mép trái màn hình, che mất chữ "Thông Báo".
+- **Giải pháp kỹ thuật đã triển khai:**
+  1. `PartnerHandoverPage.tsx` & `PageActionBar.tsx`: Thêm prop `leftClassName="hidden lg:flex"` để ẩn cụm tab trùng lặp trên màn hình di động, giữ lại nút "Xuất Bảng Kê Nhận Khăn" hiển thị gọn gàng.
+  2. `AppHeader.tsx`: Bỏ nút Hamburger trên mobile để giảm tải thị giác và loại bỏ trùng lặp với nút "Thêm" tại Bottom Bar.
+  3. `CustomHandoverItemModal.tsx`: Chuyển đổi toàn bộ tông màu cam/amber sang màu xanh dương nhạt (`sky-600`, `sky-100`, `sky-50`), tối ưu kích thước nút bấm số lượng và form responsive cho mobile (`w-[92vw] sm:w-full`).
+  4. `NotificationBell.tsx`: Căn chỉnh popup thông báo trên mobile bằng `fixed left-3 right-3 top-14 max-w-sm mx-auto` cùng lớp nền mờ nhẹ để chạm ra ngoài tự đóng, ngăn ngừa tràn viền và che khuất nội dung.
+- **Kết quả kiểm chứng:**
+  - TypeScript strict check và Vite production build pass 100%.
+
 ## 2026-11-19
 
 ### Plan 71: Xây Dựng Phân Hệ Giao Ngoài Cho Shipper & Quản Lý Lịch Làm Việc / Nghỉ Phép Thợ Xưởng (fe-react-thanhxuan-internal & be-nestjs-thanhxuan)
