@@ -87,13 +87,13 @@ export function UserModal({ open, onOpenChange, user, onSave }: UserModalProps) 
 
         <DialogContent className="space-y-4 py-4">
           {error && (
-            <div className="rounded-lg bg-rose-50 p-3 text-xs text-rose-700 border border-rose-200">
+            <div className="rounded-lg bg-rose-50 dark:bg-rose-950/40 p-3 text-xs text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800">
               {error}
             </div>
           )}
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-700">Tên đăng nhập *</label>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Tên đăng nhập *</label>
             <Input
               value={username}
               onChange={(e) => setUsername(e.target.value)}
@@ -104,7 +104,7 @@ export function UserModal({ open, onOpenChange, user, onSave }: UserModalProps) 
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-700">
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
               {user ? 'Mật khẩu mới (để trống nếu không đổi)' : 'Mật khẩu *'}
             </label>
             <Input
@@ -117,7 +117,7 @@ export function UserModal({ open, onOpenChange, user, onSave }: UserModalProps) 
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-700">Họ và tên *</label>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Họ và tên *</label>
             <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -128,7 +128,7 @@ export function UserModal({ open, onOpenChange, user, onSave }: UserModalProps) 
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-700">Email</label>
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Email</label>
               <Input
                 type="email"
                 value={email}
@@ -137,7 +137,7 @@ export function UserModal({ open, onOpenChange, user, onSave }: UserModalProps) 
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-700">Số điện thoại</label>
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Số điện thoại</label>
               <Input
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
@@ -147,11 +147,11 @@ export function UserModal({ open, onOpenChange, user, onSave }: UserModalProps) 
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-700">Vai trò phân quyền</label>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Vai trò phân quyền</label>
             <select
               value={role}
               onChange={(e) => setRole(e.target.value)}
-              className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs"
+              className="flex h-9 w-full rounded-md border border-input bg-background dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 px-3 py-1 text-sm shadow-xs"
             >
               <option value="ADMIN">ADMIN — Toàn quyền hệ thống</option>
               <option value="MANAGER">MANAGER — Quản lý vận hành & Marketing</option>

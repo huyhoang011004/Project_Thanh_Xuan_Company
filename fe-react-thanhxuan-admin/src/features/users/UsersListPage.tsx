@@ -84,26 +84,26 @@ export function UsersListPage() {
         <div>
           <div className="flex items-center gap-2">
             <ShieldCheck className="h-6 w-6 text-primary" />
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">Tài Khoản Quản Trị & Phân Quyền</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Tài Khoản Quản Trị & Phân Quyền</h1>
           </div>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             Quản trị nhân sự quản trị hệ thống đa thương hiệu Thanh Xuân
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => refetch()} className="gap-1.5">
+          <Button variant="outline" size="sm" onClick={() => refetch()} className="gap-1.5 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200">
             <RefreshCw className="h-3.5 w-3.5" />
             Làm mới
           </Button>
-          <Button size="sm" onClick={handleOpenCreate} className="gap-1.5 font-semibold">
+          <Button size="sm" onClick={handleOpenCreate} className="gap-1.5 font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:opacity-95">
             <Plus className="h-4 w-4" />
             Thêm Tài Khoản
           </Button>
         </div>
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white shadow-xs overflow-hidden">
+      <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 shadow-xs overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
@@ -130,13 +130,13 @@ export function UsersListPage() {
             ) : (
               users.map((u, idx) => (
                 <TableRow key={u._id}>
-                  <TableCell className="text-center font-medium text-slate-500">{idx + 1}</TableCell>
+                  <TableCell className="text-center font-medium text-slate-500 dark:text-slate-400">{idx + 1}</TableCell>
                   <TableCell>
-                    <div className="font-semibold text-slate-900">{u.name}</div>
+                    <div className="font-semibold text-slate-900 dark:text-slate-100">{u.name}</div>
                     <div className="font-mono text-xs text-slate-400">@{u.username}</div>
                   </TableCell>
                   <TableCell>
-                    <div className="text-xs text-slate-700">{u.email || '—'}</div>
+                    <div className="text-xs text-slate-700 dark:text-slate-300">{u.email || '—'}</div>
                     {u.phone && <div className="text-xs text-slate-400 font-mono">{u.phone}</div>}
                   </TableCell>
                   <TableCell className="text-center">
@@ -150,7 +150,7 @@ export function UsersListPage() {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleOpenEdit(u)}
-                        className="h-8 w-8 p-0 text-slate-600 hover:text-primary"
+                        className="h-8 w-8 p-0 text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary"
                         title="Chỉnh sửa"
                       >
                         <Edit2 className="h-4 w-4" />
@@ -159,7 +159,7 @@ export function UsersListPage() {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleDelete(u._id, u.name)}
-                        className="h-8 w-8 p-0 text-slate-400 hover:text-rose-600"
+                        className="h-8 w-8 p-0 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400"
                         title="Xóa"
                       >
                         <Trash2 className="h-4 w-4" />

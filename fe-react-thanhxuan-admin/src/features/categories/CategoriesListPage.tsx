@@ -46,19 +46,19 @@ export function CategoriesListPage() {
         <div>
           <div className="flex items-center gap-2">
             <FolderTree className="h-6 w-6 text-primary" />
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">Quản Lý Chuyên Mục</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Quản Lý Chuyên Mục</h1>
           </div>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             Chuyên mục bài viết và dịch vụ của <span className="font-semibold text-primary">{config.brandName}</span>
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => refetch()} className="gap-1.5">
+          <Button variant="outline" size="sm" onClick={() => refetch()} className="gap-1.5 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200">
             <RefreshCw className="h-3.5 w-3.5" />
             Làm mới
           </Button>
-          <Button size="sm" onClick={handleOpenCreate} className="gap-1.5">
+          <Button size="sm" onClick={handleOpenCreate} className="gap-1.5 font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:opacity-95">
             <Plus className="h-4 w-4" />
             Thêm Chuyên Mục
           </Button>
@@ -66,7 +66,7 @@ export function CategoriesListPage() {
       </div>
 
       {/* Table Card */}
-      <div className="rounded-xl border border-slate-200 bg-white shadow-xs overflow-hidden">
+      <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 shadow-xs overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
@@ -94,20 +94,20 @@ export function CategoriesListPage() {
             ) : (
               categories.map((cat, idx) => (
                 <TableRow key={cat._id}>
-                  <TableCell className="text-center font-medium text-slate-500">{idx + 1}</TableCell>
+                  <TableCell className="text-center font-medium text-slate-500 dark:text-slate-400">{idx + 1}</TableCell>
                   <TableCell>
-                    <div className="font-semibold text-slate-900">{cat.name}</div>
+                    <div className="font-semibold text-slate-900 dark:text-slate-100">{cat.name}</div>
                     {cat.description && (
-                      <div className="text-xs text-slate-400 line-clamp-1">{cat.description}</div>
+                      <div className="text-xs text-slate-400 dark:text-slate-500 line-clamp-1">{cat.description}</div>
                     )}
                   </TableCell>
-                  <TableCell className="font-mono text-xs text-slate-600">{cat.slug}</TableCell>
+                  <TableCell className="font-mono text-xs text-slate-600 dark:text-slate-400">{cat.slug}</TableCell>
                   <TableCell>
                     <Badge variant={cat.type === 'SERVICE' ? 'default' : 'secondary'}>
                       {cat.type === 'SERVICE' ? 'Dịch vụ' : cat.type === 'ABOUT' ? 'Giới thiệu' : 'Bài viết'}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-center text-xs font-semibold text-slate-700">
+                  <TableCell className="text-center text-xs font-semibold text-slate-700 dark:text-slate-300">
                     {cat.order || 0}
                   </TableCell>
                   <TableCell className="text-right">
@@ -116,7 +116,7 @@ export function CategoriesListPage() {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleOpenEdit(cat)}
-                        className="h-8 w-8 p-0 text-slate-600 hover:text-primary"
+                        className="h-8 w-8 p-0 text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary"
                         title="Chỉnh sửa"
                       >
                         <Edit2 className="h-4 w-4" />
@@ -125,7 +125,7 @@ export function CategoriesListPage() {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleDelete(cat._id, cat.name)}
-                        className="h-8 w-8 p-0 text-slate-400 hover:text-rose-600"
+                        className="h-8 w-8 p-0 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400"
                         title="Xóa"
                       >
                         <Trash2 className="h-4 w-4" />

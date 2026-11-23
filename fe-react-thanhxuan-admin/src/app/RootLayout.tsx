@@ -3,6 +3,7 @@ import { TenantProvider } from './TenantContext';
 import { AuthProvider } from '@/features/auth/AuthContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
+import { PwaInstallPromptComponent } from '@/components/pwa/PwaInstallPromptComponent';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -21,6 +22,7 @@ export function RootLayout() {
         <AuthProvider>
           <Outlet />
           <Toaster richColors position="top-right" />
+          <PwaInstallPromptComponent />
         </AuthProvider>
       </TenantProvider>
     </QueryClientProvider>

@@ -36,21 +36,21 @@ export function ContactsListPage() {
         <div>
           <div className="flex items-center gap-2">
             <Mail className="h-6 w-6 text-primary" />
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">Yêu Cầu Tư Vấn & Báo Giá</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Yêu Cầu Tư Vấn & Báo Giá</h1>
           </div>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             Khách hàng để lại thông tin liên hệ tại <span className="font-semibold text-primary">{config.brandName}</span>
           </p>
         </div>
 
-        <Button variant="outline" size="sm" onClick={() => refetch()} className="gap-1.5">
+        <Button variant="outline" size="sm" onClick={() => refetch()} className="gap-1.5 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200">
           <RefreshCw className="h-3.5 w-3.5" />
           Làm mới
         </Button>
       </div>
 
       {/* Filter */}
-      <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-xs sm:flex-row sm:items-center">
+      <div className="flex flex-col gap-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 backdrop-blur-md p-4 shadow-xs sm:flex-row sm:items-center">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
           <Input
@@ -65,7 +65,7 @@ export function ContactsListPage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs"
+            className="flex h-9 w-full rounded-md border border-input bg-background dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 px-3 py-1 text-sm shadow-xs"
           >
             <option value="ALL">Tất cả trạng thái</option>
             <option value="NEW">Mới tiếp nhận</option>
@@ -77,16 +77,16 @@ export function ContactsListPage() {
       </div>
 
       {/* Table */}
-      <div className="rounded-xl border border-slate-200 bg-white shadow-xs overflow-hidden">
+      <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 backdrop-blur-md shadow-xs overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-12 text-center">STT</TableHead>
-              <TableHead>Khách Hàng</TableHead>
-              <TableHead>Nội Dung / Yêu Cầu</TableHead>
-              <TableHead className="text-center">Trạng Thái</TableHead>
-              <TableHead className="text-center">Thời Gian</TableHead>
-              <TableHead className="text-right">Thao Tác</TableHead>
+              <TableHead className="w-12 text-center text-slate-500 dark:text-slate-400">STT</TableHead>
+              <TableHead className="text-slate-500 dark:text-slate-400">Khách Hàng</TableHead>
+              <TableHead className="text-slate-500 dark:text-slate-400">Nội Dung / Yêu Cầu</TableHead>
+              <TableHead className="text-center text-slate-500 dark:text-slate-400">Trạng Thái</TableHead>
+              <TableHead className="text-center text-slate-500 dark:text-slate-400">Thời Gian</TableHead>
+              <TableHead className="text-right text-slate-500 dark:text-slate-400">Thao Tác</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -105,9 +105,9 @@ export function ContactsListPage() {
             ) : (
               contacts.map((c, idx) => (
                 <TableRow key={c._id}>
-                  <TableCell className="text-center font-medium text-slate-500">{idx + 1}</TableCell>
+                  <TableCell className="text-center font-medium text-slate-500 dark:text-slate-400">{idx + 1}</TableCell>
                   <TableCell>
-                    <div className="font-semibold text-slate-900">{c.fullName}</div>
+                    <div className="font-semibold text-slate-900 dark:text-slate-100">{c.fullName}</div>
                     <div className="font-mono text-xs text-primary font-medium">{c.phone}</div>
                     {c.email && <div className="text-xs text-slate-400">{c.email}</div>}
                   </TableCell>
@@ -117,7 +117,7 @@ export function ContactsListPage() {
                         {c.serviceCategory}
                       </Badge>
                     )}
-                    <div className="text-xs text-slate-700 line-clamp-2">{c.message || 'Yêu cầu tư vấn'}</div>
+                    <div className="text-xs text-slate-700 dark:text-slate-300 line-clamp-2">{c.message || 'Yêu cầu tư vấn'}</div>
                     {c.sourceUrl && (
                       <div className="text-[10px] text-slate-400 mt-1 line-clamp-1">Từ: {c.sourceUrl}</div>
                     )}

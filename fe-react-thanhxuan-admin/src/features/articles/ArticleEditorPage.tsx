@@ -123,31 +123,36 @@ export function ArticleEditorPage() {
 
   return (
     <form onSubmit={handleSave} className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white dark:bg-slate-900/80 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-xs">
         <div className="flex items-center gap-3">
           <Button
             type="button"
-            variant="ghost"
+            variant="outline"
             size="sm"
             onClick={() => navigate('/articles')}
-            className="gap-1.5 text-slate-500"
+            className="gap-1.5 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white dark:bg-slate-800 dark:border-slate-700"
           >
             <ArrowLeft className="h-4 w-4" />
-            Quay lại
+            <span className="hidden sm:inline">Quay lại</span>
           </Button>
-          <h1 className="text-xl font-bold text-slate-900">
-            {isEditing ? 'Chỉnh Sửa Bài Viết' : 'Soạn Bài Viết Mới'}
-          </h1>
+          <div>
+            <h1 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
+              {isEditing ? 'Chỉnh Sửa Bài Viết' : 'Soạn Bài Viết Mới'}
+            </h1>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Biên tập nội dung chuẩn SEO cho website
+            </p>
+          </div>
         </div>
 
-        <Button type="submit" disabled={isSaving} className="gap-1.5 font-semibold">
+        <Button type="submit" disabled={isSaving} className="gap-1.5 font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:opacity-95 shadow-md shadow-blue-500/20 py-2.5 px-5 rounded-xl cursor-pointer">
           <Save className="h-4 w-4" />
           {isSaving ? 'Đang lưu...' : 'Lưu Bài Viết'}
         </Button>
       </div>
 
       {error && (
-        <div className="rounded-lg bg-rose-50 p-3 text-sm text-rose-700 border border-rose-200">
+        <div className="rounded-lg bg-rose-50 dark:bg-rose-950/40 p-3 text-sm text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800">
           {error}
         </div>
       )}
@@ -157,11 +162,11 @@ export function ArticleEditorPage() {
         <div className="space-y-6 lg:col-span-2">
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-base font-semibold">Nội Dung Bài Viết</CardTitle>
+              <CardTitle className="text-base font-semibold text-slate-900 dark:text-slate-100">Nội Dung Bài Viết</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-700">Tiêu đề bài viết *</label>
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Tiêu đề bài viết *</label>
                 <Input
                   value={title}
                   onChange={(e) => handleTitleChange(e.target.value)}
@@ -171,7 +176,7 @@ export function ArticleEditorPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-700">Đường dẫn tĩnh (Slug) *</label>
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Đường dẫn tĩnh (Slug) *</label>
                 <Input
                   value={slug}
                   onChange={(e) => setSlug(e.target.value)}
@@ -181,23 +186,23 @@ export function ArticleEditorPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-700">Tóm tắt ngắn (Description)</label>
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Tóm tắt ngắn (Description)</label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows={2}
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  className="w-full rounded-md border border-input bg-background dark:bg-slate-800 dark:text-slate-100 px-3 py-2 text-sm shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                   placeholder="Đoạn tóm tắt thu hút người đọc..."
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-700">Nội dung chi tiết (HTML / Markdown) *</label>
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Nội dung chi tiết (HTML / Markdown) *</label>
                 <textarea
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
                   rows={16}
-                  className="w-full font-mono text-xs rounded-md border border-input bg-background p-3 shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  className="w-full font-mono text-xs rounded-md border border-input bg-background dark:bg-slate-800 dark:text-slate-100 p-3 shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                   placeholder="Soạn thảo nội dung bài viết..."
                   required
                 />
@@ -210,15 +215,15 @@ export function ArticleEditorPage() {
         <div className="space-y-6">
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-base font-semibold">Phân Loại & Trạng Thái</CardTitle>
+              <CardTitle className="text-base font-semibold text-slate-900 dark:text-slate-100">Phân Loại & Trạng Thái</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-700">Chuyên mục</label>
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Chuyên mục</label>
                 <select
                   value={categoryId}
                   onChange={(e) => setCategoryId(e.target.value)}
-                  className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs"
+                  className="flex h-9 w-full rounded-md border border-input bg-background dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 px-3 py-1 text-sm shadow-xs"
                 >
                   <option value="">-- Chọn chuyên mục --</option>
                   {categories.map((c) => (
@@ -237,7 +242,7 @@ export function ArticleEditorPage() {
                   onChange={(e) => setIsPublished(e.target.checked)}
                   className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
                 />
-                <label htmlFor="isPublished" className="text-xs font-semibold text-slate-700">
+                <label htmlFor="isPublished" className="text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer">
                   Xuất bản công khai ngay
                 </label>
               </div>
@@ -250,7 +255,7 @@ export function ArticleEditorPage() {
                   onChange={(e) => setIsPinned(e.target.checked)}
                   className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
                 />
-                <label htmlFor="isPinned" className="text-xs font-semibold text-slate-700">
+                <label htmlFor="isPinned" className="text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer">
                   Ghim bài viết lên đầu trang
                 </label>
               </div>
@@ -259,15 +264,15 @@ export function ArticleEditorPage() {
 
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-base font-semibold">Ảnh Đại Diện (Thumbnail)</CardTitle>
+              <CardTitle className="text-base font-semibold text-slate-900 dark:text-slate-100">Ảnh Đại Diện (Thumbnail)</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               {thumbnail ? (
-                <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-slate-200">
+                <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700">
                   <img src={thumbnail} alt="Thumbnail preview" className="h-full w-full object-cover" />
                 </div>
               ) : (
-                <div className="flex aspect-video w-full flex-col items-center justify-center rounded-lg border-2 border-dashed border-slate-200 bg-slate-50 text-slate-400">
+                <div className="flex aspect-video w-full flex-col items-center justify-center rounded-lg border-2 border-dashed border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-400">
                   <UploadCloud className="h-8 w-8 mb-1" />
                   <span className="text-xs">Chưa có ảnh đại diện</span>
                 </div>
@@ -280,7 +285,7 @@ export function ArticleEditorPage() {
                 className="text-xs"
               />
 
-              <label className="flex h-8 w-full items-center justify-center rounded-md border border-input bg-background px-3 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer">
+              <label className="flex h-8 w-full items-center justify-center rounded-md border border-input bg-background dark:bg-slate-800 dark:border-slate-700 px-3 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer">
                 <span>Chọn ảnh từ máy tính</span>
                 <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
               </label>

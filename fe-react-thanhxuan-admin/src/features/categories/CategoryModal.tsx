@@ -103,13 +103,13 @@ export function CategoryModal({
 
         <DialogContent className="space-y-4 py-4">
           {error && (
-            <div className="rounded-lg bg-rose-50 p-3 text-xs text-rose-700 border border-rose-200">
+            <div className="rounded-lg bg-rose-50 dark:bg-rose-950/40 p-3 text-xs text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800">
               {error}
             </div>
           )}
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-700">Tên chuyên mục *</label>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Tên chuyên mục *</label>
             <Input
               value={name}
               onChange={(e) => handleNameChange(e.target.value)}
@@ -119,7 +119,7 @@ export function CategoryModal({
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-700">Đường dẫn tĩnh (Slug) *</label>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Đường dẫn tĩnh (Slug) *</label>
             <Input
               value={slug}
               onChange={(e) => setSlug(e.target.value)}
@@ -129,11 +129,11 @@ export function CategoryModal({
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-700">Loại chuyên mục</label>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Loại chuyên mục</label>
             <select
               value={type}
               onChange={(e) => setType(e.target.value as 'SERVICE' | 'POST' | 'ABOUT')}
-              className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs"
+              className="flex h-9 w-full rounded-md border border-input bg-background dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 px-3 py-1 text-sm shadow-xs"
             >
               <option value="POST">Bài viết Blog / Tin tức</option>
               <option value="SERVICE">Dịch vụ chính</option>
@@ -142,18 +142,18 @@ export function CategoryModal({
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-700">Mô tả ngắn</label>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Mô tả ngắn</label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              className="w-full rounded-md border border-input bg-background dark:bg-slate-800 dark:text-slate-100 px-3 py-2 text-sm shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               placeholder="Mô tả tóm tắt nội dung của chuyên mục..."
             />
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-700">Thứ tự hiển thị</label>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Thứ tự hiển thị</label>
             <Input
               type="number"
               value={order}

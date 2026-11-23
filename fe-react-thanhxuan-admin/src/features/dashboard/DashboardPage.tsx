@@ -86,27 +86,27 @@ export function DashboardPage() {
   return (
     <div className="space-y-6">
       {/* Welcome Banner */}
-      <div className="rounded-2xl bg-white p-6 shadow-xs border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="rounded-2xl bg-white dark:bg-slate-900/80 backdrop-blur-md p-6 shadow-xs border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-colors">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
               Xin chào, {user?.name || 'Quản trị viên'}!
             </h1>
             <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${config.bgLightClass}`}>
               {config.shortName}
             </span>
           </div>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Hôm nay bạn đang điều hành hệ thống <span className="font-semibold text-slate-800">{config.brandName}</span>
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+            Hôm nay bạn đang điều hành hệ thống <span className="font-semibold text-slate-800 dark:text-slate-200">{config.brandName}</span>
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          <Button size="sm" onClick={() => navigate('/articles/new')} className="gap-1.5 font-semibold">
+          <Button size="sm" onClick={() => navigate('/articles/new')} className="gap-1.5 font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:opacity-95 cursor-pointer">
             <FileText className="h-4 w-4" />
             Viết Bài Mới
           </Button>
-          <Button variant="outline" size="sm" onClick={() => navigate('/contacts')} className="gap-1.5">
+          <Button variant="outline" size="sm" onClick={() => navigate('/contacts')} className="gap-1.5 cursor-pointer dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200">
             <Mail className="h-4 w-4" />
             Xem Khách Chờ
           </Button>
@@ -121,21 +121,21 @@ export function DashboardPage() {
             <Card
               key={c.title}
               onClick={() => navigate(c.to)}
-              className="cursor-pointer transition-all hover:shadow-md hover:border-slate-300"
+              className="cursor-pointer transition-all hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700"
             >
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                <CardTitle className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                   {c.title}
                 </CardTitle>
-                <div className="h-8 w-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                <div className="h-8 w-8 rounded-lg bg-primary/10 dark:bg-primary/20 text-primary flex items-center justify-center">
                   <Icon className="h-4 w-4" />
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-extrabold text-slate-900">
+                <div className="text-2xl font-extrabold text-slate-900 dark:text-white">
                   {isLoading ? '...' : c.value}
                 </div>
-                <div className="flex items-center gap-1 text-xs text-slate-500 mt-1">
+                <div className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400 mt-1">
                   <TrendingUp className="h-3 w-3 text-emerald-500" />
                   <span>{c.subtext}</span>
                 </div>
@@ -149,38 +149,38 @@ export function DashboardPage() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle className="text-base font-semibold">Tác Vụ Thường Dùng</CardTitle>
+            <CardTitle className="text-base font-semibold text-slate-900 dark:text-slate-100">Tác Vụ Thường Dùng</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2.5">
             <div
               onClick={() => navigate('/articles')}
-              className="flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer"
+              className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
             >
               <div className="flex items-center gap-3">
                 <FileText className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium text-slate-800">Quản lý kho bài viết blog & tin tức</span>
+                <span className="text-sm font-medium text-slate-800 dark:text-slate-200">Quản lý kho bài viết blog & tin tức</span>
               </div>
               <ArrowRight className="h-4 w-4 text-slate-400" />
             </div>
 
             <div
               onClick={() => navigate('/categories')}
-              className="flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer"
+              className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
             >
               <div className="flex items-center gap-3">
                 <FileText className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium text-slate-800">Chỉnh sửa danh mục bài viết & dịch vụ</span>
+                <span className="text-sm font-medium text-slate-800 dark:text-slate-200">Chỉnh sửa danh mục bài viết & dịch vụ</span>
               </div>
               <ArrowRight className="h-4 w-4 text-slate-400" />
             </div>
 
             <div
               onClick={() => navigate('/settings')}
-              className="flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer"
+              className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
             >
               <div className="flex items-center gap-3">
                 <FileText className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium text-slate-800">Cập nhật hotline, banner, SEO metadata</span>
+                <span className="text-sm font-medium text-slate-800 dark:text-slate-200">Cập nhật hotline, banner, SEO metadata</span>
               </div>
               <ArrowRight className="h-4 w-4 text-slate-400" />
             </div>
@@ -189,22 +189,22 @@ export function DashboardPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base font-semibold">Trạng Thái Hệ Thống</CardTitle>
+            <CardTitle className="text-base font-semibold text-slate-900 dark:text-slate-100">Trạng Thái Hệ Thống</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-              <span className="text-slate-500">Tên miền quản trị đang chọn:</span>
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
+              <span className="text-slate-500 dark:text-slate-400">Tên miền quản trị đang chọn:</span>
               <span className="font-mono text-xs font-semibold text-primary">{config.subdomain}</span>
             </div>
-            <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-              <span className="text-slate-500">Môi trường:</span>
-              <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
+              <span className="text-slate-500 dark:text-slate-400">Môi trường:</span>
+              <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full">
                 Multi-Tenant React SPA
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-slate-500">Cập nhật lần cuối:</span>
-              <span className="text-xs text-slate-500 flex items-center gap-1">
+              <span className="text-slate-500 dark:text-slate-400">Cập nhật lần cuối:</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
                 <Clock className="h-3.5 w-3.5" /> Vừa xong
               </span>
             </div>

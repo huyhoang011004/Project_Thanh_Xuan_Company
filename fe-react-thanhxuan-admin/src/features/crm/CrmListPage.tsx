@@ -34,20 +34,20 @@ export function CrmListPage() {
         <div>
           <div className="flex items-center gap-2">
             <Users className="h-6 w-6 text-primary" />
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">Quản Lý Khách Hàng (CRM)</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Quản Lý Khách Hàng (CRM)</h1>
           </div>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             Hồ sơ khách hàng và lịch sử sử dụng dịch vụ tại <span className="font-semibold text-primary">{config.brandName}</span>
           </p>
         </div>
 
-        <Button variant="outline" size="sm" onClick={() => refetch()} className="gap-1.5">
+        <Button variant="outline" size="sm" onClick={() => refetch()} className="gap-1.5 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200">
           <RefreshCw className="h-3.5 w-3.5" />
           Làm mới
         </Button>
       </div>
 
-      <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-xs sm:flex-row sm:items-center">
+      <div className="flex flex-col gap-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 backdrop-blur-md p-4 shadow-xs sm:flex-row sm:items-center">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
           <Input
@@ -59,16 +59,16 @@ export function CrmListPage() {
         </div>
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white shadow-xs overflow-hidden">
+      <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 backdrop-blur-md shadow-xs overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-12 text-center">STT</TableHead>
-              <TableHead>Khách Hàng</TableHead>
-              <TableHead>Liên Hệ</TableHead>
-              <TableHead className="text-center">Số Đơn Hàng</TableHead>
-              <TableHead className="text-right">Tổng Chi Tiêu</TableHead>
-              <TableHead className="text-center">Ngày Tạo</TableHead>
+              <TableHead className="w-12 text-center text-slate-500 dark:text-slate-400">STT</TableHead>
+              <TableHead className="text-slate-500 dark:text-slate-400">Khách Hàng</TableHead>
+              <TableHead className="text-slate-500 dark:text-slate-400">Liên Hệ</TableHead>
+              <TableHead className="text-center text-slate-500 dark:text-slate-400">Số Đơn Hàng</TableHead>
+              <TableHead className="text-right text-slate-500 dark:text-slate-400">Tổng Chi Tiêu</TableHead>
+              <TableHead className="text-center text-slate-500 dark:text-slate-400">Ngày Tạo</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -87,9 +87,9 @@ export function CrmListPage() {
             ) : (
               customers.map((c, idx) => (
                 <TableRow key={c._id}>
-                  <TableCell className="text-center font-medium text-slate-500">{idx + 1}</TableCell>
+                  <TableCell className="text-center font-medium text-slate-500 dark:text-slate-400">{idx + 1}</TableCell>
                   <TableCell>
-                    <div className="font-semibold text-slate-900">{c.name}</div>
+                    <div className="font-semibold text-slate-900 dark:text-slate-100">{c.name}</div>
                     {c.address && (
                       <div className="flex items-center gap-1 text-xs text-slate-400 mt-0.5">
                         <MapPin className="h-3 w-3 shrink-0" />
@@ -98,19 +98,19 @@ export function CrmListPage() {
                     )}
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-1.5 font-mono text-xs font-medium text-slate-700">
+                    <div className="flex items-center gap-1.5 font-mono text-xs font-medium text-slate-700 dark:text-slate-300">
                       <Phone className="h-3.5 w-3.5 text-primary" />
                       <span>{c.phone}</span>
                     </div>
                     {c.email && <div className="text-xs text-slate-400">{c.email}</div>}
                   </TableCell>
-                  <TableCell className="text-center font-semibold text-xs text-slate-700">
+                  <TableCell className="text-center font-semibold text-xs text-slate-700 dark:text-slate-300">
                     {c.totalOrders || 0}
                   </TableCell>
-                  <TableCell className="text-right font-mono text-xs font-semibold text-slate-900">
+                  <TableCell className="text-right font-mono text-xs font-semibold text-slate-900 dark:text-slate-100">
                     {formatVND(c.totalSpent || 0)}
                   </TableCell>
-                  <TableCell className="text-center text-xs text-slate-500">
+                  <TableCell className="text-center text-xs text-slate-500 dark:text-slate-400">
                     {formatDateVN(c.createdAt)}
                   </TableCell>
                 </TableRow>

@@ -4,14 +4,14 @@ import { RequireAuth } from './RequireAuth';
 import { LoginPage } from '@/features/auth/LoginPage';
 import { AdminShellComponent } from '@/components/layout/AdminShellComponent';
 import { DashboardPage } from '@/features/dashboard/DashboardPage';
-import { ArticlesListPage } from '@/features/articles/ArticlesListPage';
+import { ArticleManagerPage } from '@/features/articles/ArticleManagerPage';
 import { ArticleEditorPage } from '@/features/articles/ArticleEditorPage';
-import { CategoriesListPage } from '@/features/categories/CategoriesListPage';
-import { ContactsListPage } from '@/features/contacts/ContactsListPage';
-import { CrmListPage } from '@/features/crm/CrmListPage';
-import { OrdersListPage } from '@/features/orders/OrdersListPage';
-import { GeneralSettingsPage } from '@/features/settings/GeneralSettingsPage';
-import { UsersListPage } from '@/features/users/UsersListPage';
+import { CategoryManagerPage } from '@/features/categories/CategoryManagerPage';
+import { ContactManagerPage } from '@/features/contacts/ContactManagerPage';
+import { CrmManagerPage } from '@/features/crm/CrmManagerPage';
+import { OrdersManagerPage } from '@/features/orders/OrdersManagerPage';
+import { SettingsPage } from '@/features/settings/SettingsPage';
+import { AccountManagerPage } from '@/features/users/AccountManagerPage';
 import { ZaloMarketingPage } from '@/features/zalo/ZaloMarketingPage';
 import { EmailMarketingPage } from '@/features/email-marketing/EmailMarketingPage';
 
@@ -42,7 +42,7 @@ export const router = createBrowserRouter([
           },
           {
             path: 'articles',
-            element: <ArticlesListPage />,
+            element: <ArticleManagerPage />,
           },
           {
             path: 'articles/new',
@@ -54,19 +54,19 @@ export const router = createBrowserRouter([
           },
           {
             path: 'categories',
-            element: <CategoriesListPage />,
+            element: <CategoryManagerPage />,
           },
           {
             path: 'contacts',
-            element: <ContactsListPage />,
+            element: <ContactManagerPage />,
           },
           {
             path: 'crm',
-            element: <CrmListPage />,
+            element: <CrmManagerPage />,
           },
           {
             path: 'orders',
-            element: <OrdersListPage />,
+            element: <OrdersManagerPage />,
           },
           {
             path: 'zalo-marketing',
@@ -78,11 +78,11 @@ export const router = createBrowserRouter([
           },
           {
             path: 'settings',
-            element: <GeneralSettingsPage />,
+            element: <SettingsPage />,
           },
           {
             path: 'users',
-            element: <UsersListPage />,
+            element: <AccountManagerPage />,
           },
         ],
       },

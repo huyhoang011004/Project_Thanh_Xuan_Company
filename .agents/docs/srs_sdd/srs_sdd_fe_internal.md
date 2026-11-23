@@ -519,12 +519,17 @@ sequenceDiagram
 
 ---
 
-### 2.12. Chủ Động Nhắc Cài Đặt App PWA & Native Mobile Back Handler (Plan 65)
+### 2.12. Chủ Động Nhắc Cài Đặt App PWA Chuẩn Báo Mới & Cơ Chế 4 Lớp Chống Thông Báo Lặp
 
 - **Chủ Động Nhắc Cài Đặt App PWA (`PwaInstallPromptComponent` & `IosInstallGuideModal`):**
   - Nhúng trực tiếp tại [`RootLayout.tsx`](file:///root/Project_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/app/RootLayout.tsx).
-  - Tự động nhận diện thiết bị di động (Smartphones/Tablets) và trạng thái chưa cài app (`!display-mode: standalone`).
-  - Hiển thị banner nổi bật **"Cài Đặt App Nội Bộ Thanh Xuân"** sau 2.5 giây truy cập; hỗ trợ cài đặt 1 chạm qua native prompt Chromium/Android và modal hướng dẫn trực quan 2 bước (Share -> Thêm vào MH chính) cho iOS Safari. Tự động ghi nhớ trạng thái từ chối trong 7 ngày qua `localStorage`.
+  - **Giao diện Top Floating Banner**: Thanh thông báo nền tối sang trọng (`bg-slate-900/95`, viền mờ `border-slate-800`, bo góc `rounded-2xl`) ở mép trên màn hình di động, hiển thị icon app, tiêu đề "Cài đặt App Nội Bộ", tên miền và nút "Cài đặt".
+  - **Cơ chế 4 lớp chống thông báo lặp khi đã cài app:**
+    1. *Bộ nhớ vĩnh viễn*: Lưu cờ `thanhxuan_internal_pwa_installed = 'true'` khi cài thành công.
+    2. *Display Mode*: Kiểm tra `standalone`, `fullscreen`, `minimal-ui`, iOS `navigator.standalone`, Android TWA.
+    3. *Hệ thống Android*: Khai báo `related_applications` trong Manifest và gọi API `navigator.getInstalledRelatedApps()`.
+    4. *Sự kiện Chromium*: Bỏ hoàn toàn timer ép buộc; chỉ hiển thị khi Chrome phát `beforeinstallprompt` (tự động bị trình duyệt triệt tiêu nếu đã có app trên máy).
+  - **Hỗ trợ iOS Safari**: Hiển thị modal hướng dẫn 2 bước (Chia sẻ $\rightarrow$ Thêm vào Màn hình chính) kèm ghi nhớ đóng qua `localStorage`.
 - **Xử Lý Nút Back Mobile Cho Toàn Bộ Popup / Modal (Native App Back Button):**
   - Tích hợp cơ chế History Popstate vào component dùng chung [`Dialog`](file:///root/Project_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/components/ui/dialog.tsx).
   - Tự động bao phủ toàn bộ 25+ modal của hệ thống (chấm công selfie, giao nhận, chi phí xăng xe, đối soát, nghỉ phép, phân quyền...).

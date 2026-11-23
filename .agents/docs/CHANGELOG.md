@@ -4,6 +4,25 @@ Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâ
 
 ## 2026-11-24
 
+### Quick Edit: Triển Khai PWA Install Banner Chuẩn Báo Mới & Cơ Chế 4 Lớp Chống Thông Báo Lặp (fe-react-thanhxuan-internal & fe-react-thanhxuan-admin)
+
+- **Bối cảnh & Vấn đề giải quyết:**
+  - Cổng Quản Trị Admin (`fe-react-thanhxuan-admin`) chưa có cơ chế nhắc cài đặt ứng dụng PWA và thiếu bộ icon chuẩn PNG 192/512.
+  - Cổng Vận Hành Nội Bộ (`fe-react-thanhxuan-internal`) sử dụng popup thẻ to màu trắng ở góc dưới chiếm diện tích, đồng thời có lỗi người dùng đã cài đặt App lên điện thoại nhưng khi mở tab Google Chrome vẫn bị hiện lại popup cài đặt do có lệnh hẹn giờ ép buộc (`setTimeout 2.5s`).
+- **Giải pháp kỹ thuật đã triển khai:**
+  1. **Tái thiết kế UI Top Floating Banner:**
+     - Thiết kế thanh thông báo mép trên màn hình di động nền tối (`bg-slate-900/95` bo tròn `rounded-2xl`, viền mờ `border-slate-800`, `backdrop-blur-md`) với bố cục: Nút đóng `X` $\rightarrow$ Logo bo góc $\rightarrow$ Tiêu đề app + Domain name $\rightarrow$ Nút hành động "Cài đặt" (hoặc "Hướng dẫn" trên iOS).
+  2. **Cơ chế 4 lớp nhận diện app đã cài đặt (Anti-Redundant Prompting):**
+     - *Lớp 1 (localStorage)*: Lưu cờ vĩnh viễn `*_pwa_installed = 'true'` khi cài đặt thành công, lần sau vào web sẽ bỏ qua ngay.
+     - *Lớp 2 (Display Mode / Standalone)*: Kiểm tra `(display-mode: standalone)`, `fullscreen`, `minimal-ui`, iOS `navigator.standalone`, Android TWA.
+     - *Lớp 3 (getInstalledRelatedApps API)*: Bổ sung `related_applications` vào Manifest (`vite.config.ts`) và gọi API kiểm tra trực tiếp với hệ điều hành Android.
+     - *Lớp 4 (beforeinstallprompt & appinstalled)*: Bỏ hoàn toàn hẹn giờ cưỡng bức trên Android; chỉ hiển thị khi trình duyệt phát sự kiện `beforeinstallprompt` (tự động triệt tiêu khi máy đã cài app).
+  3. **Đồng bộ tài nguyên & cấu hình:**
+     - Bổ sung bộ icon PNG 192x192, 512x512, maskable icon và meta tag PWA cho Cổng Admin.
+     - Tích hợp `PwaInstallPromptComponent` vào `RootLayout.tsx` của cả 2 ứng dụng.
+- **Kết quả kiểm chứng:**
+  - TypeScript typecheck (`tsc --noEmit`) và Vite production build pass 100% trên cả 2 app `fe-react-thanhxuan-internal` và `fe-react-thanhxuan-admin`.
+
 ### Quick Edit: Tối Ưu UI/UX Mobile Cổng Nội Bộ & Sửa Lỗi Popup Thông Báo (fe-react-thanhxuan-internal)
 
 - **Bối cảnh & Vấn đề giải quyết:**

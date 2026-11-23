@@ -75,22 +75,22 @@ export function OrdersListPage() {
             ) : (
               <Truck className="h-6 w-6 text-primary" />
             )}
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
               {isLaundry ? 'Quản Lý Đơn Giặt Là' : 'Đơn Đặt Lịch & Báo Giá Chuyển Nhà'}
             </h1>
           </div>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             Theo dõi tiến trình đơn hàng của <span className="font-semibold text-primary">{config.brandName}</span>
           </p>
         </div>
 
-        <Button variant="outline" size="sm" onClick={() => refetch()} className="gap-1.5">
+        <Button variant="outline" size="sm" onClick={() => refetch()} className="gap-1.5 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200">
           <RefreshCw className="h-3.5 w-3.5" />
           Làm mới
         </Button>
       </div>
 
-      <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-xs sm:flex-row sm:items-center">
+      <div className="flex flex-col gap-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 backdrop-blur-md p-4 shadow-xs sm:flex-row sm:items-center">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
           <Input
@@ -106,16 +106,16 @@ export function OrdersListPage() {
         </div>
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white shadow-xs overflow-hidden">
+      <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 backdrop-blur-md shadow-xs overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-12 text-center">STT</TableHead>
-              <TableHead>Mã Đơn / Khách Hàng</TableHead>
-              <TableHead>{isLaundry ? 'Dịch Vụ / Khối Lượng' : 'Lộ Trình / Xe Tải'}</TableHead>
-              <TableHead className="text-center">{isLaundry ? 'Trạng Thái' : 'Ngày Chuyển'}</TableHead>
-              <TableHead className="text-right">Tổng Tiền</TableHead>
-              <TableHead className="text-center">Ngày Tạo</TableHead>
+              <TableHead className="w-12 text-center text-slate-500 dark:text-slate-400">STT</TableHead>
+              <TableHead className="text-slate-500 dark:text-slate-400">Mã Đơn / Khách Hàng</TableHead>
+              <TableHead className="text-slate-500 dark:text-slate-400">{isLaundry ? 'Dịch Vụ / Khối Lượng' : 'Lộ Trình / Xe Tải'}</TableHead>
+              <TableHead className="text-center text-slate-500 dark:text-slate-400">{isLaundry ? 'Trạng Thái' : 'Ngày Chuyển'}</TableHead>
+              <TableHead className="text-right text-slate-500 dark:text-slate-400">Tổng Tiền</TableHead>
+              <TableHead className="text-center text-slate-500 dark:text-slate-400">Ngày Tạo</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -134,10 +134,10 @@ export function OrdersListPage() {
             ) : (
               orders.map((o, idx) => (
                 <TableRow key={o._id}>
-                  <TableCell className="text-center font-medium text-slate-500">{idx + 1}</TableCell>
+                  <TableCell className="text-center font-medium text-slate-500 dark:text-slate-400">{idx + 1}</TableCell>
                   <TableCell>
                     <div className="font-mono text-xs font-bold text-primary">{o.orderCode}</div>
-                    <div className="font-semibold text-slate-900">{o.customerName}</div>
+                    <div className="font-semibold text-slate-900 dark:text-slate-100">{o.customerName}</div>
                     <div className="text-xs text-slate-400 font-mono">{o.phone}</div>
                   </TableCell>
                   <TableCell>

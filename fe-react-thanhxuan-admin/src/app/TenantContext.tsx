@@ -25,8 +25,8 @@ export const TENANT_CONFIGS: Record<TenantType, TenantConfig> = {
     portalTitle: 'Quản Trị Giặt Sấy Thanh Xuân',
     subdomain: 'quantri.thanhxuanlaundry.com',
     colorHex: '#0284c7',
-    bgLightClass: 'bg-sky-50 text-sky-700 border-sky-200',
-    textClass: 'text-sky-600',
+    bgLightClass: 'bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800',
+    textClass: 'text-sky-600 dark:text-sky-400',
   },
   moving: {
     id: 'moving',
@@ -35,8 +35,8 @@ export const TENANT_CONFIGS: Record<TenantType, TenantConfig> = {
     portalTitle: 'Quản Trị Chuyển Nhà Tiết Kiệm',
     subdomain: 'quantri.chuyennhatietkiem.vn',
     colorHex: '#ea580c',
-    bgLightClass: 'bg-orange-50 text-orange-700 border-orange-200',
-    textClass: 'text-orange-600',
+    bgLightClass: 'bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-800',
+    textClass: 'text-orange-600 dark:text-orange-400',
   },
 };
 

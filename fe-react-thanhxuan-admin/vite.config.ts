@@ -9,7 +9,14 @@ export default defineConfig({
     VitePWA({
       registerType: "autoUpdate",
       injectRegister: "script-defer",
-      includeAssets: ["icon.svg", "favicon.ico"],
+      includeAssets: [
+        "icon.svg",
+        "apple-touch-icon-180x180.png",
+        "pwa-192x192.png",
+        "pwa-512x512.png",
+        "pwa-maskable-512x512.png",
+        "favicon-64x64.png",
+      ],
       manifest: {
         name: "Cổng Quản Trị Hệ Sinh Thái Thanh Xuân",
         short_name: "Quản Trị Thanh Xuân",
@@ -20,12 +27,36 @@ export default defineConfig({
         orientation: "any",
         scope: "/",
         start_url: "/",
+        related_applications: [
+          {
+            platform: "webapp",
+            url: "/manifest.webmanifest",
+          },
+        ],
         icons: [
           {
             src: "/icon.svg",
             sizes: "any",
             type: "image/svg+xml",
             purpose: "any",
+          },
+          {
+            src: "/pwa-192x192.png",
+            sizes: "192x192",
+            type: "image/png",
+            purpose: "any",
+          },
+          {
+            src: "/pwa-512x512.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "any",
+          },
+          {
+            src: "/pwa-maskable-512x512.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "maskable",
           },
         ],
       },

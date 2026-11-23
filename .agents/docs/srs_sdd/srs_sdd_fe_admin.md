@@ -32,7 +32,8 @@ fe-react-thanhxuan-admin/
 │   │   └── RequireAuth.tsx     # Route Guard bảo vệ route admin
 │   ├── components/             # Reusable UI (< 250-300 dòng)
 │   │   ├── ui/                 # button, input, badge, card, table, dialog, tabs
-│   │   └── layout/             # AdminShellComponent, Sidebar, Header, TenantSwitcher
+│   │   ├── layout/             # AdminShellComponent, Sidebar, Header, TenantSwitcher
+│   │   └── pwa/                # PwaInstallPromptComponent, IosInstallGuideModal
 │   ├── features/               # Flat Feature-Based Colocation
 │   │   ├── auth/               # Login, useAuth, AuthContext
 │   │   ├── dashboard/          # DashboardPage thống kê tổng quan theo tenant

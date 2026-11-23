@@ -1,5 +1,5 @@
 // Adhering to SOLID & Design Patterns
-import React from "react";
+
 import { X } from "lucide-react";
 import { SequenceFormData } from "../admin-email.types";
 
