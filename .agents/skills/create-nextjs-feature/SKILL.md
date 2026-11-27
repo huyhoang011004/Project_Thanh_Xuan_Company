@@ -1,6 +1,6 @@
 ---
 name: create-nextjs-feature
-description: Workflow chuẩn để phát triển tính năng Frontend bằng Next.js (App Router) cho dự án Web Khách Hàng & CMS Quản Trị (fe-nextjs-thanhxuan-laundry). Tuân thủ nghiêm ngặt Server Components mặc định cho SEO, Feature-based Colocation, shadcn/ui, TailwindCSS design tokens, Zod schemas và Custom Hooks. Dùng khi tạo trang mới, thêm tính năng Web, form liên hệ, hoặc màn hình quản trị CMS.
+description: Tạo tính năng Next.js App Router (fe-nextjs-thanhxuan-laundry, fe-nextjs-chuyennhatietkiem) chuẩn RSC SEO, Colocation, shadcn và Zod.
 ---
 
 # Quy trình tạo Feature Frontend (Next.js App Router & SEO)

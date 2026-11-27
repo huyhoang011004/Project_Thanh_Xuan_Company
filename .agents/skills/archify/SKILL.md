@@ -1,6 +1,6 @@
 ---
 name: archify
-description: Biến kiến trúc hệ sinh thái, codebase, luồng nghiệp vụ hoặc state machine thành sơ đồ trực quan tương tác độc lập (interactive self-contained HTML/SVG). Hỗ trợ zoom/pan, tìm kiếm node, dark/light theme, trace dependency đường đi của dữ liệu, và xuất ảnh SVG/PNG. Kích hoạt khi cần vẽ kiến trúc dự án, trực quan hóa luồng vận hành, hoặc tạo dashboard hệ thống dễ đọc cho con người.
+description: Chuyển kiến trúc hệ thống, codebase hoặc state machine thành sơ đồ HTML/SVG tương tác độc lập (zoom/pan, search, trace dependency).
 ---
 
 # Archify - Interactive System Architecture & Diagram Engine
@@ -17,10 +17,10 @@ Skill này hướng dẫn AI Agent chuyển đổi kiến trúc hệ thống, m�
    - **Trace Dependency:** Click/Hover vào 1 node sẽ làm sáng các đường kết nối (Inbound / Outbound flow), làm mờ các thành phần không liên quan.
    - **Theme:** Hỗ trợ chuyển đổi Dark Mode (Slate 900) / Light Mode (Slate 50).
    - **Controls:** Zoom In (+), Zoom Out (-), Reset View, Fit Screen.
-   - **Inspection Drawer:** Click vào node sẽ mở panel chi tiết bên cạnh: xem cổng Port, đường dẫn code nguồn ([CODEBASE_ATLAS.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/CODEBASE_ATLAS.md)), database tương ứng và ghi chú kỹ thuật.
+   - **Inspection Drawer:** Click vào node sẽ mở panel chi tiết bên cạnh: xem cổng Port, đường dẫn code nguồn ([CODEBASE_ATLAS.md](.agents/docs/CODEBASE_ATLAS.md)), database tương ứng và ghi chú kỹ thuật.
    - **Export:** Nút bấm tải về dạng SVG hoặc PNG để đính kèm báo cáo/tài liệu.
 3. **Nguồn Sự Thật (Source-Grounded):**
-   - Mọi thông số (Port, tên bảng, route, vai trò RBAC) bắt buộc khớp chính xác với [README.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/README.md), [SRS_SDD.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/SRS_SDD.md), [DATABASE_DICTIONARY.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/DATABASE_DICTIONARY.md) và [CODEBASE_ATLAS.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/CODEBASE_ATLAS.md).
+   - Mọi thông số (Port, tên bảng, route, vai trò RBAC) bắt buộc khớp chính xác với [README.md](README.md), [SRS_SDD.md](.agents/docs/SRS_SDD.md), [DATABASE_DICTIONARY.md](.agents/docs/DATABASE_DICTIONARY.md) và [CODEBASE_ATLAS.md](.agents/docs/CODEBASE_ATLAS.md).
 
 ---
 
@@ -153,8 +153,8 @@ File HTML xuất ra theo mẫu sau (lưu tại `.agents/docs/architecture-intera
 Khi nhận yêu cầu *"vẽ thiết kế dự án"* hoặc *"vẽ sơ đồ bằng archify"*:
 
 1. **Khảo sát dữ liệu thực tế (Grounding):**
-   - Đọc [.agents/docs/SRS_SDD.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/SRS_SDD.md) và [CODEBASE_ATLAS.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/CODEBASE_ATLAS.md) để lấy cấu trúc app, endpoint và đường dẫn file thực tế.
-   - Đọc [DATABASE_DICTIONARY.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/DATABASE_DICTIONARY.md) để lấy chính xác 3 CSDL MongoDB (`laundry_express`, `moving_express`, `internal_express`) và các collections.
+   - Đọc [.agents/docs/SRS_SDD.md](.agents/docs/SRS_SDD.md) và [CODEBASE_ATLAS.md](.agents/docs/CODEBASE_ATLAS.md) để lấy cấu trúc app, endpoint và đường dẫn file thực tế.
+   - Đọc [DATABASE_DICTIONARY.md](.agents/docs/DATABASE_DICTIONARY.md) để lấy chính xác 3 CSDL MongoDB (`laundry_express`, `moving_express`, `internal_express`) và các collections.
 2. **Biên tập cấu trúc node & edge (IR):**
    - Phân chia cụm (Clusters): Client Layer $\rightarrow$ Gateway/Backend Layer $\rightarrow$ Persistence Layer $\rightarrow$ External Integration Layer.
    - Gắn thuộc tính cho từng node: `id`, `label`, `sublabel`, `type` (`app`, `db`, `service`, `external`), `port`, `tech`, `fileRef`, `connections`.

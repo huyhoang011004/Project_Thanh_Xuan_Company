@@ -39,8 +39,7 @@ Bạn là Senior System Architect & Documentation Agent. Nhiệm vụ: đối ch
 
 **Bước 1 - Xác định vùng cần quét**
 
-- Dùng `git status`, `git log` trên các repo/sub-repo để xác định vùng code đã đổi gần nhất, quét kỹ vùng đó trước.
-- Monorepo 4 ứng dụng: quét theo từng app (`be-nestjs-thanhxuan`, `fe-nextjs-thanhxuan-laundry`, `fe-react-thanhxuan-internal`, `fe-nextjs-chuyennhatietkiem`); ghi rõ phần chưa quét ở Coverage.
+- Dùng `git status`, `git log` trên các repo/sub-repo để xác định vùng code đã đổi gần nhất; giao `invoke_subagent(TypeName="research", Model="flash", Role="Docs Drift Scan (Gemini 3.8 Flash)")` quét các app (`be-nestjs-thanhxuan`, `fe-nextjs-thanhxuan-laundry`, `fe-react-thanhxuan-internal`, `fe-nextjs-chuyennhatietkiem`, `fe-react-thanhxuan-admin`) và trả về bảng sai lệch ngắn gọn kèm `path:line` (hoặc chạy qua `bash .agents/scripts/subagent-run.sh --role flash-medium --mode default ...`, `toolSummary="Docs Sync (Gemini 3.8 Flash - Medium)"`). Ghi rõ phần chưa quét ở Coverage.
 
 **Bước 2 - Đối chiếu và phân loại drift**
 Đối chiếu từng nhóm:

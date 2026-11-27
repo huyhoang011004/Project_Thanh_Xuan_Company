@@ -1,6 +1,6 @@
 ---
 trigger: glob
-glob: **/README.md
+globs: "**/README.md"
 description: Quy chuẩn kiến trúc và cấu trúc soạn thảo tài liệu README.md cho các kho mã nguồn thuộc Hệ sinh thái Thanh Xuân Company
 ---
 
@@ -15,7 +15,7 @@ Tài liệu này định nghĩa cấu trúc chuẩn mực (Golden Template), pho
 1. **Ngôn ngữ:** 100% tiếng Việt tự nhiên, chuyên nghiệp; giữ nguyên thuật ngữ kỹ thuật quốc tế bằng tiếng Anh (NestJS, Repository Pattern, App Router, Docker, CI/CD, PWA, Hook, DTO...).
 2. **Tính chính xác & Đồng bộ hiện trạng:** Mọi thông tin về công nghệ, cổng port, câu lệnh, biến môi trường `.env` và cấu trúc thư mục phải khớp 100% với code thực tế của dự án. Không để lại thông tin lỗi thời từ phiên bản cũ.
 3. **Quản lý package:** Sử dụng duy nhất `pnpm` trong toàn bộ hướng dẫn cài đặt và chạy lệnh (không dùng `npm` hay `yarn`).
-4. **Liên kết tài liệu:** Luôn có mục dẫn chiếu đến hệ thống tài liệu kiến trúc trung tâm (`.agents/docs/`): [SRS_SDD.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/SRS_SDD.md), [DATABASE_DICTIONARY.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/DATABASE_DICTIONARY.md), [CODEBASE_ATLAS.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/CODEBASE_ATLAS.md), [CHANGELOG.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/CHANGELOG.md).
+4. **Liên kết tài liệu:** Luôn có mục dẫn chiếu đến hệ thống tài liệu kiến trúc trung tâm (`.agents/docs/`): [SRS_SDD.md](.agents/docs/SRS_SDD.md), [DATABASE_DICTIONARY.md](.agents/docs/DATABASE_DICTIONARY.md), [CODEBASE_ATLAS.md](.agents/docs/CODEBASE_ATLAS.md), [CHANGELOG.md](.agents/docs/CHANGELOG.md).
 
 ---
 
@@ -26,7 +26,7 @@ Mọi file `README.md` của từng ứng dụng bắt buộc phải tuân theo 
 ### Phần 1: Tiêu Đề, Badges & Định Vị Ứng Dụng
 
 - Tên dự án rõ ràng, định vị vai trò trong hệ sinh thái.
-- Hệ thống Badges: Ngôn ngữ (TypeScript), Nền tảng (Node.js/Next.js/React/NestJS), Package Manager (pnpm), Môi trường (Docker/GHCR), Cổng nội bộ (Port: `5001`, `3000`, `3001`, `3002`).
+- Hệ thống Badges: Ngôn ngữ (TypeScript), Nền tảng (Node.js/Next.js/React/NestJS), Package Manager (pnpm), Môi trường (Docker/GHCR), Cổng nội bộ (Port: `5001`, `3000`, `3001`, `3002`, `3003`).
 - 1 đoạn tóm tắt súc tích (2-3 câu) về mục đích kinh doanh và người dùng phục vụ.
 
 ### Phần 2: Nghiệp Vụ Cốt Lõi & Tính Năng Nổi Bật (Core Business Features)
@@ -81,3 +81,4 @@ Mọi file `README.md` của từng ứng dụng bắt buộc phải tuân theo 
 | **Web Giặt Là & CMS Marketing**        | `fe-nextjs-thanhxuan-laundry/` | `3000`   | `3000`         | `thanhxuanlaundry.com`       |
 | **Cổng Vận Hành Xưởng & Quản Vận PWA** | `fe-react-thanhxuan-internal/` | `3001`   | `3001`         | `noibo.thanhxuanlaundry.com` |
 | **Web Chuyển Nhà Trọn Gói**            | `fe-nextjs-chuyennhatietkiem/` | `3002`   | `3002`         | `chuyennhatietkiem.vn`       |
+| **Cổng Quản Trị Admin Tập Trung**      | `fe-react-thanhxuan-admin/`    | `3003`   | `3003`         | `quantri.thanhxuanlaundry.com` |

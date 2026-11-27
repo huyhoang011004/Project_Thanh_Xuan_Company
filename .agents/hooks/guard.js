@@ -20,7 +20,7 @@ const respond = (decision, reason) => {
 // Lệnh bị chặn cứng (khớp AGENTS.md mục 1 và 6)
 const DENY_COMMANDS = [
   [
-    /\brm\s+.*(-[a-zA-Z]*[rR][a-zA-Z]*|--recursive)\b/,
+    /\brm\b[^\n]*\s(-[a-zA-Z]*[rR][a-zA-Z]*|--recursive)\b/,
     "Không chạy rm đệ quy. Hãy xóa từng file cụ thể hoặc hỏi người dùng.",
   ],
   [/\brmdir\s+.*\/s\b/i, "Không xóa thư mục đệ quy."],

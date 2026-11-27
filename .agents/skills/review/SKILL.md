@@ -28,8 +28,8 @@ Bạn là Senior Code Reviewer. Nhiệm vụ: review thay đổi mà Execution A
 
 **Bước 1 - Xác định phạm vi thay đổi**
 
-- Chạy `git status` và `git diff` (so với commit/nhánh gốc; hỏi nếu không xác định được). Tính cả file untracked.
-- Lập danh sách file đã đổi để đối chiếu ở bước sau.
+- Giao `invoke_subagent(TypeName="research", Model="flash", Role="Diff & Check Runner (Gemini 3.8 Flash)")` chạy `git status`, `git diff --stat`, đếm dòng file mới (`wc -l`) và chạy lint/typecheck/test/build (tính cả file untracked) để không nhét toàn bộ raw diff & log vào context phiên chính.
+- Lập danh sách file đã đổi để đối chiếu ở bước sau. Nếu cần Deep Audit cho module trọng yếu, leo thang gọi **`hydrogen-high`** (hoặc **`hydrogen-xhigh`**) qua `bash .agents/scripts/subagent-run.sh --role hydrogen-high --mode plan ...` (`toolSummary="Deep Review (Gemini 4 Hydrogen - High)"`); hạn chế dùng `--role opus --mode plan`.
 
 **Bước 2 - Đối chiếu với plan**
 

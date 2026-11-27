@@ -1,6 +1,6 @@
 ---
 name: create-nestjs-module
-description: Workflow chuẩn để tạo một Module Backend mới trong NestJS cho dự án Laundry Express Thanh Xuan, tuân thủ nghiêm ngặt Repository Pattern, Multi-Database (laundry_express, moving_express, internal_express, core_express), Clean Architecture và các nguyên tắc SOLID. Kích hoạt khi cần tạo API mới, thêm bảng CSDL mới, hoặc mở rộng nghiệp vụ Backend.
+description: Tạo/mở rộng Module Backend NestJS chuẩn Repository Pattern, Multi-Database MongoDB (laundry/moving/internal/core_express) và Class DTO.
 ---
 
 # Quy trình tạo Module Backend (NestJS Multi-Database)

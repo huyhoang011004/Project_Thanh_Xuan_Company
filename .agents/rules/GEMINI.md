@@ -1,3 +1,8 @@
+---
+trigger: model_decision
+description: Bối cảnh nghiệp vụ và kiến trúc tổng quan 5 app trong hệ sinh thái Thanh Xuân Company (chỉ nạp khi cần hiểu domain tổng thể hoặc onboarding).
+---
+
 # GEMINI.md - Hệ Sinh Thái Công Nghệ Thanh Xuân Company
 
 Tài liệu định hướng tổng quan nghiệp vụ toàn hệ sinh thái. Các quy tắc code bắt buộc, lệnh verify, bảo mật và quy trình chi tiết xem tại `AGENTS.md`.
@@ -35,12 +40,12 @@ Công ty Thanh Xuân vận hành hệ sinh thái dịch vụ đa ngành kết h�
 
 Hệ thống tài liệu kỹ thuật được module hóa và cập nhật liên tục (Living Architecture Docs):
 
-- **Tài liệu tổng quan hệ thống:** [.agents/docs/SRS_SDD.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/SRS_SDD.md) (System Context, Topology kết nối, Master Index, Conventions).
-- **Phân hệ Backend API (`be-nestjs-thanhxuan`):** [.agents/docs/srs_sdd/srs_sdd_backend.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_backend.md) (Multi-Database, Repository Pattern, API Contracts, Guards, Interceptors).
-- **Phân hệ Web Giặt Là (`fe-nextjs-thanhxuan-laundry`):** [.agents/docs/srs_sdd/srs_sdd_fe_laundry.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_laundry.md) (RSC SEO, Leads Capture B2B).
-- **Phân hệ Web Chuyển Nhà Tiết Kiệm (`fe-nextjs-chuyennhatietkiem`):** [.agents/docs/srs_sdd/srs_sdd_fe_moving.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_moving.md) (RSC SEO, Estimator Cước Xe Tải, Wizard Đặt Lịch, Báo Giá Asset-Light).
-- **Phân hệ Cổng Vận Hành Xưởng (`fe-react-thanhxuan-internal`):** [.agents/docs/srs_sdd/srs_sdd_fe_internal.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_internal.md) (PWA Mobile-First, Canvas Signature, Offline Queue, Flat Colocation).
-- **Phân hệ Cổng Quản Trị Admin Tập Trung (`fe-react-thanhxuan-admin`):** [.agents/docs/srs_sdd/srs_sdd_fe_admin.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/srs_sdd/srs_sdd_fe_admin.md) (React SPA đa thương hiệu, quản trị bài viết blog SEO, chuyên mục, đơn hàng, cài đặt website).
-- **Từ Điển Dữ Liệu Toàn Diện:** [.agents/docs/DATABASE_DICTIONARY.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/DATABASE_DICTIONARY.md) (34+ collection thuộc các DB độc lập, chi tiết kiểu dữ liệu, index, quan hệ và tác dụng nghiệp vụ).
-- **Bản Đồ Định Vị Mã Nguồn:** [.agents/docs/CODEBASE_ATLAS.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/CODEBASE_ATLAS.md) (Chỉ mục tra cứu tức thì: Endpoint $\leftrightarrow$ Controller $\leftrightarrow$ Service $\leftrightarrow$ Schema $\leftrightarrow$ Route $\leftrightarrow$ Page).
-- **Nhật Ký Tiến Hóa Kỹ Thuật:** [.agents/docs/CHANGELOG.md](file:///d:/PROJECT/Website_Thanh_Xuan_Company/.agents/docs/CHANGELOG.md) (Lưu vết bài luận chi tiết toàn bộ các Plan và Bugfix).
+- **Tài liệu tổng quan hệ thống:** [.agents/docs/SRS_SDD.md](.agents/docs/SRS_SDD.md) (System Context, Topology kết nối, Master Index, Conventions).
+- **Phân hệ Backend API (`be-nestjs-thanhxuan`):** [.agents/docs/srs_sdd/srs_sdd_backend.md](.agents/docs/srs_sdd/srs_sdd_backend.md) (Multi-Database, Repository Pattern, API Contracts, Guards, Interceptors).
+- **Phân hệ Web Giặt Là (`fe-nextjs-thanhxuan-laundry`):** [.agents/docs/srs_sdd/srs_sdd_fe_laundry.md](.agents/docs/srs_sdd/srs_sdd_fe_laundry.md) (RSC SEO, Leads Capture B2B).
+- **Phân hệ Web Chuyển Nhà Tiết Kiệm (`fe-nextjs-chuyennhatietkiem`):** [.agents/docs/srs_sdd/srs_sdd_fe_moving.md](.agents/docs/srs_sdd/srs_sdd_fe_moving.md) (RSC SEO, Estimator Cước Xe Tải, Wizard Đặt Lịch, Báo Giá Asset-Light).
+- **Phân hệ Cổng Vận Hành Xưởng (`fe-react-thanhxuan-internal`):** [.agents/docs/srs_sdd/srs_sdd_fe_internal.md](.agents/docs/srs_sdd/srs_sdd_fe_internal.md) (PWA Mobile-First, Canvas Signature, Offline Queue, Flat Colocation).
+- **Phân hệ Cổng Quản Trị Admin Tập Trung (`fe-react-thanhxuan-admin`):** [.agents/docs/srs_sdd/srs_sdd_fe_admin.md](.agents/docs/srs_sdd/srs_sdd_fe_admin.md) (React SPA đa thương hiệu, quản trị bài viết blog SEO, chuyên mục, đơn hàng, cài đặt website).
+- **Từ Điển Dữ Liệu Toàn Diện:** [.agents/docs/DATABASE_DICTIONARY.md](.agents/docs/DATABASE_DICTIONARY.md) (34+ collection thuộc các DB độc lập, chi tiết kiểu dữ liệu, index, quan hệ và tác dụng nghiệp vụ).
+- **Bản Đồ Định Vị Mã Nguồn:** [.agents/docs/CODEBASE_ATLAS.md](.agents/docs/CODEBASE_ATLAS.md) (Chỉ mục tra cứu tức thì: Endpoint $\leftrightarrow$ Controller $\leftrightarrow$ Service $\leftrightarrow$ Schema $\leftrightarrow$ Route $\leftrightarrow$ Page).
+- **Nhật Ký Tiến Hóa Kỹ Thuật:** [.agents/docs/CHANGELOG.md](.agents/docs/CHANGELOG.md) (Lưu vết bài luận chi tiết toàn bộ các Plan và Bugfix).

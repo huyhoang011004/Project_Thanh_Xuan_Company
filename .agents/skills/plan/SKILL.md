@@ -18,9 +18,10 @@ Bạn là Technical Planning & Architecture Agent. Nhiệm vụ duy nhất: phâ
 
 ### QUY TRÌNH
 
-1. Khảo sát: đọc `.agents/docs/CODEBASE_ATLAS.md`, `.agents/docs/DATABASE_DICTIONARY.md` và code liên quan, xác định pattern, dependency, test hiện có.
-2. Làm rõ: nếu yêu cầu mơ hồ và ảnh hưởng lớn tới thiết kế, hỏi tối đa 3 câu trước khi viết plan. Còn lại ghi giả định vào mục Assumptions và tiếp tục.
-3. Viết hoặc cập nhật plan theo cấu trúc bên dưới.
+1. Khảo sát: giao `invoke_subagent(TypeName="research", Model="flash", Role="Codebase Survey (Gemini 3.8 Flash)")` quét `.agents/docs/CODEBASE_ATLAS.md`, `.agents/docs/DATABASE_DICTIONARY.md` và `path:line` của code liên quan, chỉ trả về chữ ký interface/schema và các dòng cần thiết (tránh đọc toàn bộ file lớn trong phiên chính).
+2. Thẩm định kiến trúc (khi cần): nếu `Gemini 4 Hydrogen (Medium)` thấy yêu cầu phức tạp (đa app/module, đổi DB schema MongoDB, concurrency), leo thang gọi **`hydrogen-high`** (hoặc **`hydrogen-xhigh`**) qua `bash .agents/scripts/subagent-run.sh --role hydrogen-high --mode plan ...` (`toolSummary="Plan Escalation (Gemini 4 Hydrogen - High)"`) để phân tích & chia việc. Chỉ dùng `--role opus --mode plan` khi thật sự cần phản biện chéo độc lập.
+3. Làm rõ: nếu yêu cầu mơ hồ và ảnh hưởng lớn tới thiết kế, hỏi tối đa 3 câu trước khi viết plan. Còn lại ghi giả định vào mục Assumptions và tiếp tục.
+4. Viết hoặc cập nhật plan theo cấu trúc bên dưới (với plan đa app/module nên ghi rõ phạm vi file theo từng track để `/act` tách subagent song song không đụng file).
 
 ### QUY TẮC FILE PLAN
 

@@ -31,12 +31,13 @@ Bạn là Technical Execution / Coding Agent. Nhiệm vụ: thực thi chính x�
 
 - Dùng plan người dùng chỉ định; nếu không có, dùng plan có số lớn nhất khớp `plan<số>.md`. Nếu vẫn không rõ, hỏi lại.
 - Đọc toàn bộ plan, kiểm tra Status (không chạy plan đã Done trừ khi được yêu cầu).
-- Chạy `git status` để ghi nhận hiện trạng và chạy baseline typecheck/lint/test (lệnh lấy từ plan hoặc script thực tế của repo). Ghi lại lỗi đã có sẵn để không nhầm là lỗi mới.
+- Giao `invoke_subagent(TypeName="research", Model="flash", Role="Repo Survey (Gemini 3.8 Flash)")` khảo sát hiện trạng file liên quan và chạy `git status` + baseline typecheck/lint/test (chỉ trả về tóm tắt ngắn + `path:line`). Ghi lại lỗi đã có sẵn để không nhầm là lỗi mới.
 - Cập nhật Status thành `In progress`.
 
 **Bước 1 - Thực thi từng task theo thứ tự (tôn trọng `Depends on`)**
 
-- Làm từng task một. Mỗi task: đọc file đích, sửa, chạy verify liên quan, rồi mới tick `[x]`.
+- **Tách track song song & chọn tier phù hợp:** Nếu plan động tới nhiều app (`be-nestjs-thanhxuan`, `fe-nextjs-*`, `fe-react-*`) hoặc module tách biệt, giữ 1 track cho phiên chính (`Medium`) và giao track độc lập qua `invoke_subagent(TypeName="self", Model="flash"|"inherit", Role="<Task> (Gemini 3.8 Flash | Gemini 4 Hydrogen - Medium)")` hoặc `bash .agents/scripts/subagent-run.sh --role <flash-high|hydrogen-low|hydrogen-medium> --mode default ...` (chỉ định rõ danh sách file sở hữu để không sửa trùng; luôn ghi `(<Model> - <Tier>)` trong `Role` / `toolSummary`). Hạn chế dùng `--role sonnet`.
+- Làm từng task một (trong mỗi track). Mỗi task: đọc hẹp (`grep -n` + `StartLine`/`EndLine`), sửa bằng `edit_file`, chạy verify liên quan, rồi mới tick `[x]`.
 - Tuân thủ coding style, naming convention, error handling và kỷ luật chia nhỏ file (`< 250 - 300 dòng`) của dự án.
 - Không để lại code thừa, console.log debug, mock data tạm, TODO không có trong plan, hoặc file bridge/re-export tạm thời.
 - Lỗi phát sinh từ code mới thì tự sửa. Cấm: sửa/xóa/skip test hiện có, tắt lint rule, ép kiểu `any`/ts-ignore chỉ để vượt qua kiểm tra. Lỗi đã có từ baseline thì báo cáo, không tự sửa.
@@ -47,6 +48,8 @@ Bạn là Technical Execution / Coding Agent. Nhiệm vụ: thực thi chính x�
 - Đối chiếu Definition of Done. Chỉ chuyển sang Bước 3 khi tất cả pass.
 
 **Bước 3 - Đồng bộ 5 trụ cột tài liệu Modular SRS/SDD & Harness Data** (chỉ thực hiện khi Bước 2 pass hoàn toàn)
+
+- **Ủy quyền `Flash` để không đốt quota `Hydrogen`:** Giao toàn bộ bước cập nhật docs cho `invoke_subagent(TypeName="self", Model="flash", Role="Docs Sync Worker (Gemini 3.8 Flash)")` (hoặc `bash .agents/scripts/subagent-run.sh --role flash-medium --mode default ...`, `toolSummary="Docs Sync (Gemini 3.8 Flash - Medium)"`) kèm danh sách thay đổi đã xác minh; subagent dùng `grep -n` + `StartLine`/`EndLine` + `edit_file`, cấm đọc toàn bộ file lớn.
 
 - **Từ điển dữ liệu (`DATABASE_DICTIONARY.md`):** Nếu plan có thêm/sửa/xóa Schema/Field/Index/Collection, bắt buộc cập nhật `.agents/docs/DATABASE_DICTIONARY.md` (đánh số STT liền mạch, xóa triệt để tên bảng đã xóa và chạy `pnpm run db:drop-legacy` nếu có xóa/đổi tên bảng).
 - **Bản đồ mã nguồn (`CODEBASE_ATLAS.md`):** Nếu plan có thêm/sửa/xóa module, endpoint, controller, service, route, page, modal hoặc component chính, cập nhật đồng bộ vào `.agents/docs/CODEBASE_ATLAS.md`.

@@ -37,6 +37,7 @@ services:
       - MONGODB_MOVING_URI=${MONGODB_MOVING_URI:-mongodb://mongodb:27017/moving_express}
       - MONGODB_INTERNAL_URI=${MONGODB_INTERNAL_URI:-mongodb://mongodb:27017/internal_express}
       - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
+      - CORS_ORIGINS=${CORS_ORIGINS:-https://thanhxuanlaundry.com,https://noibo.thanhxuanlaundry.com},https://quantri.thanhxuanlaundry.com,https://quantri.chuyennhatietkiem.vn
       - JWT_SECRET=${JWT_SECRET:-thanh_xuan_laundry_super_secure_jwt_secret_2026}
       - JWT_ACCESS_EXPIRES_IN=${JWT_ACCESS_EXPIRES_IN:-15m}
       - JWT_REFRESH_EXPIRES_IN=${JWT_REFRESH_EXPIRES_IN:-7d}

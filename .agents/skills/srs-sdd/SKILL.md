@@ -22,7 +22,7 @@ Bạn là Senior System Architect & Documentation Agent. Nhiệm vụ: khảo s�
 
 ### QUY TRÌNH
 
-1. **Khảo sát** (theo thứ tự): manifest/package/lockfile → entry point & cấu trúc thư mục → routes/controllers → models/schema/migrations → auth/middleware/phân quyền → config & tên biến môi trường → test, CI/CD, Docker/deploy.
+1. **Khảo sát (dùng Subagent `Flash`):** Giao `invoke_subagent(TypeName="research", Model="flash", Role="Repo Structure Scan (Gemini 3.8 Flash)")` quét theo thứ tự: manifest/package/lockfile → entry point & cấu trúc thư mục → routes/controllers → models/schema/migrations → auth/middleware/phân quyền → config & tên biến môi trường → test, CI/CD, Docker/deploy, chỉ trả về bản tóm tắt kèm `path:line`. Với cập nhật nhỏ trên docs sẵn có, dùng `grep -n` + `StartLine`/`EndLine` + `edit_file`.
 2. **Monorepo / Kiến trúc Modular SRS/SDD:**
    - **Tài liệu tổng (`.agents/docs/SRS_SDD.md`):** Mô tả System Context, Topology kết nối 4 apps (`be-nestjs-thanhxuan`, `fe-nextjs-thanhxuan-laundry`, `fe-react-thanhxuan-internal`, `fe-nextjs-chuyennhatietkiem`), Multi-Database (`laundry_express`, `moving_express`, `internal_express`, `core_express`), Deploy/VPS constraints, Shared Conventions (Timezone, Security, Token, Error Handling) và bảng Master Index liên kết sang các phân hệ chi tiết.
    - **Tài liệu phân hệ (`.agents/docs/srs_sdd/srs_sdd_<app>.md`):** Đặc tả chi tiết từng app (`srs_sdd_backend.md`, `srs_sdd_fe_laundry.md, srs_sdd_fe_moving.md`, `srs_sdd_fe_internal.md`). Mỗi file chứa đầy đủ FR-xx, RBAC, ERD/Schema, API Contracts, Routing Map, State Machines và Sequence Diagram của riêng app đó.

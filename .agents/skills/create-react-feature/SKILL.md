@@ -1,6 +1,6 @@
 ---
 name: create-react-feature
-description: Workflow chuẩn để phát triển tính năng Frontend cho Cổng Vận Hành Xưởng & Quản Trị Đối Tác Nội Bộ (fe-react-thanhxuan-internal). Tuân thủ kiến trúc Feature-Based Colocation (operations/ và management/), React Router v7, TanStack Query v5, react-hook-form + zod, TailwindCSS, tách biệt logic ra Custom Hooks, chia nhỏ file (< 250-300 dòng), thiết kế Mobile-First cho thợ xưởng & tài xế xe tải (chữ ký số, offline/PWA). Dùng khi tạo màn hình vận hành, modal nghiệp vụ, giao nhận, chấm công hoặc công thợ theo giờ.
+description: Tạo tính năng React Vite Mobile-First PWA (fe-react-thanhxuan-internal, fe-react-thanhxuan-admin) chuẩn TanStack Query, Zod và Custom Hooks.
 ---
 
 # Quy trình tạo Feature Frontend React (Internal Operations App)
@@ -11,7 +11,7 @@ Skill này hướng dẫn quy chuẩn kiến trúc, **bản đồ định tuyế
 
 ## 1. Ma trận đối chiếu Backend API -> Frontend Routes
 
-Hệ thống routes trong [router.tsx](file:///d:/PROJECT/Website_Thanh_Xuan_Company/fe-react-thanhxuan-internal/src/app/router.tsx) được chuẩn hóa theo danh pháp tiếng Anh rõ ràng, phân tách 2 nhóm chính `operations/` (Vận hành) và `management/` (Quản trị):
+Hệ thống routes trong [router.tsx](fe-react-thanhxuan-internal/src/app/router.tsx) được chuẩn hóa theo danh pháp tiếng Anh rõ ràng, phân tách 2 nhóm chính `operations/` (Vận hành) và `management/` (Quản trị):
 
 | STT | Phân hệ Nghiệp vụ | Tuyến API Backend (`/api/v1/internal`) | Route Frontend (`fe-react-thanhxuan-internal`) | Màn hình & Vai trò chính |
 | :--- | :--- | :--- | :--- | :--- |

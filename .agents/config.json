@@ -52,6 +52,12 @@
       "port": 3002,
       "container": "moving_frontend",
       "domain": "chuyennhatietkiem.vn"
+    },
+    "admin": {
+      "path": "./fe-react-thanhxuan-admin",
+      "port": 3003,
+      "container": "admin_frontend",
+      "domain": "quantri.thanhxuanlaundry.com"
     }
   },
   "databases": {
@@ -127,7 +133,8 @@
       "backend",
       "frontend",
       "internal_frontend",
-      "moving_frontend"
+      "moving_frontend",
+      "admin_frontend"
     ]
   },
   "rules": {
@@ -152,5 +159,34 @@
     "useStrictTypes": true,
     "communicationLanguage": "vi-VN",
     "timezone": "Asia/Ho_Chi_Minh"
+  },
+  "subagentRouting": {
+    "orchestratorDefault": "gemini-4-hydrogen-medium",
+    "namingConvention": "<Subagent Name> (<Model> - <Tier>) — bắt buộc ghi trong Role / toolSummary / báo cáo",
+    "escalationForComplexRequests": [
+      "gemini-4-hydrogen-high",
+      "gemini-4-hydrogen-xhigh"
+    ],
+    "nativeSubagents": {
+      "researchAndDocs": "flash",
+      "lightFix": "flash_lite"
+    },
+    "cliRunner": {
+      "script": ".agents/scripts/subagent-run.sh",
+      "geminiRoles": [
+        "flash-low",
+        "flash-medium",
+        "flash-high",
+        "hydrogen-low",
+        "hydrogen-medium",
+        "hydrogen-high",
+        "hydrogen-xhigh"
+      ],
+      "claudeRolesSparing": [
+        "sonnet",
+        "opus"
+      ],
+      "note": "Ưu tiên Gemini theo từng tier; hạn chế dùng Claude vì hạn mức ít"
+    }
   }
 }

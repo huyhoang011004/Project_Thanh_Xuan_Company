@@ -1,6 +1,6 @@
 ---
 name: compact
-description: Cô đọng ngữ cảnh làm việc, tóm tắt các quyết định kỹ thuật then chốt, trạng thái git và kế hoạch tiếp theo để giải phóng token và chống suy giảm trí nhớ ngữ cảnh (context drift). Kích hoạt khi gõ /compact hoặc yêu cầu tóm tắt/cô đọng phiên làm việc.
+description: Tạo Compact State Card cô đọng ngữ cảnh kỹ thuật khi được yêu cầu tóm tắt phiên (ưu tiên /compact gốc của CLI để nén history).
 ---
 
 # Context Compaction & Memory Preservation Skill (/compact)

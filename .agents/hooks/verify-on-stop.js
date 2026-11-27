@@ -1,8 +1,29 @@
 // Antigravity Stop hook: trước khi agent kết thúc, typecheck các app có file .ts/.tsx thay đổi.
 // Nếu lỗi, buộc agent tiếp tục sửa. Đặt tại: <root>/.agents/hooks/verify-on-stop.js
-const { spawnSync } = require('child_process');
+const { spawnSync, spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
+
+const runTypecheck = (cmd, cwd, timeoutMs) =>
+  new Promise((resolve) => {
+    const child = spawn(cmd, { cwd, shell: true, encoding: 'utf8' });
+    let out = '';
+    const timer = setTimeout(() => {
+      child.kill('SIGTERM');
+      resolve({ status: 1, output: `Timeout sau ${timeoutMs / 1000}s` });
+    }, timeoutMs);
+    child.stdout.on('data', (d) => (out += d));
+    child.stderr.on('data', (d) => (out += d));
+    child.on('close', (code) => {
+      clearTimeout(timer);
+      resolve({ status: code ?? 1, output: out });
+    });
+    child.on('error', (err) => {
+      clearTimeout(timer);
+      resolve({ status: 1, output: err.message });
+    });
+  });
 
 const APPS = [
   'be-nestjs-thanhxuan',
@@ -42,7 +63,8 @@ const allowStop = () => {
 
   if (!STOP_REASONS.has(input.terminationReason) || input.fullyIdle === false) return allowStop();
 
-  const counterFile = path.join(__dirname, '.stop_counter');
+  const sessionKey = String(input.conversationId || process.ppid || 'default').replace(/[^a-zA-Z0-9_-]/g, '_');
+  const counterFile = path.join(os.tmpdir(), `agy-stop-counter-${sessionKey}.json`);
   let execCount = 1;
   try {
     if (fs.existsSync(counterFile)) {
@@ -95,15 +117,18 @@ const allowStop = () => {
     return allowStop();
   }
 
-  const failures = [];
-  for (const app of appsToVerify) {
-    const appDir = path.join(root, app);
-    const r = spawnSync(TYPECHECK_CMD, { cwd: appDir, shell: true, encoding: 'utf8', timeout: TIMEOUT_MS });
-    if (r.status !== 0) {
-      const out = `${r.stdout || ''}${r.stderr || ''}`.split('\n').filter(Boolean).slice(0, 30).join('\n');
-      failures.push(`[${app}] typecheck lỗi:\n${out}`);
-    }
-  }
+  const results = await Promise.all(
+    appsToVerify.map(async (app) => {
+      const appDir = path.join(root, app);
+      const r = await runTypecheck(TYPECHECK_CMD, appDir, TIMEOUT_MS);
+      if (r.status !== 0) {
+        const out = r.output.split('\n').filter(Boolean).slice(0, 30).join('\n');
+        return `[${app}] typecheck lỗi:\n${out}`;
+      }
+      return null;
+    }),
+  );
+  const failures = results.filter(Boolean);
 
   if (failures.length === 0) {
     try {

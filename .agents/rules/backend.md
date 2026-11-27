@@ -1,6 +1,6 @@
 ---
 trigger: glob
-glob: be-nestjs-thanhxuan/src/**
+globs: "**/be-nestjs-thanhxuan/src/**"
 description: Quy tắc phát triển Backend NestJS dự án Thanh Xuan Company
 ---
 
