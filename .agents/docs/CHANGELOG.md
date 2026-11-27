@@ -2,6 +2,14 @@
 
 Tài liệu ghi nhận toàn bộ lịch sử tiến hóa, các giai đoạn nâng cấp, bugfix và triển khai tính năng của Hệ sinh thái Công ty Thanh Xuân qua từng Plan.
 
+## 2026-11-27
+
+### UI Tweaks: Tinh Chỉnh Ô Ghi Chú Đếm Đồ Nhà Hàng & Responsive Mobile Modal Nhập Món Ngoài (fe-react-thanhxuan-internal)
+
+- **Thay đổi đã thực hiện:**
+  - `PartnerCountItemsViewComponent.tsx`: Xóa placeholder `"VD: ..."` ở các ô nhập ghi chú từng món đồ bẩn (Card view & Table view) để ô trống gọn gàng.
+  - `CustomHandoverItemModal.tsx`: Đổi layout `grid-cols-1 sm:grid-cols-2` cho phần Đơn vị tính & Số lượng, thêm `min-w-0 w-full` cho input và `w-11 h-11 shrink-0` cho nút `-` / `+` để hiển thị đầy đủ trên màn hình mobile.
+
 ## 2026-11-24
 
 ### Quick Edit: Triển Khai PWA Install Banner Chuẩn Báo Mới & Cơ Chế 4 Lớp Chống Thông Báo Lặp (fe-react-thanhxuan-internal & fe-react-thanhxuan-admin)
